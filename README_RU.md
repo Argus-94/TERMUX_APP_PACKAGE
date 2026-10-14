@@ -1,29 +1,43 @@
-# Автосборка пакетов (без ручного Run)
+# Авто-Pages для TERMUX_APP_PACKAGE
 
-## Триггеры (сами)
+## Что в архиве
 
-| Событие | Что происходит |
-|---------|----------------|
-| **push в main** | сборка `git openssh python` → commit apt/ |
-| **каждый понедельник 03:00 UTC** | повторная сборка |
-| workflow_dispatch | ручной догон (опционально) |
+| Workflow | Роль |
+|----------|------|
+| `pages.yml` | деплой через **GitHub Actions Pages** (после каждого push / после сборки пакетов) |
+| `gh-pages-branch.yml` | пишет ветку **`gh-pages`** (запасной вариант) |
+| `enable-pages-hint.yml` | проверка, жив ли feed |
 
-Повторный push от `github-actions[bot]` с сообщением `ci: auto-build` **не** запускает цикл заново.
+## Как поставить (1 раз)
 
-## Установка (один раз)
+```bash
+# содержимое архива → корень Argus-94/TERMUX_APP_PACKAGE
+cp -r .github /path/to/TERMUX_APP_PACKAGE/
+git add .github
+git commit -m "ci: auto deploy Pages + gh-pages branch"
+git push
+```
 
-1. Распакуй архив
-2. Скопируй в **корень** https://github.com/Argus-94/TERMUX_APP_PACKAGE :
-   - `.github/workflows/build-packages.yml`
-   - `.github/workflows/pages.yml`
-3. Commit + **push в main** → Action стартует **сам**
-4. **Settings → Actions → General → Workflow permissions → Read and write** → Save  
-5. **Settings → Pages → Source: GitHub Actions**
+## Единственный ручной клик (без него 404)
 
-Первая сборка: **долго** (часто 1–4+ часа).
+Открой: https://github.com/Argus-94/TERMUX_APP_PACKAGE/settings/pages
 
-## Feed
+**Вариант A (предпочтительно):**  
+Source → **GitHub Actions** → Save  
+
+**Вариант B:**  
+Source → **Deploy from a branch** → Branch: **`gh-pages`** → folder: **/ (root)** → Save  
+
+После Save в течение 1–2 минут:
 
 ```text
-deb https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main stable main
+https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main/dists/stable/main/binary-aarch64/Packages
 ```
+
+должен дать **HTTP 200**.
+
+GitHub **не позволяет** включить Pages только файлом в repo без этого клика (или без admin API token).
+
+## Права Actions
+
+Settings → Actions → General → Workflow permissions → **Read and write** → Save

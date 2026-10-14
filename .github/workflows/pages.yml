@@ -1,8 +1,14 @@
 name: Deploy apt repo to Pages
+
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
+  # after package build finishes (same repo)
+  workflow_run:
+    workflows: ["Build Termux packages (auto)"]
+    types: [completed]
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -10,20 +16,36 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-deploy
   cancel-in-progress: true
 
 jobs:
   deploy:
+    if: |
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
+        with:
+          ref: main
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact (full repo = apt at /apt/...)
+        uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - id: deployment
+
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Print feed URL
+        run: |
+          echo "Feed base: https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main"
+          echo "Packages:  https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main/dists/stable/main/binary-aarch64/Packages"
