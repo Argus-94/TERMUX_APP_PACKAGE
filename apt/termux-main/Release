@@ -1,0 +1,7 @@
+Origin: AI Builder Termux
+Label: termux-main
+Suite: stable
+Codename: stable
+Architectures: aarch64
+Components: main
+Description: App-compatible Termux packages for com.karat.aibuilder

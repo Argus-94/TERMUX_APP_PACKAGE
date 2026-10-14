@@ -1,0 +1,5 @@
+Archive: stable
+Component: main
+Origin: AI Builder Termux
+Label: termux-main
+Architecture: aarch64
