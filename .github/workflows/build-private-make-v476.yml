@@ -1,0 +1,110 @@
+name: Build and audit AI Builder GNU Make 4.4.1-1 (no binary publication)
+
+on:
+  workflow_call:
+    inputs:
+      app_data_dir:
+        description: Exact applicationInfo.dataDir measured on installed AI Builder v476
+        required: true
+        type: string
+      termux_prefix:
+        description: Exact validated filesDir/usr prefix from installed AI Builder v476
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-builder-private-make-v476
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: ${{ github.ref == 'refs/heads/work/gnu-make-4.4.1-1' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: ${{ inputs.app_data_dir }}
+      TERMUX_PREFIX: ${{ inputs.termux_prefix }}
+    steps:
+      - name: Checkout this work branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Checkout exact upstream source commit without credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Verify kit locks and audit tests
+        shell: bash
+        run: termux-private-package-kit/make-v476/verify-kit.sh
+
+      - name: Pull digest-pinned official Termux builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+
+      - name: Build and statically audit (temporary output only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit="$GITHUB_WORKSPACE/termux-private-package-kit/make-v476"
+          source_dir="$RUNNER_TEMP/termux-packages"
+          output_dir="$RUNNER_TEMP/aib-private-make-v476-output"
+          raw_log="$RUNNER_TEMP/aib-private-make-v476-build.log"
+          mkdir -p "$output_dir"
+
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$kit/build-make-private-aarch64.sh" "$source_dir" "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error::Build or static audit failed (exit $build_status). Detailed output was suppressed because this is a public repository and the log may contain the app-private prefix. No binary artifact is uploaded."
+            exit "$build_status"
+          fi
+
+          python3 - "$output_dir/build-result.json" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, pathlib, sys
+          result = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert result["status"] == "audit-passed; device-runtime-test-not-run"
+          assert result["installed"] is False
+          assert result["deviceSmokeTest"] == "NOT RUN"
+          fields = [
+              ("Status", result["status"]),
+              ("Package file", result["packageFile"]),
+              ("Package SHA-256", result["packageSha256"]),
+              ("Locked source commit", result["sourceCommit"]),
+              ("Builder image", result["builderImageRef"]),
+              ("Installed / device-tested", "No / NOT RUN"),
+              ("Binary retained or published", "No"),
+          ]
+          lines = ["## GNU Make v476 static build audit", "", "| Check | Result |", "|---|---|"]
+          lines.extend(f"| {name} | `{value}` |" for name, value in fields)
+          pathlib.Path(sys.argv[2]).write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print("AUDIT_PASSED; package binary is not an artifact")
+          PY
+
+          rm -rf -- "$output_dir" "$source_dir" "$raw_log"
