@@ -46,3 +46,7 @@ export AIB_TERMUX_BUILDER_IMAGE_REF='ghcr.io/termux/package-builder@sha256:44999
 Workflow автоматически запускается при push в ветку candidate pipeline. Он использует те же моделируемые значения, собирает временный candidate APT feed, проверяет подпись/`signed-by` и simulated install, затем удаляет source tree, `.deb`, feed и signing workspace. Binary не загружается как artifact, не коммитится и не публикуется.
 
 Workflow намеренно не запускает настоящий device install и не открывает production release. В `manifest.json` device compatibility, package installation, rollback, feed publication и byte reproducibility остаются `false` до соответствующих доказательств.
+
+## GPL evidence внутри candidate-пакета
+
+Обычный upstream helper для generic GPL создаёт ссылку на общий `termux-licenses`. Чтобы статический аудит не зависел от состояния базового bootstrap, checksum-pinned candidate patch задаёт `TERMUX_PKG_LICENSE_FILE=COPYING`: полный `COPYING` из locked GNU Make 4.4.1 source archive попадает в `.deb` как `share/doc/make/COPYING`. Auditor требует этот точный путь, GPLv3 markers и SHA-256 `e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b`; обычный symlink либо изменённый/отсутствующий текст не проходит. Это остаётся candidate-only: production feed, публикация и устройствовая установка/rollback по-прежнему запрещены/не выполнены.

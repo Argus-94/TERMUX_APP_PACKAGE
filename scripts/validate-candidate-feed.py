@@ -85,10 +85,16 @@ def validate(args: argparse.Namespace) -> None:
     require(spec.get("sourceCommit") == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7", "SOURCE_COMMIT_NOT_ALLOWLISTED")
     require(spec.get("recipePath") == "packages/make/build.sh", "RECIPE_PATH_NOT_ALLOWLISTED")
     require(spec.get("recipePatchPath") == "packages/make/src-job.c.patch", "RECIPE_PATCH_PATH_NOT_ALLOWLISTED")
+    require(spec.get("localRecipePatchPath") == "termux-private-package-kit/make-v476/patches/make-embed-gpl-license.patch",
+            "LOCAL_RECIPE_PATCH_PATH_NOT_ALLOWLISTED")
+    require(spec.get("sourceLicenseFile") == "COPYING", "SOURCE_LICENSE_FILE_NOT_ALLOWLISTED")
+    require(spec.get("sourceLicenseRelativePath") == "share/doc/make/COPYING", "SOURCE_LICENSE_PATH_NOT_ALLOWLISTED")
     exact_hashes = {
         "recipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
         "recipePatchSha256": "87ef62d072c2def6e0778e71283fb32d7bc4f00dadadd52eca822bf444a4dc10",
+        "localRecipePatchSha256": "cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03",
         "sourceSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
+        "sourceLicenseSha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b",
     }
     for key, expected in exact_hashes.items():
         require(bool(HEX64_RE.fullmatch(spec.get(key, ""))), "SOURCE_HASH_NOT_PINNED_" + key.upper())
@@ -102,8 +108,12 @@ def validate(args: argparse.Namespace) -> None:
     require(build.get("status") == "audit-passed; device-runtime-test-not-run", "BUILD_STATUS_NOT_STATIC_AUDIT_PASS")
     require(build.get("applicationId") == APP_ID, "BUILD_APP_ID_MISMATCH")
     require(build.get("prefix") == prefix, "BUILD_PREFIX_MISMATCH")
+    require(build.get("prefixProvenance") == "ci-model-only; device-observation-not-run",
+            "BUILD_PREFIX_PROVENANCE_NOT_MODEL_ONLY")
     require(build.get("sourceCommit") == spec["sourceCommit"], "BUILD_SOURCE_COMMIT_MISMATCH")
     require(build.get("builderImageRef") == spec["builderImage"], "BUILD_IMAGE_MISMATCH")
+    require(build.get("candidateRecipePatchSha256") == spec["localRecipePatchSha256"], "BUILD_LOCAL_RECIPE_PATCH_SHA_MISMATCH")
+    require(build.get("sourceLicenseSha256") == spec["sourceLicenseSha256"], "BUILD_SOURCE_LICENSE_SHA_MISMATCH")
     require(build.get("installed") is False, "BUILD_MUST_NOT_INSTALL_PACKAGE")
     require(build.get("deviceSmokeTest") == "NOT RUN", "DEVICE_SMOKE_MUST_REMAIN_UNRUN")
     require(bool(HEX64_RE.fullmatch(build.get("packageSha256", ""))), "BUILD_PACKAGE_HASH_MISSING")
@@ -112,6 +122,8 @@ def validate(args: argparse.Namespace) -> None:
     require(audit.get("package", {}).get("name") == name, "AUDIT_PACKAGE_NAME_MISMATCH")
     require(audit.get("package", {}).get("version") == version, "AUDIT_PACKAGE_VERSION_MISMATCH")
     require(audit.get("package", {}).get("architecture") == arch, "AUDIT_PACKAGE_ARCHITECTURE_MISMATCH")
+    require(audit.get("package", {}).get("licenseEvidencePath") == spec["sourceLicenseRelativePath"], "AUDIT_LICENSE_PATH_MISMATCH")
+    require(audit.get("package", {}).get("licenseEvidenceSha256") == spec["sourceLicenseSha256"], "AUDIT_LICENSE_SHA_MISMATCH")
     require(audit.get("target", {}).get("applicationId") == APP_ID, "AUDIT_APP_ID_MISMATCH")
     require(audit.get("target", {}).get("prefix") == prefix, "AUDIT_PREFIX_MISMATCH")
 

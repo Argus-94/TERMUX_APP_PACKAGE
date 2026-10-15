@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -13,6 +14,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 AUDITOR = ROOT / "audit_deb.py"
 MANIFEST = ROOT / "manifest.json"
 APP_PREFIX = "/data/user/0/com.karat.aibuilder/files/usr"
+TEST_GPLV3_TEXT = b"GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007\nSynthetic auditor fixture only.\n"
 
 
 def fake_aarch64_elf() -> bytes:
@@ -33,7 +35,8 @@ def make_fixture(root: pathlib.Path, *, architecture: str = "aarch64", version: 
                  foreign_string: bool = False, maintainer_script: bool = False,
                  non_elf_make: bool = False, depends: str | None = None,
                  app_home_string: bool = False, foreign_app_private_string: bool = False,
-                 noncanonical_android_path: bool = False) -> pathlib.Path:
+                 noncanonical_android_path: bool = False, missing_license: bool = False,
+                 wrong_license_hash: bool = False) -> pathlib.Path:
     package = root / "pkg"
     (package / "DEBIAN").mkdir(parents=True)
     control = [
@@ -65,9 +68,10 @@ def make_fixture(root: pathlib.Path, *, architecture: str = "aarch64", version: 
         os.symlink("make", base / "bin" / "gmake")
     docs = base / "share" / "doc" / "make"
     docs.mkdir(parents=True)
-    (docs / "copyright").write_text(
-        "GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007\n", encoding="utf-8"
-    )
+    if not missing_license:
+        license_text = (b"GNU GENERAL PUBLIC LICENSE\nVersion 3, modified fixture.\n"
+                        if wrong_license_hash else TEST_GPLV3_TEXT)
+        (docs / "COPYING").write_bytes(license_text)
     if foreign_string:
         (docs / "payload-note.txt").write_text(
             "bad path /data/data/com.termux/files/usr/bin/sh\n", encoding="utf-8"
@@ -94,8 +98,14 @@ def make_fixture(root: pathlib.Path, *, architecture: str = "aarch64", version: 
 
 class AuditDebTests(unittest.TestCase):
     def run_audit(self, deb: pathlib.Path, prefix: str = APP_PREFIX) -> subprocess.CompletedProcess[str]:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        manifest["package"]["sourceLicenseSha256"] = hashlib.sha256(TEST_GPLV3_TEXT).hexdigest()
+        temp = tempfile.TemporaryDirectory(prefix="aib-audit-manifest-")
+        self.addCleanup(temp.cleanup)
+        manifest_path = pathlib.Path(temp.name) / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         return subprocess.run(
-            [sys.executable, str(AUDITOR), "--manifest", str(MANIFEST), "--deb", str(deb), "--prefix", prefix],
+            [sys.executable, str(AUDITOR), "--manifest", str(manifest_path), "--deb", str(deb), "--prefix", prefix],
             capture_output=True, text=True,
         )
 
@@ -112,8 +122,20 @@ class AuditDebTests(unittest.TestCase):
         self.assertTrue(report["ok"])
         self.assertEqual(report["package"]["architecture"], "aarch64")
         self.assertEqual(report["package"]["licenseSpdxFromLockedRecipe"], "GPL-3.0")
+        self.assertEqual(report["package"]["licenseEvidencePath"], "share/doc/make/COPYING")
+        self.assertEqual(report["package"]["licenseEvidenceSha256"], hashlib.sha256(TEST_GPLV3_TEXT).hexdigest())
         self.assertFalse(report["target"]["projectRootInPayload"])
         self.assertEqual(report["elf"][0]["machine"], "AArch64")
+
+    def test_missing_source_copying_file_is_rejected(self):
+        result = self.fixture_and_audit(missing_license=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("SOURCE_LICENSE_FILE_MISSING", result.stdout)
+
+    def test_modified_source_copying_hash_is_rejected(self):
+        result = self.fixture_and_audit(wrong_license_hash=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("SOURCE_LICENSE_SHA256_MISMATCH", result.stdout)
 
     def test_wrong_target_prefix_is_rejected(self):
         result = self.fixture_and_audit(wrong_payload_prefix=True)

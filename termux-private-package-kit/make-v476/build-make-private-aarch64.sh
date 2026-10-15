@@ -5,16 +5,20 @@ readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly LOCAL_LICENSE_PATCH="$KIT_DIR/patches/make-embed-gpl-license.patch"
+readonly LOCAL_LICENSE_PATCH_SHA='cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03'
+readonly SOURCE_LICENSE_SHA256='e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b'
 
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
 usage() {
   cat <<'EOF'
 Usage:
   AIB_TERMUX_APP_DATA_DIR=<canonical-app-data-dir> \
-  AIB_TERMUX_PREFIX=<validated-filesDir/usr> \
+  AIB_TERMUX_PREFIX=<matching-filesDir/usr> \
   AIB_TERMUX_BUILDER_IMAGE_REF=ghcr.io/termux/package-builder@sha256:<64hex> \
   ./build-make-private-aarch64.sh /path/to/pinned-termux-packages /path/to/new-empty-output
 
+CI uses the explicit model in candidate-package-set.json; these values are not device observations.
 No package is installed. A successful .deb is copied only after audit_deb.py passes.
 EOF
 }
@@ -24,8 +28,8 @@ if [[ "${1:-}" == '-h' || "${1:-}" == '--help' ]]; then usage; exit 0; fi
 SOURCE_REPO="$(realpath "$1")"
 OUTPUT_DIR="$(realpath -m "$2")"
 
-: "${AIB_TERMUX_APP_DATA_DIR:?Set this from the installed AI Builder runtime; do not guess}"
-: "${AIB_TERMUX_PREFIX:?Set this from the validated embedded runtime layout; do not guess}"
+: "${AIB_TERMUX_APP_DATA_DIR:?Set the canonical target path; CI uses the explicit model, not device observation}"
+: "${AIB_TERMUX_PREFIX:?Set the matching filesDir/usr path; CI uses the explicit model, not device observation}"
 : "${AIB_TERMUX_BUILDER_IMAGE_REF:?Use a digest-pinned builder image reference}"
 
 APP_DATA_DIR="${AIB_TERMUX_APP_DATA_DIR%/}"
@@ -66,12 +70,18 @@ check_git_blob 'packages/make/src-job.c.patch' '87ef62d072c2def6e0778e71283fb32d
 check_git_blob 'scripts/properties.sh' '238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725'
 check_git_blob 'build-package.sh' '5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204'
 check_git_blob 'scripts/run-docker.sh' 'd67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2'
+[[ -f "$LOCAL_LICENSE_PATCH" ]] || fail 'LOCAL_RECIPE_LICENSE_PATCH_MISSING'
+actual_license_patch_sha="$(sha256sum "$LOCAL_LICENSE_PATCH" | awk '{print $1}')"
+[[ "$actual_license_patch_sha" == "$LOCAL_LICENSE_PATCH_SHA" ]] || fail 'LOCAL_RECIPE_LICENSE_PATCH_HASH_MISMATCH'
 
 mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE"
 git -C "$WORKTREE" checkout --detach "$PIN"
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
+git -C "$WORKTREE" apply --check "$LOCAL_LICENSE_PATCH" || fail 'LOCAL_RECIPE_LICENSE_PATCH_NOT_APPLICABLE'
+git -C "$WORKTREE" apply "$LOCAL_LICENSE_PATCH" || fail 'LOCAL_RECIPE_LICENSE_PATCH_APPLY_FAILED'
+grep -Fq 'TERMUX_PKG_LICENSE_FILE="COPYING"' "$WORKTREE/packages/make/build.sh" || fail 'LOCAL_RECIPE_LICENSE_OVERRIDE_MISSING'
 
 python3 "$KIT_DIR/patch_properties.py" "$WORKTREE/scripts/properties.sh" --data-dir "$APP_DATA_DIR" --prefix "$PREFIX"
 git -C "$WORKTREE" diff -- scripts/properties.sh > "$OUTPUT_DIR/app-private-properties.patch"
@@ -86,7 +96,7 @@ source scripts/properties.sh
 [[ "\$TERMUX_APP__DATA_DIR" == "$APP_DATA_DIR" ]]
 [[ "\$TERMUX__PREFIX" == "$PREFIX" ]]
 [[ "\$TERMUX_PREFIX" == "$PREFIX" ]]
-printf 'AIB_TARGET_LAYOUT_OK app=%s prefix=%s\\n' "\$TERMUX_APP__PACKAGE_NAME" "\$TERMUX_PREFIX"
+printf 'AIB_MODELED_PROPERTY_PATHS_MATCH app=%s prefix=%s\\n' "\$TERMUX_APP__PACKAGE_NAME" "\$TERMUX_PREFIX"
 EOF
 chmod 700 "$WORKTREE/.aib-private-layout-preflight.sh"
 
@@ -101,8 +111,10 @@ trap cleanup_container EXIT
 {
   printf 'Source commit: %s\n' "$PIN"
   printf 'App ID: %s\n' "$APP_ID"
-  printf 'Validated private prefix: %s\n' "$PREFIX"
+  printf 'CI modeled target prefix (not device-observed): %s\n' "$PREFIX"
   printf 'Builder image ref: %s\n' "$AIB_TERMUX_BUILDER_IMAGE_REF"
+  printf 'Candidate recipe patch SHA-256: %s\n' "$LOCAL_LICENSE_PATCH_SHA"
+  printf 'Source COPYING SHA-256: %s\n' "$SOURCE_LICENSE_SHA256"
   printf 'Builder image ID: %s\n' "$(docker image inspect --format '{{.Id}}' "$AIB_TERMUX_BUILDER_IMAGE_REF")"
   printf 'Build started UTC: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   printf '\n=== private-layout preflight ===\n'
@@ -127,11 +139,11 @@ mkdir -p "$OUTPUT_DIR/packages"
 python3 "$KIT_DIR/audit_deb.py" --manifest "$KIT_DIR/manifest.json" --deb "${DEBS[0]}" --prefix "$PREFIX" --report "$OUTPUT_DIR/audit-report.json" | tee -a "$OUTPUT_DIR/build.log"
 cp -- "${DEBS[0]}" "$OUTPUT_DIR/packages/"
 sha256sum "$OUTPUT_DIR/packages/$(basename "${DEBS[0]}")" > "$OUTPUT_DIR/packages/SHA256SUMS"
-python3 - "$OUTPUT_DIR/build-result.json" "$AIB_TERMUX_BUILDER_IMAGE_REF" "$PIN" "$PREFIX" "${DEBS[0]}" <<'PY'
+python3 - "$OUTPUT_DIR/build-result.json" "$AIB_TERMUX_BUILDER_IMAGE_REF" "$PIN" "$PREFIX" "${DEBS[0]}" "$LOCAL_LICENSE_PATCH_SHA" "$SOURCE_LICENSE_SHA256" <<'PY'
 import hashlib,json,pathlib,sys
-out=pathlib.Path(sys.argv[1]); image,revision,prefix,deb=sys.argv[2:]
+out=pathlib.Path(sys.argv[1]); image,revision,prefix,deb,recipe_patch_sha,license_sha=sys.argv[2:]
 p=pathlib.Path(deb)
-record={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceCommit":revision,"builderImageRef":image,"applicationId":"com.karat.aibuilder","prefix":prefix,"packageFile":p.name,"packageSha256":hashlib.sha256(p.read_bytes()).hexdigest(),"installed":False,"deviceSmokeTest":"NOT RUN"}
+record={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceCommit":revision,"builderImageRef":image,"candidateRecipePatchSha256":recipe_patch_sha,"sourceLicenseSha256":license_sha,"applicationId":"com.karat.aibuilder","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","packageFile":p.name,"packageSha256":hashlib.sha256(p.read_bytes()).hexdigest(),"installed":False,"deviceSmokeTest":"NOT RUN"}
 out.write_text(json.dumps(record,indent=2)+"\n")
 PY
 printf 'AUDITED_PACKAGE_READY %s\n' "$OUTPUT_DIR/packages/$(basename "${DEBS[0]}")"

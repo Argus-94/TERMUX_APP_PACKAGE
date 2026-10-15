@@ -19,8 +19,13 @@
       "recipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
       "recipePatchPath": "packages/make/src-job.c.patch",
       "recipePatchSha256": "87ef62d072c2def6e0778e71283fb32d7bc4f00dadadd52eca822bf444a4dc10",
+      "localRecipePatchPath": "termux-private-package-kit/make-v476/patches/make-embed-gpl-license.patch",
+      "localRecipePatchSha256": "cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03",
       "sourceUrl": "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
       "sourceSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
+      "sourceLicenseFile": "COPYING",
+      "sourceLicenseRelativePath": "share/doc/make/COPYING",
+      "sourceLicenseSha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b",
       "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
       "staticAuditRequired": true,
       "deviceInstallAndRollbackRequired": true

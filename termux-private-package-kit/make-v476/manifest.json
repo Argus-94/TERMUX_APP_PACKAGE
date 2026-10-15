@@ -43,6 +43,9 @@
     "packageRecipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
     "recipePatchPath": "packages/make/src-job.c.patch",
     "recipePatchSha256": "87ef62d072c2def6e0778e71283fb32d7bc4f00dadadd52eca822bf444a4dc10",
+    "candidateRecipePatchPath": "patches/make-embed-gpl-license.patch",
+    "candidateRecipePatchSha256": "cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03",
+    "candidateRecipePatchEffect": "Set TERMUX_PKG_LICENSE_FILE=COPYING so the pinned GNU Make source license is copied into this .deb instead of relying on the shared termux-licenses package.",
     "builderPropertiesPath": "scripts/properties.sh",
     "builderPropertiesSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
     "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
@@ -54,6 +57,9 @@
     "architecture": "aarch64",
     "homepage": "https://www.gnu.org/software/make/",
     "licenseSpdx": "GPL-3.0",
+    "sourceLicenseFile": "COPYING",
+    "sourceLicenseRelativePath": "share/doc/make/COPYING",
+    "sourceLicenseSha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b",
     "maintainer": "@termux",
     "sourceUrl": "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
     "sourceSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
@@ -66,8 +72,8 @@
       "Conflicts": ["make-guile"]
     },
     "licenseEvidenceRequired": [
-      "prefix/share/doc/make/copyright or prefix/share/doc/make/LICENSE or prefix/share/doc/make/COPYING",
-      "GPL version 3 identification in installed license text"
+      "prefix/share/doc/make/COPYING copied from the checksum-pinned make-4.4.1 source archive",
+      "exact SHA-256 e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b and GPL version 3 markers"
     ],
     "requiredExecutableRelativePath": "bin/make",
     "platformElfLibrariesAllowed": [

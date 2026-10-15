@@ -37,11 +37,16 @@ prefix='/data/user/0/com.karat.aibuilder/files/usr'
 build={
  'status':'audit-passed; device-runtime-test-not-run','sourceCommit':'505e06ef0c8dbd7611abfb90e9eb60826dcd01d7',
  'builderImageRef':'ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9',
+ 'candidateRecipePatchSha256':'cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03',
+ 'sourceLicenseSha256':'e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b',
  'applicationId':'com.karat.aibuilder','prefix':prefix,'packageFile':deb.name,'packageSha256':digest,
+ 'prefixProvenance':'ci-model-only; device-observation-not-run',
  'installed':False,'deviceSmokeTest':'NOT RUN'
 }
 audit={'ok':True,'status':'static-audit-passed; installation-and-device-runtime-unverified','sha256':digest,
- 'package':{'name':'make','version':'4.4.1-1','architecture':'aarch64'},
+ 'package':{'name':'make','version':'4.4.1-1','architecture':'aarch64',
+            'licenseEvidencePath':'share/doc/make/COPYING',
+            'licenseEvidenceSha256':'e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b'},
  'target':{'applicationId':'com.karat.aibuilder','prefix':prefix}}
 (tmp/'build-result.json').write_text(json.dumps(build),encoding='utf-8')
 (tmp/'audit-report.json').write_text(json.dumps(audit),encoding='utf-8')
@@ -71,4 +76,34 @@ if python3 "$VALIDATOR" --package-set "$TMP/open-gate.json" --feed-root "$FEED" 
 fi
 grep -q 'PRODUCTION_PUBLICATION_MUST_REMAIN_DISABLED' "$TMP/gate.out"
 
-printf 'CANDIDATE_POLICY_TESTS_OK positive=1 extra-package-rejected=1 open-production-gate-rejected=1\n'
+python3 - "$TMP/build-result.json" "$TMP/bad-recipe-patch.json" <<'PY'
+import json,pathlib,sys
+v=json.loads(pathlib.Path(sys.argv[1]).read_text()); v['candidateRecipePatchSha256']='0'*64
+pathlib.Path(sys.argv[2]).write_text(json.dumps(v),encoding='utf-8')
+PY
+if python3 "$VALIDATOR" --package-set "$PACKAGE_SET" --feed-root "$FEED" --build-result "$TMP/bad-recipe-patch.json" --audit-report "$TMP/audit-report.json" >"$TMP/patch.out" 2>&1; then
+  echo 'ERROR:UNPINNED_RECIPE_PATCH_ACCEPTED' >&2; exit 2
+fi
+grep -q 'BUILD_LOCAL_RECIPE_PATCH_SHA_MISMATCH' "$TMP/patch.out"
+
+python3 - "$TMP/audit-report.json" "$TMP/bad-license-report.json" <<'PY'
+import json,pathlib,sys
+v=json.loads(pathlib.Path(sys.argv[1]).read_text()); v['package']['licenseEvidenceSha256']='0'*64
+pathlib.Path(sys.argv[2]).write_text(json.dumps(v),encoding='utf-8')
+PY
+if python3 "$VALIDATOR" --package-set "$PACKAGE_SET" --feed-root "$FEED" --build-result "$TMP/build-result.json" --audit-report "$TMP/bad-license-report.json" >"$TMP/license.out" 2>&1; then
+  echo 'ERROR:UNPINNED_LICENSE_REPORT_ACCEPTED' >&2; exit 2
+fi
+grep -q 'AUDIT_LICENSE_SHA_MISMATCH' "$TMP/license.out"
+
+python3 - "$TMP/build-result.json" "$TMP/fabricated-device-proof.json" <<'PY'
+import json,pathlib,sys
+v=json.loads(pathlib.Path(sys.argv[1]).read_text()); v['prefixProvenance']='device-verified'
+pathlib.Path(sys.argv[2]).write_text(json.dumps(v),encoding='utf-8')
+PY
+if python3 "$VALIDATOR" --package-set "$PACKAGE_SET" --feed-root "$FEED" --build-result "$TMP/fabricated-device-proof.json" --audit-report "$TMP/audit-report.json" >"$TMP/device-proof.out" 2>&1; then
+  echo 'ERROR:FABRICATED_DEVICE_PROOF_ACCEPTED' >&2; exit 2
+fi
+grep -q 'BUILD_PREFIX_PROVENANCE_NOT_MODEL_ONLY' "$TMP/device-proof.out"
+
+printf 'CANDIDATE_POLICY_TESTS_OK positive=1 extra-package-rejected=1 open-production-gate-rejected=1 bad-recipe-patch-rejected=1 bad-license-hash-rejected=1 fabricated-device-proof-rejected=1\n'

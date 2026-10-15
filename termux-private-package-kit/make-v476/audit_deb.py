@@ -373,19 +373,21 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "MAKE_EXECUTABLE_NOT_AARCH64_ELF")
     require(int(payload[required_exec]["mode"], 8) & 0o111 != 0, "MAKE_EXECUTABLE_NOT_EXECUTABLE")
 
-    required_license = False
-    license_text = ""
-    for name, data in license_candidates.items():
-        text = data.decode("utf-8", "replace")
-        if "GNU GENERAL PUBLIC LICENSE" in text and re.search(r"Version\s+3", text, re.I):
-            required_license = True
-            license_text = name
-            break
-        if "GPL-3.0" in text or "GPL-3.0-only" in text:
-            required_license = True
-            license_text = name
-            break
-    require(required_license, "GPL3_LICENSE_EVIDENCE_MISSING")
+    expected_license_relative = pkg.get("sourceLicenseRelativePath")
+    require(expected_license_relative == "share/doc/make/COPYING", "SOURCE_LICENSE_PATH_NOT_ALLOWLISTED")
+    expected_license_sha256 = pkg.get("sourceLicenseSha256", "")
+    require(bool(re.fullmatch(r"[0-9a-f]{64}", expected_license_sha256)),
+            "LOCKED_SOURCE_LICENSE_HASH_INVALID")
+    license_path = prefix + "/" + expected_license_relative
+    license_data = license_candidates.get(license_path)
+    require(license_data is not None, "SOURCE_LICENSE_FILE_MISSING", license_path)
+    license_sha256 = hashlib.sha256(license_data).hexdigest()
+    require(license_sha256 == expected_license_sha256, "SOURCE_LICENSE_SHA256_MISMATCH",
+            f"{license_path}: {license_sha256}")
+    license_body = license_data.decode("utf-8", "replace")
+    require("GNU GENERAL PUBLIC LICENSE" in license_body and
+            re.search(r"Version\s+3", license_body, re.I) is not None,
+            "GPL3_LICENSE_EVIDENCE_MISSING", license_path)
 
     return {
         "ok": True,
@@ -397,7 +399,9 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
                     "breaks": split_relation_field(control.get("Breaks")),
                     "replaces": split_relation_field(control.get("Replaces")),
                     "conflicts": split_relation_field(control.get("Conflicts")),
-                    "licenseSpdxFromLockedRecipe": pkg["licenseSpdx"], "licenseEvidencePath": license_text},
+                    "licenseSpdxFromLockedRecipe": pkg["licenseSpdx"],
+                    "licenseEvidencePath": expected_license_relative,
+                    "licenseEvidenceSha256": license_sha256},
         "target": {"applicationId": APP_ID, "prefix": prefix,
                    "allowedEmbeddedPathRoots": [prefix, app_home],
                    "persistentProjectRoot": manifest["target"]["persistentProjectRoot"],

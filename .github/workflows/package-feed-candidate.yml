@@ -120,9 +120,10 @@ jobs:
           assert result["status"] == "audit-passed; device-runtime-test-not-run"
           assert result["installed"] is False
           assert result["deviceSmokeTest"] == "NOT RUN"
+          assert result["prefixProvenance"] == "ci-model-only; device-observation-not-run"
           assert result["applicationId"] == "com.karat.aibuilder"
           assert result["sourceCommit"] == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
-          print("PINNED_BUILD_AND_STATIC_AUDIT_OK package=make device_install=NOT_RUN")
+          print("PINNED_BUILD_AND_STATIC_AUDIT_OK package=make ci_prefix=model_only device_install=NOT_RUN")
           PY
 
       - name: Sign temporary candidate feed and verify APT download/simulation
@@ -147,7 +148,7 @@ jobs:
           ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-feed-signing.log" 2>&1 || {
             echo 'ERROR:CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
           }
-          ./scripts/validate-candidate-feed.py \
+          python3 ./scripts/validate-candidate-feed.py \
             --package-set candidate-package-set.json \
             --feed-root "$feed" \
             --build-result "$output_dir/build-result.json" \
