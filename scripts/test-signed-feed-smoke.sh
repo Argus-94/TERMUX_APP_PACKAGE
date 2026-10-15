@@ -3,12 +3,23 @@ set -Eeuo pipefail
 umask 022
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-MANIFEST="${ROOT}/keys/feed-signing.json"
-: "${AIB_TERMUX_FEED_SIGNING_KEY:?Actions signing key secret is required}"
-[[ -f "$MANIFEST" ]] || { echo 'ERROR:SIGNING_MANIFEST_MISSING' >&2; exit 2; }
 for tool in gpg gpgv dpkg-deb dpkg-scanpackages apt-get python3 sha256sum sudo; do
   command -v "$tool" >/dev/null 2>&1 || { echo "ERROR:TOOL_REQUIRED:$tool" >&2; exit 2; }
 done
+
+TMP="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/aib-feed-signing-smoke.XXXXXX")"
+cleanup() {
+  if [[ -n "${TMP:-}" && -d "$TMP" ]]; then
+    sudo rm -rf -- "$TMP" || rm -rf -- "$TMP"
+  fi
+}
+trap cleanup EXIT
+chmod 755 "$TMP"
+CONFIG_ROOT="${TMP}/ephemeral-config"
+"${ROOT}/scripts/create-ephemeral-feed-signing-key.sh" "$CONFIG_ROOT"
+export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$CONFIG_ROOT"
+export GNUPGHOME="${CONFIG_ROOT}/gnupg"
+MANIFEST="${CONFIG_ROOT}/keys/feed-signing.json"
 
 mapfile -t META < <(python3 - "$MANIFEST" <<'PY'
 import json, pathlib, re, sys
@@ -26,30 +37,17 @@ print(digest)
 PY
 )
 EXPECTED_FPR="${META[0]}"
-PUBLIC_KEYRING="${ROOT}/${META[1]}"
+PUBLIC_KEYRING="${CONFIG_ROOT}/${META[1]}"
 EXPECTED_KEYRING_SHA256="${META[2]}"
 [[ -f "$PUBLIC_KEYRING" ]] || { echo 'ERROR:PUBLIC_KEYRING_MISSING' >&2; exit 2; }
 [[ "$(sha256sum "$PUBLIC_KEYRING" | awk '{print $1}')" == "$EXPECTED_KEYRING_SHA256" ]] || {
   echo 'ERROR:PUBLIC_KEYRING_HASH_MISMATCH' >&2; exit 2;
 }
-
-TMP="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/aib-feed-signing-smoke.XXXXXX")"
-cleanup() {
-  if [[ -n "${TMP:-}" && -d "$TMP" ]]; then
-    sudo rm -rf -- "$TMP" || rm -rf -- "$TMP"
-  fi
-}
-trap cleanup EXIT
-chmod 755 "$TMP"
-export GNUPGHOME="${TMP}/gnupg"
-mkdir -m 700 "$GNUPGHOME"
-
-printf '%s' "$AIB_TERMUX_FEED_SIGNING_KEY" | gpg --batch --import >/dev/null 2>"${TMP}/gpg-import.log"
 ACTUAL_FPR="$(gpg --batch --with-colons --list-secret-keys 2>/dev/null | awk -F: '$1=="fpr" {print $10; exit}')"
-[[ "$ACTUAL_FPR" == "$EXPECTED_FPR" ]] || { echo 'ERROR:PRIVATE_KEY_FINGERPRINT_MISMATCH' >&2; exit 2; }
+[[ "$ACTUAL_FPR" == "$EXPECTED_FPR" ]] || { echo 'ERROR:EPHEMERAL_KEY_FINGERPRINT_MISMATCH' >&2; exit 2; }
 gpg --batch --export "$ACTUAL_FPR" > "${TMP}/exported-public.gpg"
 [[ "$(sha256sum "${TMP}/exported-public.gpg" | awk '{print $1}')" == "$EXPECTED_KEYRING_SHA256" ]] || {
-  echo 'ERROR:PRIVATE_KEY_DOES_NOT_MATCH_COMMITTED_PUBLIC_KEY' >&2; exit 2;
+  echo 'ERROR:EPHEMERAL_PUBLIC_KEY_HASH_MISMATCH' >&2; exit 2;
 }
 
 FEED="${TMP}/site/apt/termux-main"
@@ -136,5 +134,5 @@ if ! grep -Eiq 'Hash Sum mismatch|hashes of expected file|unexpected size' "${TM
   cat "${TMP}/tamper.log" >&2
   exit 2
 fi
-printf 'APT_SIGNING_SMOKE_OK fingerprint=%s public_keyring_sha256=%s signed_by=1 tamper_rejected=1 install_performed=0 package_published=0\n' \
+printf 'APT_SIGNING_SMOKE_OK fingerprint=%s public_keyring_sha256=%s signed_by=1 ephemeral_key=1 tamper_rejected=1 install_performed=0 package_published=0\n' \
   "$EXPECTED_FPR" "$EXPECTED_KEYRING_SHA256"

@@ -3,7 +3,8 @@ set -Eeuo pipefail
 umask 077
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-MANIFEST="$ROOT/keys/feed-signing.json"
+CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-$ROOT}"
+MANIFEST="$CONFIG_ROOT/keys/feed-signing.json"
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
 [[ $# -eq 4 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version>'
 FEED_ROOT="$(realpath -e -- "$1")"
@@ -28,7 +29,7 @@ print(fpr); print(rel); print(digest)
 PY
 ) || fail 'SIGNING_MANIFEST_INVALID'
 EXPECTED_FPR="${META[0]}"
-KEYRING="$ROOT/${META[1]}"
+KEYRING="$CONFIG_ROOT/${META[1]}"
 EXPECTED_KEY_HASH="${META[2]}"
 [[ -f "$KEYRING" && ! -L "$KEYRING" ]] || fail 'PUBLIC_KEYRING_MISSING_OR_SYMLINK'
 [[ "$(sha256sum "$KEYRING" | awk '{print $1}')" == "$EXPECTED_KEY_HASH" ]] || fail 'PUBLIC_KEYRING_HASH_MISMATCH'

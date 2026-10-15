@@ -11,6 +11,7 @@ on:
       - scripts/test-apt-candidate.sh
       - scripts/validate-candidate-feed.py
       - scripts/test-candidate-feed-policy.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
       - candidate-package-set.json
       - keys/feed-signing.json
       - keys/aibuilder-termux-feed-keyring.gpg
@@ -29,8 +30,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-    env:
-      AIB_TERMUX_FEED_SIGNING_KEY: ${{ secrets.AIB_TERMUX_FEED_SIGNING_KEY }}
     steps:
       - name: Checkout smoke-test branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -49,5 +48,5 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          bash -n scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh
+          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh
           ./scripts/test-signed-feed-smoke.sh

@@ -4,7 +4,8 @@ umask 022
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(realpath "${SCRIPT_DIR}/..")"
-MANIFEST="${PROJECT_ROOT}/keys/feed-signing.json"
+CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-${PROJECT_ROOT}}"
+MANIFEST="${CONFIG_ROOT}/keys/feed-signing.json"
 
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
 
@@ -35,7 +36,7 @@ print(digest)
 PY
 ) || fail 'SIGNING_MANIFEST_INVALID'
 EXPECTED_FPR="${KEY_INFO[0]}"
-PUBLIC_KEYRING="${PROJECT_ROOT}/${KEY_INFO[1]}"
+PUBLIC_KEYRING="${CONFIG_ROOT}/${KEY_INFO[1]}"
 EXPECTED_KEYRING_SHA256="${KEY_INFO[2]}"
 [[ -f "$PUBLIC_KEYRING" ]] || fail 'PUBLIC_KEYRING_MISSING'
 ACTUAL_KEYRING_SHA256="$(sha256sum "$PUBLIC_KEYRING" | awk '{print $1}')"

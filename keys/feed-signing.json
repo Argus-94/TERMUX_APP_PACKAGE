@@ -6,6 +6,5 @@
   "algorithm": "RSA4096 signing key",
   "createdUtc": "2026-10-15",
   "expiresUtc": "2028-10-14",
-  "actionsSecretName": "AIB_TERMUX_FEED_SIGNING_KEY",
-  "status": "branch-smoke-only; no production feed signed or published"
+  "status": "reserved-production-key; candidate-ci-uses-ephemeral-key; no-production-feed-published"
 }

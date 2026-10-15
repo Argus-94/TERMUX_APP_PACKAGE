@@ -12,6 +12,7 @@ on:
       - scripts/test-apt-candidate.sh
       - scripts/validate-candidate-feed.py
       - scripts/test-candidate-feed-policy.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
       - candidate-package-set.json
       - keys/feed-signing.json
       - keys/aibuilder-termux-feed-keyring.gpg
@@ -54,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          bash -n scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh
+          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh
           python3 -m py_compile scripts/validate-candidate-feed.py
           ./scripts/test-candidate-feed-policy.sh
           ./termux-private-package-kit/make-v476/verify-kit.sh
@@ -128,23 +129,20 @@ jobs:
 
       - name: Sign temporary candidate feed and verify APT download/simulation
         shell: bash
-        env:
-          AIB_TERMUX_FEED_SIGNING_KEY: ${{ secrets.AIB_TERMUX_FEED_SIGNING_KEY }}
         run: |
           set -Eeuo pipefail
-          : "${AIB_TERMUX_FEED_SIGNING_KEY:?Repository signing secret is required for the temporary candidate check}"
           output_dir="$RUNNER_TEMP/aib-private-make-candidate-output"
           feed="$RUNNER_TEMP/aib-make-candidate-feed"
-          key_home="$RUNNER_TEMP/aib-candidate-signing-gnupg"
-          mkdir -p "$feed/pool/main/make" "$feed/dists/stable/main/binary-aarch64" "$key_home"
-          chmod 700 "$key_home"
+          key_root="$RUNNER_TEMP/aib-candidate-signing-config"
+          mkdir -p "$feed/pool/main/make" "$feed/dists/stable/main/binary-aarch64"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key_root"
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key_root"
+          export GNUPGHOME="$key_root/gnupg"
           mapfile -t debs < <(find "$output_dir/packages" -maxdepth 1 -type f -name 'make_*_aarch64.deb' -print)
           ((${#debs[@]} == 1)) || { echo 'ERROR:EXPECTED_EXACTLY_ONE_ALLOWLISTED_DEB' >&2; exit 2; }
           cp -- "${debs[0]}" "$feed/pool/main/make/"
           (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
           gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
-          export GNUPGHOME="$key_home"
-          printf '%s' "$AIB_TERMUX_FEED_SIGNING_KEY" | gpg --batch --import >/dev/null 2>"$RUNNER_TEMP/aib-signing-import.log"
           ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-feed-signing.log" 2>&1 || {
             echo 'ERROR:CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
           }
@@ -175,8 +173,6 @@ jobs:
 
       - name: Verify synthetic tamper rejection (no package publication)
         shell: bash
-        env:
-          AIB_TERMUX_FEED_SIGNING_KEY: ${{ secrets.AIB_TERMUX_FEED_SIGNING_KEY }}
         run: ./scripts/test-signed-feed-smoke.sh
 
       - name: Remove temporary source, candidate binary, signatures, and signing workspace
@@ -189,6 +185,5 @@ jobs:
             "$RUNNER_TEMP/aib-private-make-candidate-output" \
             "$RUNNER_TEMP/aib-private-make-candidate-build.log" \
             "$RUNNER_TEMP/aib-make-candidate-feed" \
-            "$RUNNER_TEMP/aib-candidate-signing-gnupg" \
-            "$RUNNER_TEMP/aib-signing-import.log" \
+            "$RUNNER_TEMP/aib-candidate-signing-config" \
             "$RUNNER_TEMP/aib-feed-signing.log"
