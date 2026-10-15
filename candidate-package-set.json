@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "packages": [
+    {
+      "name": "make",
+      "version": "4.4.1-1",
+      "architecture": "aarch64",
+      "sourceRepository": "https://github.com/termux/termux-packages.git",
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "recipePath": "packages/make/build.sh",
+      "recipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
+      "recipePatchPath": "packages/make/src-job.c.patch",
+      "recipePatchSha256": "87ef62d072c2def6e0778e71283fb32d7bc4f00dadadd52eca822bf444a4dc10",
+      "sourceUrl": "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
+      "sourceSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "staticAuditRequired": true,
+      "deviceInstallAndRollbackRequired": true
+    }
+  ],
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT_RUN",
+    "rollback": "NOT_RUN",
+    "deviceEvidenceSha256": null
+  },
+  "excludedInputs": [
+    "the existing unverified 133-package pool",
+    "stock com.termux packages or feeds",
+    "PocketForge packages"
+  ]
+}

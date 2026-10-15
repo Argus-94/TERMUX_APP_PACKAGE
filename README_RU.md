@@ -1,43 +1,25 @@
-# Авто-Pages для TERMUX_APP_PACKAGE
+# TERMUX_APP_PACKAGE — пакеты для AI Builder
 
-## Что в архиве
+Отдельный APT-репозиторий для приватного runtime AI Builder (`com.karat.aibuilder`, `aarch64`). Он не предназначен для stock Termux и не использует пакеты `com.termux` или PocketForge.
 
-| Workflow | Роль |
-|----------|------|
-| `pages.yml` | деплой через **GitHub Actions Pages** (после каждого push / после сборки пакетов) |
-| `gh-pages-branch.yml` | пишет ветку **`gh-pages`** (запасной вариант) |
-| `enable-pages-hint.yml` | проверка, жив ли feed |
+## Текущее состояние — production закрыт
 
-## Как поставить (1 раз)
+- В `main` сохранён старый пул из 133 `.deb`, но у него нет подтверждённого полного provenance; статический аудит отметил 3 неподтверждённых записи. Эти файлы **не являются доверенным установочным feed**.
+- GitHub Pages для этого репозитория не включён; безопасный production URL пока не объявлен.
+- В отдельной ветке добавлен read-only candidate pipeline. Старые build/Pages workflows в `main` пока остаются; до отдельного подтверждения их cleanup не выполняется.
+- Ветка кандидата собирает только GNU Make `4.4.1-1` из закреплённого исходного recipe, проверяет payload, временно формирует подписанный локальный APT feed и проверяет его через `signed-by` и `apt-get --simulate`.
+- Candidate `.deb` и feed остаются только на CI runner и удаляются. Ничего не коммитится, не загружается как artifact и не публикуется.
+- `pkg.ensure` и подключение production source остаются закрыты до точного Android install/rollback smoke-теста.
 
-```bash
-# содержимое архива → корень Argus-94/TERMUX_APP_PACKAGE
-cp -r .github /path/to/TERMUX_APP_PACKAGE/
-git add .github
-git commit -m "ci: auto deploy Pages + gh-pages branch"
-git push
+## Никаких обходов доверия
+
+Не использовать `trusted=yes`, `AllowUnauthenticated`, `AllowInsecureRepositories`, официальный `com.termux` feed, пакеты из неизвестного источника или артефакты PocketForge. Наличие подписи Release подтверждает целостность индекса, но не происхождение/совместимость самих `.deb`.
+
+## Проверки
+
+```sh
+./scripts/test-candidate-feed-policy.sh
+./termux-private-package-kit/make-v476/verify-kit.sh
 ```
 
-## Единственный ручной клик (без него 404)
-
-Открой: https://github.com/Argus-94/TERMUX_APP_PACKAGE/settings/pages
-
-**Вариант A (предпочтительно):**  
-Source → **GitHub Actions** → Save  
-
-**Вариант B:**  
-Source → **Deploy from a branch** → Branch: **`gh-pages`** → folder: **/ (root)** → Save  
-
-После Save в течение 1–2 минут:
-
-```text
-https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main/dists/stable/main/binary-aarch64/Packages
-```
-
-должен дать **HTTP 200**.
-
-GitHub **не позволяет** включить Pages только файлом в repo без этого клика (или без admin API token).
-
-## Права Actions
-
-Settings → Actions → General → Workflow permissions → **Read and write** → Save
+Политика кандидата и текущие блокеры описаны в [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md); схема подписи — в [docs/FEED_SIGNING_RU.md](./docs/FEED_SIGNING_RU.md).

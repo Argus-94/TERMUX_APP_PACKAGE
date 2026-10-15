@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "releaseReference": {
+    "label": "AIBuilder-Expo-v476",
+    "appVersion": "1.10.76",
+    "androidVersionCode": 476,
+    "sourceArchive": "AIBuilder-Expo-v476.zip (not included in this public branch)",
+    "sourceArchiveSha256": "f9f1de6469688c05fbd16a13d619769976d7f1f456d7bab843287123140a8ed6"
+  },
+  "status": {
+    "kind": "candidate-build-kit-only",
+    "binaryPackageProduced": false,
+    "binaryPackageInstalled": false,
+    "packageFeedCreated": false,
+    "packageSigningKeyCreated": false,
+    "appPrefixCompatibilityProvenOnDevice": false,
+    "runtimeSmokeTestRun": false,
+    "byteReproducibleBuildProven": false,
+    "productionPublicationAllowed": false
+  },
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "runtime": "AI Builder embedded app-private Android/Bionic runtime",
+    "architecture": "aarch64",
+    "androidAbi": "arm64-v8a",
+    "prefixRelativeToCanonicalFilesDir": "usr",
+    "prefixRule": "CI-only modeled compile path is /data/user/0/com.karat.aibuilder/files/usr derived from the fixed application ID. It is not an observation of an installed device; confirm applicationInfo.dataDir/filesDir/usr and install/rollback behavior on-device before production.",
+    "ciModeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "ciModeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr",
+    "persistentProjectRoot": "/storage/emulated/0/AIBuilderTermux",
+    "persistentProjectRootIsPackagePayload": false,
+    "externalRuntimeTarget": false,
+    "standardComTermuxFeedAllowed": false,
+    "pocketForgeDebAllowed": false
+  },
+  "upstreamSource": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "revision": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "revisionSignatureStatus": "not independently verified; commit is a source pin, not an upstream signature trust decision",
+    "packageRecipePath": "packages/make/build.sh",
+    "packageRecipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
+    "recipePatchPath": "packages/make/src-job.c.patch",
+    "recipePatchSha256": "87ef62d072c2def6e0778e71283fb32d7bc4f00dadadd52eca822bf444a4dc10",
+    "builderPropertiesPath": "scripts/properties.sh",
+    "builderPropertiesSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
+    "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
+    "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2"
+  },
+  "package": {
+    "name": "make",
+    "version": "4.4.1-1",
+    "architecture": "aarch64",
+    "homepage": "https://www.gnu.org/software/make/",
+    "licenseSpdx": "GPL-3.0",
+    "maintainer": "@termux",
+    "sourceUrl": "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
+    "sourceSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
+    "recipeDeclaredRuntimeDependencies": [],
+    "runtimeDependenciesExpected": [],
+    "runtimeDependencyClosureProven": false,
+    "expectedControlRelations": {
+      "Breaks": ["make-dev"],
+      "Replaces": ["make-dev"],
+      "Conflicts": ["make-guile"]
+    },
+    "licenseEvidenceRequired": [
+      "prefix/share/doc/make/copyright or prefix/share/doc/make/LICENSE or prefix/share/doc/make/COPYING",
+      "GPL version 3 identification in installed license text"
+    ],
+    "requiredExecutableRelativePath": "bin/make",
+    "platformElfLibrariesAllowed": [
+      "libc.so",
+      "libm.so",
+      "libdl.so",
+      "liblog.so",
+      "libandroid.so",
+      "libz.so",
+      "libgcc.so",
+      "libpthread.so"
+    ],
+    "baseRuntimeElfLibraries": {"libc++.so": "libc++"},
+    "baseRuntimePackagesObservedInV476Bootstrap": [
+      {"name": "libc++", "version": "28c", "status": "install ok installed"}
+    ]
+  },
+  "builder": {
+    "command": "./build-package.sh -a aarch64 -o <isolated-output-dir> make",
+    "dependencyDownloadFlagsAllowed": false,
+    "forbiddenFlags": ["-i", "-I"],
+    "dockerRequired": true,
+    "imageReferenceMustBeDigestPinned": true,
+    "imageDigest": "sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "imageReference": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "reproducibilityStatus": "official builder image is pinned by digest; the GitHub-hosted runner and host package snapshot are not locked, so byte-for-byte reproducibility is not claimed",
+    "minimumFreeBytes": 3221225472,
+    "mustNotCleanSharedCaches": true
+  },
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT_RUN",
+    "rollback": "NOT_RUN",
+    "deviceEvidenceSha256": null
+  }
+}

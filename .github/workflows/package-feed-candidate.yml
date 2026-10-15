@@ -1,0 +1,179 @@
+name: Build and verify one AI Builder package candidate (no publication)
+
+on:
+  push:
+    branches:
+      - work/package-feed-gates-20261015
+    paths:
+      - .github/workflows/package-feed-candidate.yml
+      - .github/workflows/feed-signing-smoke.yml
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/validate-candidate-feed.py
+      - scripts/test-candidate-feed-policy.sh
+      - candidate-package-set.json
+      - keys/feed-signing.json
+      - keys/aibuilder-termux-feed-keyring.gpg
+      - termux-private-package-kit/make-v476/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-package-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-audit-and-test-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+
+    steps:
+      - name: Checkout candidate branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install isolated feed test tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+
+      - name: Run local policy and package auditor tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh
+          python3 -m py_compile scripts/validate-candidate-feed.py
+          ./scripts/test-candidate-feed-policy.sh
+          ./termux-private-package-kit/make-v476/verify-kit.sh
+
+      - name: Checkout the exact locked upstream source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Pull the digest-pinned official Termux builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+
+      - name: Build and statically audit only the allowlisted package
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit="$GITHUB_WORKSPACE/termux-private-package-kit/make-v476"
+          source_dir="$RUNNER_TEMP/termux-packages"
+          output_dir="$RUNNER_TEMP/aib-private-make-candidate-output"
+          raw_log="$RUNNER_TEMP/aib-private-make-candidate-build.log"
+          mkdir -p "$output_dir"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$kit/build-make-private-aarch64.sh" "$source_dir" "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=Candidate build or audit failed::Exit $build_status; private build log was not emitted. No binary was uploaded."
+            exit "$build_status"
+          fi
+          python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          result=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert result["status"] == "audit-passed; device-runtime-test-not-run"
+          assert result["installed"] is False
+          assert result["deviceSmokeTest"] == "NOT RUN"
+          assert result["applicationId"] == "com.karat.aibuilder"
+          assert result["sourceCommit"] == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
+          print("PINNED_BUILD_AND_STATIC_AUDIT_OK package=make device_install=NOT_RUN")
+          PY
+
+      - name: Sign temporary candidate feed and verify APT download/simulation
+        shell: bash
+        env:
+          AIB_TERMUX_FEED_SIGNING_KEY: ${{ secrets.AIB_TERMUX_FEED_SIGNING_KEY }}
+        run: |
+          set -Eeuo pipefail
+          : "${AIB_TERMUX_FEED_SIGNING_KEY:?Repository signing secret is required for the temporary candidate check}"
+          output_dir="$RUNNER_TEMP/aib-private-make-candidate-output"
+          feed="$RUNNER_TEMP/aib-make-candidate-feed"
+          key_home="$RUNNER_TEMP/aib-candidate-signing-gnupg"
+          mkdir -p "$feed/pool/main/make" "$feed/dists/stable/main/binary-aarch64" "$key_home"
+          chmod 700 "$key_home"
+          mapfile -t debs < <(find "$output_dir/packages" -maxdepth 1 -type f -name 'make_*_aarch64.deb' -print)
+          ((${#debs[@]} == 1)) || { echo 'ERROR:EXPECTED_EXACTLY_ONE_ALLOWLISTED_DEB' >&2; exit 2; }
+          cp -- "${debs[0]}" "$feed/pool/main/make/"
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          export GNUPGHOME="$key_home"
+          printf '%s' "$AIB_TERMUX_FEED_SIGNING_KEY" | gpg --batch --import >/dev/null 2>"$RUNNER_TEMP/aib-signing-import.log"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-feed-signing.log" 2>&1 || {
+            echo 'ERROR:CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
+          }
+          ./scripts/validate-candidate-feed.py \
+            --package-set candidate-package-set.json \
+            --feed-root "$feed" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json"
+          ./scripts/test-apt-candidate.sh "$feed" aarch64 make 4.4.1-1
+          package_sha="$(python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          print(json.loads(pathlib.Path(sys.argv[1]).read_text())["packageSha256"])
+          PY
+          )"
+          {
+            echo '## App-private package candidate checks'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Pinned source/recipe and builder | PASS |'
+            echo '| Fail-closed static audit | PASS |'
+            echo '| Signed APT index and strict `signed-by` | PASS |'
+            echo '| Package download + simulated install | PASS; no install performed |'
+            echo "| Candidate SHA-256 | \`$package_sha\` |"
+            echo '| Device install / rollback | NOT RUN |'
+            echo '| Production publication / artifact upload | BLOCKED / NONE |'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify synthetic tamper rejection (no package publication)
+        shell: bash
+        env:
+          AIB_TERMUX_FEED_SIGNING_KEY: ${{ secrets.AIB_TERMUX_FEED_SIGNING_KEY }}
+        run: ./scripts/test-signed-feed-smoke.sh
+
+      - name: Remove temporary source, candidate binary, signatures, and signing workspace
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- \
+            "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aib-private-make-candidate-output" \
+            "$RUNNER_TEMP/aib-private-make-candidate-build.log" \
+            "$RUNNER_TEMP/aib-make-candidate-feed" \
+            "$RUNNER_TEMP/aib-candidate-signing-gnupg" \
+            "$RUNNER_TEMP/aib-signing-import.log" \
+            "$RUNNER_TEMP/aib-feed-signing.log"

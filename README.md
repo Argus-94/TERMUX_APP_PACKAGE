@@ -1,41 +1,22 @@
 # TERMUX_APP_PACKAGE
 
-Apt repository of Termux packages built for **AI Builder** (`com.karat.aibuilder`), **not** for stock `com.termux`.
+A candidate package pipeline for the private AI Builder runtime (`com.karat.aibuilder`, `aarch64`), not for stock Termux.
 
-## Feed URL (after GitHub Pages is enabled)
+## Production status: blocked
 
-```text
-deb https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main stable main
+- The legacy `main` tree contains 133 unsigned `.deb` files without complete verified provenance; three package records were previously left unconfirmed. They are not a trusted install feed.
+- GitHub Pages is not enabled for this repository; no production feed URL is available.
+- The candidate pipeline builds only pinned GNU Make `4.4.1-1`, statically audits it, assembles a temporary signed APT feed, and tests strict `signed-by` metadata handling plus a simulated install plan.
+- Candidate binaries and feed metadata are deleted on the runner: no package artifact, commit, release, or Pages deployment is produced.
+- Production publication and app-side `pkg.ensure` stay disabled until exact-device install and rollback tests pass.
+
+Never use `trusted=yes`, unauthenticated/insecure APT options, stock `com.termux` packages, or PocketForge artifacts.
+
+## Checks
+
+```sh
+./scripts/test-candidate-feed-policy.sh
+./termux-private-package-kit/make-v476/verify-kit.sh
 ```
 
-## Layout
-
-```text
-apt/termux-main/
-  dists/stable/main/binary-aarch64/Packages[.gz]
-  pool/main/<package>/*.deb
-  Release
-```
-
-## Status
-
-- [x] Directory layout
-- [ ] `.deb` packages (`TERMUX_APP__PACKAGE_NAME=com.karat.aibuilder`)
-- [ ] Regenerated `Packages` index with real packages
-- [ ] GitHub Pages enabled
-- [ ] AI Builder `AIB_TERMUX_APT_FEED_DEFAULT` points here
-
-## Docs
-
-- [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md) — full setup guide (RU)
-- [docs/BUILD_PACKAGES_RU.md](./docs/BUILD_PACKAGES_RU.md) — how to build `.deb`
-
-## Critical rule
-
-All packages **must** be built with:
-
-```bash
-export TERMUX_APP__PACKAGE_NAME=com.karat.aibuilder
-```
-
-Do **not** publish binaries built for `com.termux`.
+See [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md) and [docs/FEED_SIGNING_RU.md](./docs/FEED_SIGNING_RU.md).
