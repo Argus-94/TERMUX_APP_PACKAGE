@@ -27,6 +27,18 @@ def require(ok: bool, code: str) -> None:
         raise GateError(code)
 
 
+def parse_deb_identity(control_text: str) -> tuple[str, str, str]:
+    fields: dict[str, str] = {}
+    for line in control_text.splitlines():
+        if not line or line[0].isspace() or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        require(key not in fields, "FEED_DEB_CONTROL_DUPLICATE_FIELD")
+        fields[key] = value.strip()
+    require(all(fields.get(key) for key in ("Package", "Version", "Architecture")), "FEED_DEB_CONTROL_INVALID")
+    return fields["Package"], fields["Version"], fields["Architecture"]
+
+
 def load(path: pathlib.Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -101,11 +113,9 @@ def validate(args: argparse.Namespace) -> None:
     seen: set[str] = set()
     for deb in debs:
         require(deb.is_file() and not deb.is_symlink() and root in deb.resolve(strict=True).parents, "FEED_DEB_PATH_INVALID")
-        fields = subprocess.run(["dpkg-deb", "-f", str(deb), "Package", "Version", "Architecture"], capture_output=True, text=True, check=False, timeout=30)
+        fields = subprocess.run(["dpkg-deb", "-f", str(deb)], capture_output=True, text=True, check=False, timeout=30)
         require(fields.returncode == 0, "FEED_DEB_CONTROL_UNREADABLE")
-        values = fields.stdout.splitlines()
-        require(len(values) == 3, "FEED_DEB_CONTROL_INVALID")
-        name, version, architecture = values
+        name, version, architecture = parse_deb_identity(fields.stdout)
         require(name in expected and name not in seen, "FEED_PACKAGE_NOT_ALLOWLISTED_OR_DUPLICATE")
         spec = expected[name]
         require((version, architecture) == (spec["version"], spec["architecture"]), "FEED_PACKAGE_IDENTITY_MISMATCH")

@@ -33,6 +33,16 @@ EXPECTED_LICENSES = {
     "libssh2": "BSD 3-Clause", "ncurses": "MIT", "openssl": "Apache-2.0",
     "pcre2": "BSD 3-Clause", "zlib": "ZLIB",
 }
+PINNED_LICENSE_EVIDENCE = {
+    "less": {
+        "sourceUrl": "https://www.greenwoodsoftware.com/less/less-710.tar.gz",
+        "sourceSha256": "d1008fb78dcae1323ddab664bcb352a61f022b1b131bd8018548e021d975ec7a",
+        "files": {
+            "share/doc/less/COPYING": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+            "share/doc/less/LICENSE": "0f94cd7f9b1d122522e1b988e42be49c88a997781494615113e7bbcf28d2c952",
+        },
+    },
+}
 
 
 class AuditError(Exception):
@@ -42,6 +52,30 @@ class AuditError(Exception):
 def require(ok: bool, code: str, detail: str = "") -> None:
     if not ok:
         raise AuditError(code + (":" + detail if detail else ""))
+
+
+def expected_source_license_files(spec: dict[str, Any]) -> dict[str, str]:
+    name = str(spec.get("name", ""))
+    pinned = PINNED_LICENSE_EVIDENCE.get(name)
+    declared = spec.get("licenseEvidenceSha256", {})
+    require(isinstance(declared, dict), "LICENSE_EVIDENCE_MANIFEST_INVALID", name)
+    if pinned is None:
+        require(not declared, "UNEXPECTED_LICENSE_EVIDENCE_MANIFEST", name)
+        return {}
+    require(spec.get("sourceUrl") == pinned["sourceUrl"] and spec.get("sourceSha256") == pinned["sourceSha256"],
+            "LICENSE_SOURCE_ARCHIVE_NOT_ALLOWLISTED", name)
+    require(declared == pinned["files"], "LICENSE_EVIDENCE_MANIFEST_NOT_ALLOWLISTED", name)
+    return pinned["files"]
+
+
+def verify_pinned_license_payload(name: str, relative_path: str, content: bytes,
+                                  pinned_files: dict[str, str]) -> str | None:
+    expected = pinned_files.get(relative_path)
+    if expected is None:
+        return None
+    actual = hashlib.sha256(content).hexdigest()
+    require(actual == expected, "LICENSE_EVIDENCE_SHA256_MISMATCH", name + ":" + relative_path)
+    return actual
 
 
 def normalize_prefix(value: str) -> str:
@@ -188,10 +222,12 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
     name = spec["name"]
     require(fields["Package"] == name and fields["Version"] == spec["version"] and fields["Architecture"] == spec["architecture"], "DEB_IDENTITY_NOT_ALLOWLISTED", name)
     require(spec["licenseExpression"] == EXPECTED_LICENSES[name], "LICENSE_EXPRESSION_NOT_ALLOWLISTED", name)
+    pinned_license_files = expected_source_license_files(spec)
     proc = subprocess.Popen(["dpkg-deb", "--fsys-tarfile", str(deb)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     assert proc.stdout is not None
     paths: set[str] = set()
     license_paths: set[str] = set()
+    license_hashes: dict[str, str] = {}
     git_executable_present = False
     elf_records: list[dict[str, Any]] = []
     total = 0
@@ -210,6 +246,8 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
                 require(member.size <= MAX_MEMBER_BYTES and total <= MAX_TOTAL_BYTES, "PAYLOAD_SIZE_LIMIT", name)
                 if member.issym() or member.islnk():
                     resolve_link(path, member.linkname, member.islnk(), prefix)
+                    relative_path = path[len(prefix) + 1:]
+                    require(relative_path not in pinned_license_files, "LICENSE_EVIDENCE_NOT_REGULAR", name + ":" + relative_path)
                     if name == "git" and path == prefix + "/bin/git" and (member.mode & 0o111):
                         git_executable_present = True
                     if path.startswith(prefix + "/share/doc/" + name + "/copyright"):
@@ -225,8 +263,14 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
                 content = stream.read(member.size + 1)
                 require(len(content) == member.size, "PAYLOAD_MEMBER_SIZE_MISMATCH", name + ":" + path)
                 scan_paths(content, prefix, name + ":" + path)
+                relative_path = path[len(prefix) + 1:]
                 if path.startswith(prefix + "/share/doc/" + name + "/copyright"):
                     license_paths.add(path)
+                    license_hashes[path] = hashlib.sha256(content).hexdigest()
+                pinned_digest = verify_pinned_license_payload(name, relative_path, content, pinned_license_files)
+                if pinned_digest is not None:
+                    license_paths.add(path)
+                    license_hashes[path] = pinned_digest
                 if content.startswith(b"\x7fELF"):
                     rel = path[len(prefix) + 1:]
                     target = temp / (name + "-" + str(len(elf_records)))
@@ -244,12 +288,17 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
             pass
         raise
     require(count > 0, "EMPTY_PACKAGE_PAYLOAD", name)
-    require(bool(license_paths), "LICENSE_EVIDENCE_MISSING", name)
+    if pinned_license_files:
+        expected_paths = {prefix + "/" + rel for rel in pinned_license_files}
+        require(expected_paths <= license_paths, "LICENSE_EVIDENCE_MISSING", name)
+    else:
+        require(bool(license_paths), "LICENSE_EVIDENCE_MISSING", name)
     if name == "git":
         require(git_executable_present, "GIT_EXECUTABLE_MISSING_OR_NOT_EXECUTABLE")
     return {"name": name, "version": spec["version"], "architecture": spec["architecture"], "sha256": sha,
             "filename": deb.name, "licenseExpression": spec["licenseExpression"], "licenseEvidencePaths": sorted(license_paths),
-            "licenseEvidenceKind": "pinned Termux source installer output; copyright file or prefix-contained shared-license symlink",
+            "licenseEvidenceSha256": {path: license_hashes[path] for path in sorted(license_hashes)},
+            "licenseEvidenceKind": "pinned Termux source installer output; copyright file, hash-pinned TERMUX_PKG_LICENSE_FILE copy, or prefix-contained shared-license symlink",
             "payloadEntries": count, "payloadBytes": total, "elf": elf_records,
             "depends": fields.get("Depends", ""), "preDepends": fields.get("Pre-Depends", ""),
             "recommends": fields.get("Recommends", ""), "maintainerScripts": sorted(set(controls) & {"preinst", "postinst", "prerm", "postrm", "config"})}
