@@ -14,6 +14,9 @@
     ],
     "git-extras": [
       "git-extras"
+    ],
+    "builder-cli": [
+      "gh"
     ]
   },
   "semantics": {
