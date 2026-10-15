@@ -16,7 +16,7 @@
     "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
     "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2",
     "restrictedAppArmorProfileSha256": "ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8",
-    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw;"
+    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw,"
   },
   "sourceClosure": {
     "profile": "git-candidate",

@@ -39,6 +39,8 @@ m=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
 assert m['schemaVersion']==1 and m['channel']=='candidate-only'
 assert m['source']['commit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 assert m['source']['builderImage']=='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
+assert m['source']['restrictedAppArmorProfileSha256']=='ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8'
+assert m['source']['restrictedAppArmorOutputAllow']=='/home/builder/termux-packages/output/** rw,'
 assert m['sourceClosure']['profile']=='git-candidate' and m['sourceClosure']['rootPackages']==['git']
 assert m['sourceClosure']['expectedPackageCount']==14 and len(m['packages'])==14
 assert m['releaseGate']['publicationAllowed'] is False
@@ -78,7 +80,7 @@ for pair in \
   actual="$(git -C "$SOURCE_REPO" show "$PIN:$path" | sha256sum | awk '{print $1}')"
   [[ "$actual" == "$expected" ]] || fail "LOCKED_UPSTREAM_SCRIPT_HASH_MISMATCH:$path"
 done
-grep -Fq -- 'allow /home/builder/termux-packages/output/** rw;' "$SOURCE_REPO/scripts/profile-restricted.apparmor" || fail 'PINNED_APPARMOR_OUTPUT_ALLOW_NOT_FOUND'
+grep -Fq -- 'allow /home/builder/termux-packages/output/** rw,' "$SOURCE_REPO/scripts/profile-restricted.apparmor" || fail 'PINNED_APPARMOR_OUTPUT_ALLOW_NOT_FOUND'
 grep -Fq -- 'deny /home/builder/termux-packages/[^o]** wlk,' "$SOURCE_REPO/scripts/profile-restricted.apparmor" || fail 'PINNED_APPARMOR_SOURCE_TREE_DENY_NOT_FOUND'
 
 mkdir -p "$OUTPUT_DIR/work"
