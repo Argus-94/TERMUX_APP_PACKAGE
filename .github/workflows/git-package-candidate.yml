@@ -107,7 +107,7 @@ jobs:
           docker pull "$TERMUX_BUILDER_IMAGE_REF"
           docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
 
-      - name: Build pinned Git package and recursive required dependency closure; statically audit every deb
+      - name: Build pinned Git package and source-built dependency closure; statically audit every deb
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -191,7 +191,7 @@ jobs:
             echo '| Gate | Result |'
             echo '|---|---|'
             echo '| Exact upstream source commit and 14 source recipes | PASS |'
-            echo '| Required source closure | PASS; 20 dependency alternatives; 14 built packages |'
+            echo '| Required source closure | PASS; 20 dependency alternatives; 14 source-built packages; dependency downloads disabled |'
             echo '| AArch64 ELF, app-private paths/links, licenses, runtime library providers | PASS; 14 package audits |'
             echo '| Exact candidate Depends/Pre-Depends closure | PASS; no external base assumptions |'
             echo '| Ephemerally signed APT index, download and simulated install of Git | PASS; install not performed |'

@@ -23,7 +23,7 @@
     "rootPackages": ["git"],
     "expectedPackageCount": 14,
     "expectedDependencyAlternativeCount": 20,
-    "semantics": "All required package recipes and subpackage rules resolved from the pinned source commit; recommendations excluded. The output feed must contain the exact recipe closure and the signed APT simulation must satisfy all package-control Depends/Pre-Depends without external base assumptions."
+    "semantics": "All required package recipes and subpackage rules are resolved and built through the pinned Termux buildorder from the pinned source commit; dependency downloads are disabled and recommendations excluded. The output feed must contain the exact recipe closure and the signed APT simulation must satisfy all package-control Depends/Pre-Depends without external base assumptions."
   },
   "packages": [
     {"name":"ca-certificates","version":"1:2026.09.25","architecture":"all","recipePath":"packages/ca-certificates/build.sh","recipeSha256":"49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861","licenseExpression":"MPL-2.0"},

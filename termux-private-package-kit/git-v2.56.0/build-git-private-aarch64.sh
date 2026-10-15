@@ -131,37 +131,52 @@ trap cleanup_container EXIT
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 (
   cd "$WORKTREE"
-  # The official upstream builder recursively builds required dependencies from this pinned checkout.
-  # No dependency-download flags are used. Dependency .debs remain in the temporary build output.
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; ./build-package.sh -a aarch64 -o /home/builder/termux-packages/output/.aib-private-git-debs git'
+  # Upstream buildorder resolves package Depends from this pinned checkout; downloads stay disabled.
+  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-git-debs git; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\n"'
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
+printf 'PINNED_HOST_OUTPUT_DEBS_BEGIN\n' | tee -a "$OUTPUT_DIR/build.log"
+find "$WORKTREE/output" -type f -name '*.deb' -printf '%P %s bytes\n' | sort | tee -a "$OUTPUT_DIR/build.log"
+printf 'PINNED_HOST_OUTPUT_DEBS_END\n' | tee -a "$OUTPUT_DIR/build.log"
 
 mkdir -p "$OUTPUT_DIR/packages"
 python3 - "$WORKTREE/output" "$PACKAGE_SET" "$OUTPUT_DIR/packages" <<'PY'
-import json,pathlib,shutil,subprocess,sys
+import hashlib,json,pathlib,shutil,subprocess,sys
 build_root=pathlib.Path(sys.argv[1]); manifest=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8')); dest=pathlib.Path(sys.argv[3])
-specs={x['name']:x for x in manifest['packages']}; found={}
-for deb in build_root.rglob('*.deb'):
-    fields=subprocess.run(['dpkg-deb','-f',str(deb),'Package','Version','Architecture'],capture_output=True,text=True,check=True).stdout.splitlines()
-    if len(fields)!=3: raise SystemExit('BUILD_OUTPUT_CONTROL_FIELDS_INVALID:'+deb.name)
-    name,version,arch=fields
+specs={x['name']:x for x in manifest['packages']}; found={}; seen_hashes={}; identical_duplicates=0
+debs=sorted(build_root.rglob('*.deb'))
+print('PINNED_BUILD_OUTPUT_DISCOVERED_DEBS count={} root={}'.format(len(debs),build_root))
+for deb in debs:
+    control_text=subprocess.run(['dpkg-deb','-f',str(deb)],capture_output=True,text=True,check=True).stdout
+    control={}
+    for line in control_text.splitlines():
+        if not line or line[0].isspace() or ':' not in line: continue
+        key,value=line.split(':',1); control[key.strip()]=value.strip()
+    if any(not control.get(key) for key in ('Package','Version','Architecture')):
+        raise SystemExit('BUILD_OUTPUT_CONTROL_FIELDS_INVALID:'+deb.name)
+    name,version,arch=(control[key] for key in ('Package','Version','Architecture'))
     if name not in specs: continue
-    if name in found: raise SystemExit('DUPLICATE_PINNED_CANDIDATE_DEB:'+name)
     spec=specs[name]
     if (version,arch)!=(spec['version'],spec['architecture']):
         raise SystemExit('PINNED_DEB_IDENTITY_MISMATCH:'+name+':'+version+':'+arch)
-    found[name]=deb
+    digest=hashlib.sha256(deb.read_bytes()).hexdigest()
+    if name in found:
+        if seen_hashes[name]!=digest:
+            raise SystemExit('DUPLICATE_PINNED_CANDIDATE_DEB_DIFFERENT_BYTES:'+name)
+        identical_duplicates+=1
+        print('IDENTICAL_DUPLICATE_PINNED_DEB_EXCLUDED:'+name+':'+str(deb.relative_to(build_root)))
+        continue
+    found[name]=deb; seen_hashes[name]=digest
 missing=set(specs)-set(found)
 if missing: raise SystemExit('PINNED_DEPENDENCY_DEB_MISSING:'+','.join(sorted(missing)))
 for name,deb in sorted(found.items()): shutil.copy2(deb,dest/deb.name)
-print('PINNED_GIT_DEB_SET_READY packages={} extras_in_build_output_excluded=1'.format(len(found)))
+print('PINNED_GIT_DEB_SET_READY packages={} identical_duplicates_excluded={} extras_in_build_output_excluded=1'.format(len(found),identical_duplicates))
 PY
 python3 "$KIT_DIR/audit_closure.py" --package-set "$PACKAGE_SET" --packages-dir "$OUTPUT_DIR/packages" --prefix "$PREFIX" --report "$OUTPUT_DIR/audit-report.json" | tee -a "$OUTPUT_DIR/build.log"
 python3 - "$OUTPUT_DIR/build-result.json" "$PACKAGE_SET" "$OUTPUT_DIR/audit-report.json" "$IMAGE" "$PIN" "$PREFIX" "$PROPERTIES_PATCH_SHA" <<'PY'
-import hashlib,json,pathlib,sys
+import json,pathlib,sys
 out,manifest_path,audit_path,image,pin,prefix,props_sha=map(str,sys.argv[1:])
 m=json.loads(pathlib.Path(manifest_path).read_text(encoding='utf-8')); a=json.loads(pathlib.Path(audit_path).read_text(encoding='utf-8'))
-r={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceRepository":m['source']['repository'],"sourceCommit":pin,"builderImageRef":image,"restrictedAppArmorProfileSha256":m['source']['restrictedAppArmorProfileSha256'],"builderPropertiesPatchSha256":props_sha,"applicationId":"com.karat.aibuilder","architecture":"aarch64","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","sourceClosure":{"profile":"git-candidate","rootPackages":["git"],"packageCount":a['sourceClosurePackageCount'],"dependencyAlternativeCount":a['sourceClosureDependencyAlternativeCount'],"directGitDepends":m['runtimeDependencies']['gitRequires'],"excludedRecommendations":m['runtimeDependencies']['gitRecommendationsExcludedFromInstallSimulation']},"packages":a['packages'],"installed":False,"deviceSmokeTest":"NOT RUN","rollback":"NOT RUN"}
+r={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceRepository":m['source']['repository'],"sourceCommit":pin,"builderImageRef":image,"restrictedAppArmorProfileSha256":m['source']['restrictedAppArmorProfileSha256'],"builderPropertiesPatchSha256":props_sha,"applicationId":"com.karat.aibuilder","architecture":"aarch64","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","sourceClosure":{"profile":"git-candidate","rootPackages":["git"],"packageCount":a['sourceClosurePackageCount'],"dependencyAlternativeCount":a['sourceClosureDependencyAlternativeCount'],"buildStrategy":"pinned-termux-buildorder-recursion; dependency-downloads-disabled","directGitDepends":m['runtimeDependencies']['gitRequires'],"excludedRecommendations":m['runtimeDependencies']['gitRecommendationsExcludedFromInstallSimulation"]},"packages":a['packages'],"installed":False,"deviceSmokeTest":"NOT RUN","rollback":"NOT RUN"}
 pathlib.Path(out).write_text(json.dumps(r,sort_keys=True,indent=2)+'\n',encoding='utf-8')
 print('PINNED_GIT_BUILD_RESULT_OK package_count={} device_install=NOT_RUN'.format(len(a['packages'])))
 PY
