@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "inventoryOnly": true,
+  "candidateInstallable": false,
+  "profiles": {
+    "base": [
+      "git",
+      "curl",
+      "wget",
+      "openssh",
+      "gh"
+    ],
+    "git-extras": [
+      "git-extras"
+    ]
+  },
+  "semantics": {
+    "requiredClosure": "TERMUX_PKG_DEPENDS, TERMUX_SUBPKG_DEPENDS, and upstream subpackage-to-parent rules",
+    "recommendations": "Recorded but not traversed; APT candidate simulation explicitly disables recommends.",
+    "versionAuthority": "This source inventory pins exact source recipe paths and SHA-256s. Generated .deb versions must still match a separate candidate package set.",
+    "safety": "This file does not authorize builds, installation, feed staging, signing, publication, or device claims."
+  }
+}

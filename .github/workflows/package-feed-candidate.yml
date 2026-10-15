@@ -14,6 +14,9 @@ on:
       - scripts/test-candidate-feed-policy.sh
       - scripts/verify-candidate-dependency-closure.py
       - scripts/test-candidate-dependency-closure.sh
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - termux-package-source-scope.json
       - scripts/create-ephemeral-feed-signing-key.sh
       - scripts/stage-device-test-artifact.py
       - scripts/test-device-test-artifact-staging.sh
@@ -60,9 +63,10 @@ jobs:
         run: |
           set -Eeuo pipefail
           bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh scripts/test-device-test-artifact-staging.sh
-          python3 -m py_compile scripts/validate-candidate-feed.py scripts/stage-device-test-artifact.py scripts/verify-candidate-dependency-closure.py
+          python3 -m py_compile scripts/validate-candidate-feed.py scripts/stage-device-test-artifact.py scripts/verify-candidate-dependency-closure.py scripts/resolve-pinned-termux-recipe-closure.py
           ./scripts/test-candidate-feed-policy.sh
           ./scripts/test-candidate-dependency-closure.sh
+          bash ./scripts/test-pinned-termux-recipe-closure.sh
           ./termux-private-package-kit/make-v476/verify-kit.sh
           ./scripts/test-device-test-artifact-staging.sh
 
@@ -78,6 +82,28 @@ jobs:
           git -C "$source_dir" checkout --detach FETCH_HEAD
           test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
           test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Inventory pinned base and git-extras source closures (metadata only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          scope="$GITHUB_WORKSPACE/termux-package-source-scope.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" --scope "$scope" --profile base \
+            > "$RUNNER_TEMP/aib-source-closure-base.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" --scope "$scope" --profile git-extras \
+            > "$RUNNER_TEMP/aib-source-closure-git-extras.json"
+          python3 - "$RUNNER_TEMP/aib-source-closure-base.json" "$RUNNER_TEMP/aib-source-closure-git-extras.json" <<'PY'
+          import json, pathlib, sys
+          for path in sys.argv[1:]:
+              result=json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+              print("TERMUX_SOURCE_SCOPE_INVENTORY_OK profile={} packages={} alternatives={} source={} built=0 installed=0 published=0".format(
+                  result["profile"], result["packageCount"], result["dependencyAlternativeCount"], result["sourceCommit"]))
+          PY
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pinned `base` and `git-extras` source closures were inventoried from recipe and subpackage metadata only. This does not build, stage, sign, install, or authorize those packages; the candidate binary job remains limited to GNU Make.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Pull the digest-pinned official Termux builder
         shell: bash
