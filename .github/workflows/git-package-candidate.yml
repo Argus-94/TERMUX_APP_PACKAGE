@@ -33,7 +33,7 @@ jobs:
       contents: read
     env:
       TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
-      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af0394e5bdf94814ac9
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
       APP_DATA_DIR: /data/user/0/com.karat.aibuilder
       TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
 

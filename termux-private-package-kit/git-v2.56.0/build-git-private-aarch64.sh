@@ -38,7 +38,7 @@ import json,pathlib,sys
 m=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
 assert m['schemaVersion']==1 and m['channel']=='candidate-only'
 assert m['source']['commit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
-assert m['source']['builderImage']=='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af0394e5bdf94814ac9'
+assert m['source']['builderImage']=='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
 assert m['sourceClosure']['profile']=='git-candidate' and m['sourceClosure']['rootPackages']==['git']
 assert m['sourceClosure']['expectedPackageCount']==14 and len(m['packages'])==14
 assert m['releaseGate']['publicationAllowed'] is False

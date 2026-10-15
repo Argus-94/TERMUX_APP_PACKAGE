@@ -18,7 +18,7 @@ from typing import Any
 
 APP_ID = "com.karat.aibuilder"
 SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
-BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af0394e5bdf94814ac9"
+BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PINNED_PACKAGE_COUNT = 14
 PLATFORM_LIBS = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so", "libgcc.so", "libpthread.so", "libatomic.so"}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")

@@ -13,7 +13,7 @@ import sys
 from typing import Any
 
 PIN = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
-BUILDER = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af0394e5bdf94814ac9"
+BUILDER = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 APP_ID = "com.karat.aibuilder"
 COUNT = 14
 
