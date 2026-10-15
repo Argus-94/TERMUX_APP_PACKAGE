@@ -12,9 +12,10 @@
 
 ## Границы
 
-- Все тестовые/candidate данные создаются во временном каталоге GitHub Actions runner и удаляются.
+- Все тестовые/candidate данные создаются во временном каталоге GitHub Actions runner. Обычные запуски всё удаляют; один одобренный marker push может сохранить только allowlisted device-test bundle в публичном Actions artifact на 1 день.
 - Candidate CI не проверяет production keypair из `keys/feed-signing.json`; production-подпись должна быть подключена отдельным защищённым workflow после отдельного допуска.
-- `.deb`, индексы и подписи не коммитятся, не загружаются как Actions artifact, не прикрепляются к release и не выкладываются на Pages.
+- Единственное исключение — временный artifact на 1 день: `.deb`, подписанные индексы/Release, только публичный ephemeral keyring, manifest и build/audit reports. Приватный signing key и его GNUPGHOME в artifact не копируются; production private key не используется.
+- Candidate `.deb`, индексы и подписи не коммитятся, не прикрепляются к GitHub Release и не выкладываются на Pages.
 - Существующий legacy pool из 133 `.deb` не подписывается и не становится доверенным от факта smoke-теста.
 - Legacy build/Pages workflow-файлы в `main` пока не удалены; их cleanup требует отдельного подтверждения.
 - Нет Android install/rollback evidence; production gate и `pkg.ensure` остаются закрыты.

@@ -13,6 +13,8 @@ on:
       - scripts/validate-candidate-feed.py
       - scripts/test-candidate-feed-policy.sh
       - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/stage-device-test-artifact.py
+      - scripts/test-device-test-artifact-staging.sh
       - candidate-package-set.json
       - keys/feed-signing.json
       - keys/aibuilder-termux-feed-keyring.gpg
@@ -55,10 +57,11 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh
-          python3 -m py_compile scripts/validate-candidate-feed.py
+          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh scripts/test-device-test-artifact-staging.sh
+          python3 -m py_compile scripts/validate-candidate-feed.py scripts/stage-device-test-artifact.py
           ./scripts/test-candidate-feed-policy.sh
           ./termux-private-package-kit/make-v476/verify-kit.sh
+          ./scripts/test-device-test-artifact-staging.sh
 
       - name: Checkout the exact locked upstream source
         shell: bash
@@ -168,12 +171,54 @@ jobs:
             echo '| Package download + simulated install | PASS; no install performed |'
             echo "| Candidate SHA-256 | \`$package_sha\` |"
             echo '| Device install / rollback | NOT RUN |'
-            echo '| Production publication / artifact upload | BLOCKED / NONE |'
+            echo '| Candidate artifact | One exact approved marker push only; 1-day retention |'
+            echo '| Production feed / GitHub Release / Pages | BLOCKED / NONE |'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify synthetic tamper rejection (no package publication)
         shell: bash
         run: ./scripts/test-signed-feed-smoke.sh
+
+      - name: Stage one-time device-test artifact (exact marker push only)
+        id: stage-device-artifact
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/work/package-feed-gates-20261015' &&
+          github.event.before == 'e8896ad67153dc1a99805dd8953cd803a22d0b1a' &&
+          contains(github.event.head_commit.message, '[DEVICE-ARTIFACT-ONCE-e8896ad]')
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/stage-device-test-artifact.py \
+            --package-set candidate-package-set.json \
+            --feed-root "$RUNNER_TEMP/aib-make-candidate-feed" \
+            --build-result "$RUNNER_TEMP/aib-private-make-candidate-output/build-result.json" \
+            --audit-report "$RUNNER_TEMP/aib-private-make-candidate-output/audit-report.json" \
+            --key-root "$RUNNER_TEMP/aib-candidate-signing-config" \
+            --destination "$RUNNER_TEMP/aib-make-device-test-artifact"
+
+      - name: Upload one-time public device-test artifact (expires in one day)
+        id: upload-device-artifact
+        if: >-
+          steps.stage-device-artifact.outcome == 'success' &&
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/work/package-feed-gates-20261015' &&
+          github.event.before == 'e8896ad67153dc1a99805dd8953cd803a22d0b1a' &&
+          contains(github.event.head_commit.message, '[DEVICE-ARTIFACT-ONCE-e8896ad]')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aib-make-device-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-make-device-test-artifact
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Record device-test artifact retention in run summary
+        if: steps.upload-device-artifact.outcome == 'success'
+        shell: bash
+        run: |
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo 'A public, non-production device-test artifact was uploaded for this one approved marker push. Retention is one day. The archive contains only the candidate package, signed APT metadata, public ephemeral keyring, package-set manifest, build result, and static audit report; no private key.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove temporary source, candidate binary, signatures, and signing workspace
         if: always()
@@ -185,5 +230,6 @@ jobs:
             "$RUNNER_TEMP/aib-private-make-candidate-output" \
             "$RUNNER_TEMP/aib-private-make-candidate-build.log" \
             "$RUNNER_TEMP/aib-make-candidate-feed" \
+            "$RUNNER_TEMP/aib-make-device-test-artifact" \
             "$RUNNER_TEMP/aib-candidate-signing-config" \
             "$RUNNER_TEMP/aib-feed-signing.log"

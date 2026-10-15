@@ -13,7 +13,7 @@
 2. Применяет fail-closed static audit к control metadata, payload paths/links, embedded app paths, ELF ABI/interpreter/needed libraries, maintainer scripts и лицензии.
 3. Сверяет package pool с `candidate-package-set.json`, build-result, audit report, `Packages` и `Packages.gz`; любое добавление, подмена или mismatch отклоняется.
 4. Временно строит подписанный APT candidate и проверяет его через `signed-by=<pinned public keyring>`, `apt-get update` и `apt-get --simulate install`. Отдельный synthetic test отвергает подменённый индекс.
-5. Удаляет весь source tree, `.deb`, candidate feed и signing workspace с runner. Никаких artifacts, commits, GitHub Releases или Pages deploy нет.
+5. Обычные запуски удаляют source tree, `.deb`, candidate feed и signing workspace с runner. Только один заранее одобренный marker push может выдать публичный Actions artifact на 1 день с `.deb`, подписанными временными APT metadata, публичным ephemeral keyring, manifest и build/audit reports; приватный ключ не копируется. Это только handoff для device smoke, не production publication.
 
 ## Остаточные условия до production
 

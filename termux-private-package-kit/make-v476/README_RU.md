@@ -43,7 +43,7 @@ export AIB_TERMUX_BUILDER_IMAGE_REF='ghcr.io/termux/package-builder@sha256:44999
 
 ## GitHub Actions
 
-Workflow автоматически запускается при push в ветку candidate pipeline. Он использует те же моделируемые значения, собирает временный candidate APT feed, проверяет подпись/`signed-by` и simulated install, затем удаляет source tree, `.deb`, feed и signing workspace. Binary не загружается как artifact, не коммитится и не публикуется.
+Workflow автоматически запускается при push в ветку candidate pipeline. Он использует те же моделируемые значения, собирает временный candidate APT feed, проверяет подпись/`signed-by` и simulated install, затем удаляет source tree, `.deb`, feed и signing workspace. Единственное исключение — один специально помеченный одобренный push, который выдаёт публичный device-test artifact на 1 день с точно разрешёнными package/metadata/keyring/provenance файлами; приватный ключ не включается.
 
 Workflow намеренно не запускает настоящий device install и не открывает production release. В `manifest.json` device compatibility, package installation, rollback, feed publication и byte reproducibility остаются `false` до соответствующих доказательств.
 
