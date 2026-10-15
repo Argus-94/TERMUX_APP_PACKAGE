@@ -31,7 +31,9 @@ def fake_aarch64_elf() -> bytes:
 def make_fixture(root: pathlib.Path, *, architecture: str = "aarch64", version: str = "4.4.1-1",
                  wrong_payload_prefix: bool = False, escaping_symlink: bool = False,
                  foreign_string: bool = False, maintainer_script: bool = False,
-                 non_elf_make: bool = False, depends: str | None = None) -> pathlib.Path:
+                 non_elf_make: bool = False, depends: str | None = None,
+                 app_home_string: bool = False, foreign_app_private_string: bool = False,
+                 noncanonical_android_path: bool = False) -> pathlib.Path:
     package = root / "pkg"
     (package / "DEBIAN").mkdir(parents=True)
     control = [
@@ -69,6 +71,18 @@ def make_fixture(root: pathlib.Path, *, architecture: str = "aarch64", version: 
     if foreign_string:
         (docs / "payload-note.txt").write_text(
             "bad path /data/data/com.termux/files/usr/bin/sh\n", encoding="utf-8"
+        )
+    if app_home_string:
+        (docs / "app-home-note.txt").write_text(
+            "private app home /data/user/0/com.karat.aibuilder/files/home/.cache\n", encoding="utf-8"
+        )
+    if foreign_app_private_string:
+        (docs / "foreign-private-note.txt").write_text(
+            "unexpected app-private path /data/user/0/com.karat.aibuilder/files/cache\n", encoding="utf-8"
+        )
+    if noncanonical_android_path:
+        (docs / "noncanonical-path-note.txt").write_text(
+            "noncanonical path /data/user/0/com.karat.aibuilder/files/usr/../files/home\n", encoding="utf-8"
         )
     deb = root / "fixture.deb"
     subprocess.run(
@@ -110,6 +124,22 @@ class AuditDebTests(unittest.TestCase):
         result = self.fixture_and_audit(foreign_string=True)
         self.assertEqual(result.returncode, 2)
         self.assertIn("FOREIGN_ANDROID_APP_PATH", result.stdout)
+
+    def test_exact_app_private_home_path_is_allowed_in_embedded_strings(self):
+        result = self.fixture_and_audit(app_home_string=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["target"]["allowedEmbeddedPathRoots"], [APP_PREFIX, "/data/user/0/com.karat.aibuilder/files/home"])
+
+    def test_unrelated_app_private_path_is_rejected(self):
+        result = self.fixture_and_audit(foreign_app_private_string=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("FOREIGN_ANDROID_APP_PATH", result.stdout)
+
+    def test_noncanonical_android_path_traversal_is_rejected(self):
+        result = self.fixture_and_audit(noncanonical_android_path=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("ANDROID_PATH_NOT_CANONICAL", result.stdout)
 
     def test_symlink_escape_is_rejected(self):
         result = self.fixture_and_audit(escaping_symlink=True)

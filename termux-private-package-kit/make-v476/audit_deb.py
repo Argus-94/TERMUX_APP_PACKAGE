@@ -185,10 +185,13 @@ def resolve_link(member_path: str, target: str, is_symlink: bool, prefix: str) -
     return resolved
 
 
-def scan_embedded_paths(data: bytes, prefix: str, payload_path: str) -> None:
+def scan_embedded_paths(data: bytes, prefix: str, app_home: str, payload_path: str) -> None:
     for match in FOREIGN_ANDROID_PATH_RE.finditer(data):
         candidate = match.group(0).decode("ascii", "strict")
-        if not (candidate == prefix or candidate.startswith(prefix + "/")):
+        require(posixpath.normpath(candidate) == candidate,
+                "ANDROID_PATH_NOT_CANONICAL", f"{payload_path}: {candidate}")
+        allowed_roots = (prefix, app_home)
+        if not any(candidate == root or candidate.startswith(root + "/") for root in allowed_roots):
             raise AuditError("FOREIGN_ANDROID_APP_PATH", f"{payload_path}: {candidate}")
     require(b"/storage/emulated/0/AIBuilderTermux" not in data,
             "PERSISTENT_PROJECT_ROOT_EMBEDDED_IN_PACKAGE", payload_path)
@@ -251,6 +254,8 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     require(manifest.get("schemaVersion") == 1, "MANIFEST_SCHEMA_UNSUPPORTED")
     pkg = manifest["package"]
     prefix = normalize_prefix(args.prefix)
+    app_data_dir = prefix.removesuffix("/files/usr")
+    app_home = app_data_dir + "/files/home"
     require(pkg["name"] == "make" and pkg["architecture"] == "aarch64", "LOCKED_PACKAGE_MANIFEST_UNEXPECTED")
     deb = args.deb.resolve(strict=True)
     members = ar_members(deb)
@@ -339,7 +344,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         payload_total += item.size
         require(payload_total <= MAX_UNPACKED_BYTES, "PAYLOAD_UNPACKED_SIZE_TOO_LARGE")
         data = read_regular(archive, item, MAX_MEMBER_BYTES)
-        scan_embedded_paths(data, prefix, path)
+        scan_embedded_paths(data, prefix, app_home, path)
         if data.startswith(b"#!"):
             first_line = data.splitlines()[0][2:].decode("utf-8", "replace").strip().split()
             require(bool(first_line), "EMPTY_SHEBANG", path)
@@ -394,6 +399,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
                     "conflicts": split_relation_field(control.get("Conflicts")),
                     "licenseSpdxFromLockedRecipe": pkg["licenseSpdx"], "licenseEvidencePath": license_text},
         "target": {"applicationId": APP_ID, "prefix": prefix,
+                   "allowedEmbeddedPathRoots": [prefix, app_home],
                    "persistentProjectRoot": manifest["target"]["persistentProjectRoot"],
                    "projectRootInPayload": False},
         "debArMembers": sorted(members),

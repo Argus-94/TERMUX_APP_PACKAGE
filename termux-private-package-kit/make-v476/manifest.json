@@ -27,6 +27,8 @@
     "prefixRule": "CI-only modeled compile path is /data/user/0/com.karat.aibuilder/files/usr derived from the fixed application ID. It is not an observation of an installed device; confirm applicationInfo.dataDir/filesDir/usr and install/rollback behavior on-device before production.",
     "ciModeledDataDir": "/data/user/0/com.karat.aibuilder",
     "ciModeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr",
+    "ciModeledHome": "/data/user/0/com.karat.aibuilder/files/home",
+    "embeddedAndroidPathAllowlist": "Only the exact modeled app-private files/usr prefix and files/home, including descendants, are allowed in embedded strings; paths must be canonical and contain no dot segments. Package payload paths, links, and ELF RPATHs remain constrained to files/usr.",
     "persistentProjectRoot": "/storage/emulated/0/AIBuilderTermux",
     "persistentProjectRootIsPackagePayload": false,
     "externalRuntimeTarget": false,

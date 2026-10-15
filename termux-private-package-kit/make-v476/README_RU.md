@@ -39,6 +39,8 @@ export AIB_TERMUX_BUILDER_IMAGE_REF='ghcr.io/termux/package-builder@sha256:44999
 
 Скрипт проверяет locked source files, prefix consistency и image digest, запрещает `-i`/`-I`, собирает только `make`, не устанавливает пакет и копирует `.deb` только после pass fail-closed аудита. Cache остаётся в изолированном контейнерном `/home/builder/.termux-build`; `.deb` сначала пишется в `/home/builder/termux-packages/output/.aib-private-make-debs`, разрешённый закреплённым AppArmor profile, затем проверяется и только после pass аудита копируется в отдельный output.
 
+В embedded strings auditor допускает только канонический modeled prefix `.../files/usr` и modeled app-private home `.../files/home` (с потомками); любой `..`, другой каталог приложения или `com.termux` отклоняется. Это не расширяет install payload: файлы, ссылки и ELF RPATH по-прежнему ограничены `files/usr`.
+
 ## GitHub Actions
 
 Workflow автоматически запускается при push в ветку candidate pipeline. Он использует те же моделируемые значения, собирает временный candidate APT feed, проверяет подпись/`signed-by` и simulated install, затем удаляет source tree, `.deb`, feed и signing workspace. Binary не загружается как artifact, не коммитится и не публикуется.
