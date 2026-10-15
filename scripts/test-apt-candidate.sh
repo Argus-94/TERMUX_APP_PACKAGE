@@ -6,14 +6,16 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-$ROOT}"
 MANIFEST="$CONFIG_ROOT/keys/feed-signing.json"
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
-[[ $# -eq 4 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version>'
+[[ $# -eq 4 || $# -eq 5 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count]'
 FEED_ROOT="$(realpath -e -- "$1")"
 ARCH="$2"
 PACKAGE="$3"
 VERSION="$4"
+EXPECTED_SOURCE_DEB_COUNT="${5:-1}"
 case "$ARCH" in aarch64|amd64) ;; *) fail 'ARCHITECTURE_NOT_ALLOWLISTED';; esac
 [[ "$PACKAGE" =~ ^[a-z0-9][a-z0-9+.-]*$ ]] || fail 'PACKAGE_NAME_INVALID'
 [[ "$VERSION" =~ ^[A-Za-z0-9.+:~_-]+$ ]] || fail 'PACKAGE_VERSION_INVALID'
+[[ "$EXPECTED_SOURCE_DEB_COUNT" =~ ^[1-9][0-9]*$ ]] || fail 'EXPECTED_SOURCE_DEB_COUNT_INVALID'
 [[ -f "$MANIFEST" ]] || fail 'SIGNING_MANIFEST_MISSING'
 for tool in gpg gpgv sha256sum python3 apt-get apt-cache; do command -v "$tool" >/dev/null 2>&1 || fail "TOOL_REQUIRED:$tool"; done
 
@@ -101,6 +103,13 @@ APT_CONFIG="$TMP/apt.conf" apt-get --simulate --no-install-recommends install "$
 )
 mapfile -t DOWNLOADED < <(find "$TMP/downloads" -maxdepth 1 -type f -name '*.deb' -print)
 mapfile -t SOURCE_DEBS < <(find "$FEED_ROOT/pool" -type f -name '*.deb' -print)
-((${#DOWNLOADED[@]} == 1 && ${#SOURCE_DEBS[@]} == 1)) || fail 'EXPECTED_EXACTLY_ONE_DOWNLOADED_AND_SOURCE_DEB'
-[[ "$(sha256sum "${DOWNLOADED[0]}" | awk '{print $1}')" == "$(sha256sum "${SOURCE_DEBS[0]}" | awk '{print $1}')" ]] || fail 'DOWNLOADED_PACKAGE_HASH_MISMATCH'
+((${#DOWNLOADED[@]} == 1 && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
+downloaded_hash="$(sha256sum "${DOWNLOADED[0]}" | awk '{print $1}')"
+matches=0
+for source_deb in "${SOURCE_DEBS[@]}"; do
+  [[ "$(dpkg-deb -f "$source_deb" Package 2>/dev/null)" == "$PACKAGE" ]] || continue
+  [[ "$(dpkg-deb -f "$source_deb" Version 2>/dev/null)" == "$VERSION" ]] || continue
+  [[ "$(sha256sum "$source_deb" | awk '{print $1}')" == "$downloaded_hash" ]] && ((matches += 1))
+done
+((matches == 1)) || fail 'DOWNLOADED_PACKAGE_HASH_OR_IDENTITY_MISMATCH'
 printf 'APT_CANDIDATE_DOWNLOAD_AND_SIMULATED_INSTALL_OK package=%s version=%s arch=%s signed_by=1 install_performed=0 rollback_performed=0\n' "$PACKAGE" "$VERSION" "$ARCH"

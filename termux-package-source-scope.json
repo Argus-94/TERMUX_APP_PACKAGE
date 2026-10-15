@@ -15,6 +15,9 @@
     "git-extras": [
       "git-extras"
     ],
+    "git-candidate": [
+      "git"
+    ],
     "builder-cli": [
       "gh"
     ]
