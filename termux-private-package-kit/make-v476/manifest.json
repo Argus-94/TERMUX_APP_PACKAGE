@@ -85,6 +85,8 @@
   },
   "builder": {
     "command": "./build-package.sh -a aarch64 -o <isolated-output-dir> make",
+    "containerCache": "default isolated /home/builder/.termux-build inside the unique candidate container; TERMUX_TOPDIR is not overridden",
+    "containerPackageOutput": "/home/builder/termux-packages/output/.aib-private-make-debs (explicitly allowlisted by the pinned restricted AppArmor profile)",
     "dependencyDownloadFlagsAllowed": false,
     "forbiddenFlags": ["-i", "-I"],
     "dockerRequired": true,

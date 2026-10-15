@@ -37,7 +37,7 @@ export AIB_TERMUX_BUILDER_IMAGE_REF='ghcr.io/termux/package-builder@sha256:44999
 ./build-make-private-aarch64.sh /path/to/pinned-termux-packages /path/to/new-empty-output
 ```
 
-Скрипт проверяет locked source files, prefix consistency и image digest, запрещает `-i`/`-I`, собирает только `make`, не устанавливает пакет и копирует `.deb` только после pass fail-closed аудита.
+Скрипт проверяет locked source files, prefix consistency и image digest, запрещает `-i`/`-I`, собирает только `make`, не устанавливает пакет и копирует `.deb` только после pass fail-closed аудита. Cache остаётся в изолированном контейнерном `/home/builder/.termux-build`; `.deb` сначала пишется в `/home/builder/termux-packages/output/.aib-private-make-debs`, разрешённый закреплённым AppArmor profile, затем проверяется и только после pass аудита копируется в отдельный output.
 
 ## GitHub Actions
 

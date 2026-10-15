@@ -92,6 +92,12 @@ chmod 700 "$WORKTREE/.aib-private-layout-preflight.sh"
 
 export TERMUX_BUILDER_IMAGE_NAME="$AIB_TERMUX_BUILDER_IMAGE_REF"
 export CONTAINER_NAME="aib-private-make-v476-$$"
+cleanup_container() {
+  if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+    docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup_container EXIT
 {
   printf 'Source commit: %s\n' "$PIN"
   printf 'App ID: %s\n' "$APP_ID"
@@ -109,10 +115,12 @@ export CONTAINER_NAME="aib-private-make-v476-$$"
 
 (
   cd "$WORKTREE"
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_TOPDIR=/home/builder/termux-packages/.aib-private-make-build-cache; ./build-package.sh -a aarch64 -o /home/builder/termux-packages/.aib-private-make-debs make'
+  # The pinned AppArmor profile denies source-tree writes except under output/;
+  # keep the cache at the builder's isolated default and the .deb in that allowlisted subtree.
+  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; ./build-package.sh -a aarch64 -o /home/builder/termux-packages/output/.aib-private-make-debs make'
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 
-mapfile -t DEBS < <(find "$WORKTREE/.aib-private-make-debs" -maxdepth 1 -type f -name 'make_*_aarch64.deb' -print | sort)
+mapfile -t DEBS < <(find "$WORKTREE/output/.aib-private-make-debs" -maxdepth 1 -type f -name 'make_*_aarch64.deb' -print | sort)
 ((${#DEBS[@]} == 1)) || fail 'EXPECTED_EXACTLY_ONE_MAKE_AARCH64_DEB'
 
 mkdir -p "$OUTPUT_DIR/packages"

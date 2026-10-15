@@ -5,6 +5,10 @@ cd "$ROOT"
 export PYTHONDONTWRITEBYTECODE=1
 python3 -m unittest discover -s tests -v
 bash -n build-make-private-aarch64.sh
+grep -Fq -- '-o /home/builder/termux-packages/output/.aib-private-make-debs' build-make-private-aarch64.sh
+! grep -Fq 'export TERMUX_TOPDIR=' build-make-private-aarch64.sh
+grep -Fq 'docker rm --force "$CONTAINER_NAME"' build-make-private-aarch64.sh
+printf 'APPARMOR_BUILD_PATHS_OK\n'
 python3 - <<'PY'
 import ast, hashlib, json, pathlib
 root = pathlib.Path('.')
