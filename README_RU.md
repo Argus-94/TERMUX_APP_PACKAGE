@@ -7,9 +7,9 @@
 - В `main` сохранён старый пул из 133 `.deb`, но у него нет подтверждённого полного provenance; статический аудит отметил 3 неподтверждённых записи. Эти файлы **не являются доверенным установочным feed**.
 - GitHub Pages для этого репозитория не включён; безопасный production URL пока не объявлен.
 - В отдельной ветке добавлен gated candidate pipeline без production publication. Старые build/Pages workflows в `main` пока остаются; до отдельного подтверждения их cleanup не выполняется.
-- Ветка кандидата собирает только GNU Make `4.4.1-1` из закреплённого исходного recipe, проверяет payload, временно формирует подписанный локальный APT feed и проверяет его через `signed-by` и `apt-get --simulate`.
-- Обычные CI-запуски удаляют `.deb` и feed с runner. Только один специально помеченный и одобренный push может выдать публичный Actions artifact на 1 день: candidate `.deb`, подписанные временные APT metadata, только публичный ephemeral keyring, manifest, build-result и audit-report; приватного ключа в artifact нет.
-- Этот временный artifact предназначен только для проверки на устройстве: он не прошёл device validation и не является production feed. Пакет не коммитится, не выпускается через GitHub Release и не публикуется на Pages.
+- Ветка кандидата собирает и статически проверяет GNU Make `4.4.1-1` и GitHub CLI `gh` `2.102.0` из закреплённых источников. Для каждого кандидата CI отдельно создаёт временный подписанный APT feed и проверяет `signed-by`, загрузку пакета и `apt-get --simulate`; реальной установки нет.
+- Обычные CI-запуски удаляют `.deb` и feed с runner. Единственный заранее одобренный marker push уже выдал публичный Actions artifact **только для `make`**: candidate `.deb`, подписанные временные APT metadata, публичный ephemeral keyring, manifest, build-result и audit-report. `gh` и приватный ключ в artifact не входят; он истекает `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)).
+- Временный `make` artifact предназначен только для device smoke: он не прошёл device validation и не является production feed. Пакеты не коммитятся, не выпускаются через GitHub Release и не публикуются на Pages.
 - `pkg.ensure` и подключение production source остаются закрыты до точного Android install/rollback smoke-теста.
 
 ## Никаких обходов доверия

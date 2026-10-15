@@ -6,18 +6,19 @@
 
 **Production feed не готов.** В `main` находится legacy pool из 133 `.deb`; полный source/build provenance для этого набора не подтверждён, а прежний статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. В отдельной ветке подготовлен gated candidate pipeline без production publication; legacy workflows пока не удалены и требуют отдельного подтверждения владельца перед cleanup/merge. GitHub Pages сейчас не включён. Не добавляйте старый pool в trusted APT sources и не используйте URL Pages как рабочий feed.
 
-Подписной smoke test проверяет временный синтетический пакет, `Release`/`InRelease`, `signed-by` и отказ APT при изменении индекса. Это не доказывает происхождение старых пакетов, установку или Android runtime.
+Подписной smoke test на синтетическом fixture проверяет `Release`/`InRelease`, `signed-by` и отказ APT при изменении индекса. Отдельные candidate CI jobs также собирают и статически проверяют два точечных пакета и моделируют их загрузку/установочный план из временного подписанного feed. Ни один результат не доказывает происхождение старых пакетов или фактическую Android-установку/runtime.
 
 ## Кандидатный конвейер
 
-Первым ограниченным кандидатом выбран GNU Make `4.4.1-1`:
+Текущий узкий allowlist кандидатов содержит GNU Make `4.4.1-1` и GitHub CLI `gh` `2.102.0`:
 
-- исходник и recipe закреплены commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`;
-- исходный архив, recipe и patch имеют SHA-256 locks;
+- исходники и Termux recipes закреплены на commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`;
+- исходные архивы и recipe/patch (для Make) имеют SHA-256 locks;
 - используется официальный Termux builder image, закреплённый по digest;
-- пакет проверяется fail-closed аудитом путей, namespace, control metadata, ELF, license и payload;
-- после аудита CI строит временный локальный APT feed, подписывает Release, применяет только `signed-by=<закреплённый public keyring>`, выполняет `apt-get update` и `apt-get --simulate install`;
-- Обычные CI-запуски удаляют package `.deb`, индекс и подписи с runner; CI не устанавливает пакет. Один одобренный marker push выдаёт публичный candidate artifact на 1 день для device smoke (пакет, подписанные metadata, только публичный ephemeral keyring и provenance); production feed, Pages и GitHub Release не публикуются.
+- каждый пакет проверяется fail-closed аудитом путей, namespace, control metadata, ELF, license и payload;
+- после аудита CI строит отдельный временный локальный APT feed для каждого кандидата, подписывает Release, применяет только `signed-by=<закреплённый public keyring>`, загружает пакет и запускает `apt-get --simulate install`;
+- у `gh` нет обязательных runtime `Depends` в собранном пакете; `openssh` указан только как `Recommends` и не включается в симуляцию с `--no-install-recommends`;
+- CI не устанавливает пакеты. Обычные запуски удаляют `.deb`, индексы и подписи с runner. Единственный одобренный marker push уже создал публичный artifact **только для `make`**, не для `gh`; он истекает `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)). Это лишь device-test handoff, не production feed; Pages и GitHub Release не публикуются.
 
 **Моделируемый CI prefix** вычислен из фиксированного Android application ID: `/data/user/0/com.karat.aibuilder/files/usr`. Это только compile-time модель, а не утверждение об измеренном на устройстве `dataDir`/`filesDir`. Скрипты не читают данные внешнего Termux и не трогают проекты пользователя. Реальный prefix, установка, исполнение и rollback должны быть проверены отдельно на целевом устройстве.
 
