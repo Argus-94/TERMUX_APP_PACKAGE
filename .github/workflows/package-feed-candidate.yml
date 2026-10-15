@@ -97,7 +97,21 @@ jobs:
           build_status=$?
           set -e
           if [ "$build_status" -ne 0 ]; then
-            echo "::error title=Candidate build or audit failed::Exit $build_status; private build log was not emitted. No binary was uploaded."
+            echo "::error title=Candidate build or audit failed::Exit $build_status; a sanitized log tail follows. No binary was uploaded."
+            python3 - "$raw_log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib, re, sys
+          log=pathlib.Path(sys.argv[1]).read_text(encoding="utf-8",errors="replace")
+          for value, replacement in ((sys.argv[2],"<RUNNER_TEMP>"),(sys.argv[3],"<WORKSPACE>"),
+                                     ("/home/builder/termux-packages","<BUILDER_SOURCE>"),
+                                     ("/data/user/0/com.karat.aibuilder/files/usr","<MODELED_PREFIX>"),
+                                     ("/data/user/0/com.karat.aibuilder","<MODELED_APP_DATA>"),
+                                     ("/data/data/com.karat.aibuilder","<MODELED_APP_DATA>")):
+              log=log.replace(value,replacement)
+          log=re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)","<REDACTED_SECRET>",log)
+          print("--- sanitized last 80 build-log lines ---")
+          for line in log.splitlines()[-80:]:
+              print(line[:600])
+          PY
             exit "$build_status"
           fi
           python3 - "$output_dir/build-result.json" <<'PY'
