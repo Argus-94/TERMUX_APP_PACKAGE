@@ -27,6 +27,14 @@ class GhAuditTests(unittest.TestCase):
         self.assertEqual(AUDIT.resolve_link(PREFIX + "/share/doc/gh/copy", "." + PREFIX + "/bin/gh",
                                              hardlink=True, prefix=PREFIX), PREFIX + "/bin/gh")
 
+    def test_only_modeled_prefix_ancestor_directories_are_allowed(self):
+        AUDIT.validate_payload_location("/data", PREFIX, is_directory=True)
+        AUDIT.validate_payload_location(PREFIX + "/share/doc/gh", PREFIX, is_directory=True)
+        with self.assertRaises(AUDIT.AuditError):
+            AUDIT.validate_payload_location("/data/user/0/com.termux", PREFIX, is_directory=True)
+        with self.assertRaises(AUDIT.AuditError):
+            AUDIT.validate_payload_location("/data", PREFIX, is_directory=False)
+
     def test_postinst_is_exact_and_app_private(self):
         script = AUDIT.expected_postinst(PREFIX)
         self.assertEqual(script.count(b"\n"), 4)

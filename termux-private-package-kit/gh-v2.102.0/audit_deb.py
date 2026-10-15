@@ -67,6 +67,15 @@ def ensure_inside(path: str, prefix: str, code: str) -> None:
     require(path == prefix or path.startswith(prefix + "/"), code, path)
 
 
+def validate_payload_location(path: str, prefix: str, *, is_directory: bool) -> None:
+    if is_directory:
+        is_ancestor = prefix.startswith(path.rstrip("/") + "/")
+        is_descendant = path == prefix or path.startswith(prefix + "/")
+        require(is_ancestor or is_descendant, "PAYLOAD_DIRECTORY_OUTSIDE_PRIVATE_PREFIX", path)
+    else:
+        ensure_inside(path, prefix, "PAYLOAD_OUTSIDE_APP_PRIVATE_PREFIX")
+
+
 def resolve_link(member_path: str, target: str, *, hardlink: bool, prefix: str) -> str:
     require(target and "\\" not in target and "\x00" not in target, "LINK_TARGET_INVALID", member_path)
     if target.startswith("/"):
@@ -236,7 +245,7 @@ def read_payload(deb: pathlib.Path, prefix: str) -> tuple[dict[str, dict[str, An
                 if member.isdir() and raw.rstrip("/") in {"", ".", "./"}:
                     continue
                 path = normalize_payload_path(raw)
-                ensure_inside(path, prefix, "PAYLOAD_OUTSIDE_APP_PRIVATE_PREFIX")
+                validate_payload_location(path, prefix, is_directory=member.isdir())
                 if member.isdir():
                     continue
                 if member.issym() or member.islnk():
