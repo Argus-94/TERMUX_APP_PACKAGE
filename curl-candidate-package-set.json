@@ -20,6 +20,7 @@
   },
   "sourceClosure": {
     "profile": "curl-candidate",
+    "buildTargetPackage": "libcurl",
     "rootPackages": [
       "curl"
     ],

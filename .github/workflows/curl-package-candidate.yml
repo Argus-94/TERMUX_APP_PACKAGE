@@ -100,6 +100,7 @@ jobs:
           assert closure['dependencyAlternativeCount']==manifest['sourceClosure']['expectedDependencyAlternativeCount']==12
           assert actual==expected
           curl=next(x for x in closure['packages'] if x['name']=='curl')
+          assert manifest['sourceClosure']['buildTargetPackage']=='libcurl'
           assert curl['packageType']=='subpackage' and curl['parentPackage']=='libcurl'
           assert curl['subpackagePath']=='packages/libcurl/curl.subpackage.sh' and curl['subpackageSha256']==next(x for x in manifest['packages'] if x['name']=='curl')['subpackageSha256']
           print('PINNED_CURL_RECIPE_CLOSURE_OK packages=9 dependency_alternatives=12 source='+closure['sourceCommit'])
@@ -146,7 +147,7 @@ jobs:
           audit=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
           assert build['status']=='audit-passed; device-runtime-test-not-run'
           assert build['sourceCommit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
-          assert build['sourceClosure']['profile']=='curl-candidate' and build['sourceClosure']['rootPackages']==['curl'] and build['sourceClosure']['packageCount']==9
+          assert build['sourceClosure']['profile']=='curl-candidate' and build['sourceClosure']['rootPackages']==['curl'] and build['sourceClosure']['buildTargetPackage']=='libcurl' and build['sourceClosure']['packageCount']==9
           assert build['sourceClosure']['dependencyAlternativeCount']==12
           assert len(build['packages'])==9 and audit['ok'] is True
           assert audit['candidatePackageCount']==9 and audit['sourceClosurePackageCount']==9 and audit['sourceClosureDependencyAlternativeCount']==12
@@ -197,7 +198,7 @@ jobs:
             echo '| Gate | Result |'
             echo '|---|---|'
             echo '| Exact upstream commit, recipe/subpackage locks and source checksums | PASS |'
-            echo '| Required source closure | PASS; 12 dependency alternatives; 9 source-built packages; dependency downloads disabled |'
+          echo '| Required source closure | PASS; 12 dependency alternatives; 9 candidate packages; parent recipe `libcurl`; dependency downloads disabled |'
             echo '| AArch64 ELF, app-private paths/links, licenses, runtime library providers | PASS; 9 package audits |'
             echo '| Exact candidate Depends/Pre-Depends closure | PASS; no external base assumptions |'
             echo '| Ephemerally signed APT index, download and simulated install of curl | PASS; install not performed |'

@@ -42,6 +42,7 @@ assert m['source']['builderImage']=='ghcr.io/termux/package-builder@sha256:44999
 assert m['source']['restrictedAppArmorProfileSha256']=='ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8'
 assert m['source']['restrictedAppArmorOutputAllow']=='/home/builder/termux-packages/output/** rw,'
 assert m['sourceClosure']['profile']=='curl-candidate' and m['sourceClosure']['rootPackages']==['curl']
+assert m['sourceClosure']['buildTargetPackage']=='libcurl'
 assert m['sourceClosure']['expectedPackageCount']==9 and m['sourceClosure']['expectedDependencyAlternativeCount']==12
 assert len(m['packages'])==9 and [p['name'] for p in m['packages']]==sorted(p['name'] for p in m['packages'])
 assert m['releaseGate']['publicationAllowed'] is False
@@ -139,7 +140,7 @@ trap cleanup_container EXIT
 (
   cd "$WORKTREE"
   # Upstream buildorder resolves package Depends from this pinned checkout; downloads stay disabled.
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-curl-debs curl; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\n"'
+  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-curl-debs libcurl; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\n"'
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 printf 'PINNED_HOST_OUTPUT_DEBS_BEGIN\n' | tee -a "$OUTPUT_DIR/build.log"
 find "$WORKTREE/output" -type f -name '*.deb' -printf '%P %s bytes\n' | sort | tee -a "$OUTPUT_DIR/build.log"
@@ -183,7 +184,7 @@ python3 - "$OUTPUT_DIR/build-result.json" "$PACKAGE_SET" "$OUTPUT_DIR/audit-repo
 import json,pathlib,sys
 out,manifest_path,audit_path,image,pin,prefix,props_sha=map(str,sys.argv[1:])
 m=json.loads(pathlib.Path(manifest_path).read_text(encoding='utf-8')); a=json.loads(pathlib.Path(audit_path).read_text(encoding='utf-8'))
-r={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceRepository":m['source']['repository'],"sourceCommit":pin,"builderImageRef":image,"restrictedAppArmorProfileSha256":m['source']['restrictedAppArmorProfileSha256'],"builderPropertiesPatchSha256":props_sha,"applicationId":"com.karat.aibuilder","architecture":"aarch64","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","sourceClosure":{"profile":"curl-candidate","rootPackages":["curl"],"packageCount":a['sourceClosurePackageCount'],"dependencyAlternativeCount":a['sourceClosureDependencyAlternativeCount'],"buildStrategy":"pinned-termux-buildorder-recursion; dependency-downloads-disabled","directCurlDepends":m['runtimeDependencies']['curlRequires'],"directLibcurlDepends":m['runtimeDependencies']['libcurlRequires'],"excludedRecommendations":m['runtimeDependencies']['recommendationsExcludedFromInstallSimulation']},"packages":a['packages'],"installed":False,"deviceSmokeTest":"NOT RUN","rollback":"NOT RUN"}
+	r={"schemaVersion":1,"status":"audit-passed; device-runtime-test-not-run","sourceRepository":m['source']['repository'],"sourceCommit":pin,"builderImageRef":image,"restrictedAppArmorProfileSha256":m['source']['restrictedAppArmorProfileSha256'],"builderPropertiesPatchSha256":props_sha,"applicationId":"com.karat.aibuilder","architecture":"aarch64","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","sourceClosure":{"profile":"curl-candidate","rootPackages":["curl"],"buildTargetPackage":m['sourceClosure']['buildTargetPackage'],"packageCount":a['sourceClosurePackageCount'],"dependencyAlternativeCount":a['sourceClosureDependencyAlternativeCount'],"buildStrategy":"pinned-termux-buildorder-recursion; dependency-downloads-disabled","directCurlDepends":m['runtimeDependencies']['curlRequires'],"directLibcurlDepends":m['runtimeDependencies']['libcurlRequires'],"excludedRecommendations":m['runtimeDependencies']['recommendationsExcludedFromInstallSimulation']},"packages":a['packages'],"installed":False,"deviceSmokeTest":"NOT RUN","rollback":"NOT RUN"}
 pathlib.Path(out).write_text(json.dumps(r,sort_keys=True,indent=2)+'\n',encoding='utf-8')
 print('PINNED_CURL_BUILD_RESULT_OK package_count={} device_install=NOT_RUN'.format(len(a['packages'])))
 PY

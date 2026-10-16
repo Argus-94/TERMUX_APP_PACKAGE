@@ -449,7 +449,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     require(gate.get("publicationAllowed") is False and gate.get("deviceInstall") == "NOT RUN" and gate.get("rollback") == "NOT RUN" and gate.get("deviceEvidenceSha256") is None, "RELEASE_GATE_NOT_BLOCKED")
     closure = manifest.get("sourceClosure", {})
     specs = manifest.get("packages")
-    require(closure.get("profile") == "curl-candidate" and closure.get("rootPackages") == ["curl"] and closure.get("expectedPackageCount") == PINNED_PACKAGE_COUNT and closure.get("expectedDependencyAlternativeCount") == 12, "SOURCE_CLOSURE_NOT_ALLOWLISTED")
+    require(closure.get("profile") == "curl-candidate" and closure.get("rootPackages") == ["curl"] and closure.get("buildTargetPackage") == "libcurl" and closure.get("expectedPackageCount") == PINNED_PACKAGE_COUNT and closure.get("expectedDependencyAlternativeCount") == 12, "SOURCE_CLOSURE_NOT_ALLOWLISTED")
     require(isinstance(specs, list) and len(specs) == PINNED_PACKAGE_COUNT, "PACKAGE_SET_COUNT_NOT_ALLOWLISTED")
     require(all(isinstance(x, dict) for x in specs), "PACKAGE_SPEC_INVALID")
     names = [x.get("name") for x in specs]
@@ -485,7 +485,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             require(library in providers, "ELF_NEEDED_LIBRARY_UNPROVEN", item["package"] + ":" + item["path"] + ":" + library)
     return {"schemaVersion": 1, "ok": True, "status": "static-audit-passed; installation-and-device-runtime-unverified",
             "applicationId": APP_ID, "prefix": prefix, "prefixProvenance": "ci-model-only; device-observation-not-run",
-            "sourceCommit": SOURCE_COMMIT, "builderImage": BUILDER_IMAGE, "sourceClosureProfile": "curl-candidate",
+            "sourceCommit": SOURCE_COMMIT, "builderImage": BUILDER_IMAGE, "sourceClosureProfile": "curl-candidate", "sourceBuildTargetPackage": "libcurl",
             "restrictedAppArmorProfileSha256": source["restrictedAppArmorProfileSha256"],
             "sourceClosurePackageCount": PINNED_PACKAGE_COUNT, "sourceClosureDependencyAlternativeCount": closure["expectedDependencyAlternativeCount"],
             "candidatePackageCount": len(all_results), "packages": all_results,
