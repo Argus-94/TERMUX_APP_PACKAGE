@@ -4,21 +4,18 @@
 
 ## Текущее состояние
 
-**Production feed не готов.** В `main` находится legacy pool из 133 `.deb`; полный source/build provenance для этого набора не подтверждён, а прежний статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. В отдельной ветке подготовлен gated candidate pipeline без production publication; legacy workflows пока не удалены и требуют отдельного подтверждения владельца перед cleanup/merge. GitHub Pages сейчас не включён. Не добавляйте старый pool в trusted APT sources и не используйте URL Pages как рабочий feed.
+**Production feed не готов.** В `main` находится legacy pool из 133 `.deb`; полный source/build provenance для набора не подтверждён, а прежний статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. Ветка PR #2 содержит gated candidate pipeline и cleanup только шести legacy workflow/script файлов; ни этот cleanup, ни candidate CI не публикуют production feed. GitHub Pages для репозитория не включён. Старый pool нельзя добавлять в trusted APT sources.
 
-Подписной smoke test на синтетическом fixture проверяет `Release`/`InRelease`, `signed-by` и отказ APT при изменении индекса. Отдельные candidate CI jobs также собирают и статически проверяют два точечных пакета и моделируют их загрузку/установочный план из временного подписанного feed. Ни один результат не доказывает происхождение старых пакетов или фактическую Android-установку/runtime.
+Signing smoke на синтетическом fixture проверяет `Release`/`InRelease`, `signed-by` и отказ APT при изменении индекса. CI отдельно строит и статически проверяет Make `4.4.1-1`, `gh` `2.102.0`, а Git `2.56.0` — вместе с 14-пакетной source-built dependency closure. Для кандидатов создаются только временные подписанные feeds и выполняются download/`apt-get --simulate` проверки; фактической Android-установки не было.
 
 ## Кандидатный конвейер
 
-Текущий узкий allowlist кандидатов содержит GNU Make `4.4.1-1` и GitHub CLI `gh` `2.102.0`:
-
-- исходники и Termux recipes закреплены на commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`;
-- исходные архивы и recipe/patch (для Make) имеют SHA-256 locks;
-- используется официальный Termux builder image, закреплённый по digest;
-- каждый пакет проверяется fail-closed аудитом путей, namespace, control metadata, ELF, license и payload;
-- после аудита CI строит отдельный временный локальный APT feed для каждого кандидата, подписывает Release, применяет только `signed-by=<закреплённый public keyring>`, загружает пакет и запускает `apt-get --simulate install`;
-- у `gh` нет обязательных runtime `Depends` в собранном пакете; `openssh` указан только как `Recommends` и не включается в симуляцию с `--no-install-recommends`;
-- CI не устанавливает пакеты. Обычные запуски удаляют `.deb`, индексы и подписи с runner. Единственный одобренный marker push уже создал публичный artifact **только для `make`**, не для `gh`; он истекает `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)). Это лишь device-test handoff, не production feed; Pages и GitHub Release не публикуются.
+- Termux source commit закреплён на `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`; builder image закреплён по digest.
+- Make и `gh` собираются как отдельные кандидаты. Для Git CI проверяет закреплённый source/recipe closure: 14 пакетов и 20 dependency alternatives; dependency downloads отключены.
+- Каждый собранный `.deb` проходит fail-closed аудит путей, namespace, control metadata, ELF, лицензии и payload.
+- Для кандидатов CI строит временный подписанный APT feed, использует только `signed-by=<закреплённый public keyring>`, загружает пакет и запускает `apt-get --simulate install`.
+- У `gh` нет обязательных runtime `Depends`; `openssh` — только `Recommends`. Git closure проверяется как полный набор без внешних base-runtime предположений.
+- Обычные запуски удаляют `.deb`, индексы и подписи с runner. Единственный одобренный marker push создал публичный Actions artifact **только для Make**, не для `gh` или Git; он истекает `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)). Это device-test handoff, не production feed; Pages и GitHub Release не публикуются.
 
 **Моделируемый CI prefix** вычислен из фиксированного Android application ID: `/data/user/0/com.karat.aibuilder/files/usr`. Это только compile-time модель, а не утверждение об измеренном на устройстве `dataDir`/`filesDir`. Скрипты не читают данные внешнего Termux и не трогают проекты пользователя. Реальный prefix, установка, исполнение и rollback должны быть проверены отдельно на целевом устройстве.
 
@@ -39,6 +36,10 @@
 
 ```sh
 ./scripts/test-candidate-feed-policy.sh
+./scripts/test-candidate-dependency-closure.sh
+./scripts/test-pinned-termux-recipe-closure.sh
+./scripts/test-device-test-artifact-staging.sh
+./scripts/test-signed-feed-smoke.sh
 ./termux-private-package-kit/make-v476/verify-kit.sh
 ```
 
