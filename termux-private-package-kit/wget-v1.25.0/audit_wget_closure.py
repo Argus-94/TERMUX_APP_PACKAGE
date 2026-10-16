@@ -22,7 +22,10 @@ BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427
 PINNED_PACKAGE_COUNT = 11
 EXPECTED_BUILD_PATCH_SHA256 = "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0"
 PLATFORM_LIBS = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so", "libgcc.so", "libpthread.so", "libatomic.so"}
-PACKAGE_FILE_ELF_PROVIDERS = {"libandroid-support.so": ("libandroid-support", "lib/libandroid-support.so")}
+PACKAGE_FILE_ELF_PROVIDERS = {
+    "libandroid-posix-semaphore.so": ("libandroid-posix-semaphore", "lib/libandroid-posix-semaphore.so"),
+    "libandroid-support.so": ("libandroid-support", "lib/libandroid-support.so"),
+}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
 MAX_DEB_BYTES = 512 * 1024 * 1024

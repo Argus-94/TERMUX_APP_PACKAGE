@@ -117,23 +117,32 @@ class WgetAllowlistTests(unittest.TestCase):
         self.assertFalse(auditor.is_wget_elf("wget", PREFIX + "/bin/other", b"\x7fELF", PREFIX))
 
     def test_needed_library_provider_requires_exact_locked_candidate_elf_file(self):
-        consumer = {"package": "libidn2", "path": "bin/idn2", "soname": None, "needed": ["libandroid-support.so"]}
-        provider = {"package": "libandroid-support", "path": "lib/libandroid-support.so", "soname": None, "needed": []}
-        result = auditor.validate_elf_needed_providers([consumer, provider])
+        idn2 = {"package": "libidn2", "path": "bin/idn2", "soname": None, "needed": ["libandroid-support.so"]}
+        uuid = {"package": "libuuid", "path": "lib/libuuid.so", "soname": "libuuid.so.1", "needed": ["libandroid-posix-semaphore.so"]}
+        semaphore = {"package": "libandroid-posix-semaphore", "path": "lib/libandroid-posix-semaphore.so", "soname": None, "needed": []}
+        support = {"package": "libandroid-support", "path": "lib/libandroid-support.so", "soname": None, "needed": []}
+        result = auditor.validate_elf_needed_providers([idn2, uuid, semaphore, support])
+        self.assertNotIn("libandroid-posix-semaphore.so", auditor.PLATFORM_LIBS)
+        self.assertNotIn("libandroid-support.so", auditor.PLATFORM_LIBS)
+        self.assertIn("libandroid-posix-semaphore.so", result["providers"])
         self.assertIn("libandroid-support.so", result["providers"])
-        self.assertEqual(result["packageFileProviders"], [{
-            "library": "libandroid-support.so",
-            "package": "libandroid-support",
-            "path": "lib/libandroid-support.so",
-            "soname": None,
-            "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure",
-        }])
+        self.assertEqual(result["packageFileProviders"], [
+            {"library": "libandroid-posix-semaphore.so", "package": "libandroid-posix-semaphore",
+             "path": "lib/libandroid-posix-semaphore.so", "soname": None,
+             "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure"},
+            {"library": "libandroid-support.so", "package": "libandroid-support",
+             "path": "lib/libandroid-support.so", "soname": None,
+             "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure"},
+        ])
         invalid_providers = [
-            [consumer],
-            [consumer, {**provider, "package": "libidn2"}],
-            [consumer, {**provider, "path": "lib/libandroid-support.so.29"}],
-            [consumer, {**provider, "soname": "different.so"}],
-            [{**consumer, "needed": ["unknown-provider.so"]}, provider],
+            [idn2, uuid, semaphore],
+            [idn2, uuid, semaphore, {**support, "package": "libidn2"}],
+            [idn2, uuid, semaphore, {**support, "path": "lib/libandroid-support.so.29"}],
+            [idn2, uuid, semaphore, {**support, "soname": "different.so"}],
+            [idn2, uuid, support],
+            [idn2, uuid, {**semaphore, "path": "lib/libandroid-posix-semaphore.so.1"}, support],
+            [idn2, uuid, {**semaphore, "soname": "different.so"}, support],
+            [{**idn2, "needed": ["unknown-provider.so"]}, uuid, semaphore, support],
         ]
         for records in invalid_providers:
             with self.subTest(records=records):
