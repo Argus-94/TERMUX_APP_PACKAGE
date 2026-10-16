@@ -116,6 +116,30 @@ class WgetAllowlistTests(unittest.TestCase):
         self.assertFalse(auditor.is_wget_elf("wget", PREFIX + "/bin/wget", b"#!/bin/sh", PREFIX))
         self.assertFalse(auditor.is_wget_elf("wget", PREFIX + "/bin/other", b"\x7fELF", PREFIX))
 
+    def test_needed_library_provider_requires_exact_locked_candidate_elf_file(self):
+        consumer = {"package": "libidn2", "path": "bin/idn2", "soname": None, "needed": ["libandroid-support.so"]}
+        provider = {"package": "libandroid-support", "path": "lib/libandroid-support.so", "soname": None, "needed": []}
+        result = auditor.validate_elf_needed_providers([consumer, provider])
+        self.assertIn("libandroid-support.so", result["providers"])
+        self.assertEqual(result["packageFileProviders"], [{
+            "library": "libandroid-support.so",
+            "package": "libandroid-support",
+            "path": "lib/libandroid-support.so",
+            "soname": None,
+            "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure",
+        }])
+        invalid_providers = [
+            [consumer],
+            [consumer, {**provider, "package": "libidn2"}],
+            [consumer, {**provider, "path": "lib/libandroid-support.so.29"}],
+            [consumer, {**provider, "soname": "different.so"}],
+            [{**consumer, "needed": ["unknown-provider.so"]}, provider],
+        ]
+        for records in invalid_providers:
+            with self.subTest(records=records):
+                with self.assertRaises(auditor.AuditError):
+                    auditor.validate_elf_needed_providers(records)
+
     def test_license_paths_are_confined_to_each_package_document_directory(self):
         self.assertTrue(auditor.is_package_license_path(PREFIX + "/share/doc/wget/COPYING", PREFIX, "wget"))
         self.assertTrue(auditor.is_package_license_path(PREFIX + "/share/doc/pcre2/LICENCE.md", PREFIX, "pcre2"))

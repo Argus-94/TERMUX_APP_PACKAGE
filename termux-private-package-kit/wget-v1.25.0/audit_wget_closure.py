@@ -22,6 +22,7 @@ BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427
 PINNED_PACKAGE_COUNT = 11
 EXPECTED_BUILD_PATCH_SHA256 = "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0"
 PLATFORM_LIBS = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so", "libgcc.so", "libpthread.so", "libatomic.so"}
+PACKAGE_FILE_ELF_PROVIDERS = {"libandroid-support.so": ("libandroid-support", "lib/libandroid-support.so")}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
 MAX_DEB_BYTES = 512 * 1024 * 1024
@@ -295,6 +296,26 @@ def inspect_elf(path: pathlib.Path, rel: str, prefix: str) -> dict[str, Any]:
     return {"path": rel, "soname": soname, "needed": needed, "interpreter": interpreter, "rpaths": rpaths}
 
 
+def validate_elf_needed_providers(all_elf: list[dict[str, Any]]) -> dict[str, Any]:
+    providers: set[str] = set(PLATFORM_LIBS)
+    for item in all_elf:
+        if item.get("soname"):
+            providers.add(item["soname"])
+    package_file_providers = []
+    for library, (package, path) in PACKAGE_FILE_ELF_PROVIDERS.items():
+        matches = [item for item in all_elf if item.get("package") == package and item.get("path") == path]
+        require(len(matches) == 1, "ELF_PACKAGE_FILE_PROVIDER_NOT_EXACTLY_ONCE", library)
+        item = matches[0]
+        require(item.get("soname") in {None, library}, "ELF_PACKAGE_FILE_PROVIDER_SONAME_MISMATCH", library + ":" + str(item.get("soname")))
+        providers.add(library)
+        package_file_providers.append({"library": library, "package": package, "path": path,
+                                       "soname": item.get("soname"), "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure"})
+    for item in all_elf:
+        for library in item.get("needed", []):
+            require(library in providers, "ELF_NEEDED_LIBRARY_UNPROVEN", item["package"] + ":" + item["path"] + ":" + library)
+    return {"providers": sorted(providers), "packageFileProviders": package_file_providers}
+
+
 def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathlib.Path) -> dict[str, Any]:
     require(deb.is_file() and not deb.is_symlink() and 0 < deb.stat().st_size <= MAX_DEB_BYTES, "DEB_INVALID", str(deb.name))
     sha = hashlib.sha256(deb.read_bytes()).hexdigest()
@@ -470,13 +491,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             all_results.append(result)
             for elf in result["elf"]:
                 all_elf.append({**elf, "package": spec["name"]})
-    providers: set[str] = set(PLATFORM_LIBS)
-    for item in all_elf:
-        if item["soname"]:
-            providers.add(item["soname"])
-    for item in all_elf:
-        for library in item["needed"]:
-            require(library in providers, "ELF_NEEDED_LIBRARY_UNPROVEN", item["package"] + ":" + item["path"] + ":" + library)
+    provider_evidence = validate_elf_needed_providers(all_elf)
     return {"schemaVersion": 1, "ok": True, "status": "static-audit-passed; installation-and-device-runtime-unverified",
             "applicationId": APP_ID, "prefix": prefix, "prefixProvenance": "ci-model-only; device-observation-not-run",
             "baseLicenseProviderEvidence": base_license_evidence,
@@ -485,7 +500,8 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "restrictedAppArmorProfileSha256": source["restrictedAppArmorProfileSha256"],
             "sourceClosurePackageCount": PINNED_PACKAGE_COUNT, "sourceClosureDependencyAlternativeCount": 15,
             "candidatePackageCount": len(all_results), "packages": all_results,
-            "elfProviders": sorted(providers), "elfCount": len(all_elf), "deviceInstall": "NOT RUN", "rollback": "NOT RUN"}
+            "elfProviders": provider_evidence["providers"], "elfPackageFileProviders": provider_evidence["packageFileProviders"],
+            "elfCount": len(all_elf), "deviceInstall": "NOT RUN", "rollback": "NOT RUN"}
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
