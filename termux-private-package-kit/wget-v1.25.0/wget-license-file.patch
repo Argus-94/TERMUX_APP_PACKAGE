@@ -1,0 +1,40 @@
+diff --git a/packages/wget/build.sh b/packages/wget/build.sh
+--- a/packages/wget/build.sh
++++ b/packages/wget/build.sh
+@@ -1,6 +1,7 @@
+ TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/wget/
+ TERMUX_PKG_DESCRIPTION="Commandline tool for retrieving files using HTTP, HTTPS and FTP"
+ TERMUX_PKG_LICENSE="GPL-3.0"
++TERMUX_PKG_LICENSE_FILE="COPYING"
+ TERMUX_PKG_MAINTAINER="@termux"
+ TERMUX_PKG_VERSION="1.25.0"
+ TERMUX_PKG_REVISION=1
+
+diff --git a/packages/util-linux/build.sh b/packages/util-linux/build.sh
+--- a/packages/util-linux/build.sh
++++ b/packages/util-linux/build.sh
+@@ -1,13 +1,6 @@
+ TERMUX_PKG_HOMEPAGE=https://en.wikipedia.org/wiki/Util-linux
+ TERMUX_PKG_DESCRIPTION="Miscellaneous system utilities"
+ TERMUX_PKG_LICENSE="GPL-3.0-or-later, GPL-2.0-or-later, LGPL-2.1-or-later, BSD 3-Clause, BSD, ISC"
+-TERMUX_PKG_LICENSE_FILE="
+-	Documentation/licenses/COPYING.GPL-3.0-or-later
+-	Documentation/licenses/COPYING.GPL-2.0-or-later
+-	Documentation/licenses/COPYING.LGPL-2.1-or-later
+-	Documentation/licenses/COPYING.BSD-3-Clause
+-	Documentation/licenses/COPYING.BSD-4-Clause-UC
+-	Documentation/licenses/COPYING.ISC
+-"
++TERMUX_PKG_LICENSE_FILE="Documentation/licenses/COPYING.GPL-3.0-or-later,Documentation/licenses/COPYING.GPL-2.0-or-later,Documentation/licenses/COPYING.LGPL-2.1-or-later,Documentation/licenses/COPYING.BSD-3-Clause,Documentation/licenses/COPYING.BSD-4-Clause-UC,Documentation/licenses/COPYING.ISC"
+ TERMUX_PKG_MAINTAINER="@termux"
+ TERMUX_PKG_VERSION="2.42.4"
+
+diff --git a/packages/util-linux/libuuid.subpackage.sh b/packages/util-linux/libuuid.subpackage.sh
+--- a/packages/util-linux/libuuid.subpackage.sh
++++ b/packages/util-linux/libuuid.subpackage.sh
+@@ -7,4 +7,5 @@
+ lib/pkgconfig/uuid.pc
+ lib/libuuid.so
+ include/uuid/uuid.h
++share/doc/util-linux
+ "
