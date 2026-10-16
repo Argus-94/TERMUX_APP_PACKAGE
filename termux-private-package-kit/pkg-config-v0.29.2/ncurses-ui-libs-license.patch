@@ -1,0 +1,9 @@
+diff --git a/packages/ncurses/ncurses-ui-libs.subpackage.sh b/packages/ncurses/ncurses-ui-libs.subpackage.sh
+--- a/packages/ncurses/ncurses-ui-libs.subpackage.sh
++++ b/packages/ncurses/ncurses-ui-libs.subpackage.sh
+@@ -4,4 +4,5 @@
+ lib/pkgconfig/form*.pc
+ lib/pkgconfig/menu*.pc
+ lib/pkgconfig/panel*.pc
++share/doc/ncurses
+ "

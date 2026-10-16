@@ -1,0 +1,844 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "source": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "commit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "propertiesScriptSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
+    "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
+    "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2",
+    "restrictedAppArmorProfileSha256": "ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8",
+    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw,"
+  },
+  "sourceClosure": {
+    "profile": "pkg-config-candidate",
+    "rootPackages": [
+      "pkg-config"
+    ],
+    "buildTargetPackage": "pkg-config",
+    "expectedPackageCount": 22,
+    "expectedDependencyAlternativeCount": 33,
+    "semantics": "Exact runtime closure of the pinned pkg-config recipe, including upstream subpackage-parent rules. Recommendations are recorded but excluded; all dependency downloads are disabled in the pinned source builder. Extra build-order outputs are excluded from the candidate package set."
+  },
+  "baseLicenseProviderEvidence": {
+    "artifact": "AIBuilder-Expo-v476/assets/termux-bootstrap/termux-bootstrap-aarch64.zip",
+    "archiveSha256": "08a447f60c06783f33561583553149cf992ac7d9779071c71b8aaeeb452451b4",
+    "packageName": "termux-licenses",
+    "version": "2.1",
+    "architecture": "all",
+    "packageStatus": "install ok installed",
+    "licenseFilesSha256": {
+      "share/LICENSES/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "share/LICENSES/GPL-2.0.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "share/LICENSES/GPL-3.0.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "share/LICENSES/LGPL-2.1.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "share/LICENSES/MPL-2.0.txt": "9bc20a15c61407693f16f5bb482035e60c9ac3e9c6611c6c3b6623a1a4453578",
+      "share/LICENSES/Public Domain.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    "verification": "Six relevant ZIP license payloads were byte-for-byte compared with pinned termux-licenses source; package status comes from the embedded v476 archive. This is archive evidence, not device observation.",
+    "deviceObserved": false
+  },
+  "sourceLicenseEvidence": {
+    "pkg-config": {
+      "sourceUrl": "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz",
+      "sourceSha256": "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591"
+    },
+    "python": {
+      "sourceUrl": "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz",
+      "sourceSha256": "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63",
+      "licensePayloadPath": "share/doc/python/LICENSE",
+      "licensePayloadSha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+      "sourceArchives": [
+        {
+          "url": "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz",
+          "sha256": "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63"
+        },
+        {
+          "url": "https://salsa.debian.org/cpython-team/python3-defaults/-/archive/f358ab52bf2932ad55b1a72a29c9762169e6ac47/python3-defaults-f358ab52bf2932ad55b1a72a29c9762169e6ac47.tar.gz",
+          "sha256": "3b7a76c144d39f5c4a2c7789fd4beb3266980c2e667ad36167e1e7a357c684b0"
+        }
+      ]
+    }
+  },
+  "buildModifications": {
+    "patchPath": "termux-private-package-kit/pkg-config-v0.29.2/ncurses-ui-libs-license.patch",
+    "patchSha256": "51dc2ef1e76617e1c3dc5c51729b78851443c01e1d8b534163aae2c9316e7f96",
+    "purpose": "Include only the parent ncurses copyright directory in the ncurses-ui-libs subpackage so the statically audited package carries its own pinned MIT license evidence; no executable code or runtime dependency changes."
+  },
+  "runtimeDependencies": {
+    "pkgConfigRequires": [
+      "glib"
+    ],
+    "pythonRecommendationsExcludedFromInstallSimulation": [
+      "python-ensurepip-wheels",
+      "python-pip"
+    ]
+  },
+  "packages": [
+    {
+      "name": "ca-certificates",
+      "version": "1:2026.09.25",
+      "architecture": "all",
+      "licenseExpression": "MPL-2.0",
+      "packageType": "recipe",
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "sourceVersionExpression": "1:2026.09.25",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "gdbm",
+      "version": "1.26-1",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-3.0",
+      "packageType": "recipe",
+      "recipePath": "packages/gdbm/build.sh",
+      "recipeSha256": "ef44697164fd19b8433ceb9ac4cd35cd88eb99ed51b39fb6f8958f87c9db7b2a",
+      "sourceVersionExpression": "1.26",
+      "sourceRevisionExpression": "1",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "readline",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "readline",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "glib",
+      "version": "2.90.1",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1",
+      "packageType": "recipe",
+      "recipePath": "packages/glib/build.sh",
+      "recipeSha256": "8181771500b14ada8f28beae580843644fe65ca324d23dd9cd984d28d1e36a62",
+      "sourceVersionExpression": "2.90.1",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pcre2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pcre2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "python",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "python",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libandroid-posix-semaphore",
+      "version": "0.1-4",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT",
+      "packageType": "recipe",
+      "recipePath": "packages/libandroid-posix-semaphore/build.sh",
+      "recipeSha256": "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+      "sourceVersionExpression": "0.1",
+      "sourceRevisionExpression": "4",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libandroid-support",
+      "version": "29-1",
+      "architecture": "aarch64",
+      "licenseExpression": "Apache-2.0, MIT",
+      "packageType": "recipe",
+      "recipePath": "packages/libandroid-support/build.sh",
+      "recipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+      "sourceVersionExpression": "(29",
+      "sourceRevisionExpression": "1",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libbz2",
+      "version": "1.0.8-8",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD",
+      "packageType": "recipe",
+      "recipePath": "packages/libbz2/build.sh",
+      "recipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+      "sourceVersionExpression": "1.0.8",
+      "sourceRevisionExpression": "8",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libcrypt",
+      "version": "0.2-6",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 2-Clause",
+      "packageType": "recipe",
+      "recipePath": "packages/libcrypt/build.sh",
+      "recipeSha256": "8d3d827030f2d51687dcf7fcb1a7dce8f79730bdbefbd5b90492def19ea43629",
+      "sourceVersionExpression": "0.2",
+      "sourceRevisionExpression": "6",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libexpat",
+      "version": "2.9.0",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT",
+      "packageType": "recipe",
+      "recipePath": "packages/libexpat/build.sh",
+      "recipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+      "sourceVersionExpression": "2.9.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libffi",
+      "version": "3.8.0",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT",
+      "packageType": "recipe",
+      "recipePath": "packages/libffi/build.sh",
+      "recipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+      "sourceVersionExpression": "3.8.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libiconv",
+      "version": "1.19",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1, GPL-3.0",
+      "packageType": "recipe",
+      "recipePath": "packages/libiconv/build.sh",
+      "recipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+      "sourceVersionExpression": "1.19",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "liblzma",
+      "version": "5.8.4",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1, GPL-2.0, GPL-3.0",
+      "packageType": "recipe",
+      "recipePath": "packages/liblzma/build.sh",
+      "recipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+      "sourceVersionExpression": "5.8.4",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libsqlite",
+      "version": "3.54.0",
+      "architecture": "aarch64",
+      "licenseExpression": "Public Domain",
+      "packageType": "recipe",
+      "recipePath": "packages/libsqlite/build.sh",
+      "recipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+      "sourceVersionExpression": "3.54.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "ncurses",
+      "version": "6.6.20260307+really6.5.20250830",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT",
+      "packageType": "recipe",
+      "recipePath": "packages/ncurses/build.sh",
+      "recipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+      "sourceVersionExpression": "(6.6.20260307+really6.5.20250830",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "ncurses-ui-libs",
+      "version": "6.6.20260307+really6.5.20250830",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT",
+      "packageType": "subpackage",
+      "recipePath": "packages/ncurses/build.sh",
+      "recipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+      "sourceVersionExpression": "(6.6.20260307+really6.5.20250830",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "ncurses",
+            "operator": "=",
+            "qualifier": null,
+            "sourceRelation": "ncurses (= parent-build-version)",
+            "version": "parent-build-version"
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": "ncurses",
+      "parentDependencyRule": "true",
+      "subpackagePath": "packages/ncurses/ncurses-ui-libs.subpackage.sh",
+      "subpackageSha256": "a1ed7e1aa01e0f87e5a23f7df0ff8efa11fc7740201191862ac6e56dcc44581e"
+    },
+    {
+      "name": "openssl",
+      "version": "1:3.6.5",
+      "architecture": "aarch64",
+      "licenseExpression": "Apache-2.0",
+      "packageType": "recipe",
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "sourceVersionExpression": "1:3.6.5",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "pcre2",
+      "version": "10.49",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause",
+      "packageType": "recipe",
+      "recipePath": "packages/pcre2/build.sh",
+      "recipeSha256": "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+      "sourceVersionExpression": "10.49",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "pkg-config",
+      "version": "0.29.2-3",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0",
+      "packageType": "recipe",
+      "recipePath": "packages/pkg-config/build.sh",
+      "recipeSha256": "8378c3bfb5e91c6a91aef8a7083d8f9b017f25913d1f0c5ff0603a5b1d858669",
+      "sourceVersionExpression": "0.29.2",
+      "sourceRevisionExpression": "3",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "glib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "glib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "python",
+      "version": "3.14.6-1",
+      "architecture": "aarch64",
+      "licenseExpression": "custom",
+      "packageType": "recipe",
+      "recipePath": "packages/python/build.sh",
+      "recipeSha256": "354ad5204056395bc423780da9112395aad862c01636ae3a56d2f4c025d69f12",
+      "sourceVersionExpression": "3.14.6",
+      "sourceRevisionExpression": "1",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "gdbm",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "gdbm",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-posix-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-posix-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libbz2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libbz2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libcrypt",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libcrypt",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsqlite",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsqlite",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses-ui-libs",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses-ui-libs",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "readline",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "readline",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zstd",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zstd",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "python-ensurepip-wheels",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "python-ensurepip-wheels",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "python-pip",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "python-pip",
+            "version": null
+          }
+        ]
+      ],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "readline",
+      "version": "8.3.6",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-3.0",
+      "packageType": "recipe",
+      "recipePath": "packages/readline/build.sh",
+      "recipeSha256": "29e24da6099650f92703b2772e9515cfc6004901733b1c8a4dbb3938b85762e3",
+      "sourceVersionExpression": "8.3.6",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "resolv-conf",
+      "version": "1.3",
+      "architecture": "aarch64",
+      "licenseExpression": "Public Domain",
+      "packageType": "recipe",
+      "recipePath": "packages/resolv-conf/build.sh",
+      "recipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+      "sourceVersionExpression": "1.3",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "architecture": "aarch64",
+      "licenseExpression": "ZLIB",
+      "packageType": "recipe",
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "sourceVersionExpression": "1.3.2",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "zstd",
+      "version": "1.5.7-1",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0",
+      "packageType": "recipe",
+      "recipePath": "packages/zstd/build.sh",
+      "recipeSha256": "d7768dbd39af796ae9d5d1f0cc95d963ed5fa842332aecd9b6b046d87bbc48ec",
+      "sourceVersionExpression": "1.5.7",
+      "sourceRevisionExpression": "1",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "dependencyGroups": [
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    }
+  ],
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT RUN",
+    "rollback": "NOT RUN",
+    "deviceEvidenceSha256": null
+  },
+  "excludedInputs": [
+    "all legacy repository .deb files",
+    "stock com.termux packages or feeds",
+    "PocketForge packages",
+    "python recommendations python-ensurepip-wheels and python-pip",
+    "all unverified build-order outputs"
+  ]
+}

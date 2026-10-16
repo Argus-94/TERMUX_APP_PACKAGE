@@ -26,6 +26,9 @@
     ],
     "wget-candidate": [
       "wget"
+    ],
+    "pkg-config-candidate": [
+      "pkg-config"
     ]
   },
   "semantics": {
