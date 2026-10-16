@@ -1,0 +1,8 @@
+diff --git a/packages/make/build.sh b/packages/make/build.sh
+--- a/packages/make/build.sh
++++ b/packages/make/build.sh
+@@ -2,3 +2,4 @@
+ TERMUX_PKG_DESCRIPTION="Tool to control the generation of non-source files from source files"
+ TERMUX_PKG_LICENSE="GPL-3.0"
++TERMUX_PKG_LICENSE_FILE="COPYING"
+ TERMUX_PKG_MAINTAINER="@termux"

@@ -1,0 +1,52 @@
+name: Synthetic APT signing and tamper smoke (no publication)
+
+on:
+  push:
+    branches:
+      - work/package-feed-gates-20261015
+    paths:
+      - .github/workflows/feed-signing-smoke.yml
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/validate-candidate-feed.py
+      - scripts/test-candidate-feed-policy.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - candidate-package-set.json
+      - keys/feed-signing.json
+      - keys/aibuilder-termux-feed-keyring.gpg
+      - docs/FEED_SIGNING_RU.md
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-feed-signing-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-signature-and-apt-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout smoke-test branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install only the tools needed for the local APT fixture
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+
+      - name: Validate syntax and signed-by/tamper behavior
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh
+          ./scripts/test-signed-feed-smoke.sh

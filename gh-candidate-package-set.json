@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "packages": [
+    {
+      "name": "gh",
+      "version": "2.102.0",
+      "architecture": "aarch64",
+      "sourceRepository": "https://github.com/termux/termux-packages.git",
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "recipePath": "packages/gh/build.sh",
+      "recipeSha256": "a26022905b66f39851553abea3b5e68c38671988b4e2a9a649366845dadfb266",
+      "sourceUrl": "https://github.com/cli/cli/archive/refs/tags/v2.102.0.tar.gz",
+      "sourceSha256": "08bf0ef8b4409893889175e0f5279d30d6edd96465816042c0d7c72eac598158",
+      "sourceLicenseFile": "LICENSE",
+      "sourceLicenseRelativePath": "share/doc/gh/copyright",
+      "sourceLicenseSha256": "6da4adc42392c8485e40b4251c7e332fc3352df1947c9ffade71dd60b14a7a4f",
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "runtimeDependenciesExpected": [],
+      "recommendationsExpected": ["openssh"],
+      "staticAuditRequired": true,
+      "deviceInstallAndRollbackRequired": true
+    }
+  ],
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT_RUN",
+    "rollback": "NOT_RUN",
+    "deviceEvidenceSha256": null
+  },
+  "excludedInputs": [
+    "the existing unverified 133-package pool",
+    "stock com.termux packages or feeds",
+    "PocketForge packages"
+  ]
+}

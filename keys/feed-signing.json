@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "fingerprint": "A7EE64180D30C6DCD498F12FDC3AF8E50872E21F",
+  "publicKeyring": "keys/aibuilder-termux-feed-keyring.gpg",
+  "publicKeyringSha256": "a19da39a2dcfe805be612ce886e8eb644e56ea9fbbb5e74b71aab79949717df2",
+  "algorithm": "RSA4096 signing key",
+  "createdUtc": "2026-10-15",
+  "expiresUtc": "2028-10-14",
+  "status": "reserved-production-key; candidate-ci-uses-ephemeral-key; no-production-feed-published"
+}

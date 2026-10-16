@@ -1,41 +1,28 @@
 # TERMUX_APP_PACKAGE
 
-Apt repository of Termux packages built for **AI Builder** (`com.karat.aibuilder`), **not** for stock `com.termux`.
+A candidate package pipeline for the private AI Builder runtime (`com.karat.aibuilder`, `aarch64`), not for stock Termux.
 
-## Feed URL (after GitHub Pages is enabled)
+## Production status: blocked
 
-```text
-deb https://argus-94.github.io/TERMUX_APP_PACKAGE/apt/termux-main stable main
+- The legacy `main` tree contains 133 `.deb` files without complete verified provenance; three package records remain unconfirmed. They are not a trusted install feed.
+- GitHub Pages is not enabled for this repository; no production feed URL is available.
+- PR #2 contains a gated candidate pipeline and a narrowly scoped cleanup of six legacy workflow/script files; it does not publish packages.
+- CI separately builds and statically audits GNU Make `4.4.1-1` and GitHub CLI `gh` `2.102.0`; a separate Git workflow builds Git `2.56.0` with its 14-package source-built dependency closure. Each candidate feed is temporary and signed; CI verifies download and `apt-get --simulate`, but performs no package installation.
+- Ordinary candidate runs delete binaries and feed metadata from the runner. The specifically authorized one-time marker push uploaded a public Actions artifact containing **only** the statically audited `make` candidate, its signed temporary APT metadata, public ephemeral keyring, manifest, build result, and audit report. `gh`, Git and private signing material are not included. It expires at `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)).
+- The temporary `make` artifact is for device testing only: it is not device-validated or a production feed, and no package is committed, released, or deployed to Pages.
+- Production publication and app-side `pkg.ensure` stay disabled until exact-device install and rollback tests pass.
+
+Never use `trusted=yes`, unauthenticated/insecure APT options, stock `com.termux` packages, or PocketForge artifacts.
+
+## Checks
+
+```sh
+./scripts/test-candidate-feed-policy.sh
+./scripts/test-candidate-dependency-closure.sh
+./scripts/test-pinned-termux-recipe-closure.sh
+./scripts/test-device-test-artifact-staging.sh
+./scripts/test-signed-feed-smoke.sh
+./termux-private-package-kit/make-v476/verify-kit.sh
 ```
 
-## Layout
-
-```text
-apt/termux-main/
-  dists/stable/main/binary-aarch64/Packages[.gz]
-  pool/main/<package>/*.deb
-  Release
-```
-
-## Status
-
-- [x] Directory layout
-- [ ] `.deb` packages (`TERMUX_APP__PACKAGE_NAME=com.karat.aibuilder`)
-- [ ] Regenerated `Packages` index with real packages
-- [ ] GitHub Pages enabled
-- [ ] AI Builder `AIB_TERMUX_APT_FEED_DEFAULT` points here
-
-## Docs
-
-- [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md) — full setup guide (RU)
-- [docs/BUILD_PACKAGES_RU.md](./docs/BUILD_PACKAGES_RU.md) — how to build `.deb`
-
-## Critical rule
-
-All packages **must** be built with:
-
-```bash
-export TERMUX_APP__PACKAGE_NAME=com.karat.aibuilder
-```
-
-Do **not** publish binaries built for `com.termux`.
+See [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md) and [docs/FEED_SIGNING_RU.md](./docs/FEED_SIGNING_RU.md).

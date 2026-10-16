@@ -1,0 +1,370 @@
+name: Build and verify one AI Builder package candidate (no publication)
+
+on:
+  push:
+    branches:
+      - work/package-feed-gates-20261015
+    paths:
+      - .github/workflows/package-feed-candidate.yml
+      - .github/workflows/feed-signing-smoke.yml
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/validate-candidate-feed.py
+      - scripts/test-candidate-feed-policy.sh
+      - scripts/verify-candidate-dependency-closure.py
+      - scripts/test-candidate-dependency-closure.sh
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/validate-gh-candidate-feed.py
+      - termux-package-source-scope.json
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/stage-device-test-artifact.py
+      - scripts/test-device-test-artifact-staging.sh
+      - candidate-package-set.json
+      - gh-candidate-package-set.json
+      - keys/feed-signing.json
+      - keys/aibuilder-termux-feed-keyring.gpg
+      - termux-private-package-kit/make-v476/**
+      - termux-private-package-kit/gh-v2.102.0/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-package-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-audit-and-test-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+
+    steps:
+      - name: Checkout candidate branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install isolated feed test tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+
+      - name: Run local policy and package auditor tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh scripts/test-device-test-artifact-staging.sh termux-private-package-kit/gh-v2.102.0/build-gh-private-aarch64.sh
+          python3 -m py_compile scripts/validate-candidate-feed.py scripts/validate-gh-candidate-feed.py scripts/stage-device-test-artifact.py scripts/verify-candidate-dependency-closure.py scripts/resolve-pinned-termux-recipe-closure.py termux-private-package-kit/gh-v2.102.0/audit_deb.py termux-private-package-kit/gh-v2.102.0/tests/test_audit_deb.py
+          python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
+          ./scripts/test-candidate-feed-policy.sh
+          ./scripts/test-candidate-dependency-closure.sh
+          bash ./scripts/test-pinned-termux-recipe-closure.sh
+          ./termux-private-package-kit/make-v476/verify-kit.sh
+          ./scripts/test-device-test-artifact-staging.sh
+
+      - name: Checkout the exact locked upstream source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Inventory pinned base and git-extras source closures (metadata only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          scope="$GITHUB_WORKSPACE/termux-package-source-scope.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" --scope "$scope" --profile base \
+            > "$RUNNER_TEMP/aib-source-closure-base.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" --scope "$scope" --profile git-extras \
+            > "$RUNNER_TEMP/aib-source-closure-git-extras.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" --scope "$scope" --profile builder-cli \
+            > "$RUNNER_TEMP/aib-source-closure-builder-cli.json"
+          python3 - "$RUNNER_TEMP/aib-source-closure-base.json" "$RUNNER_TEMP/aib-source-closure-git-extras.json" "$RUNNER_TEMP/aib-source-closure-builder-cli.json" <<'PY'
+          import json, pathlib, sys
+          for path in sys.argv[1:]:
+              result=json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+              print("TERMUX_SOURCE_SCOPE_INVENTORY_OK profile={} packages={} alternatives={} source={} built=0 installed=0 published=0".format(
+                  result["profile"], result["packageCount"], result["dependencyAlternativeCount"], result["sourceCommit"]))
+          PY
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pinned `base` and `git-extras` source closures were inventoried from recipe and subpackage metadata only. The `builder-cli` profile separately inventories only `gh`; its build/audit and temporary signed APT simulation are performed below. The broader profiles do not authorize or trigger builds, installs, publication, or device claims.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pull the digest-pinned official Termux builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+
+      - name: Build and statically audit only the allowlisted package
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit="$GITHUB_WORKSPACE/termux-private-package-kit/make-v476"
+          source_dir="$RUNNER_TEMP/termux-packages"
+          output_dir="$RUNNER_TEMP/aib-private-make-candidate-output"
+          raw_log="$RUNNER_TEMP/aib-private-make-candidate-build.log"
+          mkdir -p "$output_dir"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$kit/build-make-private-aarch64.sh" "$source_dir" "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=Candidate build or audit failed::Exit $build_status; a sanitized log tail follows. No binary was uploaded."
+            python3 - "$raw_log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib, re, sys
+          log=pathlib.Path(sys.argv[1]).read_text(encoding="utf-8",errors="replace")
+          for value, replacement in ((sys.argv[2],"<RUNNER_TEMP>"),(sys.argv[3],"<WORKSPACE>"),
+                                     ("/home/builder/termux-packages","<BUILDER_SOURCE>"),
+                                     ("/data/user/0/com.karat.aibuilder/files/usr","<MODELED_PREFIX>"),
+                                     ("/data/user/0/com.karat.aibuilder","<MODELED_APP_DATA>"),
+                                     ("/data/data/com.karat.aibuilder","<MODELED_APP_DATA>")):
+              log=log.replace(value,replacement)
+          log=re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)","<REDACTED_SECRET>",log)
+          print("--- sanitized last 80 build-log lines ---")
+          for line in log.splitlines()[-80:]:
+              print(line[:600])
+          PY
+            exit "$build_status"
+          fi
+          python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          result=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert result["status"] == "audit-passed; device-runtime-test-not-run"
+          assert result["installed"] is False
+          assert result["deviceSmokeTest"] == "NOT RUN"
+          assert result["prefixProvenance"] == "ci-model-only; device-observation-not-run"
+          assert result["applicationId"] == "com.karat.aibuilder"
+          assert result["sourceCommit"] == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
+          print("PINNED_BUILD_AND_STATIC_AUDIT_OK package=make ci_prefix=model_only device_install=NOT_RUN")
+          PY
+
+      - name: Build and statically audit pinned gh candidate (no install/publish)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-private-gh-candidate-output"
+          raw_log="$RUNNER_TEMP/aib-private-gh-candidate-build.log"
+          mkdir -p "$output_dir"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$GITHUB_WORKSPACE/termux-private-package-kit/gh-v2.102.0/build-gh-private-aarch64.sh" \
+              "$RUNNER_TEMP/termux-packages" "$GITHUB_WORKSPACE/gh-candidate-package-set.json" "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=gh candidate build or audit failed::Exit $build_status; sanitized log tail follows. No binary was uploaded."
+            python3 - "$raw_log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib, re, sys
+          log=pathlib.Path(sys.argv[1]).read_text(encoding="utf-8",errors="replace")
+          for value,replacement in ((sys.argv[2],"<RUNNER_TEMP>"),(sys.argv[3],"<WORKSPACE>"),
+                                   ("/home/builder/termux-packages","<BUILDER_SOURCE>"),
+                                   ("/data/user/0/com.karat.aibuilder/files/usr","<MODELED_PREFIX>"),
+                                   ("/data/user/0/com.karat.aibuilder","<MODELED_APP_DATA>"),
+                                   ("/data/data/com.karat.aibuilder","<MODELED_APP_DATA>")):
+              log=log.replace(value,replacement)
+          log=re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)","<REDACTED_SECRET>",log)
+          print("--- sanitized last 80 gh build-log lines ---")
+          for line in log.splitlines()[-80:]: print(line[:600])
+          PY
+            exit "$build_status"
+          fi
+          python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          result=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert result["status"] == "audit-passed; device-runtime-test-not-run"
+          assert result["packageName"] == "gh" and result["packageVersion"] == "2.102.0"
+          assert result["sourceCommit"] == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
+          assert result["sourceClosure"]["packageCount"] == 1
+          assert result["sourceClosure"]["requiredDependencyAlternativeCount"] == 0
+          assert result["installed"] is False and result["deviceSmokeTest"] == "NOT RUN"
+          assert result["prefixProvenance"] == "ci-model-only; device-observation-not-run"
+          print("PINNED_BUILD_AND_STATIC_AUDIT_OK package=gh version=2.102.0 ci_prefix=model_only device_install=NOT_RUN")
+          PY
+
+      - name: Sign temporary candidate feed and verify APT download/simulation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-private-make-candidate-output"
+          feed="$RUNNER_TEMP/aib-make-candidate-feed"
+          key_root="$RUNNER_TEMP/aib-candidate-signing-config"
+          mkdir -p "$feed/pool/main/make" "$feed/dists/stable/main/binary-aarch64"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key_root"
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key_root"
+          export GNUPGHOME="$key_root/gnupg"
+          mapfile -t debs < <(find "$output_dir/packages" -maxdepth 1 -type f -name 'make_*_aarch64.deb' -print)
+          ((${#debs[@]} == 1)) || { echo 'ERROR:EXPECTED_EXACTLY_ONE_ALLOWLISTED_DEB' >&2; exit 2; }
+          cp -- "${debs[0]}" "$feed/pool/main/make/"
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          python3 ./scripts/verify-candidate-dependency-closure.py \
+            --package-set candidate-package-set.json \
+            --packages-index "$feed/dists/stable/main/binary-aarch64/Packages"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-feed-signing.log" 2>&1 || {
+            echo 'ERROR:CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
+          }
+          python3 ./scripts/validate-candidate-feed.py \
+            --package-set candidate-package-set.json \
+            --feed-root "$feed" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json"
+          ./scripts/test-apt-candidate.sh "$feed" aarch64 make 4.4.1-1
+          package_sha="$(python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          print(json.loads(pathlib.Path(sys.argv[1]).read_text())["packageSha256"])
+          PY
+          )"
+          {
+            echo '## App-private package candidate checks'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Pinned source/recipe and builder | PASS |'
+            echo '| Fail-closed static audit | PASS |'
+            echo '| Signed APT index and strict `signed-by` | PASS |'
+            echo '| Package download + simulated install | PASS; no install performed |'
+            echo "| Candidate SHA-256 | \`$package_sha\` |"
+            echo '| Device install / rollback | NOT RUN |'
+            echo '| Candidate artifact | One exact approved marker push only; 1-day retention |'
+            echo '| Production feed / GitHub Release / Pages | BLOCKED / NONE |'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sign temporary gh candidate and verify exact dependency closure/APT simulation (no publication)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-private-gh-candidate-output"
+          feed="$RUNNER_TEMP/aib-gh-candidate-feed"
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$RUNNER_TEMP/aib-candidate-signing-config"
+          export GNUPGHOME="$AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT/gnupg"
+          mkdir -p "$feed/pool/main/gh" "$feed/dists/stable/main/binary-aarch64"
+          mapfile -t debs < <(find "$output_dir/packages" -maxdepth 1 -type f -name 'gh_*_aarch64.deb' -print)
+          ((${#debs[@]} == 1)) || { echo 'ERROR:EXPECTED_EXACTLY_ONE_ALLOWLISTED_GH_DEB' >&2; exit 2; }
+          cp -- "${debs[0]}" "$feed/pool/main/gh/"
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          python3 ./scripts/verify-candidate-dependency-closure.py \
+            --package-set gh-candidate-package-set.json \
+            --packages-index "$feed/dists/stable/main/binary-aarch64/Packages"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-gh-feed-signing.log" 2>&1 || {
+            echo 'ERROR:GH_CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
+          }
+          python3 ./scripts/validate-gh-candidate-feed.py \
+            --package-set gh-candidate-package-set.json \
+            --feed-root "$feed" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json"
+          ./scripts/test-apt-candidate.sh "$feed" aarch64 gh 2.102.0
+          package_sha="$(python3 - "$output_dir/build-result.json" <<'PY'
+          import json, pathlib, sys
+          print(json.loads(pathlib.Path(sys.argv[1]).read_text())["packageSha256"])
+          PY
+          )"
+          {
+            echo '## GitHub CLI app-private package candidate checks'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Exact Termux source commit, gh recipe and source archive | PASS |'
+            echo '| Required source closure | PASS; 1 recipe, 0 required dependency alternatives |'
+            echo '| Static audit: MIT license, AArch64 ELF, app-private paths, exact postinst | PASS |'
+            echo '| Candidate `Depends` closure | PASS; 0 external base assumptions |'
+            echo '| `Recommends: openssh` | Recorded; excluded by `--no-install-recommends` simulation |'
+            echo '| Ephemerally signed APT metadata + download/simulated install | PASS; no install performed |'
+            echo "| Candidate SHA-256 | \`$package_sha\` |"
+            echo '| Device install / rollback | NOT RUN |'
+            echo '| Public artifact / production feed / GitHub Release / Pages | NONE / BLOCKED |'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify synthetic tamper rejection (no package publication)
+        shell: bash
+        run: ./scripts/test-signed-feed-smoke.sh
+
+      - name: Stage one-time device-test artifact (exact marker push only)
+        id: stage-device-artifact
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/work/package-feed-gates-20261015' &&
+          github.event.before == 'e8896ad67153dc1a99805dd8953cd803a22d0b1a' &&
+          contains(github.event.head_commit.message, '[DEVICE-ARTIFACT-ONCE-e8896ad]')
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/stage-device-test-artifact.py \
+            --package-set candidate-package-set.json \
+            --feed-root "$RUNNER_TEMP/aib-make-candidate-feed" \
+            --build-result "$RUNNER_TEMP/aib-private-make-candidate-output/build-result.json" \
+            --audit-report "$RUNNER_TEMP/aib-private-make-candidate-output/audit-report.json" \
+            --key-root "$RUNNER_TEMP/aib-candidate-signing-config" \
+            --destination "$RUNNER_TEMP/aib-make-device-test-artifact"
+
+      - name: Upload one-time public device-test artifact (expires in one day)
+        id: upload-device-artifact
+        if: >-
+          steps.stage-device-artifact.outcome == 'success' &&
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/work/package-feed-gates-20261015' &&
+          github.event.before == 'e8896ad67153dc1a99805dd8953cd803a22d0b1a' &&
+          contains(github.event.head_commit.message, '[DEVICE-ARTIFACT-ONCE-e8896ad]')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aib-make-device-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-make-device-test-artifact
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Record device-test artifact retention in run summary
+        if: steps.upload-device-artifact.outcome == 'success'
+        shell: bash
+        run: |
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo 'A public, non-production device-test artifact was uploaded for this one approved marker push. Retention is one day. The archive contains only the candidate package, signed APT metadata, public ephemeral keyring, package-set manifest, build result, and static audit report; no private key.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove temporary source, candidate binary, signatures, and signing workspace
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- \
+            "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aib-private-make-candidate-output" \
+            "$RUNNER_TEMP/aib-private-make-candidate-build.log" \
+            "$RUNNER_TEMP/aib-make-candidate-feed" \
+            "$RUNNER_TEMP/aib-make-device-test-artifact" \
+            "$RUNNER_TEMP/aib-candidate-signing-config" \
+            "$RUNNER_TEMP/aib-feed-signing.log" \
+            "$RUNNER_TEMP/aib-private-gh-candidate-output" \
+            "$RUNNER_TEMP/aib-private-gh-candidate-build.log" \
+            "$RUNNER_TEMP/aib-gh-candidate-feed" \
+            "$RUNNER_TEMP/aib-gh-feed-signing.log"
