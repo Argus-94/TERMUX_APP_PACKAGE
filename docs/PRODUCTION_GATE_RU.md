@@ -10,7 +10,7 @@
 ## Что делает candidate pipeline
 
 1. Сборки Make и `gh` проверяют точные source/recipe/archive locks; Git workflow проверяет pinned Git source и все 14 пакетов closure, curl workflow — pinned curl source, subpackage и все 9 пакетов closure. Dependency downloads отключены в Git/curl builds.
-2. Каждый `.deb` проходит отдельный fail-closed static audit: control metadata, payload paths/links, embedded app paths, ELF ABI/interpreter/needed libraries, maintainer scripts и лицензии.
+2. Каждый `.deb` проходит отдельный fail-closed static audit: control metadata, payload paths/links, embedded app paths, ELF ABI/interpreter/needed libraries, maintainer scripts и лицензии. Для `curl` subpackage отсутствие собственного copyright payload допускается только при наличии в том же closure прошедшего audit `libcurl` parent с идентичными pinned recipe/source/version/license; validator сверяет paths/hashes parent evidence с report для `curl`.
 3. Package pool сверяется с manifest, build-result, audit report и APT indices; любое добавление, подмена или mismatch отклоняется.
 4. Для кандидатов создаётся временный подписанный APT feed; CI использует `signed-by=<pinned public keyring>`, проверяет загрузку и `apt-get --simulate install`. Фактической установки нет.
 5. Каждый `Depends`/`Pre-Depends` проверяется на точное разрешение в candidate allowlist с совместимой Debian-версией. Git closure содержит 14 source-built пакетов; curl closure включает 9 пакетов и 12 alternatives; `gh` не имеет обязательных `Depends` (`openssh` указан только как `Recommends`).

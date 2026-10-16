@@ -62,6 +62,7 @@
       "versionExpressionIsLiteral": true,
       "revisionExpressionIsLiteral": true,
       "licenseExpression": "MIT",
+      "licenseEvidenceParentPackage": "libcurl",
       "sourceUrl": "https://github.com/curl/curl/releases/download/curl-8_23_0/curl-8.23.0.tar.xz",
       "sourceSha256": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5",
       "dependencyGroups": [

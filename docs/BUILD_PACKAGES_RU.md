@@ -10,7 +10,7 @@
 - GitHub CLI `gh` `2.102.0` (`gh-candidate-package-set.json`);
 - Git `2.56.0`: 14 source-built packages и 20 dependency alternatives (CI run `38829235485`).
 
-Для подтверждённых кандидатов проверяются pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Отдельный `curl` `8.23.0` candidate workflow фиксирует closure из 9 пакетов и 12 dependency alternatives, включая hash `curl` subpackage; его актуальный CI-результат смотрите в Actions check связанного PR. Даже успешная симуляция — **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` остаются inventory для всех пакетов, кроме тех, что отдельно закреплены candidate manifests.
+Для подтверждённых кандидатов проверяются pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Отдельный `curl` `8.23.0` candidate workflow фиксирует closure из 9 пакетов и 12 dependency alternatives, включая hash `curl` subpackage; его актуальный CI-результат смотрите в Actions check связанного PR. Поскольку upstream subpackage `curl` не несёт отдельный copyright payload, аудит требует license evidence от включённого parent `.deb` `libcurl` с теми же pinned recipe/source/version/license; без доказательства parent evidence closure отклоняется. Даже успешная симуляция — **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` остаются inventory для всех пакетов, кроме тех, что отдельно закреплены candidate manifests.
 
 ## Повторяемая проверка
 

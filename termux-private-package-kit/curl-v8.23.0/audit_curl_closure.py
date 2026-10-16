@@ -52,6 +52,7 @@ EXPECTED_PACKAGE_LOCKS = {'ca-certificates': {'architecture': 'all',
                      'version': '1:2026.09.25'},
  'curl': {'architecture': 'aarch64',
           'licenseExpression': 'MIT',
+          'licenseEvidenceParentPackage': 'libcurl',
           'packageType': 'subpackage',
           'parentDependencyRule': 'true',
           'parentPackage': 'libcurl',
@@ -422,6 +423,8 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
     if pinned_license_files:
         expected_paths = {prefix + "/" + rel for rel in pinned_license_files}
         require(expected_paths <= license_paths, "LICENSE_EVIDENCE_MISSING", name)
+    elif name == "curl" and spec.get("packageType") == "subpackage" and spec.get("parentPackage") == "libcurl":
+        pass  # Its exact parent recipe and license evidence are checked after all candidate packages are audited.
     else:
         require(bool(license_paths), "LICENSE_EVIDENCE_MISSING", name)
     if name == "curl":
@@ -433,6 +436,28 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
             "payloadEntries": count, "payloadBytes": total, "elf": elf_records,
             "depends": fields.get("Depends", ""), "preDepends": fields.get("Pre-Depends", ""),
             "recommends": fields.get("Recommends", ""), "maintainerScripts": sorted(set(controls) & {"preinst", "postinst", "prerm", "postrm", "config"})}
+
+
+def inherit_subpackage_license_evidence(specs: list[dict[str, Any]], results: list[dict[str, Any]]) -> None:
+    by_spec = {item["name"]: item for item in specs}
+    by_result = {item["name"]: item for item in results}
+    for spec in specs:
+        if spec.get("packageType") != "subpackage":
+            continue
+        name = spec["name"]
+        require(name == "curl" and spec.get("parentPackage") == "libcurl" and spec.get("licenseEvidenceParentPackage") == "libcurl", "SUBPACKAGE_LICENSE_INHERITANCE_NOT_ALLOWLISTED", name)
+        parent_name = spec["parentPackage"]
+        parent_spec = by_spec.get(parent_name)
+        parent_result = by_result.get(parent_name)
+        require(parent_spec is not None and parent_spec.get("packageType") == "recipe", "SUBPACKAGE_LICENSE_PARENT_NOT_IN_CANDIDATE", name)
+        require(parent_result is not None and bool(parent_result.get("licenseEvidencePaths")), "SUBPACKAGE_PARENT_LICENSE_EVIDENCE_MISSING", name)
+        for field in ("architecture", "licenseExpression", "recipePath", "recipeSha256", "sourceUrl", "sourceSha256", "sourceVersionExpression", "sourceRevisionExpression", "version"):
+            require(spec.get(field) == parent_spec.get(field), "SUBPACKAGE_LICENSE_PROVENANCE_MISMATCH", name + ":" + field)
+        result = by_result[name]
+        result["licenseEvidenceParentPackage"] = parent_name
+        result["licenseEvidenceParentPaths"] = list(parent_result["licenseEvidencePaths"])
+        result["licenseEvidenceParentSha256"] = dict(parent_result.get("licenseEvidenceSha256", {}))
+        result["licenseEvidenceKind"] = "verified via audited parent package; identical pinned source, recipe, version, architecture, and license"
 
 
 def audit(args: argparse.Namespace) -> dict[str, Any]:
@@ -476,6 +501,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             all_results.append(result)
             for elf in result["elf"]:
                 all_elf.append({**elf, "package": spec["name"]})
+    inherit_subpackage_license_evidence(specs, all_results)
     providers: set[str] = set(PLATFORM_LIBS)
     for item in all_elf:
         if item["soname"]:

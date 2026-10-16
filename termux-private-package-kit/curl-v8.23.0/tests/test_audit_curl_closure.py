@@ -32,6 +32,34 @@ class CurlAllowlistTests(unittest.TestCase):
         with self.assertRaises(auditor.AuditError):
             auditor.validate_package_specs(specs)
 
+    def test_curl_license_evidence_is_inherited_only_from_exact_audited_parent(self):
+        results = [
+            {"name": "curl", "licenseEvidencePaths": [], "licenseEvidenceSha256": {}},
+            {"name": "libcurl", "licenseEvidencePaths": [PREFIX + "/share/doc/libcurl/copyright"], "licenseEvidenceSha256": {}},
+        ]
+        auditor.inherit_subpackage_license_evidence(self.manifest["packages"], results)
+        curl = next(item for item in results if item["name"] == "curl")
+        self.assertEqual(curl["licenseEvidenceParentPackage"], "libcurl")
+        self.assertEqual(curl["licenseEvidenceParentPaths"], [PREFIX + "/share/doc/libcurl/copyright"])
+
+    def test_curl_license_inheritance_rejects_missing_parent_evidence(self):
+        results = [
+            {"name": "curl", "licenseEvidencePaths": [], "licenseEvidenceSha256": {}},
+            {"name": "libcurl", "licenseEvidencePaths": [], "licenseEvidenceSha256": {}},
+        ]
+        with self.assertRaises(auditor.AuditError):
+            auditor.inherit_subpackage_license_evidence(self.manifest["packages"], results)
+
+    def test_curl_license_inheritance_rejects_parent_with_different_source(self):
+        specs = json.loads(json.dumps(self.manifest["packages"]))
+        next(item for item in specs if item["name"] == "curl")["sourceSha256"] = "0" * 64
+        results = [
+            {"name": "curl", "licenseEvidencePaths": [], "licenseEvidenceSha256": {}},
+            {"name": "libcurl", "licenseEvidencePaths": [PREFIX + "/share/doc/libcurl/copyright"], "licenseEvidenceSha256": {}},
+        ]
+        with self.assertRaises(auditor.AuditError):
+            auditor.inherit_subpackage_license_evidence(specs, results)
+
     def test_missing_or_extra_candidate_is_rejected(self):
         specs = self.manifest["packages"][:-1]
         with self.assertRaises(auditor.AuditError):

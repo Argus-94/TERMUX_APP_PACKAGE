@@ -109,6 +109,10 @@ def validate(args: argparse.Namespace) -> None:
     by_audit = {x.get("name"): x for x in audit_packages}
     by_build = {x.get("name"): x for x in build_packages}
     require(set(by_audit) == set(by_build) == set(expected), "BUILD_AUDIT_PACKAGE_SET_MISMATCH")
+    parent_audit = by_audit["libcurl"]
+    curl_audit = by_audit["curl"]
+    require(expected["curl"].get("licenseEvidenceParentPackage") == "libcurl" and bool(parent_audit.get("licenseEvidencePaths")) and curl_audit.get("licenseEvidenceParentPackage") == "libcurl" and curl_audit.get("licenseEvidenceParentPaths") == parent_audit.get("licenseEvidencePaths") and curl_audit.get("licenseEvidenceParentSha256") == parent_audit.get("licenseEvidenceSha256"), "CURL_SUBPACKAGE_LICENSE_INHERITANCE_INVALID")
+    require(by_build["curl"].get("licenseEvidenceParentPackage") == "libcurl" and by_build["curl"].get("licenseEvidenceParentPaths") == parent_audit.get("licenseEvidencePaths") and by_build["curl"].get("licenseEvidenceParentSha256") == parent_audit.get("licenseEvidenceSha256"), "BUILD_CURL_LICENSE_INHERITANCE_MISMATCH")
 
     root = args.feed_root.resolve(strict=True)
     pool = root / "pool"
