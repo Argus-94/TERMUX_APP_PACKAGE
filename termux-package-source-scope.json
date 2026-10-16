@@ -23,6 +23,9 @@
     ],
     "builder-cli": [
       "gh"
+    ],
+    "wget-candidate": [
+      "wget"
     ]
   },
   "semantics": {
