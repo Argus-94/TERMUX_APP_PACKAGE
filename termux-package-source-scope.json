@@ -29,10 +29,38 @@
     ],
     "pkg-config-candidate": [
       "pkg-config"
+    ],
+    "nodejs-npm-candidate": [
+      "nodejs",
+      "npm"
+    ],
+    "openjdk17-candidate": [
+      "openjdk-17"
+    ],
+    "python-candidate": [
+      "python"
+    ],
+    "cmake-ninja-candidate": [
+      "cmake",
+      "ninja"
+    ]
+  },
+  "dependencyChoices": {
+    "nodejs-npm-candidate": [
+      {
+        "package": "npm",
+        "dependencyGroupIndex": 0,
+        "alternatives": [
+          "nodejs",
+          "nodejs-lts"
+        ],
+        "selected": "nodejs"
+      }
     ]
   },
   "semantics": {
     "requiredClosure": "TERMUX_PKG_DEPENDS, TERMUX_SUBPKG_DEPENDS, and upstream subpackage-to-parent rules",
+    "dependencyChoices": "The complete source relation remains recorded; only the explicitly selected provider is traversed for a profile, and the candidate package set must still satisfy the full relation.",
     "recommendations": "Recorded but not traversed; APT candidate simulation explicitly disables recommends.",
     "versionAuthority": "This source inventory pins exact source recipe paths and SHA-256s. Generated .deb versions must still match a separate candidate package set.",
     "safety": "This file does not authorize builds, installation, feed staging, signing, publication, or device claims."

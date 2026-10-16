@@ -1,0 +1,704 @@
+{
+  "dependencyAlternativeCount": 34,
+  "packageCount": 22,
+  "packages": [
+    {
+      "dependencyGroups": [],
+      "name": "ca-certificates",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:2026.09.25",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libarchive",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libarchive",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libcurl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libcurl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "jsoncpp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "jsoncpp",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libuv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libuv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "rhash",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "rhash",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "cmake",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/cmake/build.sh",
+      "recipeSha256": "36556f15fe7e055c6d4ba10adf580802a1fe50b45f3b8ebb6a75b88cc5b492e4",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "clang",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "clang",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "make",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "make",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "4.4.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "jsoncpp",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/jsoncpp/build.sh",
+      "recipeSha256": "ddd00bd024424d9919e9ce7837c544f4501253b655c88a51288cff10423c0e28",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.9.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-glob",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-glob/build.sh",
+      "recipeSha256": "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libandroid-spawn",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-spawn/build.sh",
+      "recipeSha256": "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "0.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libbz2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libbz2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxml2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxml2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libarchive",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libarchive/build.sh",
+      "recipeSha256": "c22a609e59872c8f0e0d3d0fe4a027c6fd8e4bcd79e9e937e219f968ac94f8de",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.8.9",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libbz2",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libbz2/build.sh",
+      "recipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "8",
+      "sourceVersionExpression": "1.0.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libc++",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libc++/build.sh",
+      "recipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libnghttp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libnghttp3",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp3",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libngtcp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libngtcp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libssh2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libssh2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": ">=",
+            "qualifier": null,
+            "sourceRelation": "openssl (>= 1:3.2.1-1)",
+            "version": "1:3.2.1-1"
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libcurl",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libcurl/build.sh",
+      "recipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "8.23.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libexpat",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libexpat/build.sh",
+      "recipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.9.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libiconv",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libiconv/build.sh",
+      "recipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.19",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "liblzma",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/liblzma/build.sh",
+      "recipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "5.8.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libnghttp2",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libnghttp2/build.sh",
+      "recipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.70.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libnghttp3",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libnghttp3/build.sh",
+      "recipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.18.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libngtcp2",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libngtcp2/build.sh",
+      "recipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.25.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libssh2",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libssh2/build.sh",
+      "recipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.11.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libuv",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libuv/build.sh",
+      "recipeSha256": "5306178facd555b28439aae348d0e561c541cdaace4d04ab1eeec540997b2dfc",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.53.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-glob",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-glob",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libxml2",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libxml2/build.sh",
+      "recipeSha256": "52de9d390c6594e2a9bc45b1301a21fadc157b20a7c203d9e4eb3a841b058f7c",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "2.15.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "ninja",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/ninja/build.sh",
+      "recipeSha256": "6a3c1ec0da0494531079bed1604965eb2163e602781ba12be04d3e60ef5cddbe",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.13.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openssl",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:3.6.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "name": "rhash",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/rhash/build.sh",
+      "recipeSha256": "471c7efe285a2d81169dbc5fcc0e339ab1a47317021057eea8ab0028318c0f1f",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.4.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "zlib",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    }
+  ],
+  "profile": "cmake-ninja-candidate",
+  "rootPackages": [
+    "cmake",
+    "ninja"
+  ],
+  "schemaVersion": 1,
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "verification": "pinned-source-recipe-inventory-only; no packages built, installed, staged, signed, or authorized"
+}

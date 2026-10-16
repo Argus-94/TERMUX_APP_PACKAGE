@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "inventory-only; no package build or install authorization",
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "profiles": {
+    "nodejs-npm-candidate": {
+      "rootPackages": ["nodejs", "npm"],
+      "packageCount": 11,
+      "dependencyAlternativeCount": 14,
+      "closureSha256": "4bfb59809c1dc31731816a11a9671853a93ca3994bfd9266f9a67eb3abec4c61",
+      "closureFile": "toolchain-candidate-source-closures/nodejs-npm-candidate.json",
+      "packageNames": ["c-ares", "ca-certificates", "libc++", "libffi", "libicu", "libsqlite", "nodejs", "npm", "openssl", "resolv-conf", "zlib"],
+      "selectedDependencyAlternatives": [
+        {
+          "package": "npm",
+          "dependencyGroupIndex": 0,
+          "alternatives": ["nodejs", "nodejs-lts"],
+          "selected": "nodejs"
+        }
+      ],
+      "note": "The upstream nodejs recipe recommends npm but builds with --without-npm; npm is an explicit root here and selects nodejs, excluding the conflicting nodejs-lts runtime."
+    },
+    "openjdk17-candidate": {
+      "rootPackages": ["openjdk-17"],
+      "packageCount": 36,
+      "dependencyAlternativeCount": 46,
+      "closureSha256": "378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a",
+      "closureFile": "toolchain-candidate-source-closures/openjdk17-candidate.json",
+      "packageNames": ["abseil-cpp", "alsa-lib", "alsa-plugins", "dbus", "libandroid-execinfo", "libandroid-glob", "libandroid-shmem", "libandroid-spawn", "libandroid-stub", "libandroid-support", "libandroid-sysv-semaphore", "libc++", "libexpat", "libflac", "libiconv", "libjpeg-turbo", "libltdl", "libmp3lame", "libmpg123", "libogg", "libopus", "libsndfile", "libsoxr", "libvorbis", "libwebrtc-audio-processing", "libx11", "libxau", "libxcb", "libxdmcp", "littlecms", "openjdk-17", "pulseaudio", "speexdsp", "xorg-util-macros", "xorgproto", "zlib"],
+      "selectedDependencyAlternatives": []
+    },
+    "python-candidate": {
+      "rootPackages": ["python"],
+      "packageCount": 17,
+      "dependencyAlternativeCount": 25,
+      "closureSha256": "fee7f54aab5e120b377abbb503e704380a478162e8025bb9d975f5bdbd372ad6",
+      "closureFile": "toolchain-candidate-source-closures/python-candidate.json",
+      "packageNames": ["ca-certificates", "gdbm", "libandroid-posix-semaphore", "libandroid-support", "libbz2", "libcrypt", "libexpat", "libffi", "liblzma", "libsqlite", "ncurses", "ncurses-ui-libs", "openssl", "python", "readline", "zlib", "zstd"],
+      "selectedDependencyAlternatives": []
+    },
+    "cmake-ninja-candidate": {
+      "rootPackages": ["cmake", "ninja"],
+      "packageCount": 22,
+      "dependencyAlternativeCount": 34,
+      "closureSha256": "9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff",
+      "closureFile": "toolchain-candidate-source-closures/cmake-ninja-candidate.json",
+      "packageNames": ["ca-certificates", "cmake", "jsoncpp", "libandroid-glob", "libandroid-spawn", "libarchive", "libbz2", "libc++", "libcurl", "libexpat", "libiconv", "liblzma", "libnghttp2", "libnghttp3", "libngtcp2", "libssh2", "libuv", "libxml2", "ninja", "openssl", "rhash", "zlib"],
+      "selectedDependencyAlternatives": []
+    }
+  },
+  "limitations": [
+    "The resolver follows TERMUX_PKG_DEPENDS, TERMUX_SUBPKG_DEPENDS, and upstream subpackage-to-parent rules; it records but does not traverse recommendations.",
+    "TERMUX_PKG_BUILD_DEPENDS and builder-specific host inputs are outside these runtime closures; the inventory does not prove a build is feasible.",
+    "No package set, binary, static ELF/license audit, signed feed, APT simulation, artifact, Android install, or rollback evidence is produced by this inventory."
+  ]
+}

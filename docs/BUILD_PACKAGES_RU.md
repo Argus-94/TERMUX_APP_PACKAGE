@@ -12,6 +12,17 @@
 
 Для подтверждённых кандидатов проверяются pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Отдельный `curl` `8.23.0` candidate workflow фиксирует closure из 9 пакетов и 12 dependency alternatives, включая hash `curl` subpackage; его актуальный CI-результат смотрите в Actions check связанного PR. Поскольку upstream subpackage `curl` не несёт отдельный copyright payload, аудит требует license evidence от включённого parent `.deb` `libcurl` с теми же pinned recipe/source/version/license; без доказательства parent evidence closure отклоняется. Даже успешная симуляция — **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` остаются inventory для всех пакетов, кроме тех, что отдельно закреплены candidate manifests.
 
+## Дополнительные toolchain closures — только source metadata
+
+Отдельная ветка фиксирует recipe hashes и runtime dependency closures из Termux commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7` для:
+
+- Node.js `26.4.0` + npm `11.20.0`: 11 пакетов, 14 dependency alternatives. Upstream `nodejs` recipe рекомендует npm, но использует `--without-npm`; npm включён как отдельный root. Для `npm` явно выбран provider `nodejs` вместо конфликтующего `nodejs-lts`; исходная группа `nodejs | nodejs-lts` при этом сохраняется в metadata.
+- OpenJDK 17 `17.0.20`: 36 пакетов, 46 alternatives.
+- Python `3.14.6`: 17 пакетов, 25 alternatives.
+- CMake `4.4.4` + Ninja `1.13.2`: 22 пакета, 34 alternatives.
+
+Эти числа описывают **runtime `Depends` closure**, а не полный build closure: `TERMUX_PKG_BUILD_DEPENDS` и builder-specific host inputs не обходятся. Read-only workflow повторно разрешает recipes/subpackages, сверяет каждый snapshot и hash, но ничего не собирает, не скачивает package binaries, не создаёт/подписывает feed и не запускает APT или Android. Ни один из перечисленных toolchain packages пока не является CI-аудированным или installable candidate; для этого нужны отдельные candidate package sets, provenance/build scripts, статические ELF/license/dependency audits и hosted build проверки.
+
 ## Повторяемая проверка
 
 Запускайте команды из корня репозитория:
@@ -20,6 +31,7 @@
 ./scripts/test-candidate-feed-policy.sh
 ./scripts/test-candidate-dependency-closure.sh
 bash ./scripts/test-pinned-termux-recipe-closure.sh
+bash ./scripts/test-toolchain-candidate-source-closures.sh /path/to/clean-pinned-termux-packages
 ./termux-private-package-kit/make-v476/verify-kit.sh
 ./scripts/test-device-test-artifact-staging.sh
 python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
