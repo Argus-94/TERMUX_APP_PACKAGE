@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "source": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "commit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "propertiesScriptSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
+    "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
+    "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2",
+    "restrictedAppArmorProfileSha256": "ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8",
+    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw,"
+  },
+  "sourceClosure": {
+    "profile": "curl-candidate",
+    "rootPackages": [
+      "curl"
+    ],
+    "expectedPackageCount": 9,
+    "expectedDependencyAlternativeCount": 12,
+    "semantics": "The exact required TERMUX_PKG_DEPENDS and subpackage-parent dependency closure is resolved from the pinned Termux commit, then built using the pinned buildorder with dependency downloads disabled. Recommendations are inventoried but excluded. The signed candidate feed must satisfy all generated Depends/Pre-Depends relations with no external package assumptions."
+  },
+  "packages": [
+    {
+      "name": "ca-certificates",
+      "version": "1:2026.09.25",
+      "architecture": "all",
+      "packageType": "recipe",
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "sourceVersionExpression": "1:2026.09.25",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MPL-2.0",
+      "sourceUrl": "https://curl.se/ca/cacert-2026-09-25.pem",
+      "sourceSha256": "a41b5d356aea97a529fe27e0f7316d2f9d946d75927476cf9cf1b90637d00505",
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "curl",
+      "version": "8.23.0",
+      "architecture": "aarch64",
+      "packageType": "subpackage",
+      "recipePath": "packages/libcurl/build.sh",
+      "recipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+      "sourceVersionExpression": "8.23.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MIT",
+      "sourceUrl": "https://github.com/curl/curl/releases/download/curl-8_23_0/curl-8.23.0.tar.xz",
+      "sourceSha256": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libcurl",
+            "operator": "=",
+            "qualifier": null,
+            "sourceRelation": "libcurl (= parent-build-version)",
+            "version": "parent-build-version"
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": "libcurl",
+      "parentDependencyRule": "true",
+      "subpackagePath": "packages/libcurl/curl.subpackage.sh",
+      "subpackageSha256": "47a25ce446d62c15a4911b4ed6e95fb0655cb1624eb1b62a13a6b6e87315daef"
+    },
+    {
+      "name": "libcurl",
+      "version": "8.23.0",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/libcurl/build.sh",
+      "recipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+      "sourceVersionExpression": "8.23.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MIT",
+      "sourceUrl": "https://github.com/curl/curl/releases/download/curl-8_23_0/curl-8.23.0.tar.xz",
+      "sourceSha256": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libnghttp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libnghttp3",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp3",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libngtcp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libngtcp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libssh2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libssh2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": ">=",
+            "qualifier": null,
+            "sourceRelation": "openssl (>= 1:3.2.1-1)",
+            "version": "1:3.2.1-1"
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libnghttp2",
+      "version": "1.70.0",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/libnghttp2/build.sh",
+      "recipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+      "sourceVersionExpression": "1.70.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MIT",
+      "sourceUrl": "https://github.com/nghttp2/nghttp2/releases/download/v1.70.0/nghttp2-1.70.0.tar.xz",
+      "sourceSha256": "e05cb1388eaca3830aded4ccf20044b6e1ac1a61411dcca11b0437c4285c8bc2",
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libnghttp3",
+      "version": "1.18.0",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/libnghttp3/build.sh",
+      "recipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+      "sourceVersionExpression": "1.18.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MIT",
+      "sourceUrl": "https://github.com/ngtcp2/nghttp3/releases/download/v1.18.0/nghttp3-1.18.0.tar.xz",
+      "sourceSha256": "aad782c23d3f01bd4bb52c8bac7a553b631ef8115fd1612703df6183449fef19",
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libngtcp2",
+      "version": "1.25.0",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/libngtcp2/build.sh",
+      "recipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+      "sourceVersionExpression": "1.25.0",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "MIT",
+      "sourceUrl": "https://github.com/ngtcp2/ngtcp2/releases/download/v1.25.0/ngtcp2-1.25.0.tar.gz",
+      "sourceSha256": "1c0843076528a87b65e9a9d455100941f4cb65d44f96c5da6ae56df146043955",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "libssh2",
+      "version": "1.11.1-2",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/libssh2/build.sh",
+      "recipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+      "sourceVersionExpression": "1.11.1",
+      "sourceRevisionExpression": "2",
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "BSD 3-Clause",
+      "sourceUrl": "https://www.libssh2.org/download/libssh2-1.11.1.tar.gz",
+      "sourceSha256": "d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "openssl",
+      "version": "1:3.6.5",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "sourceVersionExpression": "1:3.6.5",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "Apache-2.0",
+      "sourceUrl": "https://github.com/openssl/openssl/releases/download/openssl-3.6.5/openssl-3.6.5.tar.gz",
+      "sourceSha256": "a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98",
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "architecture": "aarch64",
+      "packageType": "recipe",
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "sourceVersionExpression": "1.3.2",
+      "sourceRevisionExpression": null,
+      "versionExpressionIsLiteral": true,
+      "revisionExpressionIsLiteral": true,
+      "licenseExpression": "ZLIB",
+      "sourceUrl": "https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.xz",
+      "sourceSha256": "d7a0654783a4da529d1bb793b7ad9c3318020af77667bcae35f95d0e42a792f3",
+      "dependencyGroups": [],
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "parentPackage": null,
+      "parentDependencyRule": null,
+      "subpackagePath": null,
+      "subpackageSha256": null
+    }
+  ],
+  "runtimeDependencies": {
+    "curlRequires": [
+      "libcurl"
+    ],
+    "libcurlRequires": [
+      "libnghttp2",
+      "libnghttp3",
+      "libngtcp2",
+      "libssh2",
+      "openssl",
+      "zlib"
+    ],
+    "recommendationsExcludedFromInstallSimulation": []
+  },
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT RUN",
+    "rollback": "NOT RUN",
+    "deviceEvidenceSha256": null
+  },
+  "excludedInputs": [
+    "all existing legacy .deb packages in the repository",
+    "stock com.termux packages and feeds as candidate binaries",
+    "PocketForge packages",
+    "unapproved external base packages and dependency downloads"
+  ]
+}
