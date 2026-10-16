@@ -20,9 +20,9 @@ SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PACKAGE_COUNT = 22
 DEPENDENCY_ALTERNATIVE_COUNT = 33
-PACKAGE_SET_SHA256 = "0078742e32166828f88ed7583b89bfb470075fc43ba7f0cfa4a5ae4c9b5cc3f2"
+PACKAGE_SET_SHA256 = "7a72402868ddbcd04dd1de1b799235bb7bcc3c7685b63fdf6e6fd9d48eda9a93"
 SOURCE_CLOSURE_SHA256 = "84fbfa0980dbe28aa348d84003b715571c53891cdeaa6c03f1d5b0291cd635f6"
-PATCH_SHA256 = "51dc2ef1e76617e1c3dc5c51729b78851443c01e1d8b534163aae2c9316e7f96"
+PATCH_SHA256 = "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9"
 PREFIXES = {
     "/data/user/0/com.karat.aibuilder/files/usr",
     "/data/data/com.karat.aibuilder/files/usr",
@@ -87,6 +87,16 @@ EXPECTED_SOURCE_LICENSE_EVIDENCE = {
         "sourceUrl": "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz",
         "sourceSha256": "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591",
     },
+    "ncurses": {
+        "sourceUrl": "https://github.com/ThomasDickey/ncurses-snapshots/archive/5f58399b2de47ed14bdfe3a0cb149293b27893d5.tar.gz",
+        "sourceSha256": "28cd102efe6a2610e830cc79cf270da6ff0427b2022900a9a36d2761522f9576",
+        "licenseSourcePath": "COPYING",
+        "licensePayloadSha256": "708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226",
+        "packageLicensePaths": {
+            "ncurses": "share/doc/ncurses/copyright",
+            "ncurses-ui-libs": "share/doc/ncurses-ui-libs/COPYING",
+        },
+    },
     "python": {
         "sourceUrl": "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz",
         "sourceSha256": "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63",
@@ -121,6 +131,8 @@ EXPECTED_LOCAL_LICENSE_PATHS = {
         "share/doc/liblzma/COPYING.GPLv3",
         "share/doc/liblzma/COPYING.LGPLv2.1",
     },
+    "ncurses": {"share/doc/ncurses/copyright"},
+    "ncurses-ui-libs": {"share/doc/ncurses-ui-libs/COPYING"},
     "python": {"share/doc/python/LICENSE"},
 }
 
@@ -306,10 +318,7 @@ def validate_elf_needed_providers(all_elf: list[dict[str, Any]]) -> dict[str, An
 
 
 def license_roots(name: str, prefix: str) -> list[str]:
-    roots = [prefix + "/share/doc/" + name + "/"]
-    if name == "ncurses-ui-libs":
-        roots.append(prefix + "/share/doc/ncurses/")
-    return roots
+    return [prefix + "/share/doc/" + name + "/"]
 
 
 def is_license_doc(path: str, name: str, prefix: str) -> bool:
@@ -465,6 +474,11 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
         require(expected_paths <= license_paths, "LOCAL_LICENSE_FILE_SET_INCOMPLETE", name)
         for path in expected_paths:
             require(path in license_hashes, "LOCAL_LICENSE_NOT_REGULAR", name + ":" + path)
+    if name in {"ncurses", "ncurses-ui-libs"}:
+        evidence = EXPECTED_SOURCE_LICENSE_EVIDENCE["ncurses"]
+        path = prefix + "/" + evidence["packageLicensePaths"][name]
+        require(license_hashes.get(path) == evidence["licensePayloadSha256"],
+                "NCURSES_COPYING_LICENSE_HASH_MISMATCH", name + ":" + path)
     if name == "python":
         require(license_hashes.get(prefix + "/share/doc/python/LICENSE") == EXPECTED_SOURCE_LICENSE_EVIDENCE["python"]["licensePayloadSha256"],
                 "PYTHON_PSF_LICENSE_MISSING_OR_MISMATCHED")

@@ -4,9 +4,9 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='0078742e32166828f88ed7583b89bfb470075fc43ba7f0cfa4a5ae4c9b5cc3f2'
+readonly EXPECTED_MANIFEST_SHA='7a72402868ddbcd04dd1de1b799235bb7bcc3c7685b63fdf6e6fd9d48eda9a93'
 readonly EXPECTED_CLOSURE_SHA='84fbfa0980dbe28aa348d84003b715571c53891cdeaa6c03f1d5b0291cd635f6'
-readonly EXPECTED_PATCH_SHA='51dc2ef1e76617e1c3dc5c51729b78851443c01e1d8b534163aae2c9316e7f96'
+readonly EXPECTED_PATCH_SHA='f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9'
 readonly MIN_FREE_BYTES=$((8 * 1024 * 1024 * 1024))
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
@@ -51,7 +51,8 @@ assert m['sourceClosure']['profile']=='pkg-config-candidate' and m['sourceClosur
 assert m['sourceClosure']['expectedPackageCount']==22 and m['sourceClosure']['expectedDependencyAlternativeCount']==33
 assert len(m['packages'])==22 and [p['name'] for p in m['packages']]==sorted(p['name'] for p in m['packages'])
 assert m['releaseGate']=={'publicationAllowed':False,'deviceInstall':'NOT RUN','rollback':'NOT RUN','deviceEvidenceSha256':None}
-assert m['buildModifications']['patchSha256']=='51dc2ef1e76617e1c3dc5c51729b78851443c01e1d8b534163aae2c9316e7f96'
+assert m['buildModifications']['patchSha256']=='f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9'
+assert m['sourceLicenseEvidence']['ncurses']['licensePayloadSha256']=='708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226'
 assert m['sourceLicenseEvidence']['python']['licensePayloadSha256']=='b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231'
 PY
 
@@ -107,7 +108,7 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/ncurses/ncurses-ui-libs.subpackage.sh\nscripts/properties.sh' ]] || fail 'PKG_CONFIG_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/ncurses/build.sh\npackages/ncurses/ncurses-ui-libs.subpackage.sh\nscripts/properties.sh' ]] || fail 'PKG_CONFIG_PATCH_SCOPE_MISMATCH'
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash

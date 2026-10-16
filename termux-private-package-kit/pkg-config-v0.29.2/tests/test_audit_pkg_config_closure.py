@@ -79,9 +79,18 @@ class PkgConfigAuditTests(unittest.TestCase):
 
     def test_only_allowed_license_doc_roots_are_recognized(self) -> None:
         self.assertTrue(audit.is_license_doc(PREFIX + "/share/doc/python/LICENSE", "python", PREFIX))
-        self.assertTrue(audit.is_license_doc(PREFIX + "/share/doc/ncurses/copyright", "ncurses-ui-libs", PREFIX))
+        self.assertTrue(audit.is_license_doc(PREFIX + "/share/doc/ncurses/copyright", "ncurses", PREFIX))
+        self.assertTrue(audit.is_license_doc(PREFIX + "/share/doc/ncurses-ui-libs/COPYING", "ncurses-ui-libs", PREFIX))
         self.assertFalse(audit.is_license_doc(PREFIX + "/share/doc/other/LICENSE", "python", PREFIX))
-        self.assertFalse(audit.is_license_doc(PREFIX + "/share/doc/ncurses/notes.txt", "ncurses-ui-libs", PREFIX))
+        self.assertFalse(audit.is_license_doc(PREFIX + "/share/doc/ncurses/copyright", "ncurses-ui-libs", PREFIX))
+        self.assertFalse(audit.is_license_doc(PREFIX + "/share/doc/ncurses-ui-libs/notes.txt", "ncurses-ui-libs", PREFIX))
+
+    def test_split_ncurses_packages_have_separate_source_pinned_license_copies(self) -> None:
+        evidence = audit.EXPECTED_SOURCE_LICENSE_EVIDENCE["ncurses"]
+        self.assertEqual(evidence["sourceSha256"], "28cd102efe6a2610e830cc79cf270da6ff0427b2022900a9a36d2761522f9576")
+        self.assertEqual(evidence["licensePayloadSha256"], "708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226")
+        self.assertEqual(audit.EXPECTED_LOCAL_LICENSE_PATHS["ncurses"], {"share/doc/ncurses/copyright"})
+        self.assertEqual(audit.EXPECTED_LOCAL_LICENSE_PATHS["ncurses-ui-libs"], {"share/doc/ncurses-ui-libs/COPYING"})
 
     def test_foreign_android_app_paths_are_rejected(self) -> None:
         audit.scan_paths((PREFIX + "/lib/libdemo.so").encode(), PREFIX, "fixture")

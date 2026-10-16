@@ -51,6 +51,16 @@
       "sourceUrl": "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz",
       "sourceSha256": "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591"
     },
+    "ncurses": {
+      "sourceUrl": "https://github.com/ThomasDickey/ncurses-snapshots/archive/5f58399b2de47ed14bdfe3a0cb149293b27893d5.tar.gz",
+      "sourceSha256": "28cd102efe6a2610e830cc79cf270da6ff0427b2022900a9a36d2761522f9576",
+      "licenseSourcePath": "COPYING",
+      "licensePayloadSha256": "708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226",
+      "packageLicensePaths": {
+        "ncurses": "share/doc/ncurses/copyright",
+        "ncurses-ui-libs": "share/doc/ncurses-ui-libs/COPYING"
+      }
+    },
     "python": {
       "sourceUrl": "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz",
       "sourceSha256": "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63",
@@ -70,8 +80,8 @@
   },
   "buildModifications": {
     "patchPath": "termux-private-package-kit/pkg-config-v0.29.2/ncurses-ui-libs-license.patch",
-    "patchSha256": "51dc2ef1e76617e1c3dc5c51729b78851443c01e1d8b534163aae2c9316e7f96",
-    "purpose": "Include only the parent ncurses copyright directory in the ncurses-ui-libs subpackage so the statically audited package carries its own pinned MIT license evidence; no executable code or runtime dependency changes."
+    "patchSha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9",
+    "purpose": "Preserve the parent ncurses copyright file and copy the source-verified COPYING payload into ncurses-ui-libs, so both split packages carry independent package-local MIT evidence; no executable code or runtime dependency changes."
   },
   "runtimeDependencies": {
     "pkgConfigRequires": [

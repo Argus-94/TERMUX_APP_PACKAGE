@@ -98,7 +98,7 @@ jobs:
             --scope "$GITHUB_WORKSPACE/termux-package-source-scope.json" \
             --profile pkg-config-candidate > "$closure"
           test "$(sha256sum "$closure" | awk '{print $1}')" = 84fbfa0980dbe28aa348d84003b715571c53891cdeaa6c03f1d5b0291cd635f6
-          test "$(sha256sum pkg-config-candidate-package-set.json | awk '{print $1}')" = 0078742e32166828f88ed7583b89bfb470075fc43ba7f0cfa4a5ae4c9b5cc3f2
+          test "$(sha256sum pkg-config-candidate-package-set.json | awk '{print $1}')" = 7a72402868ddbcd04dd1de1b799235bb7bcc3c7685b63fdf6e6fd9d48eda9a93
           python3 - "$closure" pkg-config-candidate-package-set.json <<'PY'
           import json,pathlib,sys
           closure=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))

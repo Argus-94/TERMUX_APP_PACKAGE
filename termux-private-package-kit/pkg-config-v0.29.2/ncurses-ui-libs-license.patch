@@ -1,9 +1,13 @@
+diff --git a/packages/ncurses/build.sh b/packages/ncurses/build.sh
+--- a/packages/ncurses/build.sh
++++ b/packages/ncurses/build.sh
+@@ -140,1 +140,3 @@ termux_step_post_make_install()
++	# Keep an independent, source-identical license copy in the split UI-libs package.
++	install -Dm644 "$TERMUX_PKG_SRCDIR/COPYING" "$TERMUX_PREFIX/share/doc/ncurses-ui-libs/COPYING" || termux_error_exit "Failed to install ncurses-ui-libs license copy"
+ }
 diff --git a/packages/ncurses/ncurses-ui-libs.subpackage.sh b/packages/ncurses/ncurses-ui-libs.subpackage.sh
 --- a/packages/ncurses/ncurses-ui-libs.subpackage.sh
 +++ b/packages/ncurses/ncurses-ui-libs.subpackage.sh
-@@ -4,4 +4,5 @@
- lib/pkgconfig/form*.pc
- lib/pkgconfig/menu*.pc
- lib/pkgconfig/panel*.pc
-+share/doc/ncurses
+@@ -8,1 +8,2 @@
++share/doc/ncurses-ui-libs
  "
