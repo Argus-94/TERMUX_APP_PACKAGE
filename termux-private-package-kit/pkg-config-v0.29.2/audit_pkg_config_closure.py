@@ -35,6 +35,9 @@ PACKAGE_FILE_ELF_PROVIDERS = {
     "libandroid-posix-semaphore.so": ("libandroid-posix-semaphore", "lib/libandroid-posix-semaphore.so"),
     "libandroid-support.so": ("libandroid-support", "lib/libandroid-support.so"),
 }
+PACKAGE_FILE_ELF_SYMLINK_PROVIDERS = {
+    "libsqlite3.so": ("libsqlite", "lib/libsqlite3.so", "lib/libsqlite3.so.3.54.0"),
+}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 LICENSE_NAME_RE = re.compile(r"(?i)^(copyright|copying|license|licence)(?:[._-].*)?$")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
@@ -288,7 +291,7 @@ def inspect_elf(path: pathlib.Path, rel: str, prefix: str) -> dict[str, Any]:
     return {"path": rel, "soname": soname, "needed": needed, "interpreter": interpreter, "rpaths": rpaths}
 
 
-def validate_elf_needed_providers(all_elf: list[dict[str, Any]]) -> dict[str, Any]:
+def validate_elf_needed_providers(all_elf: list[dict[str, Any]], library_symlinks: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     sonames: dict[str, list[dict[str, Any]]] = {}
     for item in all_elf:
         if item.get("soname"):
@@ -305,6 +308,18 @@ def validate_elf_needed_providers(all_elf: list[dict[str, Any]]) -> dict[str, An
         provider_paths[library] = item
         evidence.append({"library": library, "package": package, "path": path, "soname": item.get("soname"),
                          "basis": "exact packaged AArch64 ELF path; package and recipe are pinned in the candidate closure"})
+    symlink_evidence = []
+    if library_symlinks is not None:
+        for library, (package, path, target) in PACKAGE_FILE_ELF_SYMLINK_PROVIDERS.items():
+            links = [link for link in library_symlinks if link.get("package") == package and
+                     link.get("path") == path and link.get("target") == target]
+            require(len(links) == 1, "ELF_PACKAGE_FILE_SYMLINK_PROVIDER_NOT_EXACTLY_ONCE", library)
+            targets = [item for item in all_elf if item.get("package") == package and item.get("path") == target]
+            require(len(targets) == 1, "ELF_PACKAGE_FILE_SYMLINK_TARGET_NOT_EXACTLY_ONCE", library)
+            provider_paths[library] = targets[0]
+            symlink_evidence.append({"library": library, "package": package, "path": path, "target": target,
+                                     "targetSoname": targets[0].get("soname"),
+                                     "basis": "exact package-local symlink path resolves to one pinned AArch64 ELF in the same package"})
     for item in all_elf:
         for library in item.get("needed", []):
             if library in PLATFORM_LIBS:
@@ -314,7 +329,8 @@ def validate_elf_needed_providers(all_elf: list[dict[str, Any]]) -> dict[str, An
                 require(library in provider_paths, "ELF_NEEDED_LIBRARY_UNPROVEN", item["package"] + ":" + item["path"] + ":" + library)
             else:
                 require(len(matches) == 1, "ELF_NEEDED_LIBRARY_PROVIDER_AMBIGUOUS", item["package"] + ":" + item["path"] + ":" + library)
-    return {"providers": sorted(PLATFORM_LIBS | set(sonames) | set(provider_paths)), "packageFileProviders": evidence}
+    return {"providers": sorted(PLATFORM_LIBS | set(sonames) | set(provider_paths)),
+            "packageFileProviders": evidence, "packageFileSymlinkProviders": symlink_evidence}
 
 
 def license_roots(name: str, prefix: str) -> list[str]:
@@ -404,6 +420,7 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
     license_hashes: dict[str, str] = {}
     shared_license_targets: set[str] = set()
     elf_records: list[dict[str, Any]] = []
+    library_symlinks: list[dict[str, str]] = []
     total = count = 0
     pkg_config_executable = False
     pkg_config_elf = False
@@ -421,6 +438,9 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
                 require(count <= 200000 and member.size <= MAX_MEMBER_BYTES and total <= MAX_TOTAL_BYTES, "PAYLOAD_SIZE_LIMIT", name)
                 if member.issym() or member.islnk():
                     resolved = resolve_link(path, member.linkname, member.islnk(), prefix)
+                    if member.issym() and path.startswith(prefix + "/lib/") and ".so" in pathlib.PurePosixPath(path).name:
+                        target_rel = resolved[len(prefix) + 1:] if resolved.startswith(prefix + "/") else ""
+                        library_symlinks.append({"path": path[len(prefix) + 1:], "target": target_rel})
                     if is_license_doc(path, name, prefix):
                         license_paths.add(path)
                         if resolved.startswith(prefix + "/share/LICENSES/"):
@@ -489,7 +509,7 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
             "licenseEvidenceSha256": {path: license_hashes[path] for path in sorted(license_hashes)},
             "sharedLicenseProviderTargets": sorted(shared_license_targets),
             "licenseEvidenceKind": "pinned Termux source recipe output; package-local regular license payload or exact v476 shared-license provider target",
-            "payloadEntries": count, "payloadBytes": total, "elf": elf_records,
+            "payloadEntries": count, "payloadBytes": total, "elf": elf_records, "librarySymlinks": library_symlinks,
             "depends": fields.get("Depends", ""), "preDepends": fields.get("Pre-Depends", ""),
             "recommends": fields.get("Recommends", ""),
             "maintainerScripts": sorted(set(controls) & {"preinst", "postinst", "prerm", "postrm", "config"})}
@@ -507,13 +527,15 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     require(set(file_by_name) == set(EXPECTED_PACKAGES), "DEB_NAME_SET_MISMATCH")
     all_results: list[dict[str, Any]] = []
     all_elf: list[dict[str, Any]] = []
+    all_library_symlinks: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="aib-pkg-config-audit-") as td:
         temp = pathlib.Path(td)
         for spec in specs:
             result = audit_one(file_by_name[spec["name"]], spec, prefix, temp)
             all_results.append(result)
             all_elf.extend({**elf, "package": spec["name"]} for elf in result["elf"])
-    providers = validate_elf_needed_providers(all_elf)
+            all_library_symlinks.extend({**link, "package": spec["name"]} for link in result["librarySymlinks"])
+    providers = validate_elf_needed_providers(all_elf, all_library_symlinks)
     return {"schemaVersion": 1, "ok": True,
             "status": "static-audit-passed; installation-and-device-runtime-unverified",
             "applicationId": APP_ID, "prefix": prefix, "prefixProvenance": "ci-model-only; device-observation-not-run",
@@ -525,6 +547,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "sourceClosurePackageCount": PACKAGE_COUNT, "sourceClosureDependencyAlternativeCount": DEPENDENCY_ALTERNATIVE_COUNT,
             "candidatePackageCount": len(all_results), "packages": all_results,
             "elfProviders": providers["providers"], "elfPackageFileProviders": providers["packageFileProviders"],
+            "elfPackageFileSymlinkProviders": providers["packageFileSymlinkProviders"],
             "elfCount": len(all_elf), "deviceInstall": "NOT RUN", "rollback": "NOT RUN"}
 
 

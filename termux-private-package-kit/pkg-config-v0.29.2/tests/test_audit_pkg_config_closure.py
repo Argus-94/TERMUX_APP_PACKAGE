@@ -116,6 +116,22 @@ class PkgConfigAuditTests(unittest.TestCase):
                 {"package": "another", "path": "lib/duplicate.so", "soname": "libxml2.so", "needed": []}
             ])
 
+    def test_pinned_libsqlite_symlink_proves_sqlite_elf_provider(self) -> None:
+        records = [
+            {"package": "libandroid-posix-semaphore", "path": "lib/libandroid-posix-semaphore.so", "soname": None, "needed": []},
+            {"package": "libandroid-support", "path": "lib/libandroid-support.so", "soname": None, "needed": []},
+            {"package": "libsqlite", "path": "lib/libsqlite3.so.3.54.0", "soname": "libsqlite3.so.0", "needed": []},
+            {"package": "python", "path": "lib/python3.14/lib-dynload/_sqlite3.cpython-314-aarch64-linux-android.so", "soname": None, "needed": ["libsqlite3.so"]},
+        ]
+        link = {"package": "libsqlite", "path": "lib/libsqlite3.so", "target": "lib/libsqlite3.so.3.54.0"}
+        result = audit.validate_elf_needed_providers(records, [link])
+        self.assertIn("libsqlite3.so", result["providers"])
+        self.assertEqual(result["packageFileSymlinkProviders"][0]["target"], "lib/libsqlite3.so.3.54.0")
+        with self.assertRaises(audit.AuditError):
+            audit.validate_elf_needed_providers(records, [{**link, "target": "lib/libother.so"}])
+        with self.assertRaises(audit.AuditError):
+            audit.validate_elf_needed_providers(records[:-2] + [records[-1]], [link])
+
     def test_release_gate_remains_blocked_in_exact_manifest(self) -> None:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(manifest["releaseGate"], {
