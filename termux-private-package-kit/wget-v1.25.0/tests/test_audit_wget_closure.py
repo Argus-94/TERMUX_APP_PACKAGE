@@ -66,6 +66,29 @@ class WgetAllowlistTests(unittest.TestCase):
         with self.assertRaises(auditor.AuditError):
             auditor.expected_source_license_files(changed)
 
+    def test_libuuid_license_documents_are_pinned_to_exact_source_archive(self):
+        spec = next(item for item in self.manifest["packages"] if item["name"] == "libuuid")
+        expected = {
+            "share/doc/util-linux/COPYING.GPL-3.0-or-later": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+            "share/doc/util-linux/COPYING.GPL-2.0-or-later": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "share/doc/util-linux/COPYING.LGPL-2.1-or-later": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+            "share/doc/util-linux/COPYING.BSD-3-Clause": "9b718a9460fed5952466421235bc79eb49d4e9eacc920d7a9dd6285ab8fd6c6d",
+            "share/doc/util-linux/COPYING.BSD-4-Clause-UC": "ba7640f00d93e72e92b94b9d71f25ec53bac2f1682f5c4adcccb0018359f60f8",
+            "share/doc/util-linux/COPYING.ISC": "e53348ce276358e9997014071c5294b36a18c4b34f32f00ee57b9acce0aafd63",
+        }
+        self.assertEqual(auditor.expected_source_license_files(spec), expected)
+        changed = dict(spec)
+        changed["sourceSha256"] = "0" * 64
+        with self.assertRaises(auditor.AuditError):
+            auditor.expected_source_license_files(changed)
+
+    def test_util_linux_license_list_patch_uses_pinned_helper_format(self):
+        patch = pathlib.Path(__file__).resolve().parents[1] / "wget-license-file.patch"
+        text = patch.read_text(encoding="utf-8")
+        expected = '+TERMUX_PKG_LICENSE_FILE="Documentation/licenses/COPYING.GPL-3.0-or-later,Documentation/licenses/COPYING.GPL-2.0-or-later,Documentation/licenses/COPYING.LGPL-2.1-or-later,Documentation/licenses/COPYING.BSD-3-Clause,Documentation/licenses/COPYING.BSD-4-Clause-UC,Documentation/licenses/COPYING.ISC"'
+        self.assertIn(expected, text)
+        self.assertIn("+share/doc/util-linux", text)
+
     def test_base_bootstrap_license_provider_evidence_is_exact_and_archive_only(self):
         expected = auditor.validate_base_license_provider_evidence(self.manifest["baseLicenseProviderEvidence"])
         self.assertEqual(expected["packageName"], "termux-licenses")

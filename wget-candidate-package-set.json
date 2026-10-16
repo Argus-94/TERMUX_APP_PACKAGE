@@ -47,8 +47,8 @@
   },
   "buildModifications": {
     "patchPath": "termux-private-package-kit/wget-v1.25.0/wget-license-file.patch",
-    "patchSha256": "660d685022c7b4016085673b1161d253759b07360ae54323bd70c85f2521f90d",
-    "purpose": "Set TERMUX_PKG_LICENSE_FILE=COPYING so Wget carries its hash-pinned full GPL-3.0 text, and include the exact util-linux share/doc directory in the libuuid subpackage. Documentation-only changes; no executable code or runtime dependency is changed.",
+    "patchSha256": "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0",
+    "purpose": "Set Wget TERMUX_PKG_LICENSE_FILE=COPYING so its full GPL text is installed. Normalize pinned util-linux's multiline license-file list to the comma-separated format parsed by its pinned installer, then include those six source-hash-pinned license documents in libuuid. Documentation and recipe-metadata changes only; no executable program code or runtime dependency is changed.",
     "sourceArchiveUrl": "https://mirrors.kernel.org/gnu/wget/wget-1.25.0.tar.lz",
     "sourceArchiveSha256": "19225cc756b0a088fc81148dc6a40a0c8f329af7fd8483f1c7b2fe50f4e08a1f",
     "licensePayloadPath": "share/doc/wget/COPYING",
@@ -176,6 +176,16 @@
       "version": "2.42.4",
       "architecture": "aarch64",
       "licenseExpression": "GPL-3.0-or-later, GPL-2.0-or-later, LGPL-2.1-or-later, BSD 3-Clause, BSD, ISC",
+      "sourceUrl": "https://www.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.4.tar.xz",
+      "sourceSha256": "fbd62a100ab7bb8746ba0661255c3c48185b1e9021507c624da01fbc696330ec",
+      "licenseEvidenceSha256": {
+        "share/doc/util-linux/COPYING.GPL-3.0-or-later": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+        "share/doc/util-linux/COPYING.GPL-2.0-or-later": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+        "share/doc/util-linux/COPYING.LGPL-2.1-or-later": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+        "share/doc/util-linux/COPYING.BSD-3-Clause": "9b718a9460fed5952466421235bc79eb49d4e9eacc920d7a9dd6285ab8fd6c6d",
+        "share/doc/util-linux/COPYING.BSD-4-Clause-UC": "ba7640f00d93e72e92b94b9d71f25ec53bac2f1682f5c4adcccb0018359f60f8",
+        "share/doc/util-linux/COPYING.ISC": "e53348ce276358e9997014071c5294b36a18c4b34f32f00ee57b9acce0aafd63"
+      },
       "packageType": "subpackage",
       "recipePath": "packages/util-linux/build.sh",
       "recipeSha256": "8886bcd721858e31c479f9c8e11592d5a7c43b1db19cbca2fa5f51a36493ef81",

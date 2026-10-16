@@ -44,6 +44,18 @@ PINNED_LICENSE_EVIDENCE = {
         "sourceUrl": "https://mirrors.kernel.org/gnu/wget/wget-1.25.0.tar.lz",
         "sourceSha256": "19225cc756b0a088fc81148dc6a40a0c8f329af7fd8483f1c7b2fe50f4e08a1f",
         "files": {"share/doc/wget/COPYING": "f7dc7522e7e1be9227f3dc8de8b39a4d1d2471968c893af15f00c1a2076a0eec"},
+    },
+    "libuuid": {
+        "sourceUrl": "https://www.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.4.tar.xz",
+        "sourceSha256": "fbd62a100ab7bb8746ba0661255c3c48185b1e9021507c624da01fbc696330ec",
+        "files": {
+            "share/doc/util-linux/COPYING.GPL-3.0-or-later": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+            "share/doc/util-linux/COPYING.GPL-2.0-or-later": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "share/doc/util-linux/COPYING.LGPL-2.1-or-later": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+            "share/doc/util-linux/COPYING.BSD-3-Clause": "9b718a9460fed5952466421235bc79eb49d4e9eacc920d7a9dd6285ab8fd6c6d",
+            "share/doc/util-linux/COPYING.BSD-4-Clause-UC": "ba7640f00d93e72e92b94b9d71f25ec53bac2f1682f5c4adcccb0018359f60f8",
+            "share/doc/util-linux/COPYING.ISC": "e53348ce276358e9997014071c5294b36a18c4b34f32f00ee57b9acce0aafd63",
+        },
     }
 }
 EXPECTED_PACKAGE_LOCKS = {

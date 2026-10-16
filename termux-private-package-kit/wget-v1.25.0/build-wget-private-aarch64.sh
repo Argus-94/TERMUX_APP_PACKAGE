@@ -105,8 +105,9 @@ git -C "$WORKTREE" diff -- scripts/properties.sh > "$OUTPUT_DIR/app-private-prop
 PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | awk '{print $1}')"
 git -C "$WORKTREE" apply --check "$KIT_DIR/wget-license-file.patch"
 git -C "$WORKTREE" apply "$KIT_DIR/wget-license-file.patch"
+grep -Fq 'TERMUX_PKG_LICENSE_FILE="Documentation/licenses/COPYING.GPL-3.0-or-later,Documentation/licenses/COPYING.GPL-2.0-or-later,Documentation/licenses/COPYING.LGPL-2.1-or-later,Documentation/licenses/COPYING.BSD-3-Clause,Documentation/licenses/COPYING.BSD-4-Clause-UC,Documentation/licenses/COPYING.ISC"' "$WORKTREE/packages/util-linux/build.sh" || fail 'UTIL_LINUX_LICENSE_LIST_NOT_NORMALIZED'
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/util-linux/libuuid.subpackage.sh\npackages/wget/build.sh\nscripts/properties.sh' ]] || fail 'WGET_LICENSE_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/util-linux/build.sh\npackages/util-linux/libuuid.subpackage.sh\npackages/wget/build.sh\nscripts/properties.sh' ]] || fail 'WGET_LICENSE_PATCH_SCOPE_MISMATCH'
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash
