@@ -1,6 +1,8 @@
+import ast
 import importlib.util
 import json
 import pathlib
+import re
 import unittest
 
 MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "audit_curl_closure.py"
@@ -16,6 +18,14 @@ PREFIX = "/data/user/0/com.karat.aibuilder/files/usr"
 class CurlAllowlistTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+    def test_embedded_builder_python_heredocs_parse(self):
+        builder = pathlib.Path(__file__).resolve().parents[1] / "build-curl-private-aarch64.sh"
+        text = builder.read_text(encoding="utf-8")
+        blocks = re.findall(r"<<'PY'\n(.*?)\nPY(?=\n|$)", text, re.S)
+        self.assertGreaterEqual(len(blocks), 3)
+        for index, block in enumerate(blocks):
+            ast.parse(block, filename=f"{builder}:python-heredoc-{index + 1}")
 
     def test_exact_pinned_package_specs_are_accepted(self):
         auditor.validate_package_specs(self.manifest["packages"])
