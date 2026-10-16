@@ -20,6 +20,7 @@ APP_ID = "com.karat.aibuilder"
 SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PINNED_PACKAGE_COUNT = 11
+EXPECTED_BUILD_PATCH_SHA256 = "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0"
 PLATFORM_LIBS = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so", "libgcc.so", "libpthread.so", "libatomic.so"}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
@@ -449,7 +450,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         require(item.get("recommendationGroupsNotIncludedInRequiredClosure") == [], "RECOMMENDATIONS_NOT_ALLOWLISTED_" + item["name"])
     require(sum(len(group) for item in specs for group in item["dependencyGroups"]) == 15, "DEPENDENCY_ALTERNATIVE_COUNT_NOT_ALLOWLISTED")
     modifications = manifest.get("buildModifications", {})
-    require(modifications.get("patchPath") == "termux-private-package-kit/wget-v1.25.0/wget-license-file.patch" and modifications.get("patchSha256") == "660d685022c7b4016085673b1161d253759b07360ae54323bd70c85f2521f90d", "BUILD_PATCH_NOT_ALLOWLISTED")
+    require(modifications.get("patchPath") == "termux-private-package-kit/wget-v1.25.0/wget-license-file.patch" and modifications.get("patchSha256") == EXPECTED_BUILD_PATCH_SHA256, "BUILD_PATCH_NOT_ALLOWLISTED")
     require(modifications.get("sourceArchiveSha256") == "19225cc756b0a088fc81148dc6a40a0c8f329af7fd8483f1c7b2fe50f4e08a1f" and modifications.get("licensePayloadPath") == "share/doc/wget/COPYING" and modifications.get("licensePayloadSha256") == "f7dc7522e7e1be9227f3dc8de8b39a4d1d2471968c893af15f00c1a2076a0eec" and modifications.get("libuuidLicenseDocsPath") == "share/doc/util-linux", "WGET_LICENSE_EVIDENCE_NOT_ALLOWLISTED")
     require(all(isinstance(x.get("recipeSha256"), str) and re.fullmatch(r"[0-9a-f]{64}", x["recipeSha256"]) for x in specs), "RECIPE_HASH_MISSING")
     files = sorted(args.packages_dir.glob("*.deb"))

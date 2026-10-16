@@ -1,4 +1,5 @@
 import ast
+import hashlib
 import importlib.util
 import json
 import pathlib
@@ -88,6 +89,12 @@ class WgetAllowlistTests(unittest.TestCase):
         expected = '+TERMUX_PKG_LICENSE_FILE="Documentation/licenses/COPYING.GPL-3.0-or-later,Documentation/licenses/COPYING.GPL-2.0-or-later,Documentation/licenses/COPYING.LGPL-2.1-or-later,Documentation/licenses/COPYING.BSD-3-Clause,Documentation/licenses/COPYING.BSD-4-Clause-UC,Documentation/licenses/COPYING.ISC"'
         self.assertIn(expected, text)
         self.assertIn("+share/doc/util-linux", text)
+
+    def test_build_patch_digest_matches_manifest_and_auditor_allowlist(self):
+        patch = pathlib.Path(__file__).resolve().parents[1] / "wget-license-file.patch"
+        actual = hashlib.sha256(patch.read_bytes()).hexdigest()
+        self.assertEqual(actual, self.manifest["buildModifications"]["patchSha256"])
+        self.assertEqual(actual, auditor.EXPECTED_BUILD_PATCH_SHA256)
 
     def test_base_bootstrap_license_provider_evidence_is_exact_and_archive_only(self):
         expected = auditor.validate_base_license_provider_evidence(self.manifest["baseLicenseProviderEvidence"])
