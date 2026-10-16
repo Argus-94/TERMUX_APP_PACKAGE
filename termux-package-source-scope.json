@@ -18,6 +18,9 @@
     "git-candidate": [
       "git"
     ],
+    "curl-candidate": [
+      "curl"
+    ],
     "builder-cli": [
       "gh"
     ]

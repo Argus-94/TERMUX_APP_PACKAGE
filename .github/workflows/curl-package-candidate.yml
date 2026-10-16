@@ -1,0 +1,222 @@
+name: Build and verify pinned curl package closure (no publication)
+
+on:
+  push:
+    branches:
+      - work/curl-package-candidate-20261016
+    paths:
+      - .github/workflows/curl-package-candidate.yml
+      - curl-candidate-package-set.json
+      - termux-package-source-scope.json
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/verify-candidate-dependency-closure.py
+      - termux-private-package-kit/curl-v8.23.0/**
+      - termux-private-package-kit/make-v476/patch_properties.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-curl-package-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-audit-and-test-curl-closure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+
+    steps:
+      - name: Checkout candidate branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install isolated signing and index tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+
+      - name: Run local policy, source resolver, and syntax tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/create-ephemeral-feed-signing-key.sh scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh termux-private-package-kit/curl-v8.23.0/build-curl-private-aarch64.sh
+          python3 -m py_compile scripts/resolve-pinned-termux-recipe-closure.py scripts/verify-candidate-dependency-closure.py termux-private-package-kit/curl-v8.23.0/audit_curl_closure.py termux-private-package-kit/curl-v8.23.0/validate_curl_feed.py
+          python3 -m unittest discover -s termux-private-package-kit/curl-v8.23.0/tests -p 'test_*.py' -v
+          python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
+          python3 -m unittest discover -s termux-private-package-kit/git-v2.56.0/tests -p 'test_*.py' -v
+          ./scripts/test-candidate-feed-policy.sh
+          ./scripts/test-candidate-dependency-closure.sh
+          bash ./scripts/test-pinned-termux-recipe-closure.sh
+          ./termux-private-package-kit/make-v476/verify-kit.sh
+          ./scripts/test-signed-feed-smoke.sh
+
+      - name: Checkout exact locked Termux source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Resolve and verify exact pinned curl source closure (metadata only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$RUNNER_TEMP/termux-packages" \
+            --scope "$GITHUB_WORKSPACE/termux-package-source-scope.json" \
+            --profile curl-candidate > "$RUNNER_TEMP/aib-curl-source-closure.json"
+          python3 - "$RUNNER_TEMP/aib-curl-source-closure.json" "$GITHUB_WORKSPACE/curl-candidate-package-set.json" <<'PY'
+          import json,pathlib,sys
+          closure=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+          manifest=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
+          fields=('recipePath','recipeSha256','packageType','parentPackage','parentDependencyRule','subpackagePath','subpackageSha256','sourceVersionExpression','sourceRevisionExpression','versionExpressionIsLiteral','revisionExpressionIsLiteral','dependencyGroups','recommendationGroupsNotIncludedInRequiredClosure')
+          actual={x['name']:{k:x[k] for k in fields} for x in closure['packages']}
+          expected={x['name']:{k:x[k] for k in fields} for x in manifest['packages']}
+          assert closure['sourceCommit']==manifest['source']['commit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
+          assert closure['profile']=='curl-candidate' and closure['rootPackages']==['curl']
+          assert closure['packageCount']==manifest['sourceClosure']['expectedPackageCount']==9
+          assert closure['dependencyAlternativeCount']==manifest['sourceClosure']['expectedDependencyAlternativeCount']==12
+          assert actual==expected
+          curl=next(x for x in closure['packages'] if x['name']=='curl')
+          assert manifest['sourceClosure']['buildTargetPackage']=='libcurl'
+          assert curl['packageType']=='subpackage' and curl['parentPackage']=='libcurl'
+          assert curl['subpackagePath']=='packages/libcurl/curl.subpackage.sh' and curl['subpackageSha256']==next(x for x in manifest['packages'] if x['name']=='curl')['subpackageSha256']
+          print('PINNED_CURL_RECIPE_CLOSURE_OK packages=9 dependency_alternatives=12 source='+closure['sourceCommit'])
+          PY
+
+      - name: Pull digest-pinned official Termux builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+
+      - name: Build pinned curl package and source-built dependency closure; statically audit every deb
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-private-curl-candidate-output"
+          raw_log="$RUNNER_TEMP/aib-private-curl-candidate-build.log"
+          mkdir -p "$output_dir"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$GITHUB_WORKSPACE/termux-private-package-kit/curl-v8.23.0/build-curl-private-aarch64.sh" \
+              "$RUNNER_TEMP/termux-packages" "$GITHUB_WORKSPACE/curl-candidate-package-set.json" "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=curl candidate build or audit failed::Exit $build_status; a sanitized log tail follows. No binary was uploaded."
+            python3 - "$raw_log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib,re,sys
+          log=pathlib.Path(sys.argv[1]).read_text(encoding='utf-8',errors='replace')
+          for value,replacement in ((sys.argv[2],'<RUNNER_TEMP>'),(sys.argv[3],'<WORKSPACE>'),('/home/builder/termux-packages','<BUILDER_SOURCE>'),('/data/user/0/com.karat.aibuilder/files/usr','<MODELED_PREFIX>'),('/data/user/0/com.karat.aibuilder','<MODELED_APP_DATA>'),('/data/data/com.karat.aibuilder','<MODELED_APP_DATA>')): log=log.replace(value,replacement)
+          log=re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)','<REDACTED_SECRET>',log)
+          print('--- sanitized last 100 build-log lines ---')
+          for line in log.splitlines()[-100:]: print(line[:600])
+          PY
+            exit "$build_status"
+          fi
+          python3 - "$output_dir/build-result.json" "$output_dir/audit-report.json" <<'PY'
+          import json,pathlib,sys
+          build=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+          audit=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
+          assert build['status']=='audit-passed; device-runtime-test-not-run'
+          assert build['sourceCommit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
+          assert build['sourceClosure']['profile']=='curl-candidate' and build['sourceClosure']['rootPackages']==['curl'] and build['sourceClosure']['buildTargetPackage']=='libcurl' and build['sourceClosure']['packageCount']==9
+          assert build['sourceClosure']['dependencyAlternativeCount']==12
+          assert len(build['packages'])==9 and audit['ok'] is True
+          assert audit['candidatePackageCount']==9 and audit['sourceClosurePackageCount']==9 and audit['sourceClosureDependencyAlternativeCount']==12
+          assert build['installed'] is False and build['deviceSmokeTest']=='NOT RUN' and build['rollback']=='NOT RUN'
+          assert build['prefixProvenance']=='ci-model-only; device-observation-not-run'
+          print('PINNED_BUILD_AND_STATIC_AUDIT_OK packages=9 ci_prefix=model_only device_install=NOT_RUN')
+          PY
+
+      - name: Create ephemeral signed candidate feed and verify exact closure with APT
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-private-curl-candidate-output"
+          feed="$RUNNER_TEMP/aib-curl-candidate-feed"
+          key_root="$RUNNER_TEMP/aib-curl-candidate-signing-config"
+          mkdir -p "$feed/dists/stable/main/binary-aarch64"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key_root"
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key_root"
+          export GNUPGHOME="$key_root/gnupg"
+          while IFS= read -r -d '' deb; do
+            package="$(dpkg-deb -f "$deb" Package)"
+            mkdir -p "$feed/pool/main/$package"
+            cp -- "$deb" "$feed/pool/main/$package/"
+          done < <(find "$output_dir/packages" -maxdepth 1 -type f -name '*.deb' -print0)
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          python3 ./scripts/verify-candidate-dependency-closure.py \
+            --package-set curl-candidate-package-set.json \
+            --packages-index "$feed/dists/stable/main/binary-aarch64/Packages"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-curl-feed-signing.log" 2>&1 || {
+            echo 'ERROR:CURL_CANDIDATE_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
+          }
+          python3 termux-private-package-kit/curl-v8.23.0/validate_curl_feed.py \
+            --package-set curl-candidate-package-set.json \
+            --feed-root "$feed" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json"
+          ./scripts/test-apt-candidate.sh "$feed" aarch64 curl 8.23.0 9
+          ./scripts/test-signed-feed-smoke.sh
+          curl_sha="$(python3 - "$output_dir/build-result.json" <<'PY'
+          import json,pathlib,sys
+          print(next(p['sha256'] for p in json.loads(pathlib.Path(sys.argv[1]).read_text())['packages'] if p['name']=='curl'))
+          PY
+          )"
+          {
+            echo '## Pinned curl candidate closure (temporary CI-only feed)'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Exact upstream commit, recipe/subpackage locks and source checksums | PASS |'
+          echo '| Required source closure | PASS; 12 dependency alternatives; 9 candidate packages; parent recipe `libcurl`; dependency downloads disabled |'
+            echo '| AArch64 ELF, app-private paths/links, licenses, runtime library providers | PASS; 9 package audits |'
+            echo '| Exact candidate Depends/Pre-Depends closure | PASS; no external base assumptions |'
+            echo '| Ephemerally signed APT index, download and simulated install of curl | PASS; install not performed |'
+            echo '| curl candidate SHA-256 | `'$curl_sha'` |'
+            echo '| Device install / rollback | NOT RUN |'
+            echo '| Public artifact / production feed / Pages / GitHub Release | NONE / BLOCKED |'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove all temporary source, package, signature, and signing material
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- \
+            "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aib-private-curl-candidate-output" \
+            "$RUNNER_TEMP/aib-private-curl-candidate-build.log" \
+            "$RUNNER_TEMP/aib-curl-candidate-feed" \
+            "$RUNNER_TEMP/aib-curl-candidate-signing-config" \
+            "$RUNNER_TEMP/aib-curl-feed-signing.log" \
+            "$RUNNER_TEMP/aib-curl-source-closure.json"

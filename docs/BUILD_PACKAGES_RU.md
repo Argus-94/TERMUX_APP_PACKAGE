@@ -4,12 +4,13 @@
 
 Репозиторий работает в режиме **candidate-only**. Production APT feed не настроен, GitHub Pages не включён, а подключение `pkg.ensure` остаётся закрытым. Не копируйте собранные `.deb` в `apt/`, не пересобирайте production-индексы вручную и не публикуйте кандидаты.
 
-Подтверждённые CI-кандидаты на текущей ветке:
+Подтверждённые CI-кандидаты на `main`:
 
 - GNU Make `4.4.1-1` (`candidate-package-set.json`);
-- GitHub CLI `gh` `2.102.0` (`gh-candidate-package-set.json`).
+- GitHub CLI `gh` `2.102.0` (`gh-candidate-package-set.json`);
+- Git `2.56.0`: 14 source-built packages и 20 dependency alternatives (CI run `38829235485`).
 
-Для них проверены pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Это **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` — только инвентаризация рецептов/зависимостей; перечисленные там пакеты не считаются собранными, проверенными или устанавливаемыми.
+Для подтверждённых кандидатов проверяются pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Отдельный `curl` `8.23.0` candidate workflow фиксирует closure из 9 пакетов и 12 dependency alternatives, включая hash `curl` subpackage; его актуальный CI-результат смотрите в Actions check связанного PR. Поскольку upstream subpackage `curl` не несёт отдельный copyright payload, аудит требует license evidence от включённого parent `.deb` `libcurl` с теми же pinned recipe/source/version/license; без доказательства parent evidence closure отклоняется. Даже успешная симуляция — **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` остаются inventory для всех пакетов, кроме тех, что отдельно закреплены candidate manifests.
 
 ## Повторяемая проверка
 
@@ -22,13 +23,15 @@ bash ./scripts/test-pinned-termux-recipe-closure.sh
 ./termux-private-package-kit/make-v476/verify-kit.sh
 ./scripts/test-device-test-artifact-staging.sh
 python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
+python3 -m unittest discover -s termux-private-package-kit/git-v2.56.0/tests -p 'test_*.py' -v
+python3 -m unittest discover -s termux-private-package-kit/curl-v8.23.0/tests -p 'test_*.py' -v
 ```
 
-Полную сборку двух разрешённых кандидатов, статический аудит и временную APT-симуляцию выполняет `.github/workflows/package-feed-candidate.yml` в GitHub Actions. Обычные запуски не публикуют пакеты и удаляют временные исходники, бинарники и signing workspace после проверки.
+Полную сборку Make/`gh` выполняет `.github/workflows/package-feed-candidate.yml`; Git и `curl` проверяются отдельными `.github/workflows/git-package-candidate.yml` и `.github/workflows/curl-package-candidate.yml`. Candidate workflows не публикуют бинарники или production feed и удаляют временные исходники, пакеты и signing workspace после проверки.
 
 ## Ограниченная локальная сборка для разработки
 
-Локальные builder-скрипты предназначены только для получения **непубликуемого** результата аудита. Они требуют чистый checkout Termux на точном pinned commit, Docker, digest-pinned официальный builder image и не менее 3 GiB свободного места. Скрипты проверяют app-private namespace, выполняют статический аудит и не устанавливают пакет. Например, для Make:
+Локальные builder-скрипты предназначены только для получения **непубликуемого** результата аудита. Они требуют чистый checkout Termux на точном pinned commit, Docker и digest-pinned официальный builder image; минимальный запас — 3 GiB для Make и 5 GiB для Git/`curl`. Скрипты проверяют app-private namespace, выполняют статический аудит и не устанавливают пакет. Например, для Make:
 
 ```sh
 export AIB_TERMUX_APP_DATA_DIR=/data/user/0/com.karat.aibuilder
