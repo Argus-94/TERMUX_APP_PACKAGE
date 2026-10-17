@@ -28,3 +28,9 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -v
 ```
 
 Entry point: `build-nodejs-npm-private-aarch64.sh <clean-pinned-source> <package-set.json> <new-empty-output>`, with the same modeled-prefix and digest-pinned builder environment variables as the workflow. The driver never pulls an image itself.
+
+## Hosted build troubleshooting
+
+[The first hosted run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39042792448) reached Node.js installation and license packaging, then failed in npm `scripts/resetdeps.js`: `fatal: not a git repository`. The verified commit archive correctly contains no `.git` metadata, but npm restores its checked-in `node_modules` through a Git index. Static audit and signed APT simulation were not reached. The run uploaded zero artifacts and its cleanup step passed.
+
+The recipe now initializes a local build-only Git index containing only the checksum-verified archive's bundled `node_modules`. No upstream commit is fabricated and the immutable archive URL/checksum remains authoritative. Regression tests restore original vendor bytes from the index and verify that no HEAD commit exists. npm is built before the lengthy Node.js compilation so archive/resetdeps errors fail early. This correction is not itself a successful binary build or device proof.

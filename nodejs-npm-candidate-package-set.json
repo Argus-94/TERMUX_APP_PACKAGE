@@ -447,7 +447,12 @@
   },
   "buildModifications": {
     "patchPath": "termux-private-package-kit/nodejs-npm/nodejs-npm-source-provenance.patch",
-    "patchSha256": "ab60e8d3e47beffb3b5d1d011405593ef215486b157a97a5d58803bb8edbe097",
-    "purpose": "Immutable checksum-verified npm commit archive; preserve ICU license from checksum-verified source; install bundled Node/npm licenses. No runtime dependency substitution."
+    "patchSha256": "768451f8beec0e13f2bf194d27a332aca78795a488eaf9a0df7ab31efce74a16",
+    "purpose": "Immutable checksum-verified npm commit archive; preserve ICU license from checksum-verified source; install bundled Node/npm licenses. No runtime dependency substitution.",
+    "npmArchiveGitIndex": "Local index of checksum-verified bundled node_modules only; no upstream source commit fabricated; resetdeps compatibility.",
+    "buildExecutionOrder": [
+      "npm",
+      "nodejs"
+    ]
   }
 }

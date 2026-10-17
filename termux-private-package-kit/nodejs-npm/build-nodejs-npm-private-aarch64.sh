@@ -56,7 +56,7 @@ docker info >/dev/null 2>&1 || fail DOCKER_UNAVAILABLE; docker image inspect "$I
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE" CONTAINER_NAME="aib-nodejs-npm-$$"
 trap 'docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true' EXIT
 (cd "$W" && ./scripts/run-docker.sh bash /home/builder/termux-packages/.aib-preflight.sh) | tee "$OUT/build.log"
-(cd "$W" && ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-nodejs-npm-debs nodejs npm') 2>&1 | tee -a "$OUT/build.log"
+(cd "$W" && ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-nodejs-npm-debs npm; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-nodejs-npm-debs nodejs') 2>&1 | tee -a "$OUT/build.log"
 mkdir -p "$OUT/packages"; python3 - "$W/output" "$MANIFEST" "$OUT/packages" <<'PY'
 import json,pathlib,shutil,subprocess,sys
 root=pathlib.Path(sys.argv[1]);m=json.loads(pathlib.Path(sys.argv[2]).read_text());spec={p['name']:p for p in m['packages']}; found={}

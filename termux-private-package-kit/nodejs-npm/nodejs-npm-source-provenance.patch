@@ -36,3 +36,17 @@ diff --git a/packages/npm/build.sh b/packages/npm/build.sh
  TERMUX_PKG_DEPENDS="nodejs | nodejs-lts"
  TERMUX_PKG_ANTI_BUILD_DEPENDS="nodejs, nodejs-lts"
  # npm was earlier packaged with nodejs and nodejs-lts packages.
+@@ -25,6 +26,13 @@
+ 	termux_pkg_upgrade_version "${latest_version}"
+ }
+ 
++termux_step_post_get_source() {
++# The checksum-verified commit archive has no .git directory. resetdeps.js
++# restores bundled node_modules from an index; create only local build
++# metadata, not an upstream commit or alternate source provenance.
++git -C "$TERMUX_PKG_SRCDIR" init --quiet
++git -C "$TERMUX_PKG_SRCDIR" -c core.autocrlf=false add --force -- node_modules
++}
+ termux_step_configure() {
+ 	:
+ }
