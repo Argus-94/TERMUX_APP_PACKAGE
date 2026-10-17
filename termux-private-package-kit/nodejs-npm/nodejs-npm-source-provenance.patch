@@ -1,0 +1,52 @@
+diff --git a/packages/libicu/build.sh b/packages/libicu/build.sh
+--- a/packages/libicu/build.sh
++++ b/packages/libicu/build.sh
+@@ -20,8 +20,6 @@
+ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-samples --disable-tests --with-cross-build=$TERMUX_PKG_HOSTBUILD_DIR"
+ 
+ termux_step_post_get_source() {
+-	rm "$TERMUX_PKG_SRCDIR/LICENSE"
+-	curl -L "https://raw.githubusercontent.com/unicode-org/icu/release-${TERMUX_PKG_VERSION//./-}/LICENSE" -o "$TERMUX_PKG_SRCDIR/LICENSE"
+ 	TERMUX_PKG_SRCDIR+="/source"
+ 	find . -type f -print0 | xargs -0 touch
+ }
+diff --git a/packages/nodejs/build.sh b/packages/nodejs/build.sh
+--- a/packages/nodejs/build.sh
++++ b/packages/nodejs/build.sh
+@@ -1,6 +1,7 @@
+ TERMUX_PKG_HOMEPAGE=https://nodejs.org/
+ TERMUX_PKG_DESCRIPTION="Open Source, cross-platform JavaScript runtime environment"
+ TERMUX_PKG_LICENSE="MIT"
++TERMUX_PKG_LICENSE_FILE=LICENSE
+ TERMUX_PKG_MAINTAINER="Yaksh Bariya <thunder-coding@termux.dev>"
+ TERMUX_PKG_VERSION=26.4.0
+ TERMUX_PKG_REVISION=1
+diff --git a/packages/npm/build.sh b/packages/npm/build.sh
+--- a/packages/npm/build.sh
++++ b/packages/npm/build.sh
+@@ -3,8 +3,9 @@
+ TERMUX_PKG_LICENSE="Artistic-License-2.0"
+ TERMUX_PKG_MAINTAINER="Yaksh Bariya <thunder-coding@termux.dev>"
+ TERMUX_PKG_VERSION="11.20.0"
+-TERMUX_PKG_SRCURL=git+https://github.com/npm/cli.git
+-TERMUX_PKG_SHA256=a7bba8c40e179d3be92176026f6c29caf6a8c7b0fcae4eb71951a9e103ac6f9e
++TERMUX_PKG_SRCURL=https://codeload.github.com/npm/cli/tar.gz/d12b9434dd010b5fb7044c3cc149cdda317813f8
++TERMUX_PKG_SHA256=590722fbc114915e695814686a0b9996696456b2999c581523b8514d996bfb96
++TERMUX_PKG_LICENSE_FILE=LICENSE
+ TERMUX_PKG_DEPENDS="nodejs | nodejs-lts"
+ TERMUX_PKG_ANTI_BUILD_DEPENDS="nodejs, nodejs-lts"
+ # npm was earlier packaged with nodejs and nodejs-lts packages.
+@@ -25,6 +26,13 @@
+ 	termux_pkg_upgrade_version "${latest_version}"
+ }
+ 
++termux_step_post_get_source() {
++# The checksum-verified commit archive has no .git directory. resetdeps.js
++# restores bundled node_modules from an index; create only local build
++# metadata, not an upstream commit or alternate source provenance.
++git -C "$TERMUX_PKG_SRCDIR" init --quiet
++git -C "$TERMUX_PKG_SRCDIR" -c core.autocrlf=false add --force -- node_modules
++}
+ termux_step_configure() {
+ 	:
+ }

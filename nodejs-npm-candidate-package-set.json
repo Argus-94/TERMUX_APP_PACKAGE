@@ -1,0 +1,458 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "source": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "commit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "propertiesScriptSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
+    "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
+    "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2",
+    "restrictedAppArmorProfileSha256": "ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8",
+    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw,"
+  },
+  "sourceClosure": {
+    "profile": "nodejs-npm-candidate",
+    "rootPackages": [
+      "nodejs",
+      "npm"
+    ],
+    "buildTargetPackages": [
+      "nodejs",
+      "npm"
+    ],
+    "expectedPackageCount": 11,
+    "expectedDependencyAlternativeCount": 14,
+    "semantics": "Exact required runtime closure from pinned recipes/inventory. The npm dependency alternative is explicitly selected as nodejs (not nodejs-lts); any source recipe, dependency provider, version, or closure drift is rejected."
+  },
+  "sourceLicenseEvidence": {
+    "nodejs": {
+      "sourceUrl": "https://nodejs.org/dist/v26.4.0/node-v26.4.0.tar.xz",
+      "sourceSha256": "9eceb3621024069d91035b5471d2ebe86aa04d22dbeba72a782eaf36ff9183ac",
+      "licenseSourcePath": "node-v26.4.0/LICENSE",
+      "licensePayloadPath": "share/doc/nodejs/LICENSE",
+      "licensePayloadSha256": "148eacf7863ef4329224a29398623077200a27194aa075569faf4a0a85566ca5"
+    },
+    "npm": {
+      "sourceUrl": "https://codeload.github.com/npm/cli/tar.gz/d12b9434dd010b5fb7044c3cc149cdda317813f8",
+      "sourceSha256": "590722fbc114915e695814686a0b9996696456b2999c581523b8514d996bfb96",
+      "licenseSourcePath": "cli-d12b9434dd010b5fb7044c3cc149cdda317813f8/LICENSE",
+      "licensePayloadPath": "share/doc/npm/LICENSE",
+      "licensePayloadSha256": "7610d223851f421d315df5e77974f1c68a04b97e02060e5bbbcf13d95e3ca257"
+    },
+    "libicu": {
+      "sourceUrl": "https://github.com/unicode-org/icu/releases/download/release-78.3/icu4c-78.3-sources.tgz",
+      "sourceSha256": "3a2e7a47604ba702f345878308e6fefeca612ee895cf4a5f222e7955fabfe0c0",
+      "licenseSourcePath": "icu/LICENSE",
+      "licensePayloadPath": "share/doc/libicu/LICENSE",
+      "licensePayloadSha256": "e55522d81edc687a341a4411e0776e54ca654e90147f354a90458aaced4116af"
+    }
+  },
+  "runtimeDependencies": {
+    "selectedDependencyAlternatives": [
+      {
+        "alternatives": [
+          "nodejs",
+          "nodejs-lts"
+        ],
+        "dependencyGroupIndex": 0,
+        "package": "npm",
+        "selected": "nodejs"
+      }
+    ],
+    "excludedRecommendations": []
+  },
+  "packages": [
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ]
+      ],
+      "name": "c-ares",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/c-ares/build.sh",
+      "recipeSha256": "39364f4135281f12c103e20468f8776c4dec2008f268d3cea73c9d17ff3441d3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.34.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.34.8",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "ca-certificates",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:2026.09.25",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1:2026.09.25",
+      "architecture": "all",
+      "licenseExpression": "MPL-2.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libc++",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libc++/build.sh",
+      "recipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "30",
+      "architecture": "aarch64",
+      "licenseExpression": "NCSA"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libffi",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libffi/build.sh",
+      "recipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.8.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "3.8.0",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libicu",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libicu/build.sh",
+      "recipeSha256": "400ce1208f3c046b20a3875abbb3a3a17eefede53163bae9eab4032c8f322769",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "78.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "78.3",
+      "architecture": "aarch64",
+      "licenseExpression": "custom"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libsqlite",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libsqlite/build.sh",
+      "recipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.54.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "3.54.0",
+      "architecture": "aarch64",
+      "licenseExpression": "Public Domain"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "c-ares",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "c-ares",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libicu",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libicu",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsqlite",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsqlite",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ]
+      ],
+      "name": "nodejs",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/nodejs/build.sh",
+      "recipeSha256": "17e377fe5c0c6eddc37749692f4a4a7e0d4d613027a1649bf0054a04461a159e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "npm",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "npm",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "26.4.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "26.4.0-1",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "nodejs",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs",
+            "version": null
+          },
+          {
+            "name": "nodejs-lts",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs-lts",
+            "version": null
+          }
+        ]
+      ],
+      "name": "npm",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/npm/build.sh",
+      "recipeSha256": "7bf0bf1c95252097985bdc843c08bdaf806fb29b24572e9d127b92680d914c85",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "11.20.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "11.20.0",
+      "architecture": "all",
+      "licenseExpression": "Artistic-License-2.0"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openssl",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:3.6.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1:3.6.5",
+      "architecture": "aarch64",
+      "licenseExpression": "Apache-2.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "resolv-conf",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/resolv-conf/build.sh",
+      "recipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3",
+      "architecture": "aarch64",
+      "licenseExpression": "Public Domain"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "zlib",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3.2",
+      "architecture": "aarch64",
+      "licenseExpression": "ZLIB"
+    }
+  ],
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT RUN",
+    "rollback": "NOT RUN",
+    "deviceEvidenceSha256": null
+  },
+  "baseLicenseProviderEvidence": {
+    "artifact": "AIBuilder-Expo-v476/assets/termux-bootstrap/termux-bootstrap-aarch64.zip",
+    "archiveSha256": "08a447f60c06783f33561583553149cf992ac7d9779071c71b8aaeeb452451b4",
+    "packageName": "termux-licenses",
+    "version": "2.1",
+    "architecture": "all",
+    "packageStatus": "install ok installed",
+    "licenseFilesSha256": {
+      "share/LICENSES/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "share/LICENSES/GPL-2.0.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "share/LICENSES/GPL-3.0.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "share/LICENSES/LGPL-2.1.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "share/LICENSES/MPL-2.0.txt": "9bc20a15c61407693f16f5bb482035e60c9ac3e9c6611c6c3b6623a1a4453578",
+      "share/LICENSES/Public Domain.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "share/LICENSES/NCSA.txt": "aecb9504bcc76b4ff5e8ff1266344bb607b6bed2bfc3dd8b35233d941401d01e"
+    },
+    "verification": "Seven relevant ZIP license payloads were byte-for-byte compared with pinned termux-licenses source; package status comes from the embedded v476 archive. This is archive evidence, not device observation.",
+    "deviceObserved": false
+  },
+  "buildModifications": {
+    "patchPath": "termux-private-package-kit/nodejs-npm/nodejs-npm-source-provenance.patch",
+    "patchSha256": "768451f8beec0e13f2bf194d27a332aca78795a488eaf9a0df7ab31efce74a16",
+    "purpose": "Immutable checksum-verified npm commit archive; preserve ICU license from checksum-verified source; install bundled Node/npm licenses. No runtime dependency substitution.",
+    "npmArchiveGitIndex": "Local index of checksum-verified bundled node_modules only; no upstream source commit fabricated; resetdeps compatibility.",
+    "buildExecutionOrder": [
+      "npm",
+      "nodejs"
+    ]
+  }
+}

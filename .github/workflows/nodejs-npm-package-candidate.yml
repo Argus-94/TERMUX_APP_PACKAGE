@@ -1,0 +1,139 @@
+name: Build and verify pinned Node.js/npm candidate (no publication)
+
+on:
+  push:
+    branches:
+      - work/nodejs-npm-candidate-20261017
+    paths:
+      - .github/workflows/nodejs-npm-package-candidate.yml
+      - nodejs-npm-candidate-package-set.json
+      - termux-package-source-scope.json
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/tests/**
+      - scripts/verify-candidate-dependency-closure.py
+      - scripts/test-candidate-feed-policy.sh
+      - scripts/test-candidate-dependency-closure.sh
+      - termux-private-package-kit/nodejs-npm/**
+      - termux-private-package-kit/make-v476/patch_properties.py
+permissions:
+  contents: read
+concurrency:
+  group: aib-nodejs-npm-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-audit-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install isolated signing and index tools
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+      - name: Run syntax, audit-unit, policy and pinned-source tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/nodejs-npm
+          bash -n scripts/create-ephemeral-feed-signing-key.sh scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh "$kit/build-nodejs-npm-private-aarch64.sh"
+          PYTHONDONTWRITEBYTECODE=1 python3 -m py_compile scripts/resolve-pinned-termux-recipe-closure.py scripts/verify-candidate-dependency-closure.py "$kit/audit_nodejs_npm_closure.py" "$kit/validate_nodejs_npm_feed.py"
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$kit/tests" -p 'test_*.py' -v
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p 'test_apt_simulation_exact_closure.py' -v
+          ./scripts/test-candidate-feed-policy.sh
+          ./scripts/test-candidate-dependency-closure.sh
+          bash ./scripts/test-pinned-termux-recipe-closure.sh
+          ./scripts/test-signed-feed-smoke.sh
+      - name: Checkout exact locked Termux source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          d="$RUNNER_TEMP/termux-packages"; mkdir -p "$d"; git -C "$d" init
+          git -C "$d" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$d" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$d" checkout --detach FETCH_HEAD
+          test "$(git -C "$d" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$d" status --porcelain=v1)"
+      - name: Verify pinned source closure and npm immutable archive ref
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/nodejs-npm
+          closure="$RUNNER_TEMP/nodejs-npm-source-closure.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py --source-root "$RUNNER_TEMP/termux-packages" --scope termux-package-source-scope.json --profile nodejs-npm-candidate > "$closure"
+          test "$(sha256sum "$closure" | awk '{print $1}')" = 4bfb59809c1dc31731816a11a9671853a93ca3994bfd9266f9a67eb3abec4c61
+          python3 - "$closure" nodejs-npm-candidate-package-set.json <<'PY'
+          import json,pathlib,sys
+          c=json.loads(pathlib.Path(sys.argv[1]).read_text());m=json.loads(pathlib.Path(sys.argv[2]).read_text());f=('recipePath','recipeSha256','packageType','parentPackage','parentDependencyRule','subpackagePath','subpackageSha256','sourceVersionExpression','sourceRevisionExpression','versionExpressionIsLiteral','revisionExpressionIsLiteral','dependencyGroups','recommendationGroupsNotIncludedInRequiredClosure')
+          assert c['sourceCommit']==m['source']['commit'] and c['profile']=='nodejs-npm-candidate' and c['rootPackages']==['nodejs','npm'] and c['packageCount']==11 and c['dependencyAlternativeCount']==14
+          assert {x['name']:{k:x[k] for k in f} for x in c['packages']}=={x['name']:{k:x[k] for k in f} for x in m['packages']}
+          assert next(x for x in m['packages'] if x['name']=='npm')['architecture']=='all'
+          PY
+      - name: Pull digest-pinned official builder
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+      - name: Build and statically audit complete candidate deb set
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/nodejs-npm
+          out="$RUNNER_TEMP/aib-nodejs-npm-output"; log="$RUNNER_TEMP/aib-nodejs-npm-build.log"; mkdir -p "$out"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" AIB_TERMUX_PREFIX="$TERMUX_PREFIX" AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" "$kit/build-nodejs-npm-private-aarch64.sh" "$RUNNER_TEMP/termux-packages" "$GITHUB_WORKSPACE/nodejs-npm-candidate-package-set.json" "$out" >"$log" 2>&1
+          status=$?; set -e
+          if [ "$status" -ne 0 ]; then echo '::error::Node/npm build or static audit failed; sanitized log tail follows; no binary was uploaded.'; python3 - "$log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib,re,sys
+          x=pathlib.Path(sys.argv[1]).read_text(errors='replace')
+          for a,b in ((sys.argv[2],'<RUNNER_TEMP>'),(sys.argv[3],'<WORKSPACE>'),('/home/builder/termux-packages','<BUILDER_SOURCE>'),('/data/user/0/com.karat.aibuilder/files/usr','<MODELED_PREFIX>'),('/data/user/0/com.karat.aibuilder','<MODELED_APP_DATA>')):x=x.replace(a,b)
+          x=re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----)','<REDACTED_SECRET>',x)
+          print('\n'.join(line[:600] for line in x.splitlines()[-100:]))
+          PY
+          exit "$status"; fi
+          python3 - "$out/build-result.json" "$out/audit-report.json" <<'PY'
+          import json,pathlib,sys
+          b=json.loads(pathlib.Path(sys.argv[1]).read_text());a=json.loads(pathlib.Path(sys.argv[2]).read_text());assert b['status']=='audit-passed; device-runtime-test-not-run' and b['sourceCommit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7' and b['sourceClosure']['profile']=='nodejs-npm-candidate' and b['sourceClosure']['rootPackages']==['nodejs','npm'] and b['sourceClosure']['packageCount']==11 and b['sourceClosure']['dependencyAlternativeCount']==14 and len(b['packages'])==11 and b['installed'] is False and b['deviceSmokeTest']=='NOT RUN' and b['rollback']=='NOT RUN' and a['ok'] is True
+          PY
+      - name: Sign temporary feed and exact-simulate APT closure
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          out="$RUNNER_TEMP/aib-nodejs-npm-output"; feed="$RUNNER_TEMP/aib-nodejs-npm-feed"; key="$RUNNER_TEMP/aib-nodejs-npm-signing"; mkdir -p "$feed/dists/stable/main/binary-aarch64"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key"; export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key" GNUPGHOME="$key/gnupg"
+          while IFS= read -r -d '' deb; do p=$(dpkg-deb -f "$deb" Package); mkdir -p "$feed/pool/main/$p"; cp -- "$deb" "$feed/pool/main/$p/"; done < <(find "$out/packages" -maxdepth 1 -name '*.deb' -type f -print0)
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null >dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          python3 ./scripts/verify-candidate-dependency-closure.py --package-set nodejs-npm-candidate-package-set.json --packages-index "$feed/dists/stable/main/binary-aarch64/Packages"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/nodejs-npm-feed-signing.log" 2>&1 || { echo 'ERROR:NODEJS_NPM_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2; }
+          python3 termux-private-package-kit/nodejs-npm/validate_nodejs_npm_feed.py --package-set nodejs-npm-candidate-package-set.json --source-closure "$out/source-closure.json" --feed-root "$feed" --build-result "$out/build-result.json" --audit-report "$out/audit-report.json" --prefix "$TERMUX_PREFIX"
+          AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE=1 ./scripts/test-apt-candidate.sh "$feed" aarch64 npm 11.20.0 11 all
+          ./scripts/test-signed-feed-smoke.sh
+          npm_sha=$(python3 - "$out/build-result.json" <<'PY'
+          import json,pathlib,sys;print(next(x['sha256'] for x in json.loads(pathlib.Path(sys.argv[1]).read_text())['packages'] if x['name']=='npm'))
+          PY
+          )
+          { echo '## Pinned Node.js/npm candidate closure (temporary CI-only feed)'; echo; echo '| Gate | Result |'; echo '|---|---|'; echo '| Exact upstream source closure | PASS; 11 packages / 14 dependency alternatives; npm provider is nodejs |'; echo '| Immutable npm archive and bundled Node/npm license provenance; ICU pinned-source LICENSE preserved | PASS'; echo '| App-private payload paths, licenses, AArch64 ELF and providers | PASS; 11 package audits |'; echo '| Ephemeral signed APT feed and exact simulated install | PASS; install not performed'; echo '| npm package SHA-256 | `'$npm_sha'` |'; echo '| Device install / rollback | NOT RUN |'; echo '| Public artifact / production feed / Pages / GitHub Release | NONE / BLOCKED |'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary source, package, feed, and signing material
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- "$RUNNER_TEMP/termux-packages" "$RUNNER_TEMP/aib-nodejs-npm-output" "$RUNNER_TEMP/aib-nodejs-npm-build.log" "$RUNNER_TEMP/aib-nodejs-npm-feed" "$RUNNER_TEMP/aib-nodejs-npm-signing" "$RUNNER_TEMP/nodejs-npm-feed-signing.log" "$RUNNER_TEMP/nodejs-npm-source-closure.json"
