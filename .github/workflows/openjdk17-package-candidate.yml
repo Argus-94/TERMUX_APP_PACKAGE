@@ -36,7 +36,6 @@ jobs:
     env:
       TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
       TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
-      AIB_PINNED_SOURCE_ROOT: ${{ runner.temp }}/termux-packages
       APP_DATA_DIR: /data/user/0/com.karat.aibuilder
       TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
 
@@ -72,6 +71,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           kit=termux-private-package-kit/openjdk17
+          export AIB_PINNED_SOURCE_ROOT="$RUNNER_TEMP/termux-packages"
           bash -n scripts/create-ephemeral-feed-signing-key.sh scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh "$kit/build-openjdk17-private-aarch64.sh"
           python3 -m py_compile scripts/resolve-pinned-termux-recipe-closure.py scripts/verify-candidate-dependency-closure.py "$kit/audit_openjdk17_closure.py" "$kit/validate_openjdk17_feed.py"
           python3 -m unittest discover -s "$kit/tests" -p 'test_*.py' -v
