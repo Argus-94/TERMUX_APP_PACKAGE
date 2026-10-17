@@ -1,0 +1,89 @@
+name: Verify pinned toolchain source closures (inventory only)
+
+on:
+  push:
+    branches:
+      - work/toolchain-source-closure-candidates-20261016
+    paths:
+      - .github/workflows/toolchain-source-closure-candidate.yml
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/test-toolchain-candidate-source-closures.sh
+      - termux-package-source-scope.json
+      - toolchain-candidate-source-closure-locks.json
+      - toolchain-candidate-source-closures/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/toolchain-source-closure-candidate.yml
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/test-toolchain-candidate-source-closures.sh
+      - termux-package-source-scope.json
+      - toolchain-candidate-source-closure-locks.json
+      - toolchain-candidate-source-closures/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-toolchain-source-closure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-source-closure-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+    steps:
+      - name: Check out candidate branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Check out exact locked Termux source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+      - name: Verify source inventory locks and regression tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/resolve-pinned-termux-recipe-closure.py")
+          compile(path.read_text(encoding="utf-8"), str(path), "exec")
+          PY
+          bash -n scripts/test-pinned-termux-recipe-closure.sh scripts/test-toolchain-candidate-source-closures.sh
+          bash scripts/test-pinned-termux-recipe-closure.sh
+          bash scripts/test-toolchain-candidate-source-closures.sh "$RUNNER_TEMP/termux-packages"
+          {
+            echo '## Toolchain source-closure inventory (metadata only)'
+            echo
+            echo '| Profile | Runtime packages | Dependency alternatives |'
+            echo '|---|---:|---:|'
+            python3 - toolchain-candidate-source-closure-locks.json <<'PY'
+          import json, pathlib, sys
+          lock=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          for name, profile in lock["profiles"].items():
+              print(f"| `{name}` | {profile['packageCount']} | {profile['dependencyAlternativeCount']} |")
+          PY
+            echo
+            echo 'Build / binary audit / signed APT / artifact / Android install / rollback: NOT RUN. Production publication and app-side installation remain blocked.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove only this job's temporary source checkout
+        if: always()
+        shell: bash
+        run: rm -rf -- "$RUNNER_TEMP/termux-packages"

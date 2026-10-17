@@ -162,6 +162,32 @@ def load_scope(path: pathlib.Path) -> dict[str, Any]:
         require(all(isinstance(root, str) and re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", root) for root in roots),
                 "SOURCE_SCOPE_ROOT_NAME_INVALID")
         require(len(set(roots)) == len(roots), "SOURCE_SCOPE_ROOT_DUPLICATE")
+    choices_by_profile = scope.get("dependencyChoices", {})
+    require(isinstance(choices_by_profile, dict), "SOURCE_SCOPE_DEPENDENCY_CHOICES_INVALID")
+    for profile, choices in choices_by_profile.items():
+        require(profile in profiles, "SOURCE_SCOPE_DEPENDENCY_CHOICE_PROFILE_UNKNOWN")
+        require(isinstance(choices, list), "SOURCE_SCOPE_DEPENDENCY_CHOICE_LIST_INVALID")
+        seen: set[tuple[str, int]] = set()
+        for choice in choices:
+            require(isinstance(choice, dict), "SOURCE_SCOPE_DEPENDENCY_CHOICE_INVALID")
+            require(set(choice) == {"package", "dependencyGroupIndex", "alternatives", "selected"},
+                    "SOURCE_SCOPE_DEPENDENCY_CHOICE_FIELDS_INVALID")
+            package, group_index = choice.get("package"), choice.get("dependencyGroupIndex")
+            alternatives, selected = choice.get("alternatives"), choice.get("selected")
+            require(isinstance(package, str) and re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", package) is not None,
+                    "SOURCE_SCOPE_DEPENDENCY_CHOICE_PACKAGE_INVALID")
+            require(type(group_index) is int and group_index >= 0,
+                    "SOURCE_SCOPE_DEPENDENCY_CHOICE_INDEX_INVALID")
+            require(isinstance(alternatives, list) and len(alternatives) >= 2
+                    and all(isinstance(name, str) and re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", name) is not None
+                            for name in alternatives),
+                    "SOURCE_SCOPE_DEPENDENCY_CHOICE_ALTERNATIVES_INVALID")
+            require(len(set(alternatives)) == len(alternatives), "SOURCE_SCOPE_DEPENDENCY_CHOICE_DUPLICATE_ALTERNATIVE")
+            require(isinstance(selected, str) and selected in alternatives,
+                    "SOURCE_SCOPE_DEPENDENCY_CHOICE_SELECTION_INVALID")
+            key = (package, group_index)
+            require(key not in seen, "SOURCE_SCOPE_DEPENDENCY_CHOICE_DUPLICATE_GROUP")
+            seen.add(key)
     return scope
 
 
@@ -183,7 +209,7 @@ def git_source_state(source_root: pathlib.Path) -> tuple[str, str]:
 
 
 class Resolver:
-    def __init__(self, source_root: pathlib.Path):
+    def __init__(self, source_root: pathlib.Path, dependency_choices: list[dict[str, Any]] | None = None):
         self.source_root = source_root.resolve()
         self.packages_root = self.source_root / "packages"
         require(self.packages_root.is_dir(), "SOURCE_PACKAGES_DIRECTORY_MISSING")
@@ -204,6 +230,12 @@ class Resolver:
             raise GateError("SOURCE_PACKAGES_DIRECTORY_UNREADABLE") from exc
         self.nodes: dict[str, dict[str, Any]] = {}
         self.edges = 0
+        self.dependency_choices = {
+            (choice["package"], choice["dependencyGroupIndex"]): choice
+            for choice in (dependency_choices or [])
+        }
+        self.applied_dependency_choices: set[tuple[str, int]] = set()
+        self.selected_dependency_alternatives: list[dict[str, Any]] = []
 
     def locate(self, package: str) -> tuple[pathlib.Path, pathlib.Path | None]:
         direct = self.recipe_by_package.get(package)
@@ -291,12 +323,30 @@ class Resolver:
                 continue
             metadata = self.package_metadata(package)
             self.nodes[package] = metadata
-            for group in metadata["dependencyGroups"]:
-                for alternative in group:
-                    dependency = str(alternative["name"])
+            for group_index, group in enumerate(metadata["dependencyGroups"]):
+                alternatives = [str(alternative["name"]) for alternative in group]
+                choice_key = (package, group_index)
+                choice = self.dependency_choices.get(choice_key)
+                if choice is None:
+                    dependencies = alternatives
+                else:
+                    require(alternatives == choice["alternatives"], "SOURCE_DEPENDENCY_CHOICE_NOT_APPLIED")
+                    selected = str(choice["selected"])
+                    require(selected in alternatives, "SOURCE_DEPENDENCY_CHOICE_PROVIDER_NOT_FOUND")
+                    self.applied_dependency_choices.add(choice_key)
+                    self.selected_dependency_alternatives.append({
+                        "package": package,
+                        "dependencyGroupIndex": group_index,
+                        "alternatives": alternatives,
+                        "selected": selected,
+                    })
+                    dependencies = [selected]
+                for dependency in dependencies:
                     if dependency not in self.nodes:
                         pending.append(dependency)
-        return {
+        require(self.applied_dependency_choices == set(self.dependency_choices),
+                "SOURCE_DEPENDENCY_CHOICE_NOT_APPLIED")
+        result = {
             "rootPackages": roots,
             "packageCount": len(self.nodes),
             "dependencyAlternativeCount": sum(
@@ -306,6 +356,9 @@ class Resolver:
             ),
             "packages": [self.nodes[name] for name in sorted(self.nodes)],
         }
+        if self.selected_dependency_alternatives:
+            result["selectedDependencyAlternatives"] = self.selected_dependency_alternatives
+        return result
 
 
 def main() -> int:
@@ -321,7 +374,7 @@ def main() -> int:
         revision, _ = git_source_state(source_root)
         require(revision == scope["sourceCommit"], "SOURCE_COMMIT_MISMATCH")
         roots = scope["profiles"][args.profile]
-        resolver = Resolver(source_root)
+        resolver = Resolver(source_root, scope.get("dependencyChoices", {}).get(args.profile, []))
         result = resolver.resolve(roots)
         output = {
             "schemaVersion": 1,

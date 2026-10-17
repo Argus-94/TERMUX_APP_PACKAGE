@@ -12,6 +12,20 @@
 
 Для подтверждённых кандидатов проверяются pinned source, рецепт, builder image, app-private prefix в модели CI, package payload и временный подписанный APT feed с `signed-by` и `apt-get --simulate`. Отдельный `curl` `8.23.0` candidate workflow фиксирует closure из 9 пакетов и 12 dependency alternatives, включая hash `curl` subpackage; его актуальный CI-результат смотрите в Actions check связанного PR. Поскольку upstream subpackage `curl` не несёт отдельный copyright payload, аудит требует license evidence от включённого parent `.deb` `libcurl` с теми же pinned recipe/source/version/license; без доказательства parent evidence closure отклоняется. Даже успешная симуляция — **не** Android install test и не разрешение production-публикации. Профили `base` и `git-extras` в `termux-package-source-scope.json` остаются inventory для всех пакетов, кроме тех, что отдельно закреплены candidate manifests.
 
+## Toolchain profiles: candidate и source-metadata inventory
+
+Для Node.js+NPM, OpenJDK 17 и CMake+Ninja отдельная ветка фиксирует recipe hashes и runtime dependency closures из Termux commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`:
+
+- Node.js `26.4.0` + npm `11.20.0`: 11 пакетов, 14 dependency alternatives. Upstream `nodejs` recipe рекомендует npm, но использует `--without-npm`; npm включён как отдельный root. Для `npm` явно выбран provider `nodejs` вместо конфликтующего `nodejs-lts`; исходная группа `nodejs | nodejs-lts` при этом сохраняется в metadata.
+- OpenJDK 17 `17.0.20`: 36 пакетов, 46 alternatives.
+- CMake `4.4.4` + Ninja `1.13.2`: 22 пакета, 34 alternatives.
+
+Эти числа описывают **runtime `Depends` closure**, а не полный build closure. Read-only workflow повторно разрешает recipes/subpackages и сверяет snapshots/hashes, но для этих трёх профилей ничего не собирает и не запускает APT или Android.
+
+### Python `3.14.6` — отдельный candidate pipeline
+
+Python вынесен в отдельный package set и kit: pinned runtime closure содержит 17 пакетов / 25 dependency alternatives. В `build.sh` `tk` закреплён как build-only dependency; `tk`, `tcl` и отдельный `python-tkinter` не входят в candidate runtime feed. Рекомендации `python-pip` и `python-ensurepip-wheels` также исключены из required closure и simulated install. Workflow в `.github/workflows/python-package-candidate.yml` предназначен для source build из точного commit, static ELF/license/dependency audit и временного ephemeral-signed APT `--simulate`; [Actions run 39036690122](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39036690122) на commit `b39ebbf624a19adee282f28568c50a5619a192af` завершился успешно: собраны и статически проверены 17 пакетов; exact dependency audit подтвердил 25 relations без external base assumptions; APT подтвердил `signed_by=1`, download и simulated install для `python=3.14.6-1`, `install_performed=0`, `rollback_performed=0`. Artifacts: 0; удаление временных source/packages/feed/keys завершилось успешно. Это не Android installation/rollback proof и не разрешение production feed/Pages публикации.
+
 ## Повторяемая проверка
 
 Запускайте команды из корня репозитория:
@@ -20,6 +34,8 @@
 ./scripts/test-candidate-feed-policy.sh
 ./scripts/test-candidate-dependency-closure.sh
 bash ./scripts/test-pinned-termux-recipe-closure.sh
+bash ./scripts/test-toolchain-candidate-source-closures.sh /path/to/clean-pinned-termux-packages
+python3 -m unittest discover -s termux-private-package-kit/python-v3.14.6/tests -p 'test_*.py' -v
 ./termux-private-package-kit/make-v476/verify-kit.sh
 ./scripts/test-device-test-artifact-staging.sh
 python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
@@ -27,11 +43,11 @@ python3 -m unittest discover -s termux-private-package-kit/git-v2.56.0/tests -p 
 python3 -m unittest discover -s termux-private-package-kit/curl-v8.23.0/tests -p 'test_*.py' -v
 ```
 
-Полную сборку Make/`gh` выполняет `.github/workflows/package-feed-candidate.yml`; Git и `curl` проверяются отдельными `.github/workflows/git-package-candidate.yml` и `.github/workflows/curl-package-candidate.yml`. Candidate workflows не публикуют бинарники или production feed и удаляют временные исходники, пакеты и signing workspace после проверки.
+Полную сборку Make/`gh` выполняет `.github/workflows/package-feed-candidate.yml`; Git, `curl` и Python проверяются отдельными `.github/workflows/git-package-candidate.yml`, `.github/workflows/curl-package-candidate.yml` и `.github/workflows/python-package-candidate.yml`. Candidate workflows не публикуют бинарники или production feed и удаляют временные исходники, пакеты и signing workspace после проверки.
 
 ## Ограниченная локальная сборка для разработки
 
-Локальные builder-скрипты предназначены только для получения **непубликуемого** результата аудита. Они требуют чистый checkout Termux на точном pinned commit, Docker и digest-pinned официальный builder image; минимальный запас — 3 GiB для Make и 5 GiB для Git/`curl`. Скрипты проверяют app-private namespace, выполняют статический аудит и не устанавливают пакет. Например, для Make:
+Локальные builder-скрипты предназначены только для получения **непубликуемого** результата аудита. Они требуют чистый checkout Termux на точном pinned commit, Docker и digest-pinned официальный builder image; минимальный запас — 3 GiB для Make, 5 GiB для Git/`curl` и 8 GiB для Python. Скрипты проверяют app-private namespace, выполняют статический аудит и не устанавливают пакет. Например, для Make:
 
 ```sh
 export AIB_TERMUX_APP_DATA_DIR=/data/user/0/com.karat.aibuilder

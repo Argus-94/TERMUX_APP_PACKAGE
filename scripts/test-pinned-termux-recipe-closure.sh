@@ -10,6 +10,7 @@ git -C "$SRC" config user.name 'closure fixture'
 git -C "$SRC" config user.email 'closure-fixture@example.invalid'
 
 mkdir -p "$SRC/packages/alpha" "$SRC/packages/bravo" "$SRC/packages/parent" "$SRC/packages/support" "$SRC/packages/optional"
+mkdir -p "$SRC/packages/nodejs" "$SRC/packages/nodejs-lts" "$SRC/packages/npm"
 cat > "$SRC/packages/alpha/build.sh" <<'EOF'
 TERMUX_PKG_VERSION="1.0"
 TERMUX_PKG_DEPENDS="bravo (>= 2.0)"
@@ -37,11 +38,23 @@ EOF
 cat > "$SRC/packages/optional/build.sh" <<'EOF'
 TERMUX_PKG_VERSION=5.0
 EOF
+cat > "$SRC/packages/nodejs/build.sh" <<'EOF'
+TERMUX_PKG_VERSION=26.4.0
+TERMUX_PKG_CONFLICTS="nodejs-lts"
+EOF
+cat > "$SRC/packages/nodejs-lts/build.sh" <<'EOF'
+TERMUX_PKG_VERSION=24.13.0
+TERMUX_PKG_CONFLICTS="nodejs"
+EOF
+cat > "$SRC/packages/npm/build.sh" <<'EOF'
+TERMUX_PKG_VERSION=11.20.0
+TERMUX_PKG_DEPENDS="nodejs | nodejs-lts"
+EOF
 git -C "$SRC" add packages
 git -C "$SRC" commit -qm 'synthetic pinned source fixture'
 PIN="$(git -C "$SRC" rev-parse HEAD)"
 cat > "$TMP/config/scope.json" <<EOF
-{"schemaVersion":1,"sourceRepository":"https://example.invalid/termux-packages.git","sourceCommit":"$PIN","inventoryOnly":true,"candidateInstallable":false,"profiles":{"base":["alpha"],"extras":["helper"]}}
+{"schemaVersion":1,"sourceRepository":"https://example.invalid/termux-packages.git","sourceCommit":"$PIN","inventoryOnly":true,"candidateInstallable":false,"profiles":{"base":["alpha"],"extras":["helper"],"npm-choice":["nodejs","npm"]},"dependencyChoices":{"npm-choice":[{"package":"npm","dependencyGroupIndex":0,"alternatives":["nodejs","nodejs-lts"],"selected":"nodejs"}]}}
 EOF
 CHECKER="$ROOT/scripts/resolve-pinned-termux-recipe-closure.py"
 python3 "$CHECKER" --source-root "$SRC" --scope "$TMP/config/scope.json" --profile base > "$TMP/base.json"
@@ -67,7 +80,35 @@ result=json.loads(pathlib.Path(sys.argv[1]).read_text())
 assert result['rootPackages']==['helper']
 assert {'helper','parent','support'}=={item['name'] for item in result['packages']}
 PY
-sed -i 's/"sourceCommit":"[0-9a-f]*/"sourceCommit":"0000000000000000000000000000000000000000/' "$TMP/config/scope.json"
+python3 "$CHECKER" --source-root "$SRC" --scope "$TMP/config/scope.json" --profile npm-choice > "$TMP/npm-choice.json"
+python3 - "$TMP/npm-choice.json" <<'PY'
+import json, pathlib, sys
+result=json.loads(pathlib.Path(sys.argv[1]).read_text())
+packages={item['name']:item for item in result['packages']}
+assert {'nodejs','npm'} <= set(packages)
+assert 'nodejs-lts' not in packages
+assert packages['npm']['dependencyGroups'][0][0]['name']=='nodejs'
+assert packages['npm']['dependencyGroups'][0][1]['name']=='nodejs-lts'
+assert result['selectedDependencyAlternatives']==[{'package':'npm','dependencyGroupIndex':0,'alternatives':['nodejs','nodejs-lts'],'selected':'nodejs'}]
+print('PINNED_TERMUX_DEPENDENCY_CHOICE_TESTS_OK chosen_provider=1 conflicting_alternative_excluded=1 full_source_relation_retained=1')
+PY
+python3 - "$TMP/config/scope.json" <<'PY'
+import json, pathlib, sys
+path=pathlib.Path(sys.argv[1]); scope=json.loads(path.read_text())
+scope['dependencyChoices']['npm-choice'][0]['alternatives']=['nodejs','missing-provider']
+path.write_text(json.dumps(scope))
+PY
+if python3 "$CHECKER" --source-root "$SRC" --scope "$TMP/config/scope.json" --profile npm-choice >"$TMP/choice.out" 2>&1; then
+  echo 'ERROR:UNMATCHED_DEPENDENCY_CHOICE_ACCEPTED' >&2; exit 2
+fi
+grep -q 'SOURCE_DEPENDENCY_CHOICE_NOT_APPLIED' "$TMP/choice.out"
+sed -i "s/missing-provider/nodejs-lts/" "$TMP/config/scope.json"
+python3 - "$TMP/config/scope.json" <<'PY'
+import json, pathlib, sys
+path=pathlib.Path(sys.argv[1]); scope=json.loads(path.read_text())
+scope['sourceCommit']='0000000000000000000000000000000000000000'
+path.write_text(json.dumps(scope))
+PY
 if python3 "$CHECKER" --source-root "$SRC" --scope "$TMP/config/scope.json" --profile base >"$TMP/pin.out" 2>&1; then
   echo 'ERROR:SOURCE_PIN_MISMATCH_ACCEPTED' >&2; exit 2
 fi

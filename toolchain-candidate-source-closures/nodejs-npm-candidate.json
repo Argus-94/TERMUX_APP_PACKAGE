@@ -1,0 +1,342 @@
+{
+  "dependencyAlternativeCount": 14,
+  "packageCount": 11,
+  "packages": [
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ]
+      ],
+      "name": "c-ares",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/c-ares/build.sh",
+      "recipeSha256": "39364f4135281f12c103e20468f8776c4dec2008f268d3cea73c9d17ff3441d3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.34.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "ca-certificates",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:2026.09.25",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libc++",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libc++/build.sh",
+      "recipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libffi",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libffi/build.sh",
+      "recipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.8.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libicu",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libicu/build.sh",
+      "recipeSha256": "400ce1208f3c046b20a3875abbb3a3a17eefede53163bae9eab4032c8f322769",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "78.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libsqlite",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libsqlite/build.sh",
+      "recipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.54.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "c-ares",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "c-ares",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libicu",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libicu",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsqlite",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsqlite",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ]
+      ],
+      "name": "nodejs",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/nodejs/build.sh",
+      "recipeSha256": "17e377fe5c0c6eddc37749692f4a4a7e0d4d613027a1649bf0054a04461a159e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "npm",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "npm",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "26.4.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "nodejs",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs",
+            "version": null
+          },
+          {
+            "name": "nodejs-lts",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs-lts",
+            "version": null
+          }
+        ]
+      ],
+      "name": "npm",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/npm/build.sh",
+      "recipeSha256": "7bf0bf1c95252097985bdc843c08bdaf806fb29b24572e9d127b92680d914c85",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "11.20.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openssl",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:3.6.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "resolv-conf",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/resolv-conf/build.sh",
+      "recipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    },
+    {
+      "dependencyGroups": [],
+      "name": "zlib",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true
+    }
+  ],
+  "profile": "nodejs-npm-candidate",
+  "rootPackages": [
+    "nodejs",
+    "npm"
+  ],
+  "schemaVersion": 1,
+  "selectedDependencyAlternatives": [
+    {
+      "alternatives": [
+        "nodejs",
+        "nodejs-lts"
+      ],
+      "dependencyGroupIndex": 0,
+      "package": "npm",
+      "selected": "nodejs"
+    }
+  ],
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "verification": "pinned-source-recipe-inventory-only; no packages built, installed, staged, signed, or authorized"
+}
