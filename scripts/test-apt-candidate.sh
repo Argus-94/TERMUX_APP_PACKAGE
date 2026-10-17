@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 077
+export LC_ALL=C
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-$ROOT}"
 MANIFEST="$CONFIG_ROOT/keys/feed-signing.json"
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
-[[ $# -eq 4 || $# -eq 5 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count]'
+[[ $# -ge 4 && $# -le 6 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count] [expected-root-architecture]'
 FEED_ROOT="$(realpath -e -- "$1")"
 ARCH="$2"
 PACKAGE="$3"
 VERSION="$4"
 EXPECTED_SOURCE_DEB_COUNT="${5:-1}"
+EXPECTED_ROOT_ARCH="${6:-$ARCH}"
 case "$ARCH" in aarch64|amd64) ;; *) fail 'ARCHITECTURE_NOT_ALLOWLISTED';; esac
+[[ "$EXPECTED_ROOT_ARCH" == "$ARCH" || "$EXPECTED_ROOT_ARCH" == all ]] || fail 'ROOT_ARCHITECTURE_NOT_ALLOWLISTED'
 [[ "$PACKAGE" =~ ^[a-z0-9][a-z0-9+.-]*$ ]] || fail 'PACKAGE_NAME_INVALID'
 [[ "$VERSION" =~ ^[A-Za-z0-9.+:~_-]+$ ]] || fail 'PACKAGE_VERSION_INVALID'
 [[ "$EXPECTED_SOURCE_DEB_COUNT" =~ ^[1-9][0-9]*$ ]] || fail 'EXPECTED_SOURCE_DEB_COUNT_INVALID'
@@ -95,8 +98,27 @@ APT_CONFIG="$TMP/apt.conf" apt-get update >"$TMP/update.log" 2>&1 || { cat "$TMP
 APT_CONFIG="$TMP/apt.conf" apt-cache show "$PACKAGE" >"$TMP/show.log" 2>&1 || { cat "$TMP/show.log" >&2; fail 'APT_CANDIDATE_NOT_QUERYABLE'; }
 grep -Fxq "Package: $PACKAGE" "$TMP/show.log" || fail 'APT_PACKAGE_NAME_MISMATCH'
 grep -Fxq "Version: $VERSION" "$TMP/show.log" || fail 'APT_PACKAGE_VERSION_MISMATCH'
-grep -Fxq "Architecture: $ARCH" "$TMP/show.log" || fail 'APT_PACKAGE_ARCHITECTURE_MISMATCH'
+grep -Fxq "Architecture: $EXPECTED_ROOT_ARCH" "$TMP/show.log" || fail 'APT_PACKAGE_ARCHITECTURE_MISMATCH'
 APT_CONFIG="$TMP/apt.conf" apt-get --simulate --no-install-recommends install "$PACKAGE=$VERSION" >"$TMP/simulate.log" 2>&1 || { cat "$TMP/simulate.log" >&2; fail 'APT_SIMULATED_INSTALL_REJECTED'; }
+if [[ "${AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE:-0}" == 1 ]]; then
+  python3 - "$TMP/simulate.log" "$FEED_ROOT/pool" <<'PY'
+import pathlib,re,subprocess,sys
+expected={}
+for deb in pathlib.Path(sys.argv[2]).rglob('*.deb'):
+    name=subprocess.check_output(['dpkg-deb','-f',str(deb),'Package'],text=True).strip()
+    version=subprocess.check_output(['dpkg-deb','-f',str(deb),'Version'],text=True).strip()
+    if name in expected: raise SystemExit('APT_SOURCE_PACKAGE_DUPLICATE:'+name)
+    expected[name]=version
+actual={}
+for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    if not line.startswith('Inst '): continue
+    match=re.match(r'^Inst ([a-z0-9][a-z0-9+.-]*)(?::[a-z0-9-]+)? \((\S+)',line)
+    if not match or match[1] in actual: raise SystemExit('APT_SIMULATION_RECORD_INVALID')
+    actual[match[1]]=match[2]
+if actual!=expected: raise SystemExit('APT_SIMULATED_EXACT_CLOSURE_MISMATCH')
+print('APT_SIMULATED_EXACT_SOURCE_CLOSURE_OK packages='+str(len(actual)))
+PY
+fi
 (
   cd "$TMP/downloads"
   APT_CONFIG="$TMP/apt.conf" apt-get download "$PACKAGE=$VERSION" >"$TMP/download.log" 2>&1 || { cat "$TMP/download.log" >&2; fail 'APT_DOWNLOAD_FAILED'; }
@@ -109,6 +131,7 @@ matches=0
 for source_deb in "${SOURCE_DEBS[@]}"; do
   [[ "$(dpkg-deb -f "$source_deb" Package 2>/dev/null)" == "$PACKAGE" ]] || continue
   [[ "$(dpkg-deb -f "$source_deb" Version 2>/dev/null)" == "$VERSION" ]] || continue
+  [[ "$(dpkg-deb -f "$source_deb" Architecture 2>/dev/null)" == "$EXPECTED_ROOT_ARCH" ]] || continue
   [[ "$(sha256sum "$source_deb" | awk '{print $1}')" == "$downloaded_hash" ]] && ((matches += 1))
 done
 ((matches == 1)) || fail 'DOWNLOADED_PACKAGE_HASH_OR_IDENTITY_MISMATCH'

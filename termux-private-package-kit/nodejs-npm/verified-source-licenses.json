@@ -1,0 +1,23 @@
+{
+  "nodejs": {
+    "sourceUrl": "https://nodejs.org/dist/v26.4.0/node-v26.4.0.tar.xz",
+    "sourceSha256": "9eceb3621024069d91035b5471d2ebe86aa04d22dbeba72a782eaf36ff9183ac",
+    "licenseSourcePath": "node-v26.4.0/LICENSE",
+    "licensePayloadPath": "share/doc/nodejs/LICENSE",
+    "licensePayloadSha256": "148eacf7863ef4329224a29398623077200a27194aa075569faf4a0a85566ca5"
+  },
+  "npm": {
+    "sourceUrl": "https://codeload.github.com/npm/cli/tar.gz/d12b9434dd010b5fb7044c3cc149cdda317813f8",
+    "sourceSha256": "590722fbc114915e695814686a0b9996696456b2999c581523b8514d996bfb96",
+    "licenseSourcePath": "cli-d12b9434dd010b5fb7044c3cc149cdda317813f8/LICENSE",
+    "licensePayloadPath": "share/doc/npm/LICENSE",
+    "licensePayloadSha256": "7610d223851f421d315df5e77974f1c68a04b97e02060e5bbbcf13d95e3ca257"
+  },
+  "libicu": {
+    "sourceUrl": "https://github.com/unicode-org/icu/releases/download/release-78.3/icu4c-78.3-sources.tgz",
+    "sourceSha256": "3a2e7a47604ba702f345878308e6fefeca612ee895cf4a5f222e7955fabfe0c0",
+    "licenseSourcePath": "icu/LICENSE",
+    "licensePayloadPath": "share/doc/libicu/LICENSE",
+    "licensePayloadSha256": "e55522d81edc687a341a4411e0776e54ca654e90147f354a90458aaced4116af"
+  }
+}
