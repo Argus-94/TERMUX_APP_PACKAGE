@@ -14,11 +14,13 @@ The controlled overlay preserves OpenJDK `LICENSE`, `ADDITIONAL_LICENSE_INFO`, a
 
 Hosted run [39066933456](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39066933456) stopped at PulseAudio's unresolved `sndfile` pkg-config dependency. The pinned recipes expose a source build cycle: `libmpg123` build-depends on `pulseaudio`, which depends on `libsndfile`, which depends on `libmpg123`.
 
-The overlay selects mpg123's supported decoder-only build: `--disable-components --enable-libmpg123`, and removes the console player's PulseAudio build dependency. These switches were checked in `configure.ac` from exact mpg123 1.33.7 source matching recipe SHA-256. This is a real decoder library build, not a placeholder package. Optional console player/output components are not included in this candidate.
+The overlay selects mpg123's supported decoder-only build: `--disable-components --enable-libmpg123`, removes the console player's PulseAudio build dependency, and excludes the optional console subpackage on aarch64 using the standard architecture gate. These switches were checked in `configure.ac` from exact mpg123 1.33.7 source matching recipe SHA-256. This is a real decoder library build, not a placeholder package. Optional console player/output components are not included in this candidate.
 
-PulseAudio's mutable `v17.0` git reference is replaced by the archive of peeled commit `1f020889c9aa44ea0f63d7222e8c2b62c3f45f68`, SHA-256 `0ccee8a0c9653badc668cf11f0eaad97a1febb85afa82c24c2d1935926446e3b`. Package versions and required runtime inventory remain unchanged. The manifest locks the overlay and additional source evidence.
+PulseAudio's mutable `v17.0` git reference is replaced by the archive of peeled commit `1f020889c9aa44ea0f63d7222e8c2b62c3f45f68`, SHA-256 `0ccee8a0c9653badc668cf11f0eaad97a1febb85afa82c24c2d1935926446e3b`. The standard `.tarball-version` file is seeded from pinned recipe version 17.0, as required by upstream `git-version-gen` when `.git` metadata is absent. Hosted run 39070715062 exposed this archive version-metadata requirement before dependency detection. Package versions and required runtime inventory remain unchanged. The manifest locks the overlay and additional source evidence.
 
 ## Hosted gates
+
+Before compilation, a metadata-only preflight checks the controlled 120-package source build order and requires `libmpg123` before `libsndfile` before `pulseaudio`, with no optional console subpackage. This build-only ordering set is distinct from the 36-package runtime inventory.
 
 CI builds dependencies from source with binary dependency downloads disabled. It requires exact identities and dependencies, source recipe hashes, private payload/link paths, license evidence, AArch64/Android ELF properties and proven library providers. After a successful audit, CI creates an ephemeral signing key and temporary feed, verifies hashes and signatures, and runs an exact APT simulation. No package installation occurs. Temporary source, packages, feed, container and signing material are removed even on failure.
 

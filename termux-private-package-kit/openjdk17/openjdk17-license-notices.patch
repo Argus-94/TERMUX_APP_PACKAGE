@@ -11,6 +11,15 @@ diff --git a/packages/libmpg123/build.sh b/packages/libmpg123/build.sh
 +TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-components --enable-libmpg123"
  TERMUX_PKG_BREAKS="mpg123 (<< 1.33.1-1)"
  TERMUX_PKG_REPLACES="mpg123 (<< 1.33.1-1)"
+diff --git a/packages/libmpg123/mpg123.subpackage.sh b/packages/libmpg123/mpg123.subpackage.sh
+--- a/packages/libmpg123/mpg123.subpackage.sh
++++ b/packages/libmpg123/mpg123.subpackage.sh
+@@ -5,3 +5,5 @@
+ lib/mpg123/
+ share/man/man1/mpg123.1.gz share/man/man1/out123.1.gz
+ "
++# Decoder-only candidate intentionally excludes the optional console player.
++TERMUX_SUBPKG_EXCLUDED_ARCHES="aarch64"
 diff --git a/packages/libtool/build.sh b/packages/libtool/build.sh
 --- a/packages/libtool/build.sh
 +++ b/packages/libtool/build.sh
@@ -57,3 +66,12 @@ diff --git a/packages/pulseaudio/build.sh b/packages/pulseaudio/build.sh
  TERMUX_PKG_VERSION="17.0"
  TERMUX_PKG_REVISION=4
  TERMUX_PKG_DEPENDS="dbus, libandroid-stub, libandroid-execinfo, libandroid-glob, libc++, libltdl, libsndfile, libsoxr, libwebrtc-audio-processing, speexdsp"
+@@ -20,6 +21,8 @@
+ TERMUX_PKG_CONFFILES="etc/pulse/client.conf etc/pulse/daemon.conf etc/pulse/default.pa etc/pulse/system.pa"
+ 
+ termux_step_pre_configure() {
++	# Upstream git-version-gen requires release metadata for commit archives.
++	printf '%s\n' "$TERMUX_PKG_VERSION" > "$TERMUX_PKG_SRCDIR/.tarball-version"
+ 	# Our aaudio sink module needs libaaudio.so from a later android api version:
+ 	if [ $TERMUX_PKG_API_LEVEL -lt 26 ]; then
+ 		local _libdir="$TERMUX_PKG_TMPDIR/libaaudio"

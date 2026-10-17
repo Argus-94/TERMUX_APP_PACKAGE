@@ -4,9 +4,9 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='e6aceeb5e50910ed0c275dd1d00bb6ecaee2f5d7efadd4562e4798b3dd3e2a08'
+readonly EXPECTED_MANIFEST_SHA='22f78d9643d1b073fdb320d8fdd64c2ebfc709232c90df52e25e8f8c07df8335'
 readonly EXPECTED_CLOSURE_SHA='378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a'
-readonly EXPECTED_PATCH_SHA='f721ac1663771a4bdc8e15c796e4e07444fd99cc0aa494701b5469e4fde3560c'
+readonly EXPECTED_PATCH_SHA='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
 readonly MIN_FREE_BYTES=$((12 * 1024 * 1024 * 1024))
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
@@ -51,7 +51,7 @@ assert m['sourceClosure']['profile']=='openjdk17-candidate' and m['sourceClosure
 assert m['sourceClosure']['expectedPackageCount']==36 and m['sourceClosure']['expectedDependencyAlternativeCount']==46
 assert len(m['packages'])==36 and [p['name'] for p in m['packages']]==sorted(p['name'] for p in m['packages'])
 assert m['releaseGate']=={'publicationAllowed':False,'deviceInstall':'NOT RUN','rollback':'NOT RUN','deviceEvidenceSha256':None}
-assert m['buildModifications']['patchSha256']=='f721ac1663771a4bdc8e15c796e4e07444fd99cc0aa494701b5469e4fde3560c'
+assert m['buildModifications']['patchSha256']=='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
 assert set(m['sourceLicenseEvidence'])=={'openjdk-17'}
 PY
 
@@ -106,7 +106,8 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libmpg123/mpg123.subpackage.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
+python3 "$ROOT/termux-private-package-kit/openjdk17/verify_openjdk17_buildorder.py" --source-root "$WORKTREE"
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash

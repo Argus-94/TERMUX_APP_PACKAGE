@@ -70,7 +70,7 @@
   },
   "buildModifications": {
     "patchPath": "termux-private-package-kit/openjdk17/openjdk17-license-notices.patch",
-    "patchSha256": "f721ac1663771a4bdc8e15c796e4e07444fd99cc0aa494701b5469e4fde3560c",
+    "patchSha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc",
     "purpose": "Preserve source/license notices; build only supported libmpg123 decoder component to remove the source build cycle; replace mutable PulseAudio git tag with exact commit archive and verified SHA-256. Runtime dependency inventory and versions remain pinned and unchanged."
   },
   "runtimeDependencies": {
@@ -1263,12 +1263,14 @@
       "sourceSha256": "0ccee8a0c9653badc668cf11f0eaad97a1febb85afa82c24c2d1935926446e3b",
       "commit": "1f020889c9aa44ea0f63d7222e8c2b62c3f45f68",
       "tag": "v17.0",
-      "tagObject": "16be4f7accce287fd08519591c6356ffa61aaaf1"
+      "tagObject": "16be4f7accce287fd08519591c6356ffa61aaaf1",
+      "archiveVersionMetadata": "Standard git-version-gen .tarball-version is seeded from exact pinned recipe 17.0; commit archive has no .git metadata."
     },
     "libmpg123": {
       "sourceSha256": "31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee",
       "configureComponentEvidence": "configure.ac lines 375-418: --disable-components --enable-libmpg123; no decoder API removed",
-      "reason": "Hosted run 39066933456: pulseaudio configure cannot resolve sndfile; pinned recipe libmpg123 BUILD_DEPENDS=pulseaudio closes the cycle through pulseaudio runtime sndfile and sndfile runtime mpg123."
+      "reason": "Hosted run 39066933456: pulseaudio configure cannot resolve sndfile; pinned recipe libmpg123 BUILD_DEPENDS=pulseaudio closes the cycle through pulseaudio runtime sndfile and sndfile runtime mpg123.",
+      "optionalConsoleSubpackage": "Excluded on aarch64 via standard TERMUX_SUBPKG_EXCLUDED_ARCHES so buildorder does not reintroduce its PulseAudio dependency."
     }
   }
 }
