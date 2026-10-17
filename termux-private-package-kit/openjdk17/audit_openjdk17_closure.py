@@ -20,7 +20,7 @@ SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PACKAGE_COUNT = 36
 DEPENDENCY_ALTERNATIVE_COUNT = 46
-PACKAGE_SET_SHA256 = "ab01cbe7377249de44c22d0dc1dc83d92f8bedb7c61f8617a6809cc5974d7272"
+PACKAGE_SET_SHA256 = "6d11683078a4440244921f036db39554b9a63819ff6b19ed92c88ab2d12d4f0d"
 SOURCE_CLOSURE_SHA256 = "378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a"
 PATCH_SHA256 = "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc"
 PREFIXES = {
@@ -33,6 +33,7 @@ PLATFORM_LIBS = {
 }
 PACKAGE_FILE_ELF_PROVIDERS = {'libandroid-glob.so': ('libandroid-glob', 'lib/libandroid-glob.so'), 'libandroid-spawn.so': ('libandroid-spawn', 'lib/libandroid-spawn.so'), 'libandroid-support.so': ('libandroid-support', 'lib/libandroid-support.so'), 'libandroid-sysv-semaphore.so': ('libandroid-sysv-semaphore', 'lib/libandroid-sysv-semaphore.so'), 'libtermux-platform-ns.so': ('libandroid-stub', 'lib/libtermux-platform-ns.so'), 'libjli.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjli.so'), 'libjava.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjava.so'), 'libjvm.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/server/libjvm.so'), 'libandroid-shmem.so': ('libandroid-shmem', 'lib/libandroid-shmem.so'), 'libandroid.so': ('libandroid-stub', 'lib/libandroid.so'), 'libmediandk.so': ('libandroid-stub', 'lib/libmediandk.so'), 'libOpenSLES.so': ('libandroid-stub', 'lib/libOpenSLES.so'), 'libbinder_ndk.so': ('libandroid-stub', 'lib/libbinder_ndk.so')}
 PACKAGE_FILE_ELF_SYMLINK_PROVIDERS = {}
+EXPECTED_DUPLICATE_ELF_ALIASES = {'libjsig.so': {'package': 'openjdk-17', 'paths': ['lib/jvm/java-17-openjdk/lib/libjsig.so', 'lib/jvm/java-17-openjdk/lib/server/libjsig.so'], 'equivalence': 'identical SHA-256 plus identical SONAME/NEEDED/interpreter/RPATH metadata', 'sourceEvidence': 'https://github.com/openjdk/jdk17u/blob/8cbbca61432426a3441aa08838d930ef954ea1ba/make/modules/java.base/Lib.gmk#L145-L166'}}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 LICENSE_NAME_RE = re.compile(r"(?i)^(copyright|copying|license|licence)(?:[._-].*)?$")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
@@ -203,8 +204,25 @@ def validate_elf_needed_providers(all_elf: list[dict[str, Any]], library_symlink
     for item in all_elf:
         if item.get("soname"):
             sonames.setdefault(item["soname"], []).append(item)
+    alias_evidence = []
     for library, providers in sonames.items():
-        require(len(providers) == 1, "ELF_SONAME_PROVIDER_AMBIGUOUS", library)
+        if len(providers) == 1:
+            continue
+        policy = EXPECTED_DUPLICATE_ELF_ALIASES.get(library)
+        require(policy is not None, "ELF_SONAME_PROVIDER_AMBIGUOUS", library)
+        require(len(providers) == len(policy["paths"]) and
+                {x.get("path") for x in providers} == set(policy["paths"]) and
+                all(x.get("package") == policy["package"] for x in providers),
+                "ELF_ALIAS_PACKAGE_OR_PATH_SET_MISMATCH", library)
+        digests = {x.get("sha256") for x in providers}
+        require(len(digests) == 1 and all(isinstance(x, str) and re.fullmatch(r"[0-9a-f]{64}", x) for x in digests),
+                "ELF_ALIAS_CONTENT_HASH_MISMATCH_OR_MISSING", library)
+        for field in ("soname", "needed", "interpreter", "rpaths"):
+            require(all(x.get(field) == providers[0].get(field) for x in providers),
+                    "ELF_ALIAS_METADATA_MISMATCH", library + ":" + field)
+        alias_evidence.append({"library": library, "package": policy["package"], "paths": policy["paths"],
+                               "sha256": next(iter(digests)), "sourceEvidence": policy["sourceEvidence"]})
+        sonames[library] = [next(x for x in providers if x["path"] == policy["paths"][0])]
     provider_paths: dict[str, dict[str, Any]] = {}
     evidence = []
     for library, (package, path) in PACKAGE_FILE_ELF_PROVIDERS.items():
@@ -237,7 +255,7 @@ def validate_elf_needed_providers(all_elf: list[dict[str, Any]], library_symlink
             else:
                 require(len(matches) == 1, "ELF_NEEDED_LIBRARY_PROVIDER_AMBIGUOUS", item["package"] + ":" + item["path"] + ":" + library)
     return {"providers": sorted(PLATFORM_LIBS | set(sonames) | set(provider_paths)),
-            "packageFileProviders": evidence, "packageFileSymlinkProviders": symlink_evidence}
+            "packageFileProviders": evidence, "packageFileSymlinkProviders": symlink_evidence, "duplicateAliases": alias_evidence}
 
 
 def license_roots(name: str, prefix: str) -> list[str]:
@@ -279,6 +297,7 @@ def validate_manifest(args: argparse.Namespace) -> tuple[dict[str, Any], str, li
     closure = manifest.get("sourceClosure", {})
     for key, value in expected_closure.items():
         require(closure.get(key) == value, "SOURCE_CLOSURE_NOT_ALLOWLISTED_" + key)
+    require(manifest.get("elfDuplicateAliases") == EXPECTED_DUPLICATE_ELF_ALIASES, "ELF_ALIAS_POLICY_NOT_ALLOWLISTED")
     evidence = expected_base_license_evidence(manifest.get("baseLicenseProviderEvidence"))
     require(manifest.get("sourceLicenseEvidence") == EXPECTED_SOURCE_LICENSE_EVIDENCE, "SOURCE_LICENSE_EVIDENCE_NOT_ALLOWLISTED")
     modifications = manifest.get("buildModifications", {})
@@ -372,7 +391,7 @@ def audit_one(deb: pathlib.Path, spec: dict[str, Any], prefix: str, temp: pathli
                         found_required_elf.add(relative)
                     temp_file = temp / (name + "-" + str(len(elf_records)))
                     temp_file.write_bytes(content)
-                    elf_records.append(inspect_elf(temp_file, relative, prefix))
+                    elf_records.append({**inspect_elf(temp_file, relative, prefix), "sha256": hashlib.sha256(content).hexdigest()})
         proc.stdout.close()
         stderr = proc.stderr.read(8192) if proc.stderr else b""
         require(proc.wait(timeout=180) == 0, "PAYLOAD_ARCHIVE_INVALID", stderr.decode("utf-8", "replace")[:400])
@@ -446,6 +465,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "candidatePackageCount": len(all_results), "packages": all_results,
             "elfProviders": providers["providers"], "elfPackageFileProviders": providers["packageFileProviders"],
             "elfPackageFileSymlinkProviders": providers["packageFileSymlinkProviders"],
+            "elfDuplicateAliases": providers["duplicateAliases"],
             "elfCount": len(all_elf), "deviceInstall": "NOT RUN", "rollback": "NOT RUN"}
 
 

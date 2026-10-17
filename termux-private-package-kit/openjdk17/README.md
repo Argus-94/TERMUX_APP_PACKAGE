@@ -28,6 +28,8 @@ The restricted AppArmor profile is preserved. No privileged alternatives mutatio
 
 The exact NDK/source-backed platform allowlist includes `libaaudio.so` only with an explicit API 26 requirement for the optional, default-disabled PulseAudio AAudio sink. This is not proof that every optional module can load on older Android versions. Wrapper libraries from `libandroid-stub` and `libandroid-shmem` must be present as exact audited package/file providers, not generic platform exemptions.
 
+Upstream OpenJDK deliberately exposes `libjsig.so` in both the base library directory and the server variant directory (`make/modules/java.base/Lib.gmk`). The static audit accepts this one exact package/path pair only when both regular ELF payloads have identical SHA-256 and SONAME/NEEDED/interpreter/RPATH metadata, and records their hash. Extra copies, different packages, missing hashes, altered bytes or other duplicate SONAMEs are rejected. Run 39074441196 completed compilation and per-package payload checks but stopped at the original generic ambiguity gate; no full audit/APT pass is claimed for it.
+
 ## Production remains blocked
 
 Android installation, `java -version`, `javac`/JAR execution, private paths and permissions, JNI/library loading, certificate behavior, upgrade and rollback are **NOT RUN**. They must pass on the target Android application before production publication or Builder installation. CI success cannot open this gate.

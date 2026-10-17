@@ -96,7 +96,7 @@ jobs:
             --scope "$GITHUB_WORKSPACE/termux-package-source-scope.json" \
             --profile openjdk17-candidate > "$closure"
           test "$(sha256sum "$closure" | awk '{print $1}')" = 378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a
-          test "$(sha256sum openjdk17-candidate-package-set.json | awk '{print $1}')" = ab01cbe7377249de44c22d0dc1dc83d92f8bedb7c61f8617a6809cc5974d7272
+          test "$(sha256sum openjdk17-candidate-package-set.json | awk '{print $1}')" = 6d11683078a4440244921f036db39554b9a63819ff6b19ed92c88ab2d12d4f0d
           python3 - "$closure" openjdk17-candidate-package-set.json <<'PY'
           import json,pathlib,sys
           c=json.loads(pathlib.Path(sys.argv[1]).read_text());m=json.loads(pathlib.Path(sys.argv[2]).read_text());f=('recipePath','recipeSha256','packageType','parentPackage','parentDependencyRule','subpackagePath','subpackageSha256','sourceVersionExpression','sourceRevisionExpression','versionExpressionIsLiteral','revisionExpressionIsLiteral','dependencyGroups','recommendationGroupsNotIncludedInRequiredClosure')

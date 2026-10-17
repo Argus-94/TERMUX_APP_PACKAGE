@@ -1280,5 +1280,16 @@
       "evidence": "pinned packages/pulseaudio/build.sh lines 23-30 copies NDK API 26 link stub; lines 60-61 leave AAudio sink disabled by default",
       "deviceVerified": false
     }
+  },
+  "elfDuplicateAliases": {
+    "libjsig.so": {
+      "package": "openjdk-17",
+      "paths": [
+        "lib/jvm/java-17-openjdk/lib/libjsig.so",
+        "lib/jvm/java-17-openjdk/lib/server/libjsig.so"
+      ],
+      "equivalence": "identical SHA-256 plus identical SONAME/NEEDED/interpreter/RPATH metadata",
+      "sourceEvidence": "https://github.com/openjdk/jdk17u/blob/8cbbca61432426a3441aa08838d930ef954ea1ba/make/modules/java.base/Lib.gmk#L145-L166"
+    }
   }
 }

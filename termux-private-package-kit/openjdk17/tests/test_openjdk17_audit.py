@@ -103,6 +103,40 @@ class OpenJDKAuditTests(unittest.TestCase):
         rows=self.provider_records(); rows += [{'package':'a','path':'lib/a','soname':'same.so','needed':[]},{'package':'b','path':'lib/b','soname':'same.so','needed':[]}]
         with self.assertRaises(audit.AuditError): audit.validate_elf_needed_providers(rows,[])
 
+    def jsig_records(self):
+        return self.provider_records()+[{'package':'openjdk-17','path':path,'soname':'libjsig.so','needed':['libdl.so','libc.so'],'interpreter':None,'rpaths':['$ORIGIN'],'sha256':'a'*64} for path in audit.EXPECTED_DUPLICATE_ELF_ALIASES['libjsig.so']['paths']]
+
+    def test_exact_byte_identical_jsig_alias_is_recorded(self):
+        result=audit.validate_elf_needed_providers(self.jsig_records(),[])
+        self.assertEqual(result['duplicateAliases'][0]['sha256'],'a'*64)
+        self.assertEqual(len(result['duplicateAliases'][0]['paths']),2)
+
+    def test_jsig_alias_altered_or_missing_hash_rejected(self):
+        for digest in ['b'*64,None,'not-a-hash']:
+            rows=self.jsig_records();rows[-1]['sha256']=digest
+            with self.subTest(digest=digest),self.assertRaises(audit.AuditError):audit.validate_elf_needed_providers(rows,[])
+
+    def test_jsig_alias_wrong_package_or_path_rejected(self):
+        for key,value in [('package','foreign-package'),('path','lib/elsewhere/libjsig.so')]:
+            rows=self.jsig_records();rows[-1][key]=value
+            with self.subTest(key=key),self.assertRaises(audit.AuditError):audit.validate_elf_needed_providers(rows,[])
+
+    def test_jsig_third_copy_rejected(self):
+        rows=self.jsig_records();rows.append({**rows[-1],'path':'lib/third/libjsig.so'})
+        with self.assertRaises(audit.AuditError):audit.validate_elf_needed_providers(rows,[])
+
+    def test_jsig_metadata_mismatch_rejected(self):
+        for key,value in [('needed',[]),('rpaths',[]),('interpreter','/wrong')]:
+            rows=self.jsig_records();rows[-1][key]=value
+            with self.subTest(key=key),self.assertRaises(audit.AuditError):audit.validate_elf_needed_providers(rows,[])
+
+    def test_other_identical_soname_duplicate_still_rejected(self):
+        rows=self.provider_records()+[{'package':'openjdk-17','path':'lib/'+str(i)+'/other.so','soname':'other.so','needed':[],'sha256':'a'*64} for i in range(2)]
+        with self.assertRaises(audit.AuditError):audit.validate_elf_needed_providers(rows,[])
+
+    def test_alias_manifest_policy_mutation_rejected(self):
+        self.semantic_mutation(lambda m:m.__setitem__('elfDuplicateAliases',{}))
+
     def test_bootstrap_license_evidence_is_archive_only(self):
         e=json.loads(MANIFEST.read_text())['baseLicenseProviderEvidence']
         self.assertFalse(e['deviceObserved'])
