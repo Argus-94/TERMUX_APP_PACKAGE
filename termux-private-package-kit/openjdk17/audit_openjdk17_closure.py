@@ -20,7 +20,7 @@ SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PACKAGE_COUNT = 36
 DEPENDENCY_ALTERNATIVE_COUNT = 46
-PACKAGE_SET_SHA256 = "22f78d9643d1b073fdb320d8fdd64c2ebfc709232c90df52e25e8f8c07df8335"
+PACKAGE_SET_SHA256 = "ab01cbe7377249de44c22d0dc1dc83d92f8bedb7c61f8617a6809cc5974d7272"
 SOURCE_CLOSURE_SHA256 = "378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a"
 PATCH_SHA256 = "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc"
 PREFIXES = {
@@ -29,9 +29,9 @@ PREFIXES = {
 }
 PLATFORM_LIBS = {
     "libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so",
-    "libz.so", "libgcc.so", "libpthread.so", "libatomic.so",
+    "libz.so", "libgcc.so", "libpthread.so", "libatomic.so", "libaaudio.so",
 }
-PACKAGE_FILE_ELF_PROVIDERS = {'libandroid-glob.so': ('libandroid-glob', 'lib/libandroid-glob.so'), 'libandroid-spawn.so': ('libandroid-spawn', 'lib/libandroid-spawn.so'), 'libandroid-support.so': ('libandroid-support', 'lib/libandroid-support.so'), 'libandroid-sysv-semaphore.so': ('libandroid-sysv-semaphore', 'lib/libandroid-sysv-semaphore.so'), 'libtermux-platform-ns.so': ('libandroid-stub', 'lib/libtermux-platform-ns.so'), 'libjli.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjli.so'), 'libjava.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjava.so'), 'libjvm.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/server/libjvm.so')}
+PACKAGE_FILE_ELF_PROVIDERS = {'libandroid-glob.so': ('libandroid-glob', 'lib/libandroid-glob.so'), 'libandroid-spawn.so': ('libandroid-spawn', 'lib/libandroid-spawn.so'), 'libandroid-support.so': ('libandroid-support', 'lib/libandroid-support.so'), 'libandroid-sysv-semaphore.so': ('libandroid-sysv-semaphore', 'lib/libandroid-sysv-semaphore.so'), 'libtermux-platform-ns.so': ('libandroid-stub', 'lib/libtermux-platform-ns.so'), 'libjli.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjli.so'), 'libjava.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/libjava.so'), 'libjvm.so': ('openjdk-17', 'lib/jvm/java-17-openjdk/lib/server/libjvm.so'), 'libandroid-shmem.so': ('libandroid-shmem', 'lib/libandroid-shmem.so'), 'libandroid.so': ('libandroid-stub', 'lib/libandroid.so'), 'libmediandk.so': ('libandroid-stub', 'lib/libmediandk.so'), 'libOpenSLES.so': ('libandroid-stub', 'lib/libOpenSLES.so'), 'libbinder_ndk.so': ('libandroid-stub', 'lib/libbinder_ndk.so')}
 PACKAGE_FILE_ELF_SYMLINK_PROVIDERS = {}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 LICENSE_NAME_RE = re.compile(r"(?i)^(copyright|copying|license|licence)(?:[._-].*)?$")
@@ -442,6 +442,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "sourceClosureProfile": "openjdk17-candidate", "sourceBuildTargetPackage": "openjdk-17",
             "restrictedAppArmorProfileSha256": manifest["source"]["restrictedAppArmorProfileSha256"],
             "sourceClosurePackageCount": PACKAGE_COUNT, "sourceClosureDependencyAlternativeCount": DEPENDENCY_ALTERNATIVE_COUNT,
+            "platformElfRequirements": manifest["platformElfRequirements"],
             "candidatePackageCount": len(all_results), "packages": all_results,
             "elfProviders": providers["providers"], "elfPackageFileProviders": providers["packageFileProviders"],
             "elfPackageFileSymlinkProviders": providers["packageFileSymlinkProviders"],

@@ -1272,5 +1272,13 @@
       "reason": "Hosted run 39066933456: pulseaudio configure cannot resolve sndfile; pinned recipe libmpg123 BUILD_DEPENDS=pulseaudio closes the cycle through pulseaudio runtime sndfile and sndfile runtime mpg123.",
       "optionalConsoleSubpackage": "Excluded on aarch64 via standard TERMUX_SUBPKG_EXCLUDED_ARCHES so buildorder does not reintroduce its PulseAudio dependency."
     }
+  },
+  "platformElfRequirements": {
+    "libaaudio.so": {
+      "minimumAndroidApi": 26,
+      "scope": "optional pulseaudio module-aaudio-sink; disabled in default.pa",
+      "evidence": "pinned packages/pulseaudio/build.sh lines 23-30 copies NDK API 26 link stub; lines 60-61 leave AAudio sink disabled by default",
+      "deviceVerified": false
+    }
   }
 }

@@ -4,7 +4,7 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='22f78d9643d1b073fdb320d8fdd64c2ebfc709232c90df52e25e8f8c07df8335'
+readonly EXPECTED_MANIFEST_SHA='ab01cbe7377249de44c22d0dc1dc83d92f8bedb7c61f8617a6809cc5974d7272'
 readonly EXPECTED_CLOSURE_SHA='378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a'
 readonly EXPECTED_PATCH_SHA='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
 readonly MIN_FREE_BYTES=$((12 * 1024 * 1024 * 1024))

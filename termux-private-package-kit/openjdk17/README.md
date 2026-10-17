@@ -26,6 +26,8 @@ CI builds dependencies from source with binary dependency downloads disabled. It
 
 The restricted AppArmor profile is preserved. No privileged alternatives mutation or local build is used. No binary artifacts are uploaded. Recommended `ca-certificates-java`, `openjdk-17-x`, and `resolv-conf` remain excluded. A headless candidate does not prove TLS trust or GUI support. Declared build-only dependencies remain separate unless already required by the runtime graph.
 
+The exact NDK/source-backed platform allowlist includes `libaaudio.so` only with an explicit API 26 requirement for the optional, default-disabled PulseAudio AAudio sink. This is not proof that every optional module can load on older Android versions. Wrapper libraries from `libandroid-stub` and `libandroid-shmem` must be present as exact audited package/file providers, not generic platform exemptions.
+
 ## Production remains blocked
 
 Android installation, `java -version`, `javac`/JAR execution, private paths and permissions, JNI/library loading, certificate behavior, upgrade and rollback are **NOT RUN**. They must pass on the target Android application before production publication or Builder installation. CI success cannot open this gate.
