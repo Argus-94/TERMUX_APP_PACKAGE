@@ -4,9 +4,9 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='d99fb29de61771ca765cb3e36316090140a9cc6a8248ea141341ee22af80e750'
+readonly EXPECTED_MANIFEST_SHA='e6aceeb5e50910ed0c275dd1d00bb6ecaee2f5d7efadd4562e4798b3dd3e2a08'
 readonly EXPECTED_CLOSURE_SHA='378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a'
-readonly EXPECTED_PATCH_SHA='1683cb5cc576d6473f7fc43137f322292ae5f3637b664bc9c52cd38b36b4966c'
+readonly EXPECTED_PATCH_SHA='f721ac1663771a4bdc8e15c796e4e07444fd99cc0aa494701b5469e4fde3560c'
 readonly MIN_FREE_BYTES=$((12 * 1024 * 1024 * 1024))
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
@@ -51,7 +51,7 @@ assert m['sourceClosure']['profile']=='openjdk17-candidate' and m['sourceClosure
 assert m['sourceClosure']['expectedPackageCount']==36 and m['sourceClosure']['expectedDependencyAlternativeCount']==46
 assert len(m['packages'])==36 and [p['name'] for p in m['packages']]==sorted(p['name'] for p in m['packages'])
 assert m['releaseGate']=={'publicationAllowed':False,'deviceInstall':'NOT RUN','rollback':'NOT RUN','deviceEvidenceSha256':None}
-assert m['buildModifications']['patchSha256']=='1683cb5cc576d6473f7fc43137f322292ae5f3637b664bc9c52cd38b36b4966c'
+assert m['buildModifications']['patchSha256']=='f721ac1663771a4bdc8e15c796e4e07444fd99cc0aa494701b5469e4fde3560c'
 assert set(m['sourceLicenseEvidence'])=={'openjdk-17'}
 PY
 
@@ -106,7 +106,7 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash
@@ -124,7 +124,33 @@ test -x /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
 sha256sum /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
 printf 'AIB_MODELED_PROPERTY_PATHS_MATCH app=%s prefix=%s\\n' "\$TERMUX_APP__PACKAGE_NAME" "\$TERMUX_PREFIX"
 EOF
-chmod 700 "$WORKTREE/.aib-private-layout-preflight.sh"
+cat > "$WORKTREE/.aib-private-openjdk17-build.sh" <<'EOF'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+cd /home/builder/termux-packages
+source scripts/properties.sh
+export TERMUX_INSTALL_DEPS=false
+build_failure_diagnostics() {
+  status=$?
+  trap - ERR
+  set +e
+  printf 'SOURCE_BUILD_FAILURE_DIAGNOSTICS exit=%s\n' "$status"
+  log=/home/builder/.termux-build/pulseaudio/build/meson-logs/meson-log.txt
+  if [[ -f "$log" ]]; then tail -50 "$log"; fi
+  pc="$TERMUX_PREFIX/lib/pkgconfig/sndfile.pc"
+  if [[ -f "$pc" ]]; then head -25 "$pc"; else printf 'SNDFILE_PC_MISSING\n'; fi
+  PKG_CONFIG_LIBDIR="$TERMUX_PREFIX/lib/pkgconfig" pkg-config --print-errors --modversion sndfile
+  exit "$status"
+}
+trap build_failure_diagnostics ERR
+java -version
+javac -version
+./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-openjdk17-debs openjdk-17
+printf 'PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\n'
+find /home/builder/termux-packages/output -type f -name '*.deb' -printf '%P %s bytes\n' | sort
+printf 'PINNED_CONTAINER_OUTPUT_DEBS_END\n'
+EOF
+chmod 700 "$WORKTREE/.aib-private-layout-preflight.sh" "$WORKTREE/.aib-private-openjdk17-build.sh"
 mkdir -p "$WORKTREE/output/.aib-private-openjdk17-debs"
 free_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 [[ "$free_bytes" =~ ^[0-9]+$ ]] || fail 'DISK_SPACE_CHECK_FAILED'
@@ -142,7 +168,7 @@ trap cleanup_container EXIT
   printf 'Builder image ID: %s\n' "$(docker image inspect --format '{{.Id}}' "$IMAGE")"
   printf 'Modeled AI Builder prefix (not device observed): %s\n' "$PREFIX"
   printf 'Patched properties SHA-256: %s\n' "$PROPERTIES_PATCH_SHA"
-  printf 'OpenJDK source notices doc-only patch SHA-256: %s\n' "$EXPECTED_PATCH_SHA"
+  printf 'OpenJDK candidate controlled overlay patch SHA-256: %s\n' "$EXPECTED_PATCH_SHA"
   printf 'Build started UTC: %s\n\n=== layout preflight ===\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } | tee "$OUTPUT_DIR/build.log"
 (
@@ -152,7 +178,7 @@ trap cleanup_container EXIT
 (
   cd "$WORKTREE"
   # Pinned buildorder resolves the required runtime closure; binary dependency downloads stay disabled.
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; java -version; javac -version; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-openjdk17-debs openjdk-17; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\\n"'
+  ./scripts/run-docker.sh bash /home/builder/termux-packages/.aib-private-openjdk17-build.sh
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 printf 'PINNED_HOST_OUTPUT_DEBS_BEGIN\n' | tee -a "$OUTPUT_DIR/build.log"
 find "$WORKTREE/output" -type f -name '*.deb' -printf '%P %s bytes\n' | sort | tee -a "$OUTPUT_DIR/build.log"

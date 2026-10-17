@@ -1,3 +1,16 @@
+diff --git a/packages/libmpg123/build.sh b/packages/libmpg123/build.sh
+--- a/packages/libmpg123/build.sh
++++ b/packages/libmpg123/build.sh
+@@ -7,6 +7,8 @@
+ TERMUX_PKG_SRCURL=https://downloads.sourceforge.net/sourceforge/mpg123/mpg123-${TERMUX_PKG_VERSION}.tar.bz2
+ TERMUX_PKG_SHA256=31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee
+ TERMUX_PKG_AUTO_UPDATE=true
+-TERMUX_PKG_BUILD_DEPENDS="pulseaudio"
++# Decoder-only source build breaks pulseaudio -> sndfile -> mpg123 -> pulseaudio.
++# These exact switches are supported by mpg123 1.33.7 configure.ac.
++TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-components --enable-libmpg123"
+ TERMUX_PKG_BREAKS="mpg123 (<< 1.33.1-1)"
+ TERMUX_PKG_REPLACES="mpg123 (<< 1.33.1-1)"
 diff --git a/packages/libtool/build.sh b/packages/libtool/build.sh
 --- a/packages/libtool/build.sh
 +++ b/packages/libtool/build.sh
@@ -31,3 +44,16 @@ diff --git a/packages/openjdk-17/build.sh b/packages/openjdk-17/build.sh
  TERMUX_PKG_MAINTAINER="@termux"
  TERMUX_PKG_VERSION="17.0.20"
  TERMUX_PKG_SRCURL=https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-${TERMUX_PKG_VERSION}-ga.tar.gz
+diff --git a/packages/pulseaudio/build.sh b/packages/pulseaudio/build.sh
+--- a/packages/pulseaudio/build.sh
++++ b/packages/pulseaudio/build.sh
+@@ -2,7 +2,8 @@
+ TERMUX_PKG_DESCRIPTION="A featureful, general-purpose sound server"
+ TERMUX_PKG_LICENSE="GPL-2.0"
+ TERMUX_PKG_MAINTAINER="@termux"
+-TERMUX_PKG_SRCURL=git+https://github.com/pulseaudio/pulseaudio
++TERMUX_PKG_SRCURL=https://github.com/pulseaudio/pulseaudio/archive/1f020889c9aa44ea0f63d7222e8c2b62c3f45f68.tar.gz
++TERMUX_PKG_SHA256=0ccee8a0c9653badc668cf11f0eaad97a1febb85afa82c24c2d1935926446e3b
+ TERMUX_PKG_VERSION="17.0"
+ TERMUX_PKG_REVISION=4
+ TERMUX_PKG_DEPENDS="dbus, libandroid-stub, libandroid-execinfo, libandroid-glob, libc++, libltdl, libsndfile, libsoxr, libwebrtc-audio-processing, speexdsp"
