@@ -1,0 +1,33 @@
+diff --git a/packages/libtool/build.sh b/packages/libtool/build.sh
+--- a/packages/libtool/build.sh
++++ b/packages/libtool/build.sh
+@@ -13,6 +13,9 @@
+ TERMUX_PKG_GROUPS="base-devel"
+ 
+ termux_step_post_make_install() {
++	# Preserve the pinned parent recipe license in the split runtime package.
++	mkdir -p "$TERMUX_PREFIX/share/doc/libltdl"
++	ln -sf ../../LICENSES/GPL-2.0.txt "$TERMUX_PREFIX/share/doc/libltdl/copyright"
+ 	perl -p -i -e \
+ 		"s|\"/usr/bin/|\"$TERMUX_PREFIX/bin/|;s|\"/bin/|\"$TERMUX_PREFIX/bin/|" \
+ 		$TERMUX_PREFIX/bin/{libtool,libtoolize}
+diff --git a/packages/libtool/libltdl.subpackage.sh b/packages/libtool/libltdl.subpackage.sh
+--- a/packages/libtool/libltdl.subpackage.sh
++++ b/packages/libtool/libltdl.subpackage.sh
+@@ -1,4 +1,5 @@
+ TERMUX_SUBPKG_INCLUDE="
++share/doc/libltdl/
+ include/libltdl/
+ include/ltdl.h
+ lib/libltdl.so
+diff --git a/packages/openjdk-17/build.sh b/packages/openjdk-17/build.sh
+--- a/packages/openjdk-17/build.sh
++++ b/packages/openjdk-17/build.sh
+@@ -1,6 +1,7 @@
+ TERMUX_PKG_HOMEPAGE=https://openjdk.java.net
+ TERMUX_PKG_DESCRIPTION="Java development kit and runtime"
+ TERMUX_PKG_LICENSE="GPL-2.0"
++TERMUX_PKG_LICENSE_FILE="LICENSE, ADDITIONAL_LICENSE_INFO, ASSEMBLY_EXCEPTION"
+ TERMUX_PKG_MAINTAINER="@termux"
+ TERMUX_PKG_VERSION="17.0.20"
+ TERMUX_PKG_SRCURL=https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-${TERMUX_PKG_VERSION}-ga.tar.gz
