@@ -152,7 +152,7 @@ trap cleanup_container EXIT
 (
   cd "$WORKTREE"
   # Pinned buildorder resolves the required runtime closure; binary dependency downloads stay disabled.
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java; sudo update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac; java -version; javac -version; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-openjdk17-debs openjdk-17; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\\n"'
+  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; export TERMUX_INSTALL_DEPS=false; java -version; javac -version; ./build-package.sh -a aarch64 --format debian -o /home/builder/termux-packages/output/.aib-private-openjdk17-debs openjdk-17; printf "PINNED_CONTAINER_OUTPUT_DEBS_BEGIN\\n"; find /home/builder/termux-packages/output -type f -name "*.deb" -printf "%P %s bytes\\n" | sort; printf "PINNED_CONTAINER_OUTPUT_DEBS_END\\n"'
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 printf 'PINNED_HOST_OUTPUT_DEBS_BEGIN\n' | tee -a "$OUTPUT_DIR/build.log"
 find "$WORKTREE/output" -type f -name '*.deb' -printf '%P %s bytes\n' | sort | tee -a "$OUTPUT_DIR/build.log"
