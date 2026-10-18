@@ -41,7 +41,6 @@ jobs:
     timeout-minutes: 15
     env:
       PYTHONDONTWRITEBYTECODE: '1'
-      AIB_PINNED_SOURCE_ROOT: ${{ runner.temp }}/unified-pinned-source
     steps:
       - name: Checkout without persisted credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -51,6 +50,8 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          export AIB_PINNED_SOURCE_ROOT="$RUNNER_TEMP/unified-pinned-source"
+          printf '%s\n' "AIB_PINNED_SOURCE_ROOT=$AIB_PINNED_SOURCE_ROOT" >> "$GITHUB_ENV"
           mkdir -p "$AIB_PINNED_SOURCE_ROOT"
           git -C "$AIB_PINNED_SOURCE_ROOT" init
           git -C "$AIB_PINNED_SOURCE_ROOT" remote add origin https://github.com/termux/termux-packages.git
@@ -76,4 +77,4 @@ jobs:
       - name: Remove temporary source and report
         if: always()
         shell: bash
-        run: rm -rf -- "$AIB_PINNED_SOURCE_ROOT" "$RUNNER_TEMP/unified-blocked.log"
+        run: rm -rf -- "$RUNNER_TEMP/unified-pinned-source" "$RUNNER_TEMP/unified-blocked.log"
