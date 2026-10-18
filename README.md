@@ -1,33 +1,33 @@
 # TERMUX_APP_PACKAGE
 
-A candidate package pipeline for the private AI Builder runtime (`com.karat.aibuilder`, `aarch64`), not for stock Termux.
+Candidate package pipelines for the private AI Builder Android runtime (`com.karat.aibuilder`, `aarch64`), not stock Termux.
 
-## Production status: blocked
+## Production remains blocked
 
-- The legacy `main` tree contains 133 `.deb` files without complete verified provenance; three package records remain unconfirmed. They are not a trusted install feed.
-- GitHub Pages is not enabled for this repository; no production feed URL is available.
-- PR #2 contains a gated candidate pipeline and a narrowly scoped cleanup of six legacy workflow/script files; it does not publish packages.
-- CI separately builds and statically audits GNU Make `4.4.1-1` and GitHub CLI `gh` `2.102.0`; a separate Git workflow builds Git `2.56.0` with its 14-package source-built dependency closure. Each candidate feed is temporary and signed; CI verifies download and `apt-get --simulate`, but performs no package installation.
-- The Python `3.14.6-1` candidate passed [hosted source build, static audits and ephemeral-signed APT download/simulation](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39036690122) at commit `b39ebbf624a19adee282f28568c50a5619a192af`: 17 runtime packages / 25 dependency alternatives, with `tk` build-only and Python recommendations excluded. The run uploaded no artifacts and removed its temporary source, packages, feed and signing material; Android installation and rollback remain NOT RUN. OpenJDK 17 (36 / 46) and CMake+Ninja (22 / 34) remain metadata-only inventories.
-- Node.js `26.4.0-1` + npm `11.20.0` passed [hosted build, static audit and ephemeral-signed APT simulation](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39053197442/attempts/2) at commit `281edbb3e832ab8d3e3c2fc27a7c4c1aae2a26bd`: all 11 pinned runtime packages / 14 source dependency alternatives, with `nodejs` as the exclusive npm provider and npm metadata architecture `all`. The package-index closure had 13 required dependency relations and zero external-base assumptions; simulated installation matched all 11 packages exactly. The immutable npm source archive, bundled Node/npm/ICU LICENSE hashes, private paths, AArch64 ELF/library providers, indexes and package hashes passed their gates. There were zero uploaded artifacts; temporary source, binaries, feed and ephemeral keys were cleaned. Android installation/runtime/rollback remain NOT RUN; production publication and Builder `pkg.ensure` stay blocked.
-- Ordinary candidate runs delete binaries and feed metadata from the runner. The specifically authorized one-time marker push uploaded a public Actions artifact containing **only** the statically audited `make` candidate, its signed temporary APT metadata, public ephemeral keyring, manifest, build result, and audit report. It expires at `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)).
-- The temporary `make` artifact is for device testing only: it is not device-validated or a production feed, and no package is committed, released, or deployed to Pages.
-- Production publication and app-side `pkg.ensure` stay disabled until exact-device install and rollback tests pass.
+The repository contains a legacy pool of 133 `.deb` files without complete verified build provenance. It is **not** a trusted installation source. Do not use legacy packages, stock `com.termux` feeds/packages, PocketForge artifacts, `trusted=yes`, or unauthenticated/insecure APT options. GitHub Pages is not enabled; no production feed URL is available.
 
-Never use `trusted=yes`, unauthenticated/insecure APT options, stock `com.termux` packages, or PocketForge artifacts.
+Separate candidate pipelines have passed hosted source builds, static package/ELF audits, and ephemeral-signed APT download/simulation checks for Make, gh, Git, curl, wget, pkg-config, Python, Node.js/npm, OpenJDK 17, and CMake/Ninja. Exact package versions and inputs are pinned in the corresponding `*candidate-package-set.json` files. These are separate closures, not an approved combined feed.
 
-## Checks
+- OpenJDK `17.0.20`: 36 required runtime packages / 46 source dependency alternatives; [successful hosted run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39080124869).
+- CMake `4.4.4` + Ninja `1.13.2`: 22 required runtime packages / 34 source dependency alternatives; [successful hosted run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39086630210).
+- Make handoff integrity hardening, merged in PR #10: [successful merge-commit policy run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39088931746). This checks synthetic fixtures and temporary signatures, not Android installation.
+
+**Android install, runtime, project build, upgrade, and rollback are all NOT RUN.** CI models the private prefix; it does not observe an installed APK. The old, narrowly authorized Make device-test artifact expired on October 16, 2026. Ordinary candidate runs upload no package artifacts and clean up temporary packages, feeds, and signing material.
+
+Production signing/feed publication, Pages deployment, and Builder `pkg.ensure` must remain disabled until the exact Android qualification evidence is independently reviewed and publication is separately authorized. No evidence validator, passing CI, or manual report automatically promotes a candidate.
+
+See the [Android qualification and production gate](docs/PRODUCTION_GATE_RU.md), [signed evidence bundle checks](docs/ANDROID_EVIDENCE_RU.md), and [feed signing notes](docs/FEED_SIGNING_RU.md).
+
+## Local policy checks
 
 ```sh
-./scripts/test-candidate-feed-policy.sh
-./scripts/test-candidate-dependency-closure.sh
-./scripts/test-pinned-termux-recipe-closure.sh
-./scripts/test-device-test-artifact-staging.sh
-./scripts/test-signed-feed-smoke.sh
-./termux-private-package-kit/make-v476/verify-kit.sh
-python3 -m unittest discover -s termux-private-package-kit/python-v3.14.6/tests -p 'test_*.py' -v
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s termux-private-package-kit/nodejs-npm/tests -v
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -v
+bash scripts/test-candidate-feed-policy.sh
+bash scripts/test-candidate-dependency-closure.sh
+bash scripts/test-pinned-termux-recipe-closure.sh
+bash scripts/test-device-test-artifact-staging.sh
+bash scripts/test-signed-feed-smoke.sh
+bash termux-private-package-kit/make-v476/verify-kit.sh
 ```
 
-See [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md) and [docs/FEED_SIGNING_RU.md](./docs/FEED_SIGNING_RU.md).
+Tests use synthetic fixtures where indicated; they install no Android packages and provide no device proof. See each package kit for its additional candidate-specific regression tests.

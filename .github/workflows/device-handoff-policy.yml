@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - work/device-handoff-hardening-20261018
+      - work/android-evidence-validation-20261018
     paths:
       - .github/workflows/device-handoff-policy.yml
       - candidate-package-set.json
+      - scripts/validate-android-qualification.py
       - scripts/stage-device-test-artifact.py
       - scripts/validate-candidate-feed.py
       - scripts/test-device-test-artifact-staging.sh
@@ -19,6 +21,7 @@ on:
     paths:
       - .github/workflows/device-handoff-policy.yml
       - candidate-package-set.json
+      - scripts/validate-android-qualification.py
       - scripts/stage-device-test-artifact.py
       - scripts/validate-candidate-feed.py
       - scripts/test-device-test-artifact-staging.sh
