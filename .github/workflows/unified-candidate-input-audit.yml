@@ -1,0 +1,79 @@
+name: Unified candidate source input audit (no binary aggregation)
+
+on:
+  push:
+    branches:
+      - main
+      - work/unified-candidate-input-audit-20261018
+    paths:
+      - .github/workflows/**
+      - '*candidate-package-set.json'
+      - candidate-package-set.json
+      - unified-candidate-input-lock.json
+      - termux-package-source-scope.json
+      - scripts/audit-unified-candidate-inputs.py
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/verify-candidate-dependency-closure.py
+      - scripts/tests/test_unified_candidate_inputs.py
+      - termux-private-package-kit/**/*.patch
+      - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
+  pull_request:
+    paths:
+      - .github/workflows/**
+      - '*candidate-package-set.json'
+      - candidate-package-set.json
+      - unified-candidate-input-lock.json
+      - termux-package-source-scope.json
+      - scripts/audit-unified-candidate-inputs.py
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/verify-candidate-dependency-closure.py
+      - scripts/tests/test_unified_candidate_inputs.py
+      - termux-private-package-kit/**/*.patch
+      - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
+permissions:
+  contents: read
+concurrency:
+  group: unified-candidate-input-audit-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-preflight-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      AIB_PINNED_SOURCE_ROOT: ${{ runner.temp }}/unified-pinned-source
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Checkout exact source for non-executing recipe inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$AIB_PINNED_SOURCE_ROOT"
+          git -C "$AIB_PINNED_SOURCE_ROOT" init
+          git -C "$AIB_PINNED_SOURCE_ROOT" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$AIB_PINNED_SOURCE_ROOT" fetch --no-tags --depth=1 origin 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+          git -C "$AIB_PINNED_SOURCE_ROOT" checkout --detach FETCH_HEAD
+      - name: Verify exact inventory lock and negative source-preflight tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT"
+          python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.py -v
+          if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-aggregate-ready >"$RUNNER_TEMP/unified-blocked.log" 2>&1; then
+            echo 'ERROR:AGGREGATE_MUST_STAY_BLOCKED'; exit 2
+          fi
+          grep -Fx 'UNIFIED_INPUT_AUDIT_REJECTED:AGGREGATE_BLOCKED_SIGNED_BINARY_INPUTS_MISSING' "$RUNNER_TEMP/unified-blocked.log"
+          {
+            echo '## Unified source input audit only'
+            echo '10 profiles / 144 source occurrences / 79 unique package identities.'
+            echo 'Per-profile and union source dependencies: PASS. Binary aggregate: BLOCKED; signed binary inputs missing.'
+            echo 'Binary control/ELF/path-collision audits, aggregate signed APT simulation and Android qualification: NOT RUN.'
+            echo 'No build, package upload, signing key, Pages, production feed or Builder change.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary source and report
+        if: always()
+        shell: bash
+        run: rm -rf -- "$AIB_PINNED_SOURCE_ROOT" "$RUNNER_TEMP/unified-blocked.log"

@@ -1,0 +1,3337 @@
+{
+  "aggregateReady": false,
+  "androidInstallRuntimeProjectBuildUpgradeRollback": "NOT_RUN",
+  "binaryChecks": {
+    "aggregateSignedAptSimulation": "NOT_RUN; signed binary inputs unavailable",
+    "conflictsBreaksReplacesProvides": "NOT_RUN; signed binary inputs unavailable",
+    "controlDependsPreDepends": "NOT_RUN; signed binary inputs unavailable",
+    "elfProviderClosure": "NOT_RUN; signed binary inputs unavailable",
+    "exactDebHashes": "NOT_RUN; signed binary inputs unavailable",
+    "payloadPathCollisions": "NOT_RUN; signed binary inputs unavailable",
+    "signedInputProvenance": "NOT_RUN; signed binary inputs unavailable"
+  },
+  "channel": "candidate-only",
+  "dependencyValidatorSha256": "1d6d888dc9f13dc54b56b0607733bfb2bdc40b4aa9ff46b05355f60fbfcc4665",
+  "duplicatePolicy": "No provider selected. Same name/version/architecture is NOT binary equivalence. Require identical SHA-256 for automatic deduplication; otherwise stop for reviewed canonical rebuild and re-audit of every consumer.",
+  "inventoryOnly": true,
+  "knownEffectiveRecipeDivergence": {
+    "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+    "otherProfiles": [
+      "curl",
+      "git"
+    ],
+    "package": "libcurl",
+    "profile": "cmake-ninja",
+    "resolution": "UNRESOLVED; do not choose an equal-version libcurl by filename or overwrite order",
+    "upstreamRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025"
+  },
+  "packages": [
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "abseil-cpp",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/abseil-cpp/build.sh",
+      "recipeSha256": "e143b94f69c3af8b28cd4c9f494a9355e6c349d52f668b3fc00fb302998b3061",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "20260526.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "20260526.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-sysv-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-sysv-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ]
+      ],
+      "name": "alsa-lib",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/alsa-lib/build.sh",
+      "recipeSha256": "bddac5aafb371dd88050583be5fc3f0df579ab1681f5a87e75c5578c0021740b",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.2.16.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.2.16.1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-sysv-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-sysv-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "alsa-lib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "alsa-lib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pulseaudio",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pulseaudio",
+            "version": null
+          }
+        ]
+      ],
+      "name": "alsa-plugins",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/alsa-plugins/build.sh",
+      "recipeSha256": "d7d9f2fff77de9a4f4f5e45a393ac00c9e6047de51d98c9f776f8a885a5f5440",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.2.12",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.2.12-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ]
+      ],
+      "name": "c-ares",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        }
+      ],
+      "recipePath": "packages/c-ares/build.sh",
+      "recipeSha256": "39364f4135281f12c103e20468f8776c4dec2008f268d3cea73c9d17ff3441d3",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.34.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.34.8"
+    },
+    {
+      "architecture": "all",
+      "dependencyGroups": [],
+      "name": "ca-certificates",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/ca-certificates/build.sh",
+      "recipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:2026.09.25",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1:2026.09.25"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libarchive",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libarchive",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libcurl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libcurl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "jsoncpp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "jsoncpp",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libuv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libuv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "rhash",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "rhash",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "cmake",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/cmake/build.sh",
+      "recipeSha256": "36556f15fe7e055c6d4ba10adf580802a1fe50b45f3b8ebb6a75b88cc5b492e4",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "4.4.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "4.4.4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libcurl",
+            "operator": "=",
+            "qualifier": null,
+            "sourceRelation": "libcurl (= parent-build-version)",
+            "version": "parent-build-version"
+          }
+        ]
+      ],
+      "name": "curl",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        }
+      ],
+      "recipePath": "packages/libcurl/build.sh",
+      "recipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "8.23.0",
+      "subpackagePath": "packages/libcurl/curl.subpackage.sh",
+      "subpackageSha256": "47a25ce446d62c15a4911b4ed6e95fb0655cb1624eb1b62a13a6b6e87315daef",
+      "version": "8.23.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libx11",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libx11",
+            "version": null
+          }
+        ]
+      ],
+      "name": "dbus",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/dbus/build.sh",
+      "recipeSha256": "d82b006a6b057d480b912f49ac32b39d4c576e1b1546393411050c700c5b1ac4",
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "1.16.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.16.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "readline",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "readline",
+            "version": null
+          }
+        ]
+      ],
+      "name": "gdbm",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/gdbm/build.sh",
+      "recipeSha256": "ef44697164fd19b8433ceb9ac4cd35cd88eb99ed51b39fb6f8958f87c9db7b2a",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.26",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.26-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "gh",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "gh"
+        }
+      ],
+      "recipePath": "packages/gh/build.sh",
+      "recipeSha256": "a26022905b66f39851553abea3b5e68c38671988b4e2a9a649366845dadfb266",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.102.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.102.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libcurl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libcurl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "less",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "less",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pcre2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pcre2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "git",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/git/build.sh",
+      "recipeSha256": "8ec1f92e20e9a18c3c20a725102ed445df1a07c66250e1bd94fd7539625c08a9",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.56.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.56.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pcre2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pcre2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "python",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "python",
+            "version": null
+          }
+        ]
+      ],
+      "name": "glib",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        }
+      ],
+      "recipePath": "packages/glib/build.sh",
+      "recipeSha256": "8181771500b14ada8f28beae580843644fe65ca324d23dd9cd984d28d1e36a62",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.90.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.90.1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "jsoncpp",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/jsoncpp/build.sh",
+      "recipeSha256": "ddd00bd024424d9919e9ce7837c544f4501253b655c88a51288cff10423c0e28",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.9.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.9.8"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "ncurses",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pcre2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pcre2",
+            "version": null
+          }
+        ]
+      ],
+      "name": "less",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/less/build.sh",
+      "recipeSha256": "24addf768a261d47bbacd34a81ed3c8bdd59e57be0a992de5f8879e9d9706350",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "710",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "710"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-execinfo",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-execinfo/build.sh",
+      "recipeSha256": "438cfa28aefbb69ddf767656f031f0eeeee249b7edd719563596fc2b097039b3",
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.1-3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-glob",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-glob/build.sh",
+      "recipeSha256": "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.6-3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-posix-semaphore",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/libandroid-posix-semaphore/build.sh",
+      "recipeSha256": "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+      "sourceRevisionExpression": "4",
+      "sourceVersionExpression": "0.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.1-4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-shmem",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-shmem/build.sh",
+      "recipeSha256": "db55b10b90c54dd4d39b76b5b074835c09c7c7534a84a12bc29c6a63717ff2fd",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "0.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.7"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libandroid-spawn",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-spawn/build.sh",
+      "recipeSha256": "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "0.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-stub",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-stub/build.sh",
+      "recipeSha256": "7cee378836da2051e93294cc93fa7c0b06c8fddc9a702f115718017610b4e407",
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "30-2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-support",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/libandroid-support/build.sh",
+      "recipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "(29",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "29-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libandroid-sysv-semaphore",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libandroid-sysv-semaphore/build.sh",
+      "recipeSha256": "c834d20f18cbed9bd384f2a89eb9da2f0d68aac898a830cb68f2f4e11a54eedf",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "0.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.1-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libbz2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libbz2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxml2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxml2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libarchive",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/libarchive/build.sh",
+      "recipeSha256": "c22a609e59872c8f0e0d3d0fe4a027c6fd8e4bcd79e9e937e219f968ac94f8de",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.8.9",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "3.8.9"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libbz2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/libbz2/build.sh",
+      "recipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+      "sourceRevisionExpression": "8",
+      "sourceVersionExpression": "1.0.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.0.8-8"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libc++",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libc++/build.sh",
+      "recipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "30"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libcrypt",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/libcrypt/build.sh",
+      "recipeSha256": "8d3d827030f2d51687dcf7fcb1a7dce8f79730bdbefbd5b90492def19ea43629",
+      "sourceRevisionExpression": "6",
+      "sourceVersionExpression": "0.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.2-6"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libnghttp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libnghttp3",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libnghttp3",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libngtcp2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libngtcp2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libssh2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libssh2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": ">=",
+            "qualifier": null,
+            "sourceRelation": "openssl (>= 1:3.2.1-1)",
+            "version": "1:3.2.1-1"
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libcurl",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/libcurl/build.sh",
+      "recipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "8.23.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "8.23.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libexpat",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/libexpat/build.sh",
+      "recipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.9.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.9.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libffi",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/libffi/build.sh",
+      "recipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.8.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "3.8.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libflac",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libflac/build.sh",
+      "recipeSha256": "0c3adf3e6a452c1a566621646a69f251ce37d815eeb061d92e1b2758125db51a",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.5.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.5.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libiconv",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/libiconv/build.sh",
+      "recipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.19",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.19"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libicu",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        }
+      ],
+      "recipePath": "packages/libicu/build.sh",
+      "recipeSha256": "400ce1208f3c046b20a3875abbb3a3a17eefede53163bae9eab4032c8f322769",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "78.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "78.3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libunistring",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libunistring",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libidn2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/libidn2/build.sh",
+      "recipeSha256": "13dcbe4d713bc6beb01c9e666527594db097f271d368dfd97d46bca196412a9f",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "2.3.8",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.3.8-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libjpeg-turbo",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libjpeg-turbo/build.sh",
+      "recipeSha256": "8afc22fceacaf759934ce6438e5478f18645ccead9b7012ae621b5dddf3816b3",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.2.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "3.2.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libltdl",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libtool/build.sh",
+      "recipeSha256": "5a5f2ef839e6e574c6e3ae569820b7d4a11738f795151d96ff2bf40fb793d2bc",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.6.2",
+      "subpackagePath": "packages/libtool/libltdl.subpackage.sh",
+      "subpackageSha256": "4688ebbd608b3f291e3839cafd0961620611ea263fc01580d7056b9a12dcf340",
+      "version": "2.6.2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "liblzma",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/liblzma/build.sh",
+      "recipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "5.8.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "5.8.4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmpg123",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmpg123",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libmp3lame",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libmp3lame/build.sh",
+      "recipeSha256": "ae386257d3950be46169097a3b32b72a05d3df332da0b09bc62a0d0d4536b94f",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "4.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "4.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libmpg123",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libmpg123/build.sh",
+      "recipeSha256": "4a1e7d57b284aa8c2d236a7b5c2e3e51aa0f3d89cc4bf8e13926f960027b61bf",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.33.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.33.7"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libnghttp2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/libnghttp2/build.sh",
+      "recipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.70.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.70.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libnghttp3",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/libnghttp3/build.sh",
+      "recipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.18.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.18.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libngtcp2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/libngtcp2/build.sh",
+      "recipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.25.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.25.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libogg",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libogg/build.sh",
+      "recipeSha256": "ebd68d519ce8aa5fa851f1868005f4d90b7c5e9585c0ffda022de00d033faf5e",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.3.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.3.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libopus",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libopus/build.sh",
+      "recipeSha256": "2b3218c6bd300ad72a2eddf60604c4baf4ab75d907587d2834bcba354216da29",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.6.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.6.1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libflac",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libflac",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmp3lame",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmp3lame",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmpg123",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmpg123",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libopus",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libopus",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libvorbis",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libvorbis",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libsndfile",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libsndfile/build.sh",
+      "recipeSha256": "c7feb9a3fd7316cb3259339a2b8a839dacfd451d50e5f6f9a188335b62b77bf4",
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "1.2.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.2.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libsoxr",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libsoxr/build.sh",
+      "recipeSha256": "161195b9c049a71282a9f82dfc79dbbc10bc9ca919d144c02be881c1cbb8ba1e",
+      "sourceRevisionExpression": "8",
+      "sourceVersionExpression": "0.1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.1.3-8"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libsqlite",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/libsqlite/build.sh",
+      "recipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.54.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "3.54.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libssh2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        }
+      ],
+      "recipePath": "packages/libssh2/build.sh",
+      "recipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.11.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.11.1-2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libunistring",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/libunistring/build.sh",
+      "recipeSha256": "ad3070ea9961bbe5cc0a8fbab9f9207e7620c9596f208b5f5b0f3d44266ef392",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.4.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.4.2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-posix-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-posix-semaphore",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libuuid",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/util-linux/build.sh",
+      "recipeSha256": "8886bcd721858e31c479f9c8e11592d5a7c43b1db19cbca2fa5f51a36493ef81",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.42.4",
+      "subpackagePath": "packages/util-linux/libuuid.subpackage.sh",
+      "subpackageSha256": "823ea8ce6656cbf97ec5245b46648dd70671be52e10be2de8b7ab4ea8a254c96",
+      "version": "2.42.4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libuv",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/libuv/build.sh",
+      "recipeSha256": "5306178facd555b28439aae348d0e561c541cdaace4d04ab1eeec540997b2dfc",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.53.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.53.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libvorbis",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libvorbis/build.sh",
+      "recipeSha256": "295e128fc36df81920083d05538e45ee0a849a87e68948aff628ba431024d3a0",
+      "sourceRevisionExpression": "4",
+      "sourceVersionExpression": "1.3.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.3.7-4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "abseil-cpp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "abseil-cpp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libwebrtc-audio-processing",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libwebrtc-audio-processing/build.sh",
+      "recipeSha256": "a492d38cfeb3f00073e86251256cf618e6f11c20bb096e31a41ae602359c580f",
+      "sourceRevisionExpression": "5",
+      "sourceVersionExpression": "1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.3-5"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxcb",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxcb",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "xorgproto",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorgproto",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libx11",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libx11/build.sh",
+      "recipeSha256": "0163c7c054c8d2ebf8a40679d0e9859bc9aea478023102dc11730ce9e36bb521",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.8.13",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.8.13-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libxau",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libxau/build.sh",
+      "recipeSha256": "db1c86540a4e09dfcaa7e4320756c67827757474b347681d2fce2c57c96696ea",
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.0.12",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.0.12-2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libxau",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxau",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxdmcp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxdmcp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libxcb",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libxcb/build.sh",
+      "recipeSha256": "dad40cf766b09a3f336f15ea731f742e16d7dbbe6cc94f77daefd487c9483f13",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.17.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.17.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "libxdmcp",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/libxdmcp/build.sh",
+      "recipeSha256": "c65fc07a144c77cdf281c091e0a6e409ecdf65bfadbff4c854db33cd2621c4c8",
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.1.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.1.5-2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-glob",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-glob",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libxml2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/libxml2/build.sh",
+      "recipeSha256": "52de9d390c6594e2a9bc45b1301a21fadc157b20a7c203d9e4eb3a841b058f7c",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "2.15.4",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.15.4-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "littlecms",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/littlecms/build.sh",
+      "recipeSha256": "5d93c16fc236d45b01e24cd8f33c35c68119f1c99aad2ac191cf0eba85e90799",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.19.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2.19.1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "make",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "make"
+        }
+      ],
+      "recipePath": "packages/make/build.sh",
+      "recipeSha256": "8a55794717f4ea018324b1bbb8f2dfd549dd054152798c913a40d49f4baf432c",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "4.4.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "4.4.1-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "ncurses",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/ncurses/build.sh",
+      "recipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "(6.6.20260307+really6.5.20250830",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "6.6.20260307+really6.5.20250830"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "ncurses",
+            "operator": "=",
+            "qualifier": null,
+            "sourceRelation": "ncurses (= parent-build-version)",
+            "version": "parent-build-version"
+          }
+        ]
+      ],
+      "name": "ncurses-ui-libs",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/ncurses/build.sh",
+      "recipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "(6.6.20260307+really6.5.20250830",
+      "subpackagePath": "packages/ncurses/ncurses-ui-libs.subpackage.sh",
+      "subpackageSha256": "a1ed7e1aa01e0f87e5a23f7df0ff8efa11fc7740201191862ac6e56dcc44581e",
+      "version": "6.6.20260307+really6.5.20250830"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "ninja",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/ninja/build.sh",
+      "recipeSha256": "6a3c1ec0da0494531079bed1604965eb2163e602781ba12be04d3e60ef5cddbe",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.13.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.13.2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "c-ares",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "c-ares",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libicu",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libicu",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsqlite",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsqlite",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ]
+      ],
+      "name": "nodejs",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        }
+      ],
+      "recipePath": "packages/nodejs/build.sh",
+      "recipeSha256": "17e377fe5c0c6eddc37749692f4a4a7e0d4d613027a1649bf0054a04461a159e",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "26.4.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "26.4.0-1"
+    },
+    {
+      "architecture": "all",
+      "dependencyGroups": [
+        [
+          {
+            "name": "nodejs",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs",
+            "version": null
+          },
+          {
+            "name": "nodejs-lts",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "nodejs-lts",
+            "version": null
+          }
+        ]
+      ],
+      "name": "npm",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        }
+      ],
+      "recipePath": "packages/npm/build.sh",
+      "recipeSha256": "7bf0bf1c95252097985bdc843c08bdaf806fb29b24572e9d127b92680d914c85",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "11.20.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "11.20.0"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libjpeg-turbo",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libjpeg-turbo",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "littlecms",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "littlecms",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "alsa-plugins",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "alsa-plugins",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openjdk-17",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/openjdk-17/build.sh",
+      "recipeSha256": "146236631b213773a18ae82bc10f526234dec42482b601f3c302605dfa74ad82",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "17.0.20",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "17.0.20"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "ca-certificates",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openssl",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/openssl/build.sh",
+      "recipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1:3.6.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1:3.6.5"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "pcre2",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/pcre2/build.sh",
+      "recipeSha256": "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "10.49",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "10.49"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "glib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "glib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "pkg-config",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        }
+      ],
+      "recipePath": "packages/pkg-config/build.sh",
+      "recipeSha256": "8378c3bfb5e91c6a91aef8a7083d8f9b017f25913d1f0c5ff0603a5b1d858669",
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.29.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "0.29.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "dbus",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "dbus",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-stub",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-stub",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-execinfo",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-execinfo",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-glob",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-glob",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libltdl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libltdl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsndfile",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsndfile",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsoxr",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsoxr",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libwebrtc-audio-processing",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libwebrtc-audio-processing",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "speexdsp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "speexdsp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "pulseaudio",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/pulseaudio/build.sh",
+      "recipeSha256": "4fa38f213ca97d6bbb5fb0035d0ca90bbf57872576db6a28cdbb9cc779062e17",
+      "sourceRevisionExpression": "4",
+      "sourceVersionExpression": "17.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "17.0-4"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "gdbm",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "gdbm",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-posix-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-posix-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libbz2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libbz2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libcrypt",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libcrypt",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libffi",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libffi",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsqlite",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsqlite",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses-ui-libs",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses-ui-libs",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "readline",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "readline",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zstd",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zstd",
+            "version": null
+          }
+        ]
+      ],
+      "name": "python",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/python/build.sh",
+      "recipeSha256": "354ad5204056395bc423780da9112395aad862c01636ae3a56d2f4c025d69f12",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "3.14.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "3.14.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "ncurses",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ncurses",
+            "version": null
+          }
+        ]
+      ],
+      "name": "readline",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/readline/build.sh",
+      "recipeSha256": "29e24da6099650f92703b2772e9515cfc6004901733b1c8a4dbb3938b85762e3",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "8.3.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "8.3.6"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "resolv-conf",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        }
+      ],
+      "recipePath": "packages/resolv-conf/build.sh",
+      "recipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.3"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ]
+      ],
+      "name": "rhash",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        }
+      ],
+      "recipePath": "packages/rhash/build.sh",
+      "recipeSha256": "471c7efe285a2d81169dbc5fcc0e339ab1a47317021057eea8ab0028318c0f1f",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.4.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.4.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "speexdsp",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/speexdsp/build.sh",
+      "recipeSha256": "8424446f3a1bd5a4b0ca5f079d441d296996544dfb9981216c476fa52b411847",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.2.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.2.1-1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libidn2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libidn2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libuuid",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libuuid",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openssl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openssl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pcre2",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pcre2",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "wget",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/wget/build.sh",
+      "recipeSha256": "5794b1cfd67da93a67aa6a5d74548238cef5c0aaf2d26bd97d9aa312cd45fd6a",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.25.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.25.0-1"
+    },
+    {
+      "architecture": "all",
+      "dependencyGroups": [],
+      "name": "xorg-util-macros",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/xorg-util-macros/build.sh",
+      "recipeSha256": "90834b817c7086e2d7657564ba027d045493ff129e161f80eb99695d81aad57e",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.20.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.20.2"
+    },
+    {
+      "architecture": "all",
+      "dependencyGroups": [
+        [
+          {
+            "name": "xorg-util-macros",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorg-util-macros",
+            "version": null
+          }
+        ]
+      ],
+      "name": "xorgproto",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        }
+      ],
+      "recipePath": "packages/xorgproto/build.sh",
+      "recipeSha256": "6c5fc5b5f3362de2d2eb728054de01aa2368f6b22846de1ddde2c19a214f5238",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2026.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "2026.1"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [],
+      "name": "zlib",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "profile": "nodejs-npm"
+        },
+        {
+          "binarySha256": null,
+          "profile": "openjdk17"
+        },
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        },
+        {
+          "binarySha256": null,
+          "profile": "wget"
+        }
+      ],
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.3.2"
+    },
+    {
+      "architecture": "aarch64",
+      "dependencyGroups": [
+        [
+          {
+            "name": "liblzma",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "liblzma",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ]
+      ],
+      "name": "zstd",
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "profile": "python"
+        }
+      ],
+      "recipePath": "packages/zstd/build.sh",
+      "recipeSha256": "d7768dbd39af796ae9d5d1f0cc95d963ed5fa842332aecd9b6b046d87bbc48ec",
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.5.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "version": "1.5.7-1"
+    }
+  ],
+  "profiles": {
+    "cmake-ninja": {
+      "buildModifications": {
+        "dependencyContractUnchanged": true,
+        "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+        "patchPath": "termux-private-package-kit/cmake-ninja/libcurl-disable-optional-zstd.patch",
+        "patchSha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788",
+        "patchedRecipePaths": [
+          "packages/libcurl/build.sh"
+        ],
+        "propertiesPatchOnly": false,
+        "purpose": "Disable curl auto-detected optional zstd compression; first hosted ELF audit proved an undeclared libzstd.so.1 dependency.",
+        "recipePatchApplied": true,
+        "sourceRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025"
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/cmake-ninja/libcurl-disable-optional-zstd.patch",
+          "sha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788"
+        }
+      ],
+      "manifest": "cmake-ninja-candidate-package-set.json",
+      "manifestSha256": "1b4d3c401609ef7ff291d8c926cba625e89f77522056acdc49252a64af953fe5",
+      "packageCount": 22,
+      "rootPackages": [
+        "cmake",
+        "ninja"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/cmake-ninja-package-candidate.yml",
+      "workflowSha256": "c336eb26b3474203fbb2f2ada0551d4b77391cb168729c7fcbbfedf3e27df8ec"
+    },
+    "curl": {
+      "buildModifications": {},
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [],
+      "manifest": "curl-candidate-package-set.json",
+      "manifestSha256": "01cc8692d8a6c36dfe9d995cb9138ae990d747a0b6b3ae04a16cfbd48c3f75c8",
+      "packageCount": 9,
+      "rootPackages": [
+        "curl"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/curl-package-candidate.yml",
+      "workflowSha256": "b83047cda5f34578c23da6e96d4328b93a258383ce35bc26eec84dd04072deba"
+    },
+    "gh": {
+      "buildModifications": {},
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [],
+      "manifest": "gh-candidate-package-set.json",
+      "manifestSha256": "7b46136a17b9fb20868d46034516f11912ea441a9242b5350ed9ed6da54cf081",
+      "packageCount": 1,
+      "rootPackages": [
+        "gh"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/package-feed-candidate.yml",
+      "workflowSha256": "2e46d30fac9989bcf08f11ea5e4713d253a63738b6bb2c3b35a656ceafc1bb24"
+    },
+    "git": {
+      "buildModifications": {},
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [],
+      "manifest": "git-candidate-package-set.json",
+      "manifestSha256": "70105a4898ff9df0af34071d7d59c99accdd0d0d3075dfea2dab56846b2646d5",
+      "packageCount": 14,
+      "rootPackages": [
+        "git"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/git-package-candidate.yml",
+      "workflowSha256": "867634bd6eb8d67fb067c3206400356140f5862b2a27eeeb395c714ab2a81ac8"
+    },
+    "make": {
+      "buildModifications": {},
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/make-v476/patches/make-embed-gpl-license.patch",
+          "sha256": "cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03"
+        }
+      ],
+      "manifest": "candidate-package-set.json",
+      "manifestSha256": "2dccef7efd6150a4d2d65ccbef9c1b708f512af67e13e34af59a2d2b0509d097",
+      "packageCount": 1,
+      "rootPackages": [
+        "make"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/package-feed-candidate.yml",
+      "workflowSha256": "2e46d30fac9989bcf08f11ea5e4713d253a63738b6bb2c3b35a656ceafc1bb24"
+    },
+    "nodejs-npm": {
+      "buildModifications": {
+        "buildExecutionOrder": [
+          "npm",
+          "nodejs"
+        ],
+        "npmArchiveGitIndex": "Local index of checksum-verified bundled node_modules only; no upstream source commit fabricated; resetdeps compatibility.",
+        "patchPath": "termux-private-package-kit/nodejs-npm/nodejs-npm-source-provenance.patch",
+        "patchSha256": "768451f8beec0e13f2bf194d27a332aca78795a488eaf9a0df7ab31efce74a16",
+        "purpose": "Immutable checksum-verified npm commit archive; preserve ICU license from checksum-verified source; install bundled Node/npm licenses. No runtime dependency substitution."
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/nodejs-npm/nodejs-npm-source-provenance.patch",
+          "sha256": "768451f8beec0e13f2bf194d27a332aca78795a488eaf9a0df7ab31efce74a16"
+        }
+      ],
+      "manifest": "nodejs-npm-candidate-package-set.json",
+      "manifestSha256": "267de853323ede78a1d18418fe45f51b875e6f12c965324180a3dd6d77be8542",
+      "packageCount": 11,
+      "rootPackages": [
+        "nodejs",
+        "npm"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/nodejs-npm-package-candidate.yml",
+      "workflowSha256": "d1c07da703d6663a502b7cfa01ec35e389d26ce7766dd89df04a0d21801d9d92"
+    },
+    "openjdk17": {
+      "buildModifications": {
+        "patchPath": "termux-private-package-kit/openjdk17/openjdk17-license-notices.patch",
+        "patchSha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc",
+        "purpose": "Preserve source/license notices; build only supported libmpg123 decoder component to remove the source build cycle; replace mutable PulseAudio git tag with exact commit archive and verified SHA-256. Runtime dependency inventory and versions remain pinned and unchanged."
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/openjdk17/openjdk17-license-notices.patch",
+          "sha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc"
+        }
+      ],
+      "manifest": "openjdk17-candidate-package-set.json",
+      "manifestSha256": "6d11683078a4440244921f036db39554b9a63819ff6b19ed92c88ab2d12d4f0d",
+      "packageCount": 36,
+      "rootPackages": [
+        "openjdk-17"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/openjdk17-package-candidate.yml",
+      "workflowSha256": "1c9cb357dcfdb3683e128fac258aa1c928fe41c94cabeb056ad1dc6ddf0695d9"
+    },
+    "pkg-config": {
+      "buildModifications": {
+        "patchPath": "termux-private-package-kit/pkg-config-v0.29.2/ncurses-ui-libs-license.patch",
+        "patchSha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9",
+        "purpose": "Preserve the parent ncurses copyright file and copy the source-verified COPYING payload into ncurses-ui-libs, so both split packages carry independent package-local MIT evidence; no executable code or runtime dependency changes."
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/pkg-config-v0.29.2/ncurses-ui-libs-license.patch",
+          "sha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9"
+        }
+      ],
+      "manifest": "pkg-config-candidate-package-set.json",
+      "manifestSha256": "7a72402868ddbcd04dd1de1b799235bb7bcc3c7685b63fdf6e6fd9d48eda9a93",
+      "packageCount": 22,
+      "rootPackages": [
+        "pkg-config"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/pkg-config-package-candidate.yml",
+      "workflowSha256": "47e52bd113ebddf1efa039581258618f1fd426599159d1ec5a9b264c61d19374"
+    },
+    "python": {
+      "buildModifications": {
+        "patchPath": "termux-private-package-kit/python-v3.14.6/ncurses-ui-libs-license.patch",
+        "patchSha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9",
+        "purpose": "Preserve the parent ncurses copyright file and copy the source-verified COPYING payload into ncurses-ui-libs, so both split packages carry independent package-local MIT evidence; no executable code or runtime dependency changes."
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/python-v3.14.6/ncurses-ui-libs-license.patch",
+          "sha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9"
+        }
+      ],
+      "manifest": "python-candidate-package-set.json",
+      "manifestSha256": "8f40ee6821be530834d1efe2b138d9949c15a486bb14631e2f0c2e76f737be62",
+      "packageCount": 17,
+      "rootPackages": [
+        "python"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/python-package-candidate.yml",
+      "workflowSha256": "1c1f9908658ce9c9a04b1e5544b53096f11e11587a8c338ae667946b8a8e3a8c"
+    },
+    "wget": {
+      "buildModifications": {
+        "libuuidLicenseDocsPath": "share/doc/util-linux",
+        "licensePayloadPath": "share/doc/wget/COPYING",
+        "licensePayloadSha256": "f7dc7522e7e1be9227f3dc8de8b39a4d1d2471968c893af15f00c1a2076a0eec",
+        "patchPath": "termux-private-package-kit/wget-v1.25.0/wget-license-file.patch",
+        "patchSha256": "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0",
+        "purpose": "Set Wget TERMUX_PKG_LICENSE_FILE=COPYING so its full GPL text is installed. Normalize pinned util-linux's multiline license-file list to the comma-separated format parsed by its pinned installer, then include those six source-hash-pinned license documents in libuuid. Documentation and recipe-metadata changes only; no executable program code or runtime dependency is changed.",
+        "sourceArchiveSha256": "19225cc756b0a088fc81148dc6a40a0c8f329af7fd8483f1c7b2fe50f4e08a1f",
+        "sourceArchiveUrl": "https://mirrors.kernel.org/gnu/wget/wget-1.25.0.tar.lz"
+      },
+      "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/wget-v1.25.0/wget-license-file.patch",
+          "sha256": "95a294e32a59f5717410a482cd3fc3ad5c35129f004c181ee4a5afb16ee61ba0"
+        }
+      ],
+      "manifest": "wget-candidate-package-set.json",
+      "manifestSha256": "ab9634fc4bffc7be833b05be7f344be1c57ae2ac66eea03d1ffd57b2d6fc4d91",
+      "packageCount": 11,
+      "rootPackages": [
+        "wget"
+      ],
+      "signedBinaryBundle": null,
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "workflow": ".github/workflows/wget-package-candidate.yml",
+      "workflowSha256": "b3c7b074ac3f4930a14d5a1d0c2ee613aa9b81ca3c9ad91d6a57555f14778b4a"
+    }
+  },
+  "publicationAllowed": false,
+  "requiredInputs": [
+    "Fresh CI-only signed bundles for all ten profiles, never public uploads; include every exact .deb and SHA-256, Packages/Release/InRelease/Release.gpg and externally pinned ephemeral public key fingerprint/keyring.",
+    "Hash-bound source closure, full effective recipe/patch inputs, builder digest, build-result and static audit reports for each bundle; independently re-run the audits, not just trust success booleans.",
+    "Reviewed canonical provider selection for duplicate identities, especially patched libcurl, followed by cross-family consumer re-audits; no arbitrary first/last writer.",
+    "Actual control metadata and full payload inventories including type, mode, symlink/hardlink targets and hashes; reject non-directory collisions and path traversal before extraction.",
+    "One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy keys, feeds and binaries afterward."
+  ],
+  "resolverSha256": "3a0aaf39f30d00adeb2b183e0acef4e65c9ec10da1f9a2ec00952edd8d7c29c2",
+  "schemaVersion": 1,
+  "scopeSha256": "a36a6faa1d70105544585610231bdd6ccce322398c437ad9229c027b6ebe0a4f",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "summary": {
+    "duplicateNames": [
+      "ca-certificates",
+      "gdbm",
+      "libandroid-glob",
+      "libandroid-posix-semaphore",
+      "libandroid-spawn",
+      "libandroid-support",
+      "libbz2",
+      "libc++",
+      "libcrypt",
+      "libcurl",
+      "libexpat",
+      "libffi",
+      "libiconv",
+      "liblzma",
+      "libnghttp2",
+      "libnghttp3",
+      "libngtcp2",
+      "libsqlite",
+      "libssh2",
+      "ncurses",
+      "ncurses-ui-libs",
+      "openssl",
+      "pcre2",
+      "python",
+      "readline",
+      "resolv-conf",
+      "zlib",
+      "zstd"
+    ],
+    "occurrenceCount": 144,
+    "profileCount": 10,
+    "sourceDependencyClosure": "PASS; per-profile and union; not binary control or ELF evidence",
+    "uniquePackageCount": 79
+  },
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  }
+}
