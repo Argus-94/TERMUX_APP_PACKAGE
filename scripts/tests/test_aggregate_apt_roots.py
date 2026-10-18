@@ -38,15 +38,16 @@ class AggregateAptRootsTests(unittest.TestCase):
             package_root = cls.base / ("pkg-" + name)
             control_dir = package_root / "DEBIAN"
             control_dir.mkdir(parents=True)
+            architecture = "all" if name == "aggregate-root-c" else "amd64"
             (control_dir / "control").write_text(
-                f"Package: {name}\nVersion: 1.0\nArchitecture: amd64\n"
+                f"Package: {name}\nVersion: 1.0\nArchitecture: {architecture}\n"
                 "Maintainer: Test <test@example.invalid>\n"
                 f"{dependency}Description: disposable aggregate-root fixture\n",
                 encoding="utf-8")
             pooldir = cls.feed / "pool/main/aggregate-test"
             pooldir.mkdir(parents=True, exist_ok=True)
             subprocess.run(["dpkg-deb", "--build", "--root-owner-group", str(package_root),
-                            str(pooldir / f"{name}_1.0_amd64.deb")], check=True,
+                            str(pooldir / f"{name}_1.0_{architecture}.deb")], check=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         index_dir = cls.feed / "dists/stable/main/binary-amd64"
         index_dir.mkdir(parents=True)
@@ -77,6 +78,20 @@ class AggregateAptRootsTests(unittest.TestCase):
             query = subprocess.run(["dpkg-query", "-W", "-f=${db:Status-Status}", package],
                                    text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
             self.assertNotEqual(query.returncode, 0, package + " unexpectedly installed")
+
+    def test_all_primary_root_requires_explicit_all_architecture(self):
+        result = subprocess.run(["bash", str(HELPER), str(self.feed), "amd64", "aggregate-root-c", "1.0",
+                                 "4", "all", "aggregate-root-a=1.0", "aggregate-root-d=1.0"],
+                                cwd=ROOT, env=self.env, text=True, capture_output=True, timeout=90)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("roots=3", result.stdout)
+
+    def test_wrong_explicit_primary_architecture_still_rejected(self):
+        result = subprocess.run(["bash", str(HELPER), str(self.feed), "amd64", "aggregate-root-c", "1.0",
+                                 "4", "amd64", "aggregate-root-a=1.0", "aggregate-root-d=1.0"],
+                                cwd=ROOT, env=self.env, text=True, capture_output=True, timeout=90)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("APT_PACKAGE_ARCHITECTURE_MISMATCH", result.stderr)
 
     def test_duplicate_additional_root_rejected_before_apt(self):
         result = self.invoke("aggregate-root-c=1.0", "aggregate-root-c=1.0")

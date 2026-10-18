@@ -139,7 +139,18 @@ mapfile -t SOURCE_DEBS < <(find "$FEED_ROOT/pool" -type f -name '*.deb' -print)
 ((${#DOWNLOADED[@]} == ${#INSTALL_SPECS[@]} && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
 for spec in "${INSTALL_SPECS[@]}"; do
   requested_name="${spec%%=*}"; requested_version="${spec#*=}"
-  requested_arch="$ARCH"; [[ "$requested_name" != "$PACKAGE" ]] || requested_arch="$EXPECTED_ROOT_ARCH"
+  requested_arch=''; source_root_matches=0
+  for source_deb in "${SOURCE_DEBS[@]}"; do
+    [[ "$(dpkg-deb -f "$source_deb" Package 2>/dev/null)" == "$requested_name" ]] || continue
+    [[ "$(dpkg-deb -f "$source_deb" Version 2>/dev/null)" == "$requested_version" ]] || continue
+    candidate_arch="$(dpkg-deb -f "$source_deb" Architecture 2>/dev/null)"
+    [[ "$candidate_arch" == "$ARCH" || "$candidate_arch" == all ]] || fail 'SOURCE_ROOT_ARCHITECTURE_NOT_ALLOWLISTED'
+    requested_arch="$candidate_arch"; ((source_root_matches += 1))
+  done
+  ((source_root_matches == 1)) || fail 'SOURCE_ROOT_NOT_EXACTLY_ONCE'
+  if [[ "$requested_name" == "$PACKAGE" ]]; then
+    [[ "$requested_arch" == "$EXPECTED_ROOT_ARCH" ]] || fail 'SOURCE_PRIMARY_ARCHITECTURE_PIN_MISMATCH'
+  fi
   downloaded_matches=0
   for downloaded_deb in "${DOWNLOADED[@]}"; do
     [[ "$(dpkg-deb -f "$downloaded_deb" Package 2>/dev/null)" == "$requested_name" ]] || continue
