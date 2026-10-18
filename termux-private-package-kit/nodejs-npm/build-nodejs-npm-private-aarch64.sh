@@ -45,7 +45,7 @@ python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W"
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" "$W/scripts/properties.sh" --data-dir "$AIB_TERMUX_APP_DATA_DIR" --prefix "$AIB_TERMUX_PREFIX"
 git -C "$W" diff -- scripts/properties.sh > "$OUT/app-private-properties.patch"
 git -C "$W" apply --check "$ROOT/$PATCH"; git -C "$W" apply "$ROOT/$PATCH"
-changed=$(git -C "$W" diff --name-only|sort); [[ "$changed" == $'packages/libicu/build.sh\npackages/nodejs/build.sh\npackages/npm/build.sh\nscripts/properties.sh' ]] || fail PATCH_SCOPE_MISMATCH
+changed=$(git -C "$W" diff --name-only|sort); [[ "$changed" == $'packages/libicu/build.sh\npackages/nodejs/build.sh\npackages/npm/build.sh\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail PATCH_SCOPE_MISMATCH
 cat > "$W/.aib-preflight.sh" <<EOF
 #!/bin/bash
 set -e; cd /home/builder/termux-packages; source scripts/properties.sh
@@ -54,6 +54,7 @@ EOF
 chmod 700 "$W/.aib-preflight.sh"; mkdir -p "$W/output/.aib-private-nodejs-npm-debs"
 free_bytes=$(df -PB1 "$OUT" | awk 'END {print $4}'); (( free_bytes >= 8 * 1024 * 1024 * 1024 )) || fail LESS_THAN_8_GIB_FREE_NO_BUILD_STARTED
 docker info >/dev/null 2>&1 || fail DOCKER_UNAVAILABLE; docker image inspect "$IMAGE" >/dev/null 2>&1 || fail PINNED_IMAGE_NOT_PRESENT_NO_PULL_ATTEMPTED
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE" CONTAINER_NAME="aib-nodejs-npm-$$"
 trap 'docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true' EXIT
 (cd "$W" && ./scripts/run-docker.sh bash /home/builder/termux-packages/.aib-preflight.sh) | tee "$OUT/build.log"

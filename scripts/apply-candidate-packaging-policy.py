@@ -108,11 +108,25 @@ def apply(root):
         raise ValueError("post-application policy mismatch")
     return description
 
+def verify(root):
+    root = Path(root)
+    repo = Path(__file__).absolute().parents[1]
+    description = policy_description(repo, root)
+    for rel, expected in description["patchedInputs"].items():
+        if sha(regular(root, rel).read_bytes()) != expected:
+            raise ValueError("source packaging policy not applied: " + rel)
+    helper = regular(root, "scripts/build/" + HELPER_NAME)
+    if sha(helper.read_bytes()) != description["helperSha256"]:
+        raise ValueError("installed source packaging helper hash mismatch")
+    return description
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-root", required=True)
+    parser.add_argument("--verify-only", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(apply(args.source_root), sort_keys=True))
+    result = verify(args.source_root) if args.verify_only else apply(args.source_root)
+    print(json.dumps(result, sort_keys=True))
 
 if __name__ == "__main__":
     try:

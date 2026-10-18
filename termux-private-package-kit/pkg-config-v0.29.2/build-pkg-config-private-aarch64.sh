@@ -109,7 +109,7 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/ncurses/build.sh\npackages/ncurses/ncurses-ui-libs.subpackage.sh\nscripts/properties.sh' ]] || fail 'PKG_CONFIG_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/ncurses/build.sh\npackages/ncurses/ncurses-ui-libs.subpackage.sh\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail 'PKG_CONFIG_PATCH_SCOPE_MISMATCH'
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash
@@ -129,6 +129,7 @@ free_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 (( free_bytes >= MIN_FREE_BYTES )) || fail 'LESS_THAN_8_GIB_FREE; NO_BUILD_STARTED'
 docker info >/dev/null 2>&1 || fail 'DOCKER_DAEMON_UNAVAILABLE'
 docker image inspect "$IMAGE" >/dev/null 2>&1 || fail 'PINNED_BUILDER_IMAGE_NOT_PRESENT_LOCALLY; NO_PULL_ATTEMPTED'
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE"
 export CONTAINER_NAME="aib-private-pkgconfig-0292-$$"
 cleanup_container() { docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true; }

@@ -22,7 +22,7 @@ class CurlAllowlistTests(unittest.TestCase):
 
     def test_build_script_hash_is_reviewed(self):
         builder = pathlib.Path(__file__).resolve().parents[1] / "build-curl-private-aarch64.sh"
-        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "5c3f3d96f8ba8dcc4dcf70e13bb2d26c6ebcdf5bbf8438a52cecd73f26ce9ea7")
+        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "6916e85b79e6b6fc6e857e7b64c89984b3a22ab02b493e9cf049b2588937fe92")
     def test_embedded_builder_python_heredocs_parse(self):
         builder = pathlib.Path(__file__).resolve().parents[1] / "build-curl-private-aarch64.sh"
         text = builder.read_text(encoding="utf-8")

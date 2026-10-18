@@ -108,7 +108,7 @@ git -C "$WORKTREE" apply --check "$KIT_DIR/wget-license-file.patch"
 git -C "$WORKTREE" apply "$KIT_DIR/wget-license-file.patch"
 grep -Fq 'TERMUX_PKG_LICENSE_FILE="Documentation/licenses/COPYING.GPL-3.0-or-later,Documentation/licenses/COPYING.GPL-2.0-or-later,Documentation/licenses/COPYING.LGPL-2.1-or-later,Documentation/licenses/COPYING.BSD-3-Clause,Documentation/licenses/COPYING.BSD-4-Clause-UC,Documentation/licenses/COPYING.ISC"' "$WORKTREE/packages/util-linux/build.sh" || fail 'UTIL_LINUX_LICENSE_LIST_NOT_NORMALIZED'
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/util-linux/build.sh\npackages/util-linux/libuuid.subpackage.sh\npackages/wget/build.sh\nscripts/properties.sh' ]] || fail 'WGET_LICENSE_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/util-linux/build.sh\npackages/util-linux/libuuid.subpackage.sh\npackages/wget/build.sh\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail 'WGET_LICENSE_PATCH_SCOPE_MISMATCH'
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
 #!/usr/bin/env bash
@@ -128,6 +128,7 @@ free_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 (( free_bytes >= MIN_FREE_BYTES )) || fail 'LESS_THAN_5_GIB_FREE; NO_BUILD_STARTED'
 docker info >/dev/null 2>&1 || fail 'DOCKER_DAEMON_UNAVAILABLE'
 docker image inspect "$IMAGE" >/dev/null 2>&1 || fail 'PINNED_BUILDER_IMAGE_NOT_PRESENT_LOCALLY; NO_PULL_ATTEMPTED'
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE"
 export CONTAINER_NAME="aib-private-wget-v1250-$$"
 cleanup_container() { docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true; }

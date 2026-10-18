@@ -4,8 +4,8 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
-readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly AUDITOR="$KIT_DIR/audit_deb.py"
 
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
@@ -108,6 +108,7 @@ available_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 docker info >/dev/null 2>&1 || fail 'DOCKER_DAEMON_UNAVAILABLE'
 docker image inspect "$AIB_TERMUX_BUILDER_IMAGE_REF" >/dev/null 2>&1 || fail 'PINNED_BUILDER_IMAGE_NOT_PRESENT_LOCALLY; NO_PULL_ATTEMPTED'
 
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$AIB_TERMUX_BUILDER_IMAGE_REF"
 export CONTAINER_NAME="aib-private-gh-v2102-$$"
 cleanup_container() {

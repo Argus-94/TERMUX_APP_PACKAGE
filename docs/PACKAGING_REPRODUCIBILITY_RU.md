@@ -31,3 +31,9 @@ Hash-checked source policy применяется ко всем десяти bui
 После изменения packaging policy требуется новый полный source rebuild. Старые кандидаты остаются диагностическими и не подмешиваются к новому feed. Затем нужны побайтное сравнение всех повторений, полный общий control/payload/ELF/ABI audit и одна signed-by APT simulation всех 12 точных корней с ожидаемым закрытием из 79 пакетов. Многокорневой APT helper не устанавливает пакеты и не разрешает неподписанные источники.
 
 Даже успешный Linux CI не заменяет фактические Android install/upgrade/rollback и проверку private-prefix на `com.karat.aibuilder`. Без этих evidence и доверенного production key/fingerprint публикация feed, Pages и Builder installer запрещена. Ephemeral candidate keys не становятся production keys автоматически.
+
+## До дорогого rebuild
+
+После всех recipe/properties overlays каждый wrapper повторно проверяет точные hashes обеих изменённых packaging functions и установленного helper через `--verify-only`. Source patch-scope guards допускают только два явно названных новых файла, не произвольные изменения `scripts/`. ROOT определяется после KIT_DIR.
+
+PR source-preflight запускает весь generic suite и все десять пакетных suites с сохранёнными reviewed builder-hash pins. Дополнительный host fixture выполняет подготовку всех десяти настоящих wrappers на закреплённом checkout и останавливает их Docker stub до контейнера/компиляции. Он выявляет ошибки путей, source guard и порядка apply/verify, но не создаёт candidate packages и не заменяет настоящий rebuild или Android qualification.
