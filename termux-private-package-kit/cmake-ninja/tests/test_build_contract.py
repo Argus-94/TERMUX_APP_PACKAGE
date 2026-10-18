@@ -46,4 +46,19 @@ class BuildContractTests(unittest.TestCase):
         with self.assertRaisesRegex(audit.AuditError,'ELF_SONAME_PROVIDER_AMBIGUOUS'):
             audit.validate_elf_needed_providers(records,[])
 
+    def test_single_flag_overlay_hash_scope_and_contract(self):
+        m=json.loads((ROOT/'cmake-ninja-candidate-package-set.json').read_text())
+        mod=m['buildModifications'];patch=ROOT/mod['patchPath'];body=patch.read_text()
+        self.assertEqual(hashlib.sha256(patch.read_bytes()).hexdigest(),mod['patchSha256'])
+        self.assertEqual(mod,audit.EXPECTED_BUILD_MODIFICATIONS)
+        self.assertEqual(mod['patchedRecipePaths'],['packages/libcurl/build.sh'])
+        self.assertEqual([x for x in body.splitlines() if x.startswith('+') and not x.startswith('+++')],['+--without-zstd'])
+        self.assertFalse([x for x in body.splitlines() if x.startswith('-') and not x.startswith('---')])
+        self.assertTrue(mod['dependencyContractUnchanged'])
+        self.assertNotEqual(mod['effectiveRecipeSha256'],mod['sourceRecipeSha256'])
+    def test_undeclared_libzstd_is_still_rejected(self):
+        records=self.providers()+[{'package':'libcurl','path':'lib/libcurl.so','soname':'libcurl.so','needed':['libzstd.so.1']}]
+        with self.assertRaisesRegex(audit.AuditError,'ELF_NEEDED_LIBRARY_UNPROVEN'):
+            audit.validate_elf_needed_providers(records,[])
+
 if __name__=='__main__':unittest.main()

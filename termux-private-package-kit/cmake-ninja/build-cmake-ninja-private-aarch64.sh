@@ -3,7 +3,7 @@ set -Eeuo pipefail
 readonly PIN=505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
 readonly IMAGE=ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
 readonly CLOSURE_SHA=9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff
-readonly EXPECTED_MANIFEST_SHA='9eb4a0fdf2aa0f3996bb9938baacd72c0da53c1ddc0c1764d7aafd1ed57e4851'
+readonly EXPECTED_MANIFEST_SHA='1b4d3c401609ef7ff291d8c926cba625e89f77522056acdc49252a64af953fe5'
 readonly KIT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT="$(cd -- "$KIT/../.." && pwd)"
 fail(){ echo "ERROR:$*" >&2; exit 2; }
@@ -45,7 +45,10 @@ mkdir -p "$OUT/work"; W="$OUT/work/termux-packages"; git clone --shared --dissoc
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" "$W/scripts/properties.sh" --data-dir "$AIB_TERMUX_APP_DATA_DIR" --prefix "$AIB_TERMUX_PREFIX"
 git -C "$W" diff -- scripts/properties.sh > "$OUT/app-private-properties.patch"
 test -s "$OUT/app-private-properties.patch" || fail PRIVATE_PROPERTIES_PATCH_MISSING
-changed=$(git -C "$W" diff --name-only|sort); [[ "$changed" == 'scripts/properties.sh' ]] || fail PATCH_SCOPE_MISMATCH
+[[ $(sha256sum "$KIT/libcurl-disable-optional-zstd.patch"|awk '{print $1}') == 69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788 ]] || fail RECIPE_OVERLAY_HASH_MISMATCH
+git -C "$W" apply --check "$KIT/libcurl-disable-optional-zstd.patch"; git -C "$W" apply "$KIT/libcurl-disable-optional-zstd.patch"
+[[ $(sha256sum "$W/packages/libcurl/build.sh"|awk '{print $1}') == ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348 ]] || fail EFFECTIVE_LIBCURL_RECIPE_HASH_MISMATCH
+changed=$(git -C "$W" diff --name-only|sort); [[ "$changed" == $'packages/libcurl/build.sh\nscripts/properties.sh' ]] || fail PATCH_SCOPE_MISMATCH
 cat > "$W/.aib-preflight.sh" <<EOF
 #!/bin/bash
 set -e; cd /home/builder/termux-packages; source scripts/properties.sh
@@ -77,6 +80,6 @@ out,mf,af,image,pin,prefix=map(str,sys.argv[1:]);m=json.loads(pathlib.Path(mf).r
 import subprocess,hashlib
 for p in m['packages']:
  d=next(pathlib.Path(out).parent.joinpath('packages').glob(p['name']+'_*_'+p['architecture']+'.deb')); c=subprocess.check_output(['dpkg-deb','-f',str(d)],text=True); f=dict(x.split(': ',1) for x in c.splitlines() if ': ' in x);ps.append({'name':p['name'],'version':f['Version'],'architecture':f['Architecture'],'file':d.name,'sha256':hashlib.sha256(d.read_bytes()).hexdigest()})
-r={'schemaVersion':1,'status':'audit-passed; device-runtime-test-not-run','sourceCommit':pin,'builderImage':image,'prefix':prefix,'prefixProvenance':'ci-model-only; device-observation-not-run','sourceClosure':{'profile':'cmake-ninja-candidate','rootPackages':['cmake','ninja'],'buildTargetPackages':['cmake','ninja'],'packageCount':22,'dependencyAlternativeCount':34},'packages':ps,'baseLicenseProviderEvidence':m['baseLicenseProviderEvidence'],'installed':False,'deviceSmokeTest':'NOT RUN','rollback':'NOT RUN'};pathlib.Path(out).write_text(json.dumps(r,indent=2)+'\n')
+r={'schemaVersion':1,'status':'audit-passed; device-runtime-test-not-run','sourceCommit':pin,'builderImage':image,'prefix':prefix,'prefixProvenance':'ci-model-only; device-observation-not-run','sourceClosure':{'profile':'cmake-ninja-candidate','rootPackages':['cmake','ninja'],'buildTargetPackages':['cmake','ninja'],'packageCount':22,'dependencyAlternativeCount':34},'packages':ps,'baseLicenseProviderEvidence':m['baseLicenseProviderEvidence'],'buildModifications':m['buildModifications'],'installed':False,'deviceSmokeTest':'NOT RUN','rollback':'NOT RUN'};pathlib.Path(out).write_text(json.dumps(r,indent=2)+'\n')
 PY
 printf 'CMAKE_NINJA_BUILD_AND_STATIC_AUDIT_OK; no device install performed\n'

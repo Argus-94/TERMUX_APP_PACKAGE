@@ -79,7 +79,7 @@ jobs:
           closure="$RUNNER_TEMP/cmake-ninja-source-closure.json"
           python3 scripts/resolve-pinned-termux-recipe-closure.py --source-root "$RUNNER_TEMP/termux-packages" --scope termux-package-source-scope.json --profile cmake-ninja-candidate > "$closure"
           test "$(sha256sum "$closure" | awk '{print $1}')" = 9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff
-          test "$(sha256sum cmake-ninja-candidate-package-set.json | awk '{print $1}')" = 9eb4a0fdf2aa0f3996bb9938baacd72c0da53c1ddc0c1764d7aafd1ed57e4851
+          test "$(sha256sum cmake-ninja-candidate-package-set.json | awk '{print $1}')" = 1b4d3c401609ef7ff291d8c926cba625e89f77522056acdc49252a64af953fe5
           python3 - "$closure" cmake-ninja-candidate-package-set.json <<'PY'
           import json,pathlib,sys
           c=json.loads(pathlib.Path(sys.argv[1]).read_text());m=json.loads(pathlib.Path(sys.argv[2]).read_text());f=('recipePath','recipeSha256','packageType','parentPackage','parentDependencyRule','subpackagePath','subpackageSha256','sourceVersionExpression','sourceRevisionExpression','versionExpressionIsLiteral','revisionExpressionIsLiteral','dependencyGroups','recommendationGroupsNotIncludedInRequiredClosure')

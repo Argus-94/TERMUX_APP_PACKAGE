@@ -107,6 +107,8 @@ def validate(package_set: pathlib.Path, source_closure: pathlib.Path, feed_root:
             build.get("prefixProvenance") == "ci-model-only; device-observation-not-run", "BUILD_PREFIX_OR_BUILDER_MISMATCH")
     require(audit.get("builderImage") == BUILDER_IMAGE and audit.get("prefix") == canonical_prefix and
             audit.get("prefixProvenance") == "ci-model-only; device-observation-not-run", "AUDIT_PREFIX_OR_BUILDER_MISMATCH")
+    require(build.get("buildModifications") == manifest["buildModifications"] and
+            audit.get("buildModifications") == manifest["buildModifications"], "BUILD_OR_AUDIT_RECIPE_OVERLAY_MISMATCH")
     build_closure = build.get("sourceClosure", {})
     require(build_closure.get("profile") == "cmake-ninja-candidate" and
             build_closure.get("rootPackages") == ["cmake", "ninja"] and

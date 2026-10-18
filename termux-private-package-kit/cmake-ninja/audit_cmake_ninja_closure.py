@@ -20,13 +20,14 @@ SOURCE_COMMIT = "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 BUILDER_IMAGE = "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9"
 PACKAGE_COUNT = 22
 DEPENDENCY_ALTERNATIVE_COUNT = 34
-PACKAGE_SET_SHA256 = "9eb4a0fdf2aa0f3996bb9938baacd72c0da53c1ddc0c1764d7aafd1ed57e4851"
+PACKAGE_SET_SHA256 = "1b4d3c401609ef7ff291d8c926cba625e89f77522056acdc49252a64af953fe5"
 SOURCE_CLOSURE_SHA256 = "9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff"
 PREFIXES = {"/data/user/0/com.karat.aibuilder/files/usr", "/data/data/com.karat.aibuilder/files/usr"}
 PLATFORM_LIBS = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libandroid.so", "libz.so"}
 PACKAGE_FILE_ELF_PROVIDERS = {"libandroid-glob.so": ("libandroid-glob", "lib/libandroid-glob.so"), "libandroid-spawn.so": ("libandroid-spawn", "lib/libandroid-spawn.so")}
 PACKAGE_FILE_ELF_SYMLINK_PROVIDERS = {}
 EXPECTED_DUPLICATE_ELF_ALIASES = {}
+EXPECTED_BUILD_MODIFICATIONS = {'recipePatchApplied': True, 'propertiesPatchOnly': False, 'patchPath': 'termux-private-package-kit/cmake-ninja/libcurl-disable-optional-zstd.patch', 'patchSha256': '69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788', 'patchedRecipePaths': ['packages/libcurl/build.sh'], 'sourceRecipeSha256': '0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025', 'effectiveRecipeSha256': 'ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348', 'dependencyContractUnchanged': True, 'purpose': 'Disable curl auto-detected optional zstd compression; first hosted ELF audit proved an undeclared libzstd.so.1 dependency.'}
 ANDROID_PATH_RE = re.compile(rb"/data/(?:data|user/0)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._+-]+)*")
 LICENSE_NAME_RE = re.compile(r"(?i)^(copyright|copying|license|licence)(?:[._-].*)?$")
 CONTROL_ALLOWLIST = {"control", "md5sums", "conffiles", "triggers", "shlibs", "symbols", "copyright", "postinst", "postrm", "preinst", "prerm", "config"}
@@ -291,7 +292,7 @@ def validate_manifest(args: argparse.Namespace) -> tuple[dict[str, Any], str, li
     require(closure.get("profile")==wanted['profile'] and closure.get("sourceCommit")==SOURCE_COMMIT and closure.get("rootPackages")==wanted['rootPackages'] and closure.get("packageCount")==22 and closure.get("dependencyAlternativeCount")==34, "SOURCE_CLOSURE_NOT_ALLOWLISTED")
     require(manifest.get("baseLicenseProviderEvidence")==EXPECTED_BASE_LICENSE_EVIDENCE, "BASE_LICENSE_PROVIDER_EVIDENCE_NOT_ALLOWLISTED")
     require(manifest.get("sourceLicenseEvidence")==EXPECTED_SOURCE_LICENSE_EVIDENCE, "SOURCE_LICENSE_EVIDENCE_NOT_ALLOWLISTED")
-    require(manifest.get("buildModifications")=={"recipePatchApplied":False,"propertiesPatchOnly":True}, "BUILD_MODIFICATION_POLICY_INVALID")
+    require(manifest.get("buildModifications")==EXPECTED_BUILD_MODIFICATIONS, "BUILD_MODIFICATION_POLICY_INVALID")
     specs=manifest.get("packages"); require(isinstance(specs,list) and len(specs)==22 and [x.get('name') for x in specs]==sorted(EXPECTED_PACKAGES), "PACKAGE_SET_COUNT_OR_NAMES_INVALID")
     by={x['name']:x for x in closure['packages']}; require(set(by)==set(EXPECTED_PACKAGES), "SOURCE_CLOSURE_PACKAGES_INVALID")
     for spec in specs:
@@ -437,7 +438,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
             "sourceClosureProfile": "cmake-ninja-candidate", "sourceBuildTargetPackages": ["cmake", "ninja"],
             "restrictedAppArmorProfileSha256": manifest["source"]["restrictedAppArmorProfileSha256"],
             "sourceClosurePackageCount": PACKAGE_COUNT, "candidatePackageCount": len(all_results), "sourceClosureDependencyAlternativeCount": DEPENDENCY_ALTERNATIVE_COUNT,
-            "sourceBuildTargetPackages": ["cmake", "ninja"], "packages": all_results,
+            "buildModifications": manifest["buildModifications"], "packages": all_results,
             "elfProviders": providers["providers"], "elfPackageFileProviders": providers["packageFileProviders"],
             "elfPackageFileSymlinkProviders": providers["packageFileSymlinkProviders"],
             "elfDuplicateAliases": providers["duplicateAliases"],

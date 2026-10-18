@@ -80,8 +80,17 @@
     }
   },
   "buildModifications": {
-    "recipePatchApplied": false,
-    "propertiesPatchOnly": true
+    "recipePatchApplied": true,
+    "propertiesPatchOnly": false,
+    "patchPath": "termux-private-package-kit/cmake-ninja/libcurl-disable-optional-zstd.patch",
+    "patchSha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788",
+    "patchedRecipePaths": [
+      "packages/libcurl/build.sh"
+    ],
+    "sourceRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+    "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+    "dependencyContractUnchanged": true,
+    "purpose": "Disable curl auto-detected optional zstd compression; first hosted ELF audit proved an undeclared libzstd.so.1 dependency."
   },
   "packages": [
     {
