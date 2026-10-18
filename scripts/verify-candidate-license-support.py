@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Strict, non-installing verification of supplemental termux-licenses candidate bundles."""
-import argparse, hashlib, json, pathlib, re, subprocess, sys, tempfile
+import argparse, hashlib, importlib.util, json, pathlib, re, subprocess, sys, tempfile
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCK = ROOT / 'candidate-license-support-lock.json'
 EXPECTED_SOURCE = '505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
@@ -10,6 +10,44 @@ REQUIRED = {'candidate-package-set.json', 'provenance.json', 'candidate-license-
 def need(ok, why):
     if not ok: raise ValueError(why)
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def tar_audit(deb, lock):
+    spec = importlib.util.spec_from_file_location('control_audit', ROOT/'scripts/audit-unified-control-metadata.py')
+    audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)
+    entries = audit.archive(deb, '--fsys-tarfile', lambda tf: audit.read_payload(tf, '/'+PREFIX.rstrip('/')))
+    controls = audit.archive(deb, '--ctrl-tarfile', audit.read_control)
+    need(set(controls) == {'control'}, 'CONTROL_ARCHIVE_NOT_EXACT')
+    license_tree = lock['packageTree']; expected = {PREFIX+'share/LICENSES/'+n.split('/',1)[1] for n,v in license_tree.items() if n.startswith('LICENSES/') and n.endswith('.txt')}
+    expected.add(PREFIX+'share/doc/termux-licenses/copyright')
+    kinds = {name:item['kind'] for name,item in entries.items() if name != '.' and item['kind'] != 'dir'}
+    need(set(kinds) == expected, 'PAYLOAD_PATH_SET_MISMATCH')
+    expected_dirs = {PREFIX.rstrip('/')}
+    for name in expected:
+        parent = pathlib.PurePosixPath(name).parent
+        while parent.as_posix().startswith(PREFIX.rstrip('/')):
+            expected_dirs.add(parent.as_posix())
+            parent = parent.parent
+    need({name for name,item in entries.items() if item['kind']=='dir'} == expected_dirs, 'PAYLOAD_DIRECTORY_SET_MISMATCH')
+    need(all(item['mode']==0o700 for item in entries.values() if item['kind']=='dir'), 'PAYLOAD_DIRECTORY_MODE_MISMATCH')
+    need(all(item['mode']==0o644 for item in entries.values() if item['kind']=='file'), 'PAYLOAD_FILE_MODE_MISMATCH')
+    fields = audit.control_parse(controls['control'][0])
+    expected_control = {'package':'termux-licenses', 'version':'2.2', 'architecture':'all', 'section':'base',
+                        'priority':'important', 'essential':'yes', 'maintainer':'@termux',
+                        'description':'Contains LICENSE files for common licenses'}
+    need(set(fields)==set(expected_control)|{'installed-size'} and all(fields.get(k)==v for k,v in expected_control.items())
+         and controls['control'][1]==0o644, 'CONTROL_METADATA_MISMATCH')
+    for rel, spec in license_tree.items():
+        if not rel.startswith('LICENSES/') or not rel.endswith('.txt'): continue
+        name = PREFIX+'share/'+rel
+        item = entries[name]
+        if spec['type'] == 'symlink':
+            need(pathlib.PurePosixPath(spec['target']).name==spec['target'], 'SOURCE_LOCK_SYMLINK_TARGET_INVALID')
+            need(item['kind']=='symlink' and item['link']==spec['target'], 'PAYLOAD_SYMLINK_MISMATCH:'+rel)
+            dest = name.rsplit('/',1)[0]+'/'+spec['target']
+            need(dest in entries and entries[dest]['kind']=='file', 'PAYLOAD_SYMLINK_TARGET_INVALID:'+rel)
+            need(entries[dest]['sha256']==license_tree['LICENSES/'+spec['target']]['sha256'], 'LICENSE_CONTENT_HASH_MISMATCH:'+rel)
+        else:
+            need(item['kind']=='file' and item['sha256']==spec['sha256'], 'LICENSE_CONTENT_HASH_MISMATCH:'+rel)
+    need(entries[PREFIX+'share/doc/termux-licenses/copyright']['kind']=='file' and entries[PREFIX+'share/doc/termux-licenses/copyright']['sha256']==license_tree['LICENSES/GPL-3.0.txt']['sha256'], 'COPYRIGHT_HASH_MISMATCH')
 def verify(bundle, fingerprint, producer):
     b = pathlib.Path(bundle).resolve(strict=True)
     need(re.fullmatch(r'[A-F0-9]{40}', fingerprint or '') is not None, 'EXTERNAL_FINGERPRINT_INVALID')
@@ -19,6 +57,7 @@ def verify(bundle, fingerprint, producer):
         rel = p.relative_to(b).as_posix()
         need(not p.is_symlink(), 'BUNDLE_SYMLINK_FORBIDDEN')
         if p.is_file():
+            need(p.stat().st_size <= 8*1024*1024, 'BUNDLE_FILE_SIZE_LIMIT')
             need('..' not in pathlib.PurePosixPath(rel).parts, 'BUNDLE_PATH_TRAVERSAL'); actual.add(rel)
     need(actual == REQUIRED, 'BUNDLE_ALLOWLIST_MISMATCH')
     inv = json.loads((b/'signed-inventory.json').read_text()); files = inv.get('files')
@@ -52,7 +91,9 @@ def verify(bundle, fingerprint, producer):
     pset = json.loads((b/'candidate-package-set.json').read_text()); packages = pset.get('packages')
     need(isinstance(packages, list) and len(packages) == 1 and pset.get('qualified') is False and pset.get('productionAllowed') is False, 'SUPPORT_PACKAGE_SET_NOT_EXACT')
     pkg = packages[0]; deb = b/'packages/termux-licenses_2.2_all.deb'; package_sha = sha(deb)
+    need(deb.stat().st_size <= 4*1024*1024, 'SUPPORT_PACKAGE_SIZE_LIMIT')
     need((pkg.get('name'), pkg.get('version'), pkg.get('architecture')) == ('termux-licenses', '2.2', 'all') and pkg.get('filename') == 'packages/termux-licenses_2.2_all.deb' and pkg.get('sha256') == package_sha == prov.get('packageSha256') == prov.get('repeatBuildSha256'), 'PACKAGE_IDENTITY_OR_HASH_MISMATCH')
+    tar_audit(deb, lock)
     with tempfile.TemporaryDirectory() as td:
         root = pathlib.Path(td); data = root/'data'; control = root/'control'; data.mkdir(); control.mkdir()
         subprocess.run(['dpkg-deb', '-x', str(deb), str(data)], check=True, capture_output=True)
@@ -60,14 +101,20 @@ def verify(bundle, fingerprint, producer):
         fields = subprocess.check_output(['dpkg-deb', '-f', str(deb), 'Package'], text=True).strip(), subprocess.check_output(['dpkg-deb', '-f', str(deb), 'Version'], text=True).strip(), subprocess.check_output(['dpkg-deb', '-f', str(deb), 'Architecture'], text=True).strip()
         need(fields == ('termux-licenses', '2.2', 'all'), 'DEB_CONTROL_IDENTITY_MISMATCH')
         payload = {p.relative_to(data).as_posix() for p in data.rglob('*') if p.is_file() or p.is_symlink()}
-        need(not any(p.is_symlink() for p in data.rglob('*')), 'PAYLOAD_SYMLINK_FORBIDDEN')
         licdir = PREFIX+'share/LICENSES'; expected = {licdir+'/'+pathlib.PurePosixPath(f).name for f in licenses}
         expected.add(PREFIX+'share/doc/termux-licenses/copyright')
         need(payload == expected, 'PAYLOAD_PATH_SET_MISMATCH')
-        for source, h in licenses.items():
-            target = data/(licdir+'/'+pathlib.PurePosixPath(source).name)
-            need(sha(target) == h, 'LICENSE_CONTENT_HASH_MISMATCH:'+target.name)
+        for source, item in lock['packageTree'].items():
+            if source.startswith('LICENSES/') and source.endswith('.txt'):
+                target = data/(licdir+'/'+pathlib.PurePosixPath(source).name)
+                if item['type']=='symlink':
+                    need(target.is_symlink() and target.readlink().as_posix()==item['target'], 'PAYLOAD_SYMLINK_MISMATCH:'+source)
+                else: need(sha(target) == item['sha256'], 'LICENSE_CONTENT_HASH_MISMATCH:'+target.name)
         need(sha(data/(PREFIX+'share/doc/termux-licenses/copyright')) == licenses['LICENSES/GPL-3.0.txt'], 'COPYRIGHT_HASH_MISMATCH')
+        spec = importlib.util.spec_from_file_location('support_packaging_policy', ROOT/'scripts/candidate-packaging-policy.py')
+        policy = importlib.util.module_from_spec(spec); spec.loader.exec_module(policy)
+        installed = subprocess.check_output(['dpkg-deb', '-f', str(deb), 'Installed-Size'], text=True).strip()
+        need(installed==str(policy.installed_size(data/PREFIX.rstrip('/'))), 'INSTALLED_SIZE_MISMATCH')
     return {'valid': True, 'qualified': False, 'productionAllowed': False, 'android': 'NOT_RUN', 'installPerformed': False, 'package': {'name':'termux-licenses','version':'2.2','architecture':'all','sha256':package_sha}, 'sourceCommit':EXPECTED_SOURCE,'producerCommit':producer,'fingerprint':fingerprint,'builderImageDigest':lock['builderImageDigest'],'supportLockSha256':hashlib.sha256(lock_bytes).hexdigest()}
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--bundle-dir',required=True); p.add_argument('--expected-fingerprint',required=True); p.add_argument('--expected-producer',required=True); p.add_argument('--report',type=pathlib.Path); a=p.parse_args(); r=verify(a.bundle_dir,a.expected_fingerprint,a.expected_producer); text=json.dumps(r,indent=2,sort_keys=True)+'\n'; a.report.write_text(text) if a.report else print(text)
