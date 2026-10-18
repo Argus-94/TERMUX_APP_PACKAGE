@@ -2,6 +2,7 @@
 """Synthetic source-data tests; no Android packages, builds or binary provenance."""
 import copy
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -187,10 +188,13 @@ class EffectiveRecipeTests(unittest.TestCase):
         self.put(self.repo, registry, (ROOT / registry).read_bytes())
         self.put(self.repo, patch, (ROOT / patch).read_bytes())
         meson = 'packages/pulseaudio/meson.patch'
-        self.put(self.source, meson, pathlib.Path('/workspace/termux-source-505e06e') .joinpath(meson).read_bytes())
         pulse_recipe = 'packages/pulseaudio/build.sh'
-        pulse_data = pathlib.Path('/workspace/termux-source-505e06e').joinpath(pulse_recipe).read_bytes()
-        self.put(self.source, pulse_recipe, pulse_data)
+        fixtures = ROOT / 'scripts/tests/fixtures/pulseaudio-505e06e'
+        registered = json.loads((ROOT / registry).read_text())['files']
+        for name in (meson, pulse_recipe):
+            data = (fixtures / pathlib.Path(name).name).read_bytes()
+            self.assertEqual(e.sha(data), registered[name])
+            self.put(self.source, name, data)
         # The registered overlay is consumed after openjdk17-license-notices.patch
         # in the actual package workflow; model its pulseaudio recipe context here.
         legacy = ROOT / 'termux-private-package-kit/openjdk17/openjdk17-license-notices.patch'
