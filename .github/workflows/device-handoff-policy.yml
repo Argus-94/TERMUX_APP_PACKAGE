@@ -6,6 +6,7 @@ on:
       - main
       - work/device-handoff-hardening-20261018
       - work/android-evidence-validation-20261018
+      - work/candidate-payload-audit-20261018
     paths:
       - .github/workflows/device-handoff-policy.yml
       - candidate-package-set.json
@@ -15,6 +16,7 @@ on:
       - scripts/test-device-test-artifact-staging.sh
       - scripts/create-ephemeral-feed-signing-key.sh
       - scripts/create-signed-feed-release.sh
+      - scripts/audit-deb-payload-collisions.py
       - scripts/tests/**
   pull_request:
     branches: [main]
@@ -27,6 +29,7 @@ on:
       - scripts/test-device-test-artifact-staging.sh
       - scripts/create-ephemeral-feed-signing-key.sh
       - scripts/create-signed-feed-release.sh
+      - scripts/audit-deb-payload-collisions.py
       - scripts/tests/**
 
 permissions:
