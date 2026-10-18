@@ -7,7 +7,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-$ROOT}"
 MANIFEST="$CONFIG_ROOT/keys/feed-signing.json"
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
-[[ $# -ge 4 && $# -le 6 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count] [expected-root-architecture]'
+[[ $# -ge 4 && $# -le 7 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count] [expected-root-architecture] [additional-package=exact-version]'
 FEED_ROOT="$(realpath -e -- "$1")"
 ARCH="$2"
 PACKAGE="$3"
@@ -19,6 +19,12 @@ case "$ARCH" in aarch64|amd64) ;; *) fail 'ARCHITECTURE_NOT_ALLOWLISTED';; esac
 [[ "$PACKAGE" =~ ^[a-z0-9][a-z0-9+.-]*$ ]] || fail 'PACKAGE_NAME_INVALID'
 [[ "$VERSION" =~ ^[A-Za-z0-9.+:~_-]+$ ]] || fail 'PACKAGE_VERSION_INVALID'
 [[ "$EXPECTED_SOURCE_DEB_COUNT" =~ ^[1-9][0-9]*$ ]] || fail 'EXPECTED_SOURCE_DEB_COUNT_INVALID'
+INSTALL_SPECS=("$PACKAGE=$VERSION")
+if [[ -n "${7:-}" ]]; then
+  [[ "$7" =~ ^[a-z0-9][a-z0-9+.-]*=[A-Za-z0-9.+:~_-]+$ ]] || fail 'ADDITIONAL_ROOT_SPEC_INVALID'
+  [[ "${7%%=*}" != "$PACKAGE" ]] || fail 'ADDITIONAL_ROOT_DUPLICATES_PRIMARY'
+  INSTALL_SPECS+=("$7")
+fi
 [[ -f "$MANIFEST" ]] || fail 'SIGNING_MANIFEST_MISSING'
 for tool in gpg gpgv sha256sum python3 apt-get apt-cache; do command -v "$tool" >/dev/null 2>&1 || fail "TOOL_REQUIRED:$tool"; done
 
@@ -99,7 +105,7 @@ APT_CONFIG="$TMP/apt.conf" apt-cache show "$PACKAGE" >"$TMP/show.log" 2>&1 || { 
 grep -Fxq "Package: $PACKAGE" "$TMP/show.log" || fail 'APT_PACKAGE_NAME_MISMATCH'
 grep -Fxq "Version: $VERSION" "$TMP/show.log" || fail 'APT_PACKAGE_VERSION_MISMATCH'
 grep -Fxq "Architecture: $EXPECTED_ROOT_ARCH" "$TMP/show.log" || fail 'APT_PACKAGE_ARCHITECTURE_MISMATCH'
-APT_CONFIG="$TMP/apt.conf" apt-get --simulate --no-install-recommends install "$PACKAGE=$VERSION" >"$TMP/simulate.log" 2>&1 || { cat "$TMP/simulate.log" >&2; fail 'APT_SIMULATED_INSTALL_REJECTED'; }
+APT_CONFIG="$TMP/apt.conf" apt-get --simulate --no-install-recommends install "${INSTALL_SPECS[@]}" >"$TMP/simulate.log" 2>&1 || { cat "$TMP/simulate.log" >&2; fail 'APT_SIMULATED_INSTALL_REJECTED'; }
 if [[ "${AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE:-0}" == 1 ]]; then
   python3 - "$TMP/simulate.log" "$FEED_ROOT/pool" <<'PY'
 import pathlib,re,subprocess,sys
@@ -121,18 +127,29 @@ PY
 fi
 (
   cd "$TMP/downloads"
-  APT_CONFIG="$TMP/apt.conf" apt-get download "$PACKAGE=$VERSION" >"$TMP/download.log" 2>&1 || { cat "$TMP/download.log" >&2; fail 'APT_DOWNLOAD_FAILED'; }
+  APT_CONFIG="$TMP/apt.conf" apt-get download "${INSTALL_SPECS[@]}" >"$TMP/download.log" 2>&1 || { cat "$TMP/download.log" >&2; fail 'APT_DOWNLOAD_FAILED'; }
 )
 mapfile -t DOWNLOADED < <(find "$TMP/downloads" -maxdepth 1 -type f -name '*.deb' -print)
 mapfile -t SOURCE_DEBS < <(find "$FEED_ROOT/pool" -type f -name '*.deb' -print)
-((${#DOWNLOADED[@]} == 1 && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
-downloaded_hash="$(sha256sum "${DOWNLOADED[0]}" | awk '{print $1}')"
-matches=0
-for source_deb in "${SOURCE_DEBS[@]}"; do
-  [[ "$(dpkg-deb -f "$source_deb" Package 2>/dev/null)" == "$PACKAGE" ]] || continue
-  [[ "$(dpkg-deb -f "$source_deb" Version 2>/dev/null)" == "$VERSION" ]] || continue
-  [[ "$(dpkg-deb -f "$source_deb" Architecture 2>/dev/null)" == "$EXPECTED_ROOT_ARCH" ]] || continue
-  [[ "$(sha256sum "$source_deb" | awk '{print $1}')" == "$downloaded_hash" ]] && ((matches += 1))
+((${#DOWNLOADED[@]} == ${#INSTALL_SPECS[@]} && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
+for spec in "${INSTALL_SPECS[@]}"; do
+  requested_name="${spec%%=*}"; requested_version="${spec#*=}"
+  requested_arch="$ARCH"; [[ "$requested_name" != "$PACKAGE" ]] || requested_arch="$EXPECTED_ROOT_ARCH"
+  downloaded_matches=0
+  for downloaded_deb in "${DOWNLOADED[@]}"; do
+    [[ "$(dpkg-deb -f "$downloaded_deb" Package 2>/dev/null)" == "$requested_name" ]] || continue
+    [[ "$(dpkg-deb -f "$downloaded_deb" Version 2>/dev/null)" == "$requested_version" ]] || fail 'DOWNLOADED_ROOT_VERSION_MISMATCH'
+    [[ "$(dpkg-deb -f "$downloaded_deb" Architecture 2>/dev/null)" == "$requested_arch" ]] || fail 'DOWNLOADED_ROOT_ARCHITECTURE_MISMATCH'
+    ((downloaded_matches += 1))
+    downloaded_hash="$(sha256sum "$downloaded_deb" | awk '{print $1}')"; matches=0
+    for source_deb in "${SOURCE_DEBS[@]}"; do
+      [[ "$(dpkg-deb -f "$source_deb" Package 2>/dev/null)" == "$requested_name" ]] || continue
+      [[ "$(dpkg-deb -f "$source_deb" Version 2>/dev/null)" == "$requested_version" ]] || continue
+      [[ "$(dpkg-deb -f "$source_deb" Architecture 2>/dev/null)" == "$requested_arch" ]] || continue
+      [[ "$(sha256sum "$source_deb" | awk '{print $1}')" == "$downloaded_hash" ]] && ((matches += 1))
+    done
+    ((matches == 1)) || fail 'DOWNLOADED_PACKAGE_HASH_OR_IDENTITY_MISMATCH'
+  done
+  ((downloaded_matches == 1)) || fail 'DOWNLOADED_ROOT_NOT_EXACTLY_ONCE'
 done
-((matches == 1)) || fail 'DOWNLOADED_PACKAGE_HASH_OR_IDENTITY_MISMATCH'
-printf 'APT_CANDIDATE_DOWNLOAD_AND_SIMULATED_INSTALL_OK package=%s version=%s arch=%s signed_by=1 install_performed=0 rollback_performed=0\n' "$PACKAGE" "$VERSION" "$ARCH"
+printf 'APT_CANDIDATE_DOWNLOAD_AND_SIMULATED_INSTALL_OK package=%s version=%s arch=%s roots=%s signed_by=1 install_performed=0 rollback_performed=0\n' "$PACKAGE" "$VERSION" "$ARCH" "${#INSTALL_SPECS[@]}"

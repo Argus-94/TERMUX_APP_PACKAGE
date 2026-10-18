@@ -1,0 +1,136 @@
+name: Build and verify pinned CMake/Ninja candidate (no publication)
+
+on:
+  push:
+    branches:
+      - work/cmake-ninja-candidate-20261018
+    paths:
+      - .github/workflows/cmake-ninja-package-candidate.yml
+      - cmake-ninja-candidate-package-set.json
+      - termux-package-source-scope.json
+      - scripts/resolve-pinned-termux-recipe-closure.py
+      - scripts/test-pinned-termux-recipe-closure.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/create-signed-feed-release.sh
+      - scripts/test-signed-feed-smoke.sh
+      - scripts/test-apt-candidate.sh
+      - scripts/tests/**
+      - scripts/verify-candidate-dependency-closure.py
+      - scripts/test-candidate-feed-policy.sh
+      - scripts/test-candidate-dependency-closure.sh
+      - termux-private-package-kit/cmake-ninja/**
+      - termux-private-package-kit/make-v476/patch_properties.py
+permissions:
+  contents: read
+concurrency:
+  group: aib-cmake-ninja-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-audit-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install isolated signing and index tools
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+      - name: Checkout exact locked Termux source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          d="$RUNNER_TEMP/termux-packages"; mkdir -p "$d"; git -C "$d" init
+          git -C "$d" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$d" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$d" checkout --detach FETCH_HEAD
+          test "$(git -C "$d" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$d" status --porcelain=v1)"
+      - name: Run syntax, audit-unit, policy and pinned-source tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/cmake-ninja
+          export AIB_PINNED_SOURCE_ROOT="$RUNNER_TEMP/termux-packages"
+          bash -n scripts/create-ephemeral-feed-signing-key.sh scripts/create-signed-feed-release.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh "$kit/build-cmake-ninja-private-aarch64.sh"
+          PYTHONDONTWRITEBYTECODE=1 python3 -m py_compile scripts/resolve-pinned-termux-recipe-closure.py scripts/verify-candidate-dependency-closure.py "$kit/audit_cmake_ninja_closure.py" "$kit/validate_cmake_ninja_feed.py"
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$kit/tests" -p 'test_*.py' -v
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p 'test_apt*.py' -v
+          ./scripts/test-candidate-feed-policy.sh
+          ./scripts/test-candidate-dependency-closure.sh
+          bash ./scripts/test-pinned-termux-recipe-closure.sh
+          ./scripts/test-signed-feed-smoke.sh
+      - name: Verify pinned CMake/Ninja closure and complete source input locks
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/cmake-ninja
+          closure="$RUNNER_TEMP/cmake-ninja-source-closure.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py --source-root "$RUNNER_TEMP/termux-packages" --scope termux-package-source-scope.json --profile cmake-ninja-candidate > "$closure"
+          test "$(sha256sum "$closure" | awk '{print $1}')" = 9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff
+          test "$(sha256sum cmake-ninja-candidate-package-set.json | awk '{print $1}')" = 1b4d3c401609ef7ff291d8c926cba625e89f77522056acdc49252a64af953fe5
+          python3 - "$closure" cmake-ninja-candidate-package-set.json <<'PY'
+          import json,pathlib,sys
+          c=json.loads(pathlib.Path(sys.argv[1]).read_text());m=json.loads(pathlib.Path(sys.argv[2]).read_text());f=('recipePath','recipeSha256','packageType','parentPackage','parentDependencyRule','subpackagePath','subpackageSha256','sourceVersionExpression','sourceRevisionExpression','versionExpressionIsLiteral','revisionExpressionIsLiteral','dependencyGroups','recommendationGroupsNotIncludedInRequiredClosure')
+          assert c['sourceCommit']==m['source']['commit'] and c['profile']=='cmake-ninja-candidate' and c['rootPackages']==['cmake','ninja'] and c['packageCount']==22 and c['dependencyAlternativeCount']==34
+          assert {x['name']:{k:x[k] for k in f} for x in c['packages']}=={x['name']:{k:x[k] for k in f} for x in m['packages']}
+          PY
+      - name: Pull digest-pinned official builder
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+      - name: Build and statically audit complete candidate deb set
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          kit=termux-private-package-kit/cmake-ninja
+          out="$RUNNER_TEMP/aib-cmake-ninja-output"; log="$RUNNER_TEMP/aib-cmake-ninja-build.log"; mkdir -p "$out"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" AIB_TERMUX_PREFIX="$TERMUX_PREFIX" AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" "$kit/build-cmake-ninja-private-aarch64.sh" "$RUNNER_TEMP/termux-packages" "$GITHUB_WORKSPACE/cmake-ninja-candidate-package-set.json" "$out" >"$log" 2>&1
+          status=$?; set -e
+          if [ "$status" -ne 0 ]; then echo '::error::CMake/Ninja build or static audit failed; sanitized log tail follows; no binary was uploaded.'; python3 - "$log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib,re,sys
+          x=pathlib.Path(sys.argv[1]).read_text(errors='replace')
+          for a,b in ((sys.argv[2],'<RUNNER_TEMP>'),(sys.argv[3],'<WORKSPACE>'),('/home/builder/termux-packages','<BUILDER_SOURCE>'),('/data/user/0/com.karat.aibuilder/files/usr','<MODELED_PREFIX>'),('/data/user/0/com.karat.aibuilder','<MODELED_APP_DATA>')):x=x.replace(a,b)
+          x=re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----)','<REDACTED_SECRET>',x)
+          print('\n'.join(line[:600] for line in x.splitlines()[-100:]))
+          PY
+          exit "$status"; fi
+          python3 - "$out/build-result.json" "$out/audit-report.json" <<'PY'
+          import json,pathlib,sys
+          b=json.loads(pathlib.Path(sys.argv[1]).read_text());a=json.loads(pathlib.Path(sys.argv[2]).read_text());assert b['status']=='audit-passed; device-runtime-test-not-run' and b['sourceCommit']=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7' and b['sourceClosure']['profile']=='cmake-ninja-candidate' and b['sourceClosure']['rootPackages']==['cmake','ninja'] and b['sourceClosure']['packageCount']==22 and b['sourceClosure']['dependencyAlternativeCount']==34 and len(b['packages'])==22 and b['installed'] is False and b['deviceSmokeTest']=='NOT RUN' and b['rollback']=='NOT RUN' and a['ok'] is True
+          PY
+      - name: Sign temporary feed and exact-simulate APT closure
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          out="$RUNNER_TEMP/aib-cmake-ninja-output"; feed="$RUNNER_TEMP/aib-cmake-ninja-feed"; key="$RUNNER_TEMP/aib-cmake-ninja-signing"; mkdir -p "$feed/dists/stable/main/binary-aarch64"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key"; export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key" GNUPGHOME="$key/gnupg"
+          while IFS= read -r -d '' deb; do p=$(dpkg-deb -f "$deb" Package); mkdir -p "$feed/pool/main/$p"; cp -- "$deb" "$feed/pool/main/$p/"; done < <(find "$out/packages" -maxdepth 1 -name '*.deb' -type f -print0)
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null >dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          python3 ./scripts/verify-candidate-dependency-closure.py --package-set cmake-ninja-candidate-package-set.json --packages-index "$feed/dists/stable/main/binary-aarch64/Packages"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/cmake-ninja-feed-signing.log" 2>&1 || { echo 'ERROR:CMAKE_NINJA_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2; }
+          python3 termux-private-package-kit/cmake-ninja/validate_cmake_ninja_feed.py --package-set cmake-ninja-candidate-package-set.json --source-closure "$out/source-closure.json" --feed-root "$feed" --build-result "$out/build-result.json" --audit-report "$out/audit-report.json" --prefix "$TERMUX_PREFIX"
+          AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE=1 ./scripts/test-apt-candidate.sh "$feed" aarch64 cmake 4.4.4 22 aarch64 ninja=1.13.2
+          ./scripts/test-signed-feed-smoke.sh
+          { echo '## Pinned CMake/Ninja candidate (CI-only temporary feed)'; echo; echo '| Gate | Result |'; echo '|---|---|'; echo '| Pinned source closure | PASS; CMake 4.4.4 + Ninja 1.13.2; 22 packages / 34 dependency alternatives |'; echo '| App-private paths, source licenses, AArch64 ELF and exact providers | PASS; all 22 packages |'; echo '| Signed APT multi-root simulation | PASS; both exact roots; installation not performed |'; echo '| Android install, runtime and rollback | NOT RUN |'; echo '| Binary upload / production feed / Pages / Release / Builder install | NONE / BLOCKED |'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary source, package, feed, and signing material
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- "$RUNNER_TEMP/termux-packages" "$RUNNER_TEMP/aib-cmake-ninja-output" "$RUNNER_TEMP/aib-cmake-ninja-build.log" "$RUNNER_TEMP/aib-cmake-ninja-feed" "$RUNNER_TEMP/aib-cmake-ninja-signing" "$RUNNER_TEMP/cmake-ninja-feed-signing.log" "$RUNNER_TEMP/cmake-ninja-source-closure.json"

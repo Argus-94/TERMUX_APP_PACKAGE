@@ -35,6 +35,14 @@ class ExactSimulationTests(unittest.TestCase):
         output = self.run_parser('Inst nodejs (26.4.0-1 localhost [aarch64])\nInst npm (11.20.0 localhost [all])\n', [('nodejs', '26.4.0-1'), ('npm', '11.20.0')])
         self.assertIn('packages=2', output)
 
+    def test_exact_independent_cmake_ninja_roots(self):
+        output = self.run_parser('Inst cmake (4.4.4 localhost [aarch64])\nInst ninja (1.13.2 localhost [aarch64])\n', [('cmake', '4.4.4'), ('ninja', '1.13.2')])
+        self.assertIn('packages=2', output)
+
+    def test_missing_independent_ninja_root_rejected(self):
+        with self.assertRaisesRegex(SystemExit, 'EXACT_CLOSURE_MISMATCH'):
+            self.run_parser('Inst cmake (4.4.4 localhost [aarch64])\n', [('cmake', '4.4.4'), ('ninja', '1.13.2')])
+
     def test_wrong_provider_rejected(self):
         with self.assertRaisesRegex(SystemExit, 'EXACT_CLOSURE_MISMATCH'):
             self.run_parser('Inst nodejs-lts (24.18.0 localhost [aarch64])\n', [('nodejs', '26.4.0-1')])

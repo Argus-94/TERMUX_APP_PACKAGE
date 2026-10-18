@@ -1,0 +1,11 @@
+diff --git a/packages/libcurl/build.sh b/packages/libcurl/build.sh
+--- a/packages/libcurl/build.sh
++++ b/packages/libcurl/build.sh
+@@ -22,6 +22,7 @@
+ --without-libidn2
+ --without-librtmp
+ --without-brotli
++--without-zstd
+ --without-libpsl
+ --with-libssh2
+ --with-ssl
