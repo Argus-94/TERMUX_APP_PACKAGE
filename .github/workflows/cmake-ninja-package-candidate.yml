@@ -1,6 +1,13 @@
 name: Build and verify pinned CMake/Ninja candidate (no publication)
 
 on:
+  workflow_dispatch:
+    inputs:
+      retain_candidate_artifacts:
+        description: Retain verified candidate bundle for 7 days (visible to authenticated repository readers)
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - work/cmake-ninja-candidate-20261018
@@ -128,6 +135,26 @@ jobs:
           AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE=1 ./scripts/test-apt-candidate.sh "$feed" aarch64 cmake 4.4.4 22 aarch64 ninja=1.13.2
           ./scripts/test-signed-feed-smoke.sh
           { echo '## Pinned CMake/Ninja candidate (CI-only temporary feed)'; echo; echo '| Gate | Result |'; echo '|---|---|'; echo '| Pinned source closure | PASS; CMake 4.4.4 + Ninja 1.13.2; 22 packages / 34 dependency alternatives |'; echo '| App-private paths, source licenses, AArch64 ELF and exact providers | PASS; all 22 packages |'; echo '| Signed APT multi-root simulation | PASS; both exact roots; installation not performed |'; echo '| Android install, runtime and rollback | NOT RUN |'; echo '| Binary upload / production feed / Pages / Release / Builder install | NONE / BLOCKED |'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Stage verified candidate artifacts and provenance
+        if: success() && inputs.retain_candidate_artifacts
+        shell: bash
+        env:
+          CANDIDATE_OUTPUT: ${{ runner.temp }}/aib-cmake-ninja-output
+          CANDIDATE_FEED: ${{ runner.temp }}/aib-cmake-ninja-feed
+          CANDIDATE_KEYROOT: ${{ runner.temp }}/aib-cmake-ninja-signing
+          CANDIDATE_MANIFEST: ${{ github.workspace }}/cmake-ninja-candidate-package-set.json
+          BUILDER_IMAGE_REF: ${{ env.TERMUX_BUILDER_IMAGE_REF }}
+          SOURCE_COMMIT: ${{ env.TERMUX_SOURCE_PIN }}
+          BUNDLE_DIR: ${{ runner.temp }}/candidate-retention-bundle
+        run: python3 scripts/stage-candidate-retention.py
+      - name: Upload verified candidate bundle (7 days)
+        if: success() && inputs.retain_candidate_artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: candidate-cmake-ninja-${{ github.run_id }}
+          path: ${{ runner.temp }}/candidate-retention-bundle/
+          retention-days: 7
+          if-no-files-found: error
       - name: Remove temporary source, package, feed, and signing material
         if: always()
         shell: bash

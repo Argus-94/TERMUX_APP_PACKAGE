@@ -103,17 +103,34 @@ class InventoryTests(unittest.TestCase):
         self.assertTrue(all(p['signedBinaryBundle'] is None for p in self.baseline['profiles'].values()))
         self.assertTrue(all(o['binarySha256'] is None for p in self.baseline['packages'] for o in p['occurrences']))
 
-    def test_computed_divergent_duplicates(self):
-        self.assertEqual(self.baseline['summary']['effectiveRecipeDivergentDuplicateNames'], ['libcurl', 'ncurses'])
+    def test_computed_common_recipes_not_binary_equivalence(self):
+        self.assertEqual(self.baseline['summary']['effectiveRecipeDivergentDuplicateNames'], [])
         packages = {p['name']: p for p in self.baseline['packages']}
-        curl = {o['profile']: o for o in packages['libcurl']['occurrences']}
-        self.assertEqual(curl['cmake-ninja']['effectiveRecipeSha256'],
-                         'ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348')
-        self.assertEqual(curl['curl']['effectiveRecipeSha256'], packages['libcurl']['recipeSha256'])
-        self.assertEqual(curl['git']['effectiveRecipeSha256'], packages['libcurl']['recipeSha256'])
-        curses = {o['profile']: o for o in packages['ncurses']['occurrences']}
-        self.assertEqual(curses['python']['effectiveRecipeSha256'], curses['pkg-config']['effectiveRecipeSha256'])
-        self.assertNotEqual(curses['git']['effectiveRecipeSha256'], curses['python']['effectiveRecipeSha256'])
+        for name in ('libcurl', 'ncurses'):
+            occurrences = packages[name]['occurrences']
+            self.assertEqual(len({o['effectiveRecipeSha256'] for o in occurrences}), 1)
+            self.assertEqual(len({o['effectiveRecipeContextSha256'] for o in occurrences}), 1)
+            self.assertNotEqual(occurrences[0]['effectiveRecipeSha256'], packages[name]['recipeSha256'])
+            self.assertTrue(all(o['binarySha256'] is None for o in occurrences))
+        self.assertFalse(self.baseline['aggregateReady'])
+
+    def test_missing_common_overlay_restores_divergence(self):
+        def omit(m):
+            p = next(p for p in m['packages'] if p['name'] == 'libcurl')
+            p.pop('localRecipePatchPath')
+            p.pop('localRecipePatchSha256')
+        self.mutate('git-candidate-package-set.json', omit)
+        changed = u.inventory(self.repo, self.source_root)
+        self.assertIn('libcurl', changed['summary']['effectiveRecipeDivergentDuplicateNames'])
+
+    def test_missing_license_overlay_restores_ncurses_divergence(self):
+        def omit(m):
+            p = next(p for p in m['packages'] if p['name'] == 'ncurses')
+            p.pop('localRecipePatchPath')
+            p.pop('localRecipePatchSha256')
+        self.mutate('git-candidate-package-set.json', omit)
+        changed = u.inventory(self.repo, self.source_root)
+        self.assertIn('ncurses', changed['summary']['effectiveRecipeDivergentDuplicateNames'])
 
     def test_false_effective_hash_not_accepted_from_manifest(self):
         def tamper(m):

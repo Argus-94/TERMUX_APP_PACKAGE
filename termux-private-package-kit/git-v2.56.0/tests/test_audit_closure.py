@@ -16,6 +16,24 @@ LESS_FILES = {
 }
 
 
+class OverlayPolicyTests(unittest.TestCase):
+    def test_build_script_hash_is_reviewed(self):
+        root = pathlib.Path(__file__).resolve().parents[1]
+        builder = root / "build-git-private-aarch64.sh"
+        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "01ceb5b0b7c00cae41676c0b890b8afab03479d875b33f4c9514518f56d62581")
+    def test_local_recipe_overlays_are_pinned_in_candidate_manifest(self):
+        root = pathlib.Path(__file__).resolve().parents[3]
+        manifest = __import__("json").loads((root / "git-candidate-package-set.json").read_text())
+        specs = {x["name"]: x for x in manifest["packages"]}
+        for name, patch_name, expected in (
+            ("libcurl", "libcurl-disable-optional-zstd.patch", "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788"),
+            ("ncurses", "ncurses-ui-libs-license.patch", "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9"),
+        ):
+            spec = specs[name]
+            patch = root / spec["localRecipePatchPath"]
+            self.assertEqual(spec["localRecipePatchSha256"], expected)
+            self.assertEqual(hashlib.sha256(patch.read_bytes()).hexdigest(), expected)
+
 class PrivatePathTests(unittest.TestCase):
     def test_only_canonical_builder_prefixes_are_accepted(self):
         self.assertEqual(auditor.normalize_prefix(PREFIX), PREFIX)

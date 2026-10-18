@@ -1,6 +1,13 @@
 name: Build and verify pinned OpenJDK 17 package closure (no publication)
 
 on:
+  workflow_dispatch:
+    inputs:
+      retain_candidate_artifacts:
+        description: Retain verified candidate bundle for 7 days (visible to authenticated repository readers)
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - work/openjdk17-candidate-20261017
@@ -209,6 +216,26 @@ jobs:
             echo '| Public artifact / production feed / Pages / GitHub Release | NONE / BLOCKED |'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Stage verified candidate artifacts and provenance
+        if: success() && inputs.retain_candidate_artifacts
+        shell: bash
+        env:
+          CANDIDATE_OUTPUT: ${{ runner.temp }}/aib-private-openjdk17-candidate-output
+          CANDIDATE_FEED: ${{ runner.temp }}/aib-openjdk17-candidate-feed
+          CANDIDATE_KEYROOT: ${{ runner.temp }}/aib-openjdk17-candidate-signing-config
+          CANDIDATE_MANIFEST: ${{ github.workspace }}/openjdk17-candidate-package-set.json
+          BUILDER_IMAGE_REF: ${{ env.TERMUX_BUILDER_IMAGE_REF }}
+          SOURCE_COMMIT: ${{ env.TERMUX_SOURCE_PIN }}
+          BUNDLE_DIR: ${{ runner.temp }}/candidate-retention-bundle
+        run: python3 scripts/stage-candidate-retention.py
+      - name: Upload verified candidate bundle (7 days)
+        if: success() && inputs.retain_candidate_artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: candidate-openjdk17-${{ github.run_id }}
+          path: ${{ runner.temp }}/candidate-retention-bundle/
+          retention-days: 7
+          if-no-files-found: error
       - name: Remove temporary source, package, signature and signing material
         if: always()
         shell: bash

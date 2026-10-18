@@ -95,6 +95,10 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE" >/dev/null
 git -C "$WORKTREE" checkout --detach "$PIN" >/dev/null
+OVERLAY="$KIT_DIR/libcurl-disable-optional-zstd.patch"
+[[ "$(sha256sum "$OVERLAY" | awk '{print $1}')" == '69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788' ]] || fail 'CURL_OVERLAY_HASH_MISMATCH'
+git -C "$WORKTREE" apply --check "$OVERLAY"
+git -C "$WORKTREE" apply "$OVERLAY"
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" \
   "$WORKTREE/scripts/properties.sh" --data-dir "$APP_DATA_DIR" --prefix "$PREFIX"

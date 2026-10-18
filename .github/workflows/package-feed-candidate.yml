@@ -1,6 +1,13 @@
 name: Build and verify one AI Builder package candidate (no publication)
 
 on:
+  workflow_dispatch:
+    inputs:
+      retain_candidate_artifacts:
+        description: Retain verified candidate artifacts for 7 days (authenticated repository readers can access public-repository artifacts)
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - work/package-feed-gates-20261015
@@ -68,6 +75,7 @@ jobs:
           bash -n scripts/create-signed-feed-release.sh scripts/create-ephemeral-feed-signing-key.sh scripts/test-signed-feed-smoke.sh scripts/test-apt-candidate.sh scripts/test-candidate-feed-policy.sh scripts/test-device-test-artifact-staging.sh termux-private-package-kit/gh-v2.102.0/build-gh-private-aarch64.sh
           python3 -m py_compile scripts/validate-candidate-feed.py scripts/validate-gh-candidate-feed.py scripts/stage-device-test-artifact.py scripts/verify-candidate-dependency-closure.py scripts/resolve-pinned-termux-recipe-closure.py termux-private-package-kit/gh-v2.102.0/audit_deb.py termux-private-package-kit/gh-v2.102.0/tests/test_audit_deb.py
           python3 -m unittest discover -s termux-private-package-kit/gh-v2.102.0/tests -p 'test_*.py' -v
+          python3 -m unittest scripts/tests/test_candidate_retention.py -v
           ./scripts/test-candidate-feed-policy.sh
           ./scripts/test-candidate-dependency-closure.sh
           bash ./scripts/test-pinned-termux-recipe-closure.sh
@@ -309,6 +317,65 @@ jobs:
       - name: Verify synthetic tamper rejection (no package publication)
         shell: bash
         run: ./scripts/test-signed-feed-smoke.sh
+
+      - name: Stage explicit Make and gh retention bundles
+        id: stage-retention
+        if: >-
+          success() && github.event_name == 'workflow_dispatch' &&
+          inputs.retain_candidate_artifacts == true
+        shell: bash
+        env:
+          SOURCE_COMMIT: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+          BUILDER_IMAGE_REF: ${{ env.TERMUX_BUILDER_IMAGE_REF }}
+        run: |
+          set -Eeuo pipefail
+          python3 - "$RUNNER_TEMP/termux-packages" "$RUNNER_TEMP/aib-private-make-candidate-output/source-closure.json" <<'PYMAKE'
+          import importlib.util,json,pathlib,sys
+          spec=importlib.util.spec_from_file_location('source','scripts/resolve-pinned-termux-recipe-closure.py')
+          module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;spec.loader.exec_module(module)
+          root=pathlib.Path(sys.argv[1]);commit,_=module.git_source_state(root)
+          assert commit=='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
+          closure={'schemaVersion':1,'sourceCommit':commit,'profile':'make-candidate',**module.Resolver(root).resolve(['make'])}
+          pathlib.Path(sys.argv[2]).write_text(json.dumps(closure,sort_keys=True,indent=2)+'\n')
+          PYMAKE
+          common=(--keyroot "$RUNNER_TEMP/aib-candidate-signing-config" \
+            --repository "$GITHUB_REPOSITORY" --repository-dir "$GITHUB_WORKSPACE")
+          python3 scripts/stage-candidate-retention.py \
+            --output "$RUNNER_TEMP/aib-private-make-candidate-output" \
+            --feed "$RUNNER_TEMP/aib-make-candidate-feed" \
+            --manifest "$GITHUB_WORKSPACE/candidate-package-set.json" \
+            --destination "$RUNNER_TEMP/aib-make-candidate-retention" \
+            --source-closure "$RUNNER_TEMP/aib-private-make-candidate-output/source-closure.json" "${common[@]}"
+          python3 scripts/stage-candidate-retention.py \
+            --output "$RUNNER_TEMP/aib-private-gh-candidate-output" \
+            --feed "$RUNNER_TEMP/aib-gh-candidate-feed" \
+            --manifest "$GITHUB_WORKSPACE/gh-candidate-package-set.json" \
+            --destination "$RUNNER_TEMP/aib-gh-candidate-retention" \
+            --source-closure "$RUNNER_TEMP/aib-source-closure-builder-cli.json" "${common[@]}"
+
+      - name: Upload Make verified candidate evidence (7-day retention)
+        if: >-
+          steps.stage-retention.outcome == 'success' &&
+          github.event_name == 'workflow_dispatch' && inputs.retain_candidate_artifacts == true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aib-make-verified-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-make-candidate-retention
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+      - name: Upload gh verified candidate evidence (7-day retention)
+        if: >-
+          steps.stage-retention.outcome == 'success' &&
+          github.event_name == 'workflow_dispatch' && inputs.retain_candidate_artifacts == true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aib-gh-verified-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-gh-candidate-retention
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
 
       - name: Stage one-time device-test artifact (exact marker push only)
         id: stage-device-artifact

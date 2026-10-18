@@ -87,6 +87,16 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE" >/dev/null
 git -C "$WORKTREE" checkout --detach "$PIN" >/dev/null
+# Reviewed shared overlay policy: curl optional zstd off; preserve split ncurses license.
+for spec in \
+  'libcurl-disable-optional-zstd.patch 69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788' \
+  'ncurses-ui-libs-license.patch f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9'; do
+  read -r patch expected <<< "$spec"
+  overlay="$KIT_DIR/$patch"
+  [[ "$(sha256sum "$overlay" | awk '{print $1}')" == "$expected" ]] || fail "REVIEWED_OVERLAY_HASH_MISMATCH:$patch"
+  git -C "$WORKTREE" apply --check "$overlay"
+  git -C "$WORKTREE" apply "$overlay"
+done
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" \
   "$WORKTREE/scripts/properties.sh" --data-dir "$APP_DATA_DIR" --prefix "$PREFIX"

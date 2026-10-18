@@ -156,7 +156,9 @@
       "parentPackage": null,
       "parentDependencyRule": null,
       "subpackagePath": null,
-      "subpackageSha256": null
+      "subpackageSha256": null,
+      "localRecipePatchPath": "termux-private-package-kit/curl-v8.23.0/libcurl-disable-optional-zstd.patch",
+      "localRecipePatchSha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788"
     },
     {
       "name": "libnghttp2",
