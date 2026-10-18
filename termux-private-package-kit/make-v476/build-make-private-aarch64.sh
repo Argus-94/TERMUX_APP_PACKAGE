@@ -138,7 +138,7 @@ mapfile -t DEBS < <(find "$WORKTREE/output/.aib-private-make-debs" -maxdepth 1 -
 mkdir -p "$OUTPUT_DIR/packages"
 python3 "$KIT_DIR/audit_deb.py" --manifest "$KIT_DIR/manifest.json" --deb "${DEBS[0]}" --prefix "$PREFIX" --report "$OUTPUT_DIR/audit-report.json" | tee -a "$OUTPUT_DIR/build.log"
 cp -- "${DEBS[0]}" "$OUTPUT_DIR/packages/"
-sha256sum "$OUTPUT_DIR/packages/$(basename "${DEBS[0]}")" > "$OUTPUT_DIR/packages/SHA256SUMS"
+sha256sum "$OUTPUT_DIR/packages/$(basename "${DEBS[0]}")" > "$OUTPUT_DIR/package-SHA256SUMS"
 python3 - "$OUTPUT_DIR/build-result.json" "$AIB_TERMUX_BUILDER_IMAGE_REF" "$PIN" "$PREFIX" "${DEBS[0]}" "$LOCAL_LICENSE_PATCH_SHA" "$SOURCE_LICENSE_SHA256" <<'PY'
 import hashlib,json,pathlib,sys
 out=pathlib.Path(sys.argv[1]); image,revision,prefix,deb,recipe_patch_sha,license_sha=sys.argv[2:]

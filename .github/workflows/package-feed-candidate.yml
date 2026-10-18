@@ -360,7 +360,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: aib-make-verified-candidate-${{ github.sha }}
-          path: ${{ runner.temp }}/aib-make-candidate-retention
+          path: ${{ runner.temp }}/aib-make-candidate-retention.tar.gz
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
@@ -372,7 +372,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: aib-gh-verified-candidate-${{ github.sha }}
-          path: ${{ runner.temp }}/aib-gh-candidate-retention
+          path: ${{ runner.temp }}/aib-gh-candidate-retention.tar.gz
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
