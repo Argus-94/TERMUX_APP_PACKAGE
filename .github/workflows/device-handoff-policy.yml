@@ -1,0 +1,61 @@
+name: Device handoff policy and tamper tests (no publication)
+
+on:
+  push:
+    branches:
+      - main
+      - work/device-handoff-hardening-20261018
+    paths:
+      - .github/workflows/device-handoff-policy.yml
+      - candidate-package-set.json
+      - scripts/stage-device-test-artifact.py
+      - scripts/validate-candidate-feed.py
+      - scripts/test-device-test-artifact-staging.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/create-signed-feed-release.sh
+      - scripts/tests/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/device-handoff-policy.yml
+      - candidate-package-set.json
+      - scripts/stage-device-test-artifact.py
+      - scripts/validate-candidate-feed.py
+      - scripts/test-device-test-artifact-staging.sh
+      - scripts/create-ephemeral-feed-signing-key.sh
+      - scripts/create-signed-feed-release.sh
+      - scripts/tests/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: device-handoff-policy-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  policy-and-tamper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install synthetic fixture tools
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+      - name: Unit and real-signature tamper tests only
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/test-device-test-artifact-staging.sh
+          python3 -m unittest discover -s scripts/tests -v
+          bash scripts/test-device-test-artifact-staging.sh
+          bash scripts/test-candidate-feed-policy.sh
+          bash scripts/test-candidate-dependency-closure.sh
+          printf 'HANDOFF_POLICY_OK synthetic_fixture_only=1 device_tests=NOT_RUN production_publication=blocked\n'

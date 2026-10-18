@@ -113,4 +113,64 @@ if python3 "$ROOT/scripts/stage-device-test-artifact.py" \
 fi
 grep -q 'SIGNED_RELEASE_VERIFICATION_FAILED' "$TMP/tamper.out"
 [[ ! -e "$TMP/tampered-artifact" ]] || { echo 'ERROR:FAILED_STAGING_LEFT_ARTIFACT' >&2; exit 2; }
+
+# Each negative case uses a fresh feed copy and the fixture's ephemeral signing key.
+expect_stage_rejection() {
+  local name="$1" expected="$2" feed="$3" build="$4" package_set="$5"
+  local destination="$TMP/negative-$name-artifact" output="$TMP/negative-$name.out"
+  if python3 "$ROOT/scripts/stage-device-test-artifact.py" \
+    --package-set "$package_set" --feed-root "$feed" \
+    --build-result "$build" --audit-report "$TMP/audit-report.json" \
+    --key-root "$KEY_ROOT" --destination "$destination" >"$output" 2>&1; then
+    echo "ERROR:NEGATIVE_CASE_ACCEPTED:$name" >&2
+    exit 2
+  fi
+  grep -q "$expected" "$output" || { cat "$output" >&2; echo "ERROR:WRONG_NEGATIVE_CASE_ERROR:$name expected=$expected" >&2; exit 2; }
+  [[ ! -e "$destination" ]] || { echo "ERROR:FAILED_STAGING_LEFT_ARTIFACT:$name" >&2; exit 2; }
+}
+
+# A modified Packages file is not covered by its original, valid Release signature.
+cp -a "$FEED" "$TMP/index-edit-feed"
+python3 - "$TMP/index-edit-feed/dists/stable/main/binary-aarch64/Packages" <<'PY'
+import pathlib, sys
+p=pathlib.Path(sys.argv[1]); data=p.read_bytes()
+assert b'Description:' in data
+p.write_bytes(data.replace(b'Description: Synthetic artifact-staging test only; never install', b'Description: Synthetic artifact-staging test only; never install\n extra unsigned continuation', 1))
+PY
+gzip -n -9c "$TMP/index-edit-feed/dists/stable/main/binary-aarch64/Packages" > "$TMP/index-edit-feed/dists/stable/main/binary-aarch64/Packages.gz"
+expect_stage_rejection index-hash SIGNED_INDEX_HASH_MISMATCH "$TMP/index-edit-feed" "$TMP/build-result.json" "$PACKAGE_SET"
+
+# Sign a different Release payload into a valid InRelease; both signatures verify,
+# but the clear-signed payload must exactly match dists/stable/Release.
+cp -a "$FEED" "$TMP/inrelease-mismatch-feed"
+cp "$TMP/inrelease-mismatch-feed/dists/stable/Release" "$TMP/other-release"
+printf '\nX-Synthetic-Mismatch: yes\n' >> "$TMP/other-release"
+fingerprint="$(python3 - "$KEY_ROOT/keys/feed-signing.json" <<'PY'
+import json, pathlib, sys
+d=json.loads(pathlib.Path(sys.argv[1]).read_text())
+print(d['fingerprint'])
+PY
+)"
+gpg --batch --yes --local-user "$fingerprint" --clearsign --output "$TMP/inrelease-mismatch-feed/dists/stable/InRelease" "$TMP/other-release"
+expect_stage_rejection inrelease-payload INRELEASE_PAYLOAD_MISMATCH "$TMP/inrelease-mismatch-feed" "$TMP/build-result.json" "$PACKAGE_SET"
+
+# Change the root-level feed Release independently of the signed distribution.
+cp -a "$FEED" "$TMP/root-release-mismatch-feed"
+printf '\n# synthetic root release mismatch\n' >> "$TMP/root-release-mismatch-feed/Release"
+expect_stage_rejection root-release ROOT_RELEASE_MISMATCH "$TMP/root-release-mismatch-feed" "$TMP/build-result.json" "$PACKAGE_SET"
+
+# Candidate provenance policy must bind source commit and the pinned source hash.
+python3 - "$TMP/build-result.json" "$TMP/altered-build-result.json" <<'PY'
+import json, pathlib, sys
+p=json.loads(pathlib.Path(sys.argv[1]).read_text()); p['sourceCommit']='0'*40
+pathlib.Path(sys.argv[2]).write_text(json.dumps(p))
+PY
+expect_stage_rejection source-commit CANDIDATE_PROVENANCE_OR_FEED_POLICY_FAILED "$FEED" "$TMP/altered-build-result.json" "$PACKAGE_SET"
+python3 - "$PACKAGE_SET" "$TMP/altered-package-set.json" <<'PY'
+import json, pathlib, sys
+p=json.loads(pathlib.Path(sys.argv[1]).read_text()); p['packages'][0]['sourceSha256']='0'*64
+pathlib.Path(sys.argv[2]).write_text(json.dumps(p))
+PY
+expect_stage_rejection pinned-source-hash CANDIDATE_PROVENANCE_OR_FEED_POLICY_FAILED "$FEED" "$TMP/build-result.json" "$TMP/altered-package-set.json"
+
 printf 'DEVICE_TEST_ARTIFACT_STAGING_TEST_OK synthetic_fixture_only=1 signed_metadata=verified exact_file_allowlist=12 tamper_rejected=1 private_key_included=0\n'
