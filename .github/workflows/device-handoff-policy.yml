@@ -17,6 +17,7 @@ on:
       - scripts/create-ephemeral-feed-signing-key.sh
       - scripts/create-signed-feed-release.sh
       - scripts/audit-deb-payload-collisions.py
+      - scripts/verify-retained-candidate-bundle.py
       - scripts/tests/**
   pull_request:
     branches: [main]
@@ -30,6 +31,7 @@ on:
       - scripts/create-ephemeral-feed-signing-key.sh
       - scripts/create-signed-feed-release.sh
       - scripts/audit-deb-payload-collisions.py
+      - scripts/verify-retained-candidate-bundle.py
       - scripts/tests/**
 
 permissions:

@@ -96,6 +96,14 @@ class RetentionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.run_stage()
 
+    def test_explicit_source_closure_cli_string(self):
+        closure = self.output / "explicit-source-closure.json"
+        closure.write_text(json.dumps({"sourceCommit": SOURCE, "packages": [{"name": "make"}]}))
+        args = list(self.args)
+        args[-1] = str(closure)
+        self.args = tuple(args)
+        self.run_stage()
+        self.assertTrue((self.dest / "reports/source-closure.json").is_file())
     def test_rejects_missing_report(self):
         (self.output / "audit-report.json").unlink()
         with self.assertRaises(ValueError):
