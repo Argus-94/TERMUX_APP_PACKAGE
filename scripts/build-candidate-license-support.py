@@ -54,8 +54,13 @@ def verify(source, lock_path=LOCK):
     return lock, package
 
 
-def make_deb(target, epoch, out):
-    """Package the already-validated source recipe; tests pass synthetic fixtures here."""
+def make_deb(target, epoch, out, source_tree=None):
+    """Package a validated recipe; synthetic tests explicitly supply their fixture tree."""
+    locked_tree = json.loads(LOCK.read_text())['packageTree'] if source_tree is None else source_tree
+    if tree(target) != locked_tree:
+        raise ValueError('locked source package tree mismatch')
+    if pathlib.Path(out).exists():
+        raise ValueError('output archive must be new')
     with tempfile.TemporaryDirectory(prefix='license-candidate-') as temp:
         work = pathlib.Path(temp)
         control = work / 'control'
@@ -67,17 +72,47 @@ def make_deb(target, epoch, out):
         shell = 'set -Eeuo pipefail; source "$1"; TERMUX_PREFIX="$2"; TERMUX_PKG_BUILDER_DIR="$(dirname "$1")"; termux_step_make_install'
         subprocess.run(['bash', '-c', shell, 'builder', str(target / 'build.sh'), str(prefix)], check=True)
         licenses = prefix / 'share/LICENSES'
+        recipe_entries = {p.name: p for p in (target / 'LICENSES').glob('*.txt')}
         files = sorted(licenses.glob('*.txt'))
-        if not files or any(not path.is_file() or path.is_symlink() for path in files):
-            raise ValueError('missing/invalid installed licenses')
-        if sorted(path.name for path in files) != sorted(path.name for path in (target / 'LICENSES').glob('*.txt')):
+        expected_entries = {p.name for p in recipe_entries.values()}
+        if not files or {p.name for p in files} != expected_entries:
             raise ValueError('staged license set differs from recipe source')
+        for staged in files:
+            source_entry = recipe_entries[staged.name]
+            locked = locked_tree.get('LICENSES/' + staged.name)
+            if source_entry.is_symlink():
+                target_name = os.readlink(source_entry)
+                if (not locked or locked != {'type': 'symlink', 'target': target_name}
+                        or pathlib.PurePosixPath(target_name).name != target_name
+                        or target_name not in recipe_entries
+                        or recipe_entries[target_name].is_symlink()
+                        or not recipe_entries[target_name].is_file()):
+                    raise ValueError('invalid source-locked license symlink')
+                if not staged.is_symlink() or os.readlink(staged) != target_name:
+                    raise ValueError('staged license symlink differs from recipe source')
+            else:
+                if staged.is_symlink() or not staged.is_file():
+                    raise ValueError('missing/invalid installed licenses')
+                if not locked or locked.get('type') != 'file' or sha(source_entry) != locked.get('sha256'):
+                    raise ValueError('source license differs from lock')
+                if sha(staged) != sha(source_entry):
+                    raise ValueError('staged license differs from recipe source')
         doc = prefix / 'share/doc/termux-licenses'
         doc.mkdir(parents=True)
         (doc / 'copyright').write_bytes((target / 'LICENSES/GPL-3.0.txt').read_bytes())
         for path in data.rglob('*'):
             if path.is_symlink():
-                raise ValueError('unexpected symlink')
+                rel = path.relative_to(prefix).as_posix()
+                if not rel.startswith('share/LICENSES/'):
+                    raise ValueError('unexpected symlink')
+                target_name = os.readlink(path)
+                if (pathlib.PurePosixPath(target_name).name != target_name
+                        or target_name not in recipe_entries
+                        or recipe_entries[target_name].is_symlink()
+                        or not recipe_entries[target_name].is_file()):
+                    raise ValueError('unexpected symlink')
+                os.utime(path, (epoch, epoch), follow_symlinks=False)
+                continue
             path.chmod(0o700 if path.is_dir() else 0o644)
             os.utime(path, (epoch, epoch), follow_symlinks=False)
 

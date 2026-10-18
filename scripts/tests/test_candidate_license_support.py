@@ -21,6 +21,8 @@ class CandidateTests(unittest.TestCase):
         (self.pkg / 'LICENSES').mkdir(parents=True)
         (self.pkg / 'LICENSES/GPL-3.0.txt').write_text('fixture complete GPL text\n')
         (self.pkg / 'LICENSES/Other.txt').write_text('fixture license\n')
+        (self.pkg / 'LICENSES/GPL-3.0-only.txt').symlink_to('GPL-3.0.txt')
+        (self.pkg / 'LICENSES/GPL-3.0-or-later.txt').symlink_to('GPL-3.0.txt')
         (self.pkg / 'build.sh').write_text(
             'TERMUX_PKG_VERSION=2.2\n'
             'termux_step_make_install() { mkdir -p "$TERMUX_PREFIX/share/LICENSES"; '
@@ -41,8 +43,9 @@ class CandidateTests(unittest.TestCase):
     def build_pair(self):
         self.verify_fixture()
         first, second = self.root / 'a.deb', self.root / 'b.deb'
-        builder.make_deb(self.pkg, 1700000000, first)
-        builder.make_deb(self.pkg, 1700000000, second)
+        fixture_tree = builder.tree(self.pkg)
+        builder.make_deb(self.pkg, 1700000000, first, source_tree=fixture_tree)
+        builder.make_deb(self.pkg, 1700000000, second, source_tree=fixture_tree)
         self.assertEqual(first.read_bytes(), second.read_bytes())
         return first
 
@@ -65,19 +68,37 @@ class CandidateTests(unittest.TestCase):
         self.assertEqual((extracted / builder.PREFIX / 'share/LICENSES/GPL-3.0.txt').read_text(), 'fixture complete GPL text\n')
         data_tar = self.root / 'data.tar.gz'
         data_tar.write_bytes(subprocess.check_output(['ar', 'p', str(deb), 'data.tar.gz']))
-        members = subprocess.check_output(['tar', '-tvzf', str(data_tar)], text=True).splitlines()
-        names = [line.split()[-1].rstrip('/') for line in members]
+        import tarfile
+        with tarfile.open(data_tar, 'r:gz') as archive:
+            tar_members = archive.getmembers()
+        names = [m.name.rstrip('/') for m in tar_members]
         self.assertIn(builder.PREFIX, names)
         ancestors = {'data', 'data/user', 'data/user/0', 'data/user/0/com.karat.aibuilder',
                      'data/user/0/com.karat.aibuilder/files'}
         self.assertFalse(ancestors.intersection(names))
         self.assertTrue(all('com.termux' not in name for name in names))
-        for line in members:
-            mode, name = line.split()[0], line.split()[-1]
-            if name.endswith('/'):
-                self.assertEqual(mode, 'drwx------')
+        pinned = os.environ.get('AIB_PINNED_SOURCE_ROOT')
+        if pinned:
+            lock, package = builder.verify(pinned)
+            self.assertEqual(builder.tree(package), json.loads(builder.LOCK.read_text())['packageTree'])
+            aliases = [package / 'LICENSES' / name for name in ('GPL-3.0-only.txt', 'GPL-3.0-or-later.txt')]
+            for alias in aliases:
+                self.assertTrue(alias.is_symlink())
+                self.assertEqual(os.readlink(alias), 'GPL-3.0.txt')
+                self.assertTrue((alias.parent / os.readlink(alias)).is_file())
+        by_name = {m.name.rstrip('/'): m for m in tar_members}
+        for name, member in by_name.items():
+            if member.isdir():
+                self.assertEqual(member.mode, 0o700)
+            elif member.issym():
+                self.assertEqual(member.linkname, 'GPL-3.0.txt')
             else:
-                self.assertEqual(mode, '-rw-r--r--')
+                self.assertTrue(member.isfile())
+                self.assertEqual(member.mode, 0o644)
+        for alias in ('GPL-3.0-only.txt', 'GPL-3.0-or-later.txt'):
+            member = by_name[builder.PREFIX + '/share/LICENSES/' + alias]
+            self.assertTrue(member.issym())
+            self.assertEqual(member.linkname, 'GPL-3.0.txt')
         self.assertIn(builder.PREFIX + '/share/doc/termux-licenses/copyright', names)
 
     def test_modified_fixture_rejected(self):
