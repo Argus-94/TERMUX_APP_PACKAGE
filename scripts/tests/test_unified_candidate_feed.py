@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location('aggregatefeed', REPO / 'scripts/build-unified-candidate-feed.py')
@@ -61,6 +62,70 @@ class AggregateFeed(unittest.TestCase):
         self.assertFalse(list(output.rglob('private-keys-v1.d')) + list(output.rglob('secring.gpg')))
         for name in self.names:
             self.assertNotEqual(subprocess.run(['dpkg-query', '-W', '-f=${db:Status-Status}', name], capture_output=True).returncode, 0)
+
+    def test_supplemental_license_is_explicit_root_in_signed_apt_transaction(self):
+        license_name = 'termux-licenses'
+        license_stage = self.root / license_name
+        control = license_stage / 'DEBIAN'
+        control.mkdir(parents=True)
+        (control / 'control').write_text(
+            'Package: termux-licenses\nVersion: 2.2\nArchitecture: all\n'
+            'Maintainer: Disposable Test <test@example.invalid>\n'
+            'Description: TEST ONLY supplemental license fixture\n'
+        )
+        license_deb = self.root / 'termux-licenses_2.2_all.deb'
+        subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(license_stage), str(license_deb)], capture_output=True, check=True)
+        bundle = self.root / 'support-bundle'
+        (bundle / 'packages').mkdir(parents=True)
+        shutil.copyfile(license_deb, bundle / 'packages' / license_deb.name)
+        license_hash = hashlib.sha256(license_deb.read_bytes()).hexdigest()
+        manifest = copy.deepcopy(self.manifest)
+        manifest['packages'].append({'name': license_name, 'version': '2.2', 'architecture': 'all', 'sha256': license_hash})
+        path = self.root / (self._testMethodName + '.json')
+        path.write_text(json.dumps(manifest))
+        original_run = subprocess.run
+
+        def verifier_fixture(args, **kwargs):
+            if len(args) > 1 and str(args[1]).endswith('verify-candidate-license-support.py'):
+                self.assertEqual(args[args.index('--expected-fingerprint') + 1], 'A' * 64)
+                self.assertEqual(args[args.index('--expected-producer') + 1], 'TEST-ONLY')
+                report_path = Path(args[args.index('--report') + 1])
+                report_path.write_text(json.dumps({'valid': True, 'package': {'sha256': license_hash}}))
+                return subprocess.CompletedProcess(args, 0, b'', b'')
+            return original_run(args, **kwargs)
+
+        with mock.patch.object(M.subprocess, 'run', side_effect=verifier_fixture):
+            report = M.build(REPO, path, self.packages, self.root / self._testMethodName,
+                             self.roots, bundle, 'A' * 64, 'TEST-ONLY')
+        self.assertEqual(report['nativePackageCount'], 4)
+        self.assertEqual(report['supplementalPackageCount'], 1)
+        self.assertEqual(len(report['nativeToolRootSpecs']), 3)
+        self.assertEqual(report['supportRootSpecs'], ['termux-licenses=2.2'])
+        self.assertEqual(len(report['rootSpecs']), 4)
+        self.assertEqual(report['packageCount'], 5)
+        self.assertEqual(report['aptSimulation'], 'PASS')
+        self.assertFalse(report['productionAllowed'] or report['qualified'] or report['installPerformed'])
+        self.assertIn('roots=4', (self.root / self._testMethodName / 'apt-validation.log').read_text())
+
+    def test_support_pin_rejection_prevents_feed_creation(self):
+        license_name = 'termux-licenses'
+        license_deb = self.root / 'termux-licenses_2.2_all.deb'
+        stage = self.root / 'wrong-pin-license'
+        control = stage / 'DEBIAN'
+        control.mkdir(parents=True)
+        (control / 'control').write_text('Package: termux-licenses\nVersion: 2.2\nArchitecture: all\nDescription: TEST ONLY\n')
+        subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(stage), str(license_deb)], capture_output=True, check=True)
+        bundle = self.root / 'wrong-pin-bundle'
+        (bundle / 'packages').mkdir(parents=True)
+        shutil.copyfile(license_deb, bundle / 'packages' / license_deb.name)
+        manifest = copy.deepcopy(self.manifest)
+        manifest['packages'].append({'name': license_name, 'version': '2.2', 'architecture': 'all', 'sha256': hashlib.sha256(license_deb.read_bytes()).hexdigest()})
+        path = self.root / (self._testMethodName + '.json')
+        path.write_text(json.dumps(manifest))
+        with self.assertRaisesRegex(RuntimeError, 'COMMAND_REJECTED'):
+            M.build(REPO, path, self.packages, self.root / self._testMethodName,
+                    self.roots, bundle, '0' * 64, 'wrong-producer')
+        self.assertFalse((self.root / self._testMethodName).exists())
 
     def test_open_publication_gate_rejected(self):
         data = copy.deepcopy(self.manifest)
