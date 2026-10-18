@@ -123,6 +123,7 @@ free_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 (( free_bytes >= MIN_FREE_BYTES )) || fail 'LESS_THAN_5_GIB_FREE; NO_BUILD_STARTED'
 docker info >/dev/null 2>&1 || fail 'DOCKER_DAEMON_UNAVAILABLE'
 docker image inspect "$IMAGE" >/dev/null 2>&1 || fail 'PINNED_BUILDER_IMAGE_NOT_PRESENT_LOCALLY; NO_PULL_ATTEMPTED'
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE"
 export CONTAINER_NAME="aib-private-git-v256-$$"
 cleanup_container() { docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true; }

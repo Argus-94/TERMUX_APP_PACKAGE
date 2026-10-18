@@ -4,8 +4,8 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
-readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly LOCAL_LICENSE_PATCH="$KIT_DIR/patches/make-embed-gpl-license.patch"
 readonly LOCAL_LICENSE_PATCH_SHA='cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03'
 readonly SOURCE_LICENSE_SHA256='e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b'
@@ -102,6 +102,7 @@ printf 'AIB_MODELED_PROPERTY_PATHS_MATCH app=%s prefix=%s\\n' "\$TERMUX_APP__PAC
 EOF
 chmod 700 "$WORKTREE/.aib-private-layout-preflight.sh"
 
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$AIB_TERMUX_BUILDER_IMAGE_REF"
 export CONTAINER_NAME="aib-private-make-v476-$$"
 cleanup_container() {

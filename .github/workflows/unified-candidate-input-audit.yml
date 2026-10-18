@@ -19,6 +19,8 @@ on:
       - scripts/tests/test_effective_candidate_recipes.py
       - termux-private-package-kit/**/*.patch
       - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
+      - scripts/**
+      - termux-private-package-kit/**
   pull_request:
     paths:
       - .github/workflows/**
@@ -34,6 +36,8 @@ on:
       - scripts/tests/test_effective_candidate_recipes.py
       - termux-private-package-kit/**/*.patch
       - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
+      - scripts/**
+      - termux-private-package-kit/**
 permissions:
   contents: read
 concurrency:
@@ -66,8 +70,10 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT"
-          python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.py -v
-          python3 -m unittest discover -s scripts/tests -p test_effective_candidate_recipes.py -v
+          python3 -m unittest discover -s scripts/tests -v
+          for tests in termux-private-package-kit/*/tests; do
+            python3 -m unittest discover -s "$tests" -v
+          done
           python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-unified-recipes
           if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-aggregate-ready >"$RUNNER_TEMP/unified-blocked.log" 2>&1; then
             echo 'ERROR:AGGREGATE_MUST_STAY_BLOCKED'; exit 2
@@ -79,7 +85,8 @@ jobs:
             echo 'Effective recipe/subpackage overlays reproduced without recipe execution; common libcurl and ncurses recipes required. Unified-recipe gate: PASS; binary equivalence NOT proven.'
             echo 'Per-profile and union source dependencies: PASS. Binary aggregate: BLOCKED; signed binary inputs missing.'
             echo 'Binary control/ELF/path-collision audits, aggregate signed APT simulation and Android qualification: NOT RUN.'
-            echo 'No build, package upload, signing key, Pages, production feed or Builder change.'
+            echo 'All generic and per-profile tests run, including synthetic packaging fixtures and ephemeral TEST signatures.'
+            echo 'No candidate source build, candidate upload, production signing key, Pages, production feed or Builder change.'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Remove temporary source and report
         if: always()

@@ -107,7 +107,7 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libmpg123/mpg123.subpackage.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libmpg123/mpg123.subpackage.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
 python3 "$ROOT/termux-private-package-kit/openjdk17/verify_openjdk17_buildorder.py" --source-root "$WORKTREE"
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
@@ -159,6 +159,7 @@ free_bytes="$(df -PB1 "$OUTPUT_DIR" | awk 'END {print $4}')"
 (( free_bytes >= MIN_FREE_BYTES )) || fail 'LESS_THAN_12_GIB_FREE; NO_BUILD_STARTED'
 docker info >/dev/null 2>&1 || fail 'DOCKER_DAEMON_UNAVAILABLE'
 docker image inspect "$IMAGE" >/dev/null 2>&1 || fail 'PINNED_BUILDER_IMAGE_NOT_PRESENT_LOCALLY; NO_PULL_ATTEMPTED'
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE" --verify-only
 export TERMUX_BUILDER_IMAGE_NAME="$IMAGE"
 export CONTAINER_NAME="aib-private-openjdk17-17020-$$"
 cleanup_container() { docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1 && docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true; }

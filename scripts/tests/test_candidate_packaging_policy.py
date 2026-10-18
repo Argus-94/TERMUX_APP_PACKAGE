@@ -76,12 +76,19 @@ class CandidatePolicyTests(unittest.TestCase):
             deb=source/"fixture.deb"; deb.write_bytes(b"arbitrary fake fixture bytes, not a deb")
             before=deb.read_bytes()
             cmd=["python3", str(APPLIER), "--source-root", str(source)]
+            self.assertNotEqual(subprocess.run(cmd+["--verify-only"],capture_output=True).returncode,0)
+            self.assertFalse((source/"scripts/build/.aib-candidate-packaging-policy.py").exists())
             subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True)
             before_second={p:p.read_bytes() for p in (source/"scripts/build/termux_step_create_debian_package.sh", source/"scripts/build/termux_create_debian_subpackages.sh", source/"scripts/build/.aib-candidate-packaging-policy.py")}
             subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True)
             self.assertEqual(before_second, {p:p.read_bytes() for p in before_second})
             self.assertEqual(deb.read_bytes(), before)
             self.assertTrue((source/"scripts/build/.aib-candidate-packaging-policy.py").is_file())
+            subprocess.run(cmd+["--verify-only"],check=True,capture_output=True)
+            helper=source/"scripts/build/.aib-candidate-packaging-policy.py"
+            helper.write_bytes(helper.read_bytes()+b"\n# tampered test fixture\n")
+            self.assertNotEqual(subprocess.run(cmd+["--verify-only"],capture_output=True).returncode,0)
+            self.assertEqual(deb.read_bytes(),before)
 
     def test_source_hash_drift_rejected(self):
         with tempfile.TemporaryDirectory() as td:

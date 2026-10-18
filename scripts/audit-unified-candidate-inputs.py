@@ -89,8 +89,11 @@ def validate_policy_wrappers(repo):
         i = calls[0]
         require(any('checkout --detach' in line for line in lines[:i]),
                 'PACKAGING_POLICY_BEFORE_PINNED_CHECKOUT:' + rel)
-        require(any('docker info' in line or 'docker image inspect' in line for line in lines[i+1:]),
-                'PACKAGING_POLICY_PREFLIGHT_ORDER_INVALID:' + rel)
+        builds = [j for j, line in enumerate(lines) if './scripts/run-docker.sh' in line]
+        verifies = [j for j, line in enumerate(lines)
+                    if line.strip() == lines[i].strip() + ' --verify-only']
+        require(len(verifies) == 1 and builds and i < verifies[0] < min(builds),
+                'PACKAGING_POLICY_VERIFY_BEFORE_BUILD_REQUIRED:' + rel)
     return {rel: digest(repo / rel) for rel in sorted(expected)}
 
 def inventory(repo, source_root):
