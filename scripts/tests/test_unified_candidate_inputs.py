@@ -103,6 +103,30 @@ class InventoryTests(unittest.TestCase):
         self.assertTrue(all(p['signedBinaryBundle'] is None for p in self.baseline['profiles'].values()))
         self.assertTrue(all(o['binarySha256'] is None for p in self.baseline['packages'] for o in p['occurrences']))
 
+    def test_computed_divergent_duplicates(self):
+        self.assertEqual(self.baseline['summary']['effectiveRecipeDivergentDuplicateNames'], ['libcurl', 'ncurses'])
+        packages = {p['name']: p for p in self.baseline['packages']}
+        curl = {o['profile']: o for o in packages['libcurl']['occurrences']}
+        self.assertEqual(curl['cmake-ninja']['effectiveRecipeSha256'],
+                         'ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348')
+        self.assertEqual(curl['curl']['effectiveRecipeSha256'], packages['libcurl']['recipeSha256'])
+        self.assertEqual(curl['git']['effectiveRecipeSha256'], packages['libcurl']['recipeSha256'])
+        curses = {o['profile']: o for o in packages['ncurses']['occurrences']}
+        self.assertEqual(curses['python']['effectiveRecipeSha256'], curses['pkg-config']['effectiveRecipeSha256'])
+        self.assertNotEqual(curses['git']['effectiveRecipeSha256'], curses['python']['effectiveRecipeSha256'])
+
+    def test_false_effective_hash_not_accepted_from_manifest(self):
+        def tamper(m):
+            next(p for p in m['packages'] if p['name'] == 'libcurl')['effectiveRecipeSha256'] = '0' * 64
+        self.mutate('cmake-ninja-candidate-package-set.json', tamper)
+        # Effective bytes must be independently reproduced, never copied from
+        # an arbitrary success flag/hash in the manifest.
+        changed = u.inventory(self.repo, self.source_root)
+        curl = next(p for p in changed['packages'] if p['name'] == 'libcurl')
+        occurrence = next(o for o in curl['occurrences'] if o['profile'] == 'cmake-ninja')
+        self.assertEqual(occurrence['effectiveRecipeSha256'],
+                         'ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348')
+
     def test_omitted_package(self):
         self.mutate('curl-candidate-package-set.json', lambda m: m['packages'].pop())
         self.reject('PROFILE_SOURCE_SET_MISMATCH')

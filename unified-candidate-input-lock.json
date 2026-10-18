@@ -13,18 +13,73 @@
   "channel": "candidate-only",
   "dependencyValidatorSha256": "1d6d888dc9f13dc54b56b0607733bfb2bdc40b4aa9ff46b05355f60fbfcc4665",
   "duplicatePolicy": "No provider selected. Same name/version/architecture is NOT binary equivalence. Require identical SHA-256 for automatic deduplication; otherwise stop for reviewed canonical rebuild and re-audit of every consumer.",
+  "effectiveRecipeContextScope": "SHA-256 of compact sorted JSON mapping paths to SHA-256: parent build.sh and all existing sibling *.subpackage.sh after ordered manifest overlays; not all build flags, source archives, upstream patches, environment or binary ABI.",
+  "effectiveRecipeDivergences": [
+    {
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
+          "profile": "cmake-ninja"
+        },
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
+          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
+          "profile": "curl"
+        },
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
+          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
+          "profile": "git"
+        }
+      ],
+      "package": "libcurl",
+      "resolution": "UNRESOLVED; no canonical provider selected; reviewed common rebuild and consumer re-audits required",
+      "upstreamRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025"
+    },
+    {
+      "occurrences": [
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "d4c590ffc159acf666abe72725e090b73e7cf713722c638039847091f2398bee",
+          "effectiveRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
+          "profile": "git"
+        },
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
+          "profile": "pkg-config"
+        },
+        {
+          "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
+          "profile": "python"
+        }
+      ],
+      "package": "ncurses",
+      "resolution": "UNRESOLVED; no canonical provider selected; reviewed common rebuild and consumer re-audits required",
+      "upstreamRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34"
+    }
+  ],
+  "effectiveRecipeValidatorSha256": "f7aee9462f5db19519d35d562515975b6727a932eca0984ed38a0f22ee8ae114",
   "inventoryOnly": true,
-  "knownEffectiveRecipeDivergence": {
-    "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
-    "otherProfiles": [
-      "curl",
-      "git"
-    ],
-    "package": "libcurl",
-    "profile": "cmake-ninja",
-    "resolution": "UNRESOLVED; do not choose an equal-version libcurl by filename or overwrite order",
-    "upstreamRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025"
-  },
   "packages": [
     {
       "architecture": "aarch64",
@@ -43,6 +98,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "860979782815de6e65a5e987eaf6bbcb0e81baccd174b19f08cae7d61b39e460",
+          "effectiveRecipeSha256": "e143b94f69c3af8b28cd4c9f494a9355e6c349d52f668b3fc00fb302998b3061",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -80,6 +139,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "904c6ed207ab5ba37b0e497b8c35adae2e5109f6112568bebeed2a4737a9a698",
+          "effectiveRecipeSha256": "bddac5aafb371dd88050583be5fc3f0df579ab1681f5a87e75c5578c0021740b",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -135,6 +198,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7d3672a979fe3396ee5cc9daf4cd5ea7cc8421b9d8a43f3c0fefa4a6c2077d4c",
+          "effectiveRecipeSha256": "d7d9f2fff77de9a4f4f5e45a393ac00c9e6047de51d98c9f776f8a885a5f5440",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -163,6 +230,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "d1fb0a3fc074a2eee4cf5c6cefe79c0a779fb3fcbd5ba3edc62a07282e162a42",
+          "effectiveRecipeSha256": "39364f4135281f12c103e20468f8776c4dec2008f268d3cea73c9d17ff3441d3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         }
       ],
@@ -181,30 +252,58 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          "effectiveRecipeSha256": "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -296,6 +395,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3ca9339f15180ce69be77f6b871ec871d371eb96ea9cc4ddde0189d35c2bab08",
+          "effectiveRecipeSha256": "36556f15fe7e055c6d4ba10adf580802a1fe50b45f3b8ebb6a75b88cc5b492e4",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -324,6 +427,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
+          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveSubpackageSha256": "47a25ce446d62c15a4911b4ed6e95fb0655cb1624eb1b62a13a6b6e87315daef",
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         }
       ],
@@ -361,6 +468,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "95520b0b102406de25c4d31a9b6416b3e6d6c0528d119ba4f6f200f10321d4b9",
+          "effectiveRecipeSha256": "d82b006a6b057d480b912f49ac32b39d4c576e1b1546393411050c700c5b1ac4",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -389,10 +500,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "b1b5d53382e1e4a35a2f99c13b37a1cd8fda7509ae59f2fe5749dd4523714ab0",
+          "effectiveRecipeSha256": "ef44697164fd19b8433ceb9ac4cd35cd88eb99ed51b39fb6f8958f87c9db7b2a",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "b1b5d53382e1e4a35a2f99c13b37a1cd8fda7509ae59f2fe5749dd4523714ab0",
+          "effectiveRecipeSha256": "ef44697164fd19b8433ceb9ac4cd35cd88eb99ed51b39fb6f8958f87c9db7b2a",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -411,6 +530,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2613cf52eca8667bd01fd36f56ba79d2fe0f6daa2c470afd5a7beedce061bcb8",
+          "effectiveRecipeSha256": "a26022905b66f39851553abea3b5e68c38671988b4e2a9a649366845dadfb266",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "gh"
         }
       ],
@@ -493,6 +616,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "299bb2ba29f20faf92ef68bcf9bf4607dcdab7abd978dc56adc44c7f96c0ab46",
+          "effectiveRecipeSha256": "8ec1f92e20e9a18c3c20a725102ed445df1a07c66250e1bd94fd7539625c08a9",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -575,6 +702,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3f59fee041ca8bf3081d076ab89350c6de7d2f2619b730d52d29fe4e734c8280",
+          "effectiveRecipeSha256": "8181771500b14ada8f28beae580843644fe65ca324d23dd9cd984d28d1e36a62",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         }
       ],
@@ -603,6 +734,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7faa0ba0f68f8d5f0c605a3a448cdba0588430cc28e2da9cac076c2fc88589ba",
+          "effectiveRecipeSha256": "ddd00bd024424d9919e9ce7837c544f4501253b655c88a51288cff10423c0e28",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -640,6 +775,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "46394eb6374af1cd79b22af1c6ba656e8f0d459a03c62a620b7b9dbd3f73f2a6",
+          "effectiveRecipeSha256": "24addf768a261d47bbacd34a81ed3c8bdd59e57be0a992de5f8879e9d9706350",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -658,6 +797,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "b0ab634605054c8f97f93572081e1feaef9f8eca1e6fe7dd2fe983405b87eece",
+          "effectiveRecipeSha256": "438cfa28aefbb69ddf767656f031f0eeeee249b7edd719563596fc2b097039b3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -676,10 +819,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "152949272a7f74c2691a18fb051df8c10fe6fbc9fc4cf814222a0624cfde1974",
+          "effectiveRecipeSha256": "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "152949272a7f74c2691a18fb051df8c10fe6fbc9fc4cf814222a0624cfde1974",
+          "effectiveRecipeSha256": "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -698,14 +849,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a0fb63001c766fcaa4e9801ed6de70e1e98886c4fe6af876242f5175fc0fe7e6",
+          "effectiveRecipeSha256": "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a0fb63001c766fcaa4e9801ed6de70e1e98886c4fe6af876242f5175fc0fe7e6",
+          "effectiveRecipeSha256": "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a0fb63001c766fcaa4e9801ed6de70e1e98886c4fe6af876242f5175fc0fe7e6",
+          "effectiveRecipeSha256": "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -724,6 +887,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6681e7834177b943579f0461af65695473b2b8b498c5e7b47ca2573119bd3042",
+          "effectiveRecipeSha256": "db55b10b90c54dd4d39b76b5b074835c09c7c7534a84a12bc29c6a63717ff2fd",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -752,10 +919,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "d6f4556038f0ea7a4c6e641e50dbef62fe5eeda09abea3534b55afc2a90fd7b4",
+          "effectiveRecipeSha256": "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "d6f4556038f0ea7a4c6e641e50dbef62fe5eeda09abea3534b55afc2a90fd7b4",
+          "effectiveRecipeSha256": "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -774,6 +949,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a77194f3880f8a2a40922f1c2bf615323e708736c6d8bfde7b97b52f767a3015",
+          "effectiveRecipeSha256": "7cee378836da2051e93294cc93fa7c0b06c8fddc9a702f115718017610b4e407",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -792,18 +971,34 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3368e15e36268cb941dfe67f6aea7fc4b993a3d56f4fdb1ffef54b7d93f6dccf",
+          "effectiveRecipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3368e15e36268cb941dfe67f6aea7fc4b993a3d56f4fdb1ffef54b7d93f6dccf",
+          "effectiveRecipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3368e15e36268cb941dfe67f6aea7fc4b993a3d56f4fdb1ffef54b7d93f6dccf",
+          "effectiveRecipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3368e15e36268cb941dfe67f6aea7fc4b993a3d56f4fdb1ffef54b7d93f6dccf",
+          "effectiveRecipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -822,6 +1017,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ea885183b9fafbe578e11ed6bc1e6f47eb1cb9b56a5d8ff501601ec97d086483",
+          "effectiveRecipeSha256": "c834d20f18cbed9bd384f2a89eb9da2f0d68aac898a830cb68f2f4e11a54eedf",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -895,6 +1094,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3f8fbfa13663215d67ac5493164ff0974d1a97cddb005c342d0efa7daaa8f443",
+          "effectiveRecipeSha256": "c22a609e59872c8f0e0d3d0fe4a027c6fd8e4bcd79e9e937e219f968ac94f8de",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -913,14 +1116,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7d76f0ec0793ffe2a733a8e523247c85934d5bab56df4413f242669ef43ae2ec",
+          "effectiveRecipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7d76f0ec0793ffe2a733a8e523247c85934d5bab56df4413f242669ef43ae2ec",
+          "effectiveRecipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7d76f0ec0793ffe2a733a8e523247c85934d5bab56df4413f242669ef43ae2ec",
+          "effectiveRecipeSha256": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -939,14 +1154,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "71c5b88eeca755df521a37eea21671a8fc6366ad7bf53591e9acb779c3822610",
+          "effectiveRecipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "71c5b88eeca755df521a37eea21671a8fc6366ad7bf53591e9acb779c3822610",
+          "effectiveRecipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "71c5b88eeca755df521a37eea21671a8fc6366ad7bf53591e9acb779c3822610",
+          "effectiveRecipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -975,10 +1202,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "23bf34fc9f9dcb3448c38de3cab05215ef02004c2a197628b5e10631a708454f",
+          "effectiveRecipeSha256": "8d3d827030f2d51687dcf7fcb1a7dce8f79730bdbefbd5b90492def19ea43629",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "23bf34fc9f9dcb3448c38de3cab05215ef02004c2a197628b5e10631a708454f",
+          "effectiveRecipeSha256": "8d3d827030f2d51687dcf7fcb1a7dce8f79730bdbefbd5b90492def19ea43629",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -1052,14 +1287,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
+          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
+          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -1078,22 +1325,42 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          "effectiveRecipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          "effectiveRecipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          "effectiveRecipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          "effectiveRecipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          "effectiveRecipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -1112,14 +1379,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "420e15d0759ee3e8aa9901e4ecd4e9de911bffea8c86f5b9509712a48ef576b5",
+          "effectiveRecipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "420e15d0759ee3e8aa9901e4ecd4e9de911bffea8c86f5b9509712a48ef576b5",
+          "effectiveRecipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "420e15d0759ee3e8aa9901e4ecd4e9de911bffea8c86f5b9509712a48ef576b5",
+          "effectiveRecipeSha256": "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -1157,6 +1436,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ded503791ac6c41355a06905f5f233cd931d0aed30d7e8859b360a06ac9a3313",
+          "effectiveRecipeSha256": "0c3adf3e6a452c1a566621646a69f251ce37d815eeb061d92e1b2758125db51a",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1175,22 +1458,42 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          "effectiveRecipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          "effectiveRecipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          "effectiveRecipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          "effectiveRecipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          "effectiveRecipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -1219,6 +1522,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3d9966b8b876772af94a4694d031f9d5a8f670cb2897828cfe6fa9fd22ec1c0a",
+          "effectiveRecipeSha256": "2336f891972b3a4eb4e801839a401eca68eea40240758aab2462665e6e211bc7",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "nodejs-npm"
         }
       ],
@@ -1265,6 +1572,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "99a3b43aa1dd380f872ec86db3ba056285c230f8613c31fbb8ecb446aec0843b",
+          "effectiveRecipeSha256": "13dcbe4d713bc6beb01c9e666527594db097f271d368dfd97d46bca196412a9f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -1283,6 +1594,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "572f7578349738516bc6a1168eb82e90472d4aa031a349ba4ee9b121965d2030",
+          "effectiveRecipeSha256": "8afc22fceacaf759934ce6438e5478f18645ccead9b7012ae621b5dddf3816b3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1301,6 +1616,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "4ff7c23eaedbc0636776134215c6088a5992c3fe1480fe91a6fd3ed82bd169b6",
+          "effectiveRecipeSha256": "ae0624ab38d8b83fe3f7ce216a7ad740595c40fc813d8b27d87daf0b844c1471",
+          "effectiveSubpackageSha256": "e284ad5da173fa9aad18232d397e6e24a15e2ecd0de8b198449e1483175b0606",
+          "overlayTouchesPackageInputs": true,
           "profile": "openjdk17"
         }
       ],
@@ -1319,14 +1638,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "dc23317606aabaaab4f690edb9092397dd78799fe34dff80691f43f9ddc8e708",
+          "effectiveRecipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "dc23317606aabaaab4f690edb9092397dd78799fe34dff80691f43f9ddc8e708",
+          "effectiveRecipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "dc23317606aabaaab4f690edb9092397dd78799fe34dff80691f43f9ddc8e708",
+          "effectiveRecipeSha256": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -1364,6 +1695,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "1c6806158e94c45937c1fc499ad9fd8036af78037d01a57aa090e58f02de52ac",
+          "effectiveRecipeSha256": "ae386257d3950be46169097a3b32b72a05d3df332da0b09bc62a0d0d4536b94f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1382,6 +1717,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "22dfc1dc727251e3a973928a84a8f1d611652791531c68214fe6ca65ee36f05b",
+          "effectiveRecipeSha256": "90f9a350aabdcd25e723ecd1933371bff9e898ff9a357bcfa854efac0734c771",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "openjdk17"
         }
       ],
@@ -1400,14 +1739,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6f1d5152ec82157ad2a7fbe06aedb14d1e0226861c9368bfd47e67ce5c5388de",
+          "effectiveRecipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6f1d5152ec82157ad2a7fbe06aedb14d1e0226861c9368bfd47e67ce5c5388de",
+          "effectiveRecipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6f1d5152ec82157ad2a7fbe06aedb14d1e0226861c9368bfd47e67ce5c5388de",
+          "effectiveRecipeSha256": "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -1426,14 +1777,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3c2a406504c535b56b39c9004b770995be27f9a3a117d9e429dc0aad13722b8f",
+          "effectiveRecipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3c2a406504c535b56b39c9004b770995be27f9a3a117d9e429dc0aad13722b8f",
+          "effectiveRecipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "3c2a406504c535b56b39c9004b770995be27f9a3a117d9e429dc0aad13722b8f",
+          "effectiveRecipeSha256": "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -1462,14 +1825,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a18df5e0d1e3153e955f8938d1452e0a2b0f65c05f2fb76d9fc132a2639d5acb",
+          "effectiveRecipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a18df5e0d1e3153e955f8938d1452e0a2b0f65c05f2fb76d9fc132a2639d5acb",
+          "effectiveRecipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a18df5e0d1e3153e955f8938d1452e0a2b0f65c05f2fb76d9fc132a2639d5acb",
+          "effectiveRecipeSha256": "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -1488,6 +1863,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ee6a4c8c31f59ce8d4cbc5ab6b6adc29b18566c965aea46f64d86934e1f4fa36",
+          "effectiveRecipeSha256": "ebd68d519ce8aa5fa851f1868005f4d90b7c5e9585c0ffda022de00d033faf5e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1506,6 +1885,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c46d6fcbc8d1fbbec93aa1b863f725c7b7c00e80a4a2c26458d715628c3cebb6",
+          "effectiveRecipeSha256": "2b3218c6bd300ad72a2eddf60604c4baf4ab75d907587d2834bcba354216da29",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1579,6 +1962,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "432f53f9d16fc736e14529ea559a64f066fc67740d6c62909620a437c8f7ea6c",
+          "effectiveRecipeSha256": "c7feb9a3fd7316cb3259339a2b8a839dacfd451d50e5f6f9a188335b62b77bf4",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1597,6 +1984,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f3cec55552c09b63df83ccda6649b1d994426c48ba4c67156fdb2e0a3a7596cc",
+          "effectiveRecipeSha256": "161195b9c049a71282a9f82dfc79dbbc10bc9ca919d144c02be881c1cbb8ba1e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1625,14 +2016,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "514eee1371c395cdb626ee7a515cd390b8203fb41d6f11ddcfcaa1d26d58cc2f",
+          "effectiveRecipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "514eee1371c395cdb626ee7a515cd390b8203fb41d6f11ddcfcaa1d26d58cc2f",
+          "effectiveRecipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "514eee1371c395cdb626ee7a515cd390b8203fb41d6f11ddcfcaa1d26d58cc2f",
+          "effectiveRecipeSha256": "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -1670,14 +2073,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f00504a853d1d0f7b3031ed3d91acb8e4b6cafc2112dc7e83607385ecb8cfd29",
+          "effectiveRecipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f00504a853d1d0f7b3031ed3d91acb8e4b6cafc2112dc7e83607385ecb8cfd29",
+          "effectiveRecipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "f00504a853d1d0f7b3031ed3d91acb8e4b6cafc2112dc7e83607385ecb8cfd29",
+          "effectiveRecipeSha256": "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         }
       ],
@@ -1715,6 +2130,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "446e2a2e92b0aeaa77b885b9236c3d04f6aca0e4e84e60e0ed4144ec00a7de4e",
+          "effectiveRecipeSha256": "ad3070ea9961bbe5cc0a8fbab9f9207e7620c9596f208b5f5b0f3d44266ef392",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -1743,6 +2162,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "305f13b00f28d1fdf1cd45451bd8edf75ca1d56bcf61729b1142e8d0e7dbb10c",
+          "effectiveRecipeSha256": "b0e858474aeee9071785c5535f084e2071523610f6e1de4f45eab8c4dfb6cc7e",
+          "effectiveSubpackageSha256": "2bd84456f1da009e54c12edf1573914f5e989cfca766e51ea9dd60789bc47cb1",
+          "overlayTouchesPackageInputs": true,
           "profile": "wget"
         }
       ],
@@ -1771,6 +2194,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "144fc7e2d47e3a6219f074a4850c8e57c64062c459298953e4dc62806fbfb98d",
+          "effectiveRecipeSha256": "5306178facd555b28439aae348d0e561c541cdaace4d04ab1eeec540997b2dfc",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -1799,6 +2226,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c51fcbb74c805dcd77b51ecc71cf9caac381b646d92a3cab337e98468bedd39c",
+          "effectiveRecipeSha256": "295e128fc36df81920083d05538e45ee0a849a87e68948aff628ba431024d3a0",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1836,6 +2267,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "5ea9b97ba618689c72d6e253336be97d7ca88dba4ce54bee1cadfbc599f66ff2",
+          "effectiveRecipeSha256": "a492d38cfeb3f00073e86251256cf618e6f11c20bb096e31a41ae602359c580f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1882,6 +2317,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "5058efff0cadc5ca560f46bc5edd7b9dbcbee08d84012c138a09872ae2588fe8",
+          "effectiveRecipeSha256": "0163c7c054c8d2ebf8a40679d0e9859bc9aea478023102dc11730ce9e36bb521",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1900,6 +2339,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "45904259cfaac6f360bab9cf36cf6415671f6dbad148407d1e53b4e34e8addda",
+          "effectiveRecipeSha256": "db1c86540a4e09dfcaa7e4320756c67827757474b347681d2fce2c57c96696ea",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1937,6 +2380,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "601f5086b1ddbc5ddae132087c17c9bd8941c8b1c04964eedbfeec93ab5d4467",
+          "effectiveRecipeSha256": "dad40cf766b09a3f336f15ea731f742e16d7dbbe6cc94f77daefd487c9483f13",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -1955,6 +2402,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "b7b833f3bcdac7679bd79fe9a18e96e5e75d87dafcabb45404c00b946f48d408",
+          "effectiveRecipeSha256": "c65fc07a144c77cdf281c091e0a6e409ecdf65bfadbff4c854db33cd2621c4c8",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -2001,6 +2452,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c7720f5350d2ced8941d81e12b320a0c4eac6f90fa8f1b61deb31ce1dc7294ba",
+          "effectiveRecipeSha256": "52de9d390c6594e2a9bc45b1301a21fadc157b20a7c203d9e4eb3a841b058f7c",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -2019,6 +2474,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "37ec6f1af492d0f03a179f97bcab62bfd7193c35377c9326bc8883ddc4c0cf11",
+          "effectiveRecipeSha256": "5d93c16fc236d45b01e24cd8f33c35c68119f1c99aad2ac191cf0eba85e90799",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -2037,6 +2496,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "23c5bcd77f8e3f1f0dfc49cc41fa3e0324d4152e5fc0e0712bc1137e783e4df8",
+          "effectiveRecipeSha256": "03511a03c804abfed630861c0932431e775adabe00e8720a7c9c12931b13f3cb",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "make"
         }
       ],
@@ -2055,14 +2518,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "d4c590ffc159acf666abe72725e090b73e7cf713722c638039847091f2398bee",
+          "effectiveRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "python"
         }
       ],
@@ -2091,10 +2566,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": "d1d31425d957f19142e1ec3fa168a1dd2b2f73914c36331bf368ebaf7240bf54",
+          "overlayTouchesPackageInputs": true,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "effectiveSubpackageSha256": "d1d31425d957f19142e1ec3fa168a1dd2b2f73914c36331bf368ebaf7240bf54",
+          "overlayTouchesPackageInputs": true,
           "profile": "python"
         }
       ],
@@ -2132,6 +2615,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "20d96c449c6ccc2f044a0eeb29e31e94ae5d3aa9867216f7b90bbf0d98d8d5af",
+          "effectiveRecipeSha256": "6a3c1ec0da0494531079bed1604965eb2163e602781ba12be04d3e60ef5cddbe",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -2214,6 +2701,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "639bb1fbd34e45cc31e3cc594225fbd64332924bd418035dbad5279c3a9b21bb",
+          "effectiveRecipeSha256": "74d54ee138a8225ec8ddbb38f60d14f1538ee089e76817c6044e5f2b0d4e0bc9",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "nodejs-npm"
         }
       ],
@@ -2249,6 +2740,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "cfc3c9b5434ca38c4e8a3313bfb04d1d15455ea308c5f9cc6724b30c2df7e78e",
+          "effectiveRecipeSha256": "c3299a45a89403a0ef4d1cf1e60b4af2fd4fb089690a60fa55a2282f1f9bab3b",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "nodejs-npm"
         }
       ],
@@ -2331,6 +2826,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "fb37f289a9040bd21e023dcd993e8d6c56fb0d35f775d86018056131e349a0ba",
+          "effectiveRecipeSha256": "8f418340b828accbdf7dbe734a57daeec49d048c67a6dbcd9c03945530c40936",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "openjdk17"
         }
       ],
@@ -2368,30 +2867,58 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          "effectiveRecipeSha256": "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -2410,14 +2937,26 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "01faf52265125c1625b5068ec60829bf7648498ea3c6099804d4749bf013522c",
+          "effectiveRecipeSha256": "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "01faf52265125c1625b5068ec60829bf7648498ea3c6099804d4749bf013522c",
+          "effectiveRecipeSha256": "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "01faf52265125c1625b5068ec60829bf7648498ea3c6099804d4749bf013522c",
+          "effectiveRecipeSha256": "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -2446,6 +2985,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6712d8b0caafed2c5c87ce5aa8544a3aea589be7fb7cf8ea2e3e3300162c6de2",
+          "effectiveRecipeSha256": "8378c3bfb5e91c6a91aef8a7083d8f9b017f25913d1f0c5ff0603a5b1d858669",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         }
       ],
@@ -2555,6 +3098,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "dc515c1be3f5e8420b8ce86a4284d01293dbae0d5e34251ac8845895665e4181",
+          "effectiveRecipeSha256": "0a833f023e823bd41d43f25f6e63a10289572bfe454b65c76e763ba8564aacab",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "openjdk17"
         }
       ],
@@ -2709,10 +3256,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "44ef33aba38df71490113e83f1a960b27efbb6ae133be0562006a171e47d5d4f",
+          "effectiveRecipeSha256": "354ad5204056395bc423780da9112395aad862c01636ae3a56d2f4c025d69f12",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "44ef33aba38df71490113e83f1a960b27efbb6ae133be0562006a171e47d5d4f",
+          "effectiveRecipeSha256": "354ad5204056395bc423780da9112395aad862c01636ae3a56d2f4c025d69f12",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -2750,10 +3305,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a186f593377f6bcaff6571fce794eb39938cf027d367b1fdc80cf4d14fbca426",
+          "effectiveRecipeSha256": "29e24da6099650f92703b2772e9515cfc6004901733b1c8a4dbb3938b85762e3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "a186f593377f6bcaff6571fce794eb39938cf027d367b1fdc80cf4d14fbca426",
+          "effectiveRecipeSha256": "29e24da6099650f92703b2772e9515cfc6004901733b1c8a4dbb3938b85762e3",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -2772,10 +3335,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "889385d821802de729c1e47b8ccd16bc8f482836c6db7013475f08ce37b7469f",
+          "effectiveRecipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "889385d821802de729c1e47b8ccd16bc8f482836c6db7013475f08ce37b7469f",
+          "effectiveRecipeSha256": "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         }
       ],
@@ -2804,6 +3375,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "072ba91f7bc6fa269d1e34fd63ddda9c9083caf7e3e9a5e3a8173085bfbf9255",
+          "effectiveRecipeSha256": "471c7efe285a2d81169dbc5fcc0e339ab1a47317021057eea8ab0028318c0f1f",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         }
       ],
@@ -2822,6 +3397,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "80a13bbaa5069792238bebfd4386c1c7dc120e124e9c22458e8e1f7870f64437",
+          "effectiveRecipeSha256": "8424446f3a1bd5a4b0ca5f079d441d296996544dfb9981216c476fa52b411847",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -2904,6 +3483,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "94ebfaad4238f95ec150ecb8837670ccfe0aa364cf74e5afe305c9b23bbed176",
+          "effectiveRecipeSha256": "e61e307393f61ca1488ebba5884f188fb23d6ea4d39a78001b807c7248d45b85",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": true,
           "profile": "wget"
         }
       ],
@@ -2922,6 +3505,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "e7d759d70eae64e41c0740c6f1a0c53c19bda7906657884a4874ef4cc54272ff",
+          "effectiveRecipeSha256": "90834b817c7086e2d7657564ba027d045493ff129e161f80eb99695d81aad57e",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -2950,6 +3537,10 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "46b46fe895e83ac2ea9725dad2e8c23032ee0f71c17bb5c06a165d031433456a",
+          "effectiveRecipeSha256": "6c5fc5b5f3362de2d2eb728054de01aa2368f6b22846de1ddde2c19a214f5238",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         }
       ],
@@ -2968,34 +3559,66 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "cmake-ninja"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "curl"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "git"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "nodejs-npm"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "openjdk17"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          "effectiveRecipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "wget"
         }
       ],
@@ -3033,10 +3656,18 @@
       "occurrences": [
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6df6c25ff6d7f1e309e18d79efa058f40d1ce566b53a4cedf7c93c4bf40d8993",
+          "effectiveRecipeSha256": "d7768dbd39af796ae9d5d1f0cc95d963ed5fa842332aecd9b6b046d87bbc48ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "pkg-config"
         },
         {
           "binarySha256": null,
+          "effectiveRecipeContextSha256": "6df6c25ff6d7f1e309e18d79efa058f40d1ce566b53a4cedf7c93c4bf40d8993",
+          "effectiveRecipeSha256": "d7768dbd39af796ae9d5d1f0cc95d963ed5fa842332aecd9b6b046d87bbc48ec",
+          "effectiveSubpackageSha256": null,
+          "overlayTouchesPackageInputs": false,
           "profile": "python"
         }
       ],
@@ -3289,7 +3920,7 @@
     "One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy keys, feeds and binaries afterward."
   ],
   "resolverSha256": "3a0aaf39f30d00adeb2b183e0acef4e65c9ec10da1f9a2ec00952edd8d7c29c2",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "scopeSha256": "a36a6faa1d70105544585610231bdd6ccce322398c437ad9229c027b6ebe0a4f",
   "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
   "summary": {
@@ -3322,6 +3953,10 @@
       "resolv-conf",
       "zlib",
       "zstd"
+    ],
+    "effectiveRecipeDivergentDuplicateNames": [
+      "libcurl",
+      "ncurses"
     ],
     "occurrenceCount": 144,
     "profileCount": 10,

@@ -39,6 +39,7 @@ def module(name, filename):
 
 source = module('unified_source', 'resolve-pinned-termux-recipe-closure.py')
 deps = module('unified_dependencies', 'verify-candidate-dependency-closure.py')
+effective = module('unified_effective', 'effective-candidate-recipes.py')
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -118,6 +119,7 @@ def inventory(repo, source_root):
                 patches.append((p['localRecipePatchPath'], p['localRecipePatchSha256']))
         for path, sha in patches:
             require(digest(repo / path) == sha, 'LOCAL_PATCH_HASH_MISMATCH:' + family)
+        inputs = effective.effective_inputs(repo, source_root, nodes, patches)
         profiles[family] = {
             'manifest': manifest_path, 'manifestSha256': digest(repo / manifest_path),
             'workflow': '.github/workflows/' + workflow,
@@ -150,27 +152,30 @@ def inventory(repo, source_root):
                     'DUPLICATE_IDENTITY_DISAGREES:' + name)
             require(item['recipeSha256'] == node['recipeSha256'] and item['dependencyGroups'] == node['dependencyGroups'],
                     'DUPLICATE_SOURCE_DISAGREES:' + name)
-            item['occurrences'].append({'profile': family, 'binarySha256': None})
+            item['occurrences'].append({'profile': family, 'binarySha256': None, **inputs[name]})
     check_dependencies(union, {n: p['dependencyGroups'] for n, p in union.items()}, 'union')
     duplicated = sorted(n for n, p in union.items() if len(p['occurrences']) > 1)
+    divergent = effective.divergent_duplicates(union.values())
     return {
-        'schemaVersion': 1, 'channel': 'candidate-only', 'inventoryOnly': True,
+        'schemaVersion': 2, 'channel': 'candidate-only', 'inventoryOnly': True,
         'aggregateReady': False, 'publicationAllowed': False,
         'sourceCommit': revision, 'target': target,
         'scopeSha256': digest(repo / 'termux-package-source-scope.json'),
         'resolverSha256': digest(ROOT / 'scripts/resolve-pinned-termux-recipe-closure.py'),
         'dependencyValidatorSha256': digest(ROOT / 'scripts/verify-candidate-dependency-closure.py'),
+        'effectiveRecipeValidatorSha256': digest(ROOT / 'scripts/effective-candidate-recipes.py'),
         'profiles': profiles, 'packages': [union[n] for n in sorted(union)],
+        'effectiveRecipeContextScope': 'SHA-256 of compact sorted JSON mapping paths to SHA-256: parent build.sh and all existing sibling *.subpackage.sh after ordered manifest overlays; not all build flags, source archives, upstream patches, environment or binary ABI.',
         'summary': {'profileCount': len(profiles), 'occurrenceCount': sum(p['packageCount'] for p in profiles.values()),
                     'uniquePackageCount': len(union), 'duplicateNames': duplicated,
+                    'effectiveRecipeDivergentDuplicateNames': divergent,
                     'sourceDependencyClosure': 'PASS; per-profile and union; not binary control or ELF evidence'},
         'duplicatePolicy': 'No provider selected. Same name/version/architecture is NOT binary equivalence. Require identical SHA-256 for automatic deduplication; otherwise stop for reviewed canonical rebuild and re-audit of every consumer.',
-        'knownEffectiveRecipeDivergence': {
-            'package': 'libcurl', 'profile': 'cmake-ninja',
-            'upstreamRecipeSha256': '0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025',
-            'effectiveRecipeSha256': 'ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348',
-            'otherProfiles': ['curl', 'git'],
-            'resolution': 'UNRESOLVED; do not choose an equal-version libcurl by filename or overwrite order'},
+        'effectiveRecipeDivergences': [{
+            'package': name, 'upstreamRecipeSha256': union[name]['recipeSha256'],
+            'occurrences': union[name]['occurrences'],
+            'resolution': 'UNRESOLVED; no canonical provider selected; reviewed common rebuild and consumer re-audits required',
+        } for name in divergent],
         'binaryChecks': {k: 'NOT_RUN; signed binary inputs unavailable' for k in (
             'signedInputProvenance', 'exactDebHashes', 'controlDependsPreDepends',
             'conflictsBreaksReplacesProvides', 'payloadPathCollisions', 'elfProviderClosure',
@@ -193,6 +198,7 @@ def main():
     parser.add_argument('--source-root', type=pathlib.Path, required=True)
     parser.add_argument('--write-lock', action='store_true')
     parser.add_argument('--require-aggregate-ready', action='store_true')
+    parser.add_argument('--require-unified-recipes', action='store_true')
     args = parser.parse_args()
     try:
         result = inventory(ROOT, args.source_root.resolve())
@@ -203,9 +209,13 @@ def main():
             require((ROOT / LOCK).read_text() == text, 'UNIFIED_INPUT_LOCK_DRIFT')
         print('UNIFIED_SOURCE_PREFLIGHT_OK profiles={} occurrences={} unique={} binary_coexistence=NOT_RUN aggregate_ready=0 publication=blocked'.format(
             result['summary']['profileCount'], result['summary']['occurrenceCount'], result['summary']['uniquePackageCount']))
+        divergent = result['summary']['effectiveRecipeDivergentDuplicateNames']
+        print('EFFECTIVE_RECIPE_DIVERGENCE_UNRESOLVED:' + ','.join(divergent))
+        require(not args.require_unified_recipes or not divergent,
+                'UNIFIED_RECIPES_DIVERGE:' + ','.join(divergent))
         require(not args.require_aggregate_ready, 'AGGREGATE_BLOCKED_SIGNED_BINARY_INPUTS_MISSING')
         return 0
-    except (GateError, source.GateError, deps.GateError, OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:
+    except (GateError, source.GateError, deps.GateError, effective.GateError, OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:
         print('UNIFIED_INPUT_AUDIT_REJECTED:' + str(exc), file=sys.stderr)
         return 2
 

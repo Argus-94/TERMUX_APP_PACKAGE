@@ -75,3 +75,26 @@ python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.p
 Результат намеренно содержит `qualified=false` и `provenanceValidated=false`. Это только статическая проверка пересечения payload путей; она **не** проверяет подписи/подписанную provenance, доверенные builder, ABI/ELF, зависимости, совместимость runtime, полноту набора или пригодность к установке, и ничего не агрегирует, не устанавливает и не публикует. Безопасность ограничена поддерживаемым subset: максимальный вход 512 MiB, член 128 MiB, суммарный payload 1 GiB и 200 000 записей. Форматы ar/tar extensions и компрессии вне распознаваемого набора fail closed.
 
 Синтетические тесты: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_deb_payload_collisions.py -v`.
+
+## Эффективные рецепты: вычисляемая блокировка, а не ручная заметка
+
+Lock schema v2 воспроизводит ordered overlays каждого профиля на копии файлов clean pinned source. Новый `scripts/effective-candidate-recipes.py` не исполняет shell-рецепты, не меняет source checkout и не собирает пакеты. Он проверяет hash исходных recipe/subpackage и патчей, допускает только изменения существующих `build.sh` и sibling `*.subpackage.sh` тех же родителей, применяет патчи в отдельном временном каталоге и вычисляет хэши результата. Добавления/удаления, rename/copy, режимные изменения, symlink, traversal, бинарные и неподдерживаемые patch-форматы отклоняются.
+
+У каждой occurrence теперь есть `effectiveRecipeSha256`, `effectiveSubpackageSha256` и `effectiveRecipeContextSha256`. Последний — SHA-256 компактного sorted JSON, сопоставляющего пути родительского `build.sh` и всех существующих sibling `*.subpackage.sh` их effective SHA-256. Соседние subpackage участвуют в контексте родительской сборки, но не добавляются в runtime dependency closure. Это **ограниченный recipe/subpackage context**, а не полный build environment, configure flags, upstream source patches, source archive provenance или ABI.
+
+Вычислены два unresolved дубликата:
+
+| Пакет | Профили и отличие |
+|---|---|
+| `libcurl 8.23.0` | `cmake-ninja`: effective recipe `ba13efc1…f8ede348`, отключён optional zstd; `git` и `curl`: upstream `0051cc33…e69f12025`. |
+| `ncurses 6.6.20260307+really6.5.20250830` | `pkg-config` и `python`: один и тот же license-preservation overlay, effective recipe `5b90e2b0…36dec0f`; `git`: без этого overlay, recipe `350a65eb…2f4ea34`. Точная Debian version/revision остаётся закреплена в lock. |
+
+Различие `ncurses` связано с сохранением лицензии; оно **не является доказанным ABI-конфликтом**. Но одинаковые версии не позволяют молча выбрать один из результатов. Нужны reviewed common recipe/build configuration, новая совместная пересборка и повторный аудит потребителей; известные различия нельзя снять простой заменой hashes в JSON.
+
+```bash
+python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-unified-recipes
+# exit 2: UNIFIED_RECIPES_DIVERGE:libcurl,ncurses
+python3 -m unittest discover -s scripts/tests -p test_effective_candidate_recipes.py -v
+```
+
+CI проверяет как обычный inventory, так и ожидаемый отказ recipe-unification и отдельный отказ `--require-aggregate-ready`. При решении source расхождений binary gate всё равно останется закрытым: recipe equality не означает binary equality, доверенную подпись/provenance или успешную установку. Новые тесты — синтетические source-data tests; production feed, Pages и Builder installer не включаются.

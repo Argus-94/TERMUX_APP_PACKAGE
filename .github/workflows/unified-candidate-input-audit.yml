@@ -12,9 +12,11 @@ on:
       - unified-candidate-input-lock.json
       - termux-package-source-scope.json
       - scripts/audit-unified-candidate-inputs.py
+      - scripts/effective-candidate-recipes.py
       - scripts/resolve-pinned-termux-recipe-closure.py
       - scripts/verify-candidate-dependency-closure.py
       - scripts/tests/test_unified_candidate_inputs.py
+      - scripts/tests/test_effective_candidate_recipes.py
       - termux-private-package-kit/**/*.patch
       - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
   pull_request:
@@ -25,9 +27,11 @@ on:
       - unified-candidate-input-lock.json
       - termux-package-source-scope.json
       - scripts/audit-unified-candidate-inputs.py
+      - scripts/effective-candidate-recipes.py
       - scripts/resolve-pinned-termux-recipe-closure.py
       - scripts/verify-candidate-dependency-closure.py
       - scripts/tests/test_unified_candidate_inputs.py
+      - scripts/tests/test_effective_candidate_recipes.py
       - termux-private-package-kit/**/*.patch
       - docs/UNIFIED_CANDIDATE_INPUTS_RU.md
 permissions:
@@ -63,6 +67,11 @@ jobs:
           set -Eeuo pipefail
           python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT"
           python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.py -v
+          python3 -m unittest discover -s scripts/tests -p test_effective_candidate_recipes.py -v
+          if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-unified-recipes >"$RUNNER_TEMP/unified-recipes-blocked.log" 2>&1; then
+            echo 'ERROR:UNRESOLVED_RECIPES_MUST_STAY_BLOCKED'; exit 2
+          fi
+          grep -Fx 'UNIFIED_INPUT_AUDIT_REJECTED:UNIFIED_RECIPES_DIVERGE:libcurl,ncurses' "$RUNNER_TEMP/unified-recipes-blocked.log"
           if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-aggregate-ready >"$RUNNER_TEMP/unified-blocked.log" 2>&1; then
             echo 'ERROR:AGGREGATE_MUST_STAY_BLOCKED'; exit 2
           fi
@@ -70,6 +79,7 @@ jobs:
           {
             echo '## Unified source input audit only'
             echo '10 profiles / 144 source occurrences / 79 unique package identities.'
+            echo 'Effective recipe/subpackage overlays reproduced without recipe execution; unresolved duplicate variants: libcurl, ncurses. Unified-recipe gate: BLOCKED.'
             echo 'Per-profile and union source dependencies: PASS. Binary aggregate: BLOCKED; signed binary inputs missing.'
             echo 'Binary control/ELF/path-collision audits, aggregate signed APT simulation and Android qualification: NOT RUN.'
             echo 'No build, package upload, signing key, Pages, production feed or Builder change.'
@@ -77,4 +87,4 @@ jobs:
       - name: Remove temporary source and report
         if: always()
         shell: bash
-        run: rm -rf -- "$RUNNER_TEMP/unified-pinned-source" "$RUNNER_TEMP/unified-blocked.log"
+        run: rm -rf -- "$RUNNER_TEMP/unified-pinned-source" "$RUNNER_TEMP/unified-blocked.log" "$RUNNER_TEMP/unified-recipes-blocked.log"
