@@ -2,7 +2,7 @@
 
 ## Текущий статус: production закрыт
 
-- Целевое приложение — приватный AI Builder `com.karat.aibuilder`, архитектура `aarch64`; это не feed для stock Termux. В `main` (`2a2dd775`, merge PR #9; PR #8 добавил Java) остаётся legacy pool из 133 `.deb` без полного pinned build provenance. Статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. Не считать legacy pool доверенным источником установки.
+- Целевое приложение — приватный AI Builder `com.karat.aibuilder`, архитектура `aarch64`; это не feed для stock Termux. В baseline `main` после PR #10 (`691315578c9acd2649d43bef261b6374ade9e4d7`) остаётся legacy pool из 133 `.deb` без полного pinned build provenance. Статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. Не считать legacy pool доверенным источником установки.
 - Кандидатные workflows закрепляют версии исходников/рецептов и builder image и выполняют статический аудит и проверку временного подписанного APT feed с `signed-by` и `apt-get --simulate`. Это hosted CI, а не Android install/runtime proof; симуляция не устанавливает пакеты.
 - **CMake + Ninja:** `cmake` `4.4.4` и `ninja` `1.13.2`; required pinned closure — 22 пакета / 34 dependency alternatives. Источники: Termux packages commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`, CMake archive SHA-256 `bd24c30d80a7744ae84b845ff080cc8453b06c622ef01066564108e9cefc44cf`, Ninja archive SHA-256 `974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17`. Успешный CI: [run 39086630210](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39086630210), head `d038f6080babd6f465cb6d1dbb0baf253ec65171`.
 - **OpenJDK 17:** root `openjdk-17` `17.0.20`; required pinned runtime closure — 36 пакетов / 46 dependency alternatives. Успешный CI: [run 39080124869](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39080124869), head `d58ede99b4b746d7a4ed4253d33b575ffd323d8a`. В этот required набор не включены рекомендации; не подменять этим фактом самостоятельные device tests.
@@ -36,6 +36,10 @@
 Make-only `scripts/stage-device-test-artifact.py` повторно вызывает существующий candidate-policy validator, сверяет plaintext `InRelease` с `Release`, root Release с distribution Release, exact SHA-256/размеры двух подписанных индексов и срок действия metadata. Это проверка целостности handoff, не сборка новых пакетов и не Android evidence. Она не расширяет ранее разрешённый allowlist публикации artifacts.
 
 `scripts/test-device-test-artifact-staging.sh` проверяет реальные временные подписи и отказы при подмене; `scripts/tests/test_device_handoff_validation.py` покрывает metadata edge cases. Fixtures синтетические и никогда не предназначены для установки. Новый workflow `device-handoff-policy.yml` выполняет только эти policy/regression tests, без upload-artifact, production keys, Pages и package installation.
+
+### Подготовка Android evidence
+
+`scripts/validate-android-qualification.py` проверяет подпись заявления отдельным заранее доверенным ключом, exact candidate digest, хэши локальных artifacts и полноту пяти check records. Это только согласованность подписанного bundle, **не независимое доказательство Android**, не автоматическое извлечение APK certificate и не проверка feed signatures. Успех оставляет production и `pkg.ensure` заблокированными; signer не назначается автоматически. Схема, команда запуска и ограничения: [ANDROID_EVIDENCE_RU.md](ANDROID_EVIDENCE_RU.md).
 
 ## Gate перед публикацией
 
