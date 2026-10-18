@@ -71,7 +71,7 @@ class InventoryTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.repo = pathlib.Path(self.tmp.name)
-        files = {'termux-package-source-scope.json', 'scripts/candidate-packaging-policy.py', 'scripts/apply-candidate-packaging-policy.py'}
+        files = {'termux-package-source-scope.json', 'scripts/candidate-packaging-policy.py', 'scripts/apply-candidate-packaging-policy.py', 'termux-private-package-kit/openjdk17/upstream-recipe-inputs.json'}
         files.update(str(p.relative_to(ROOT)) for p in (ROOT / 'termux-private-package-kit').glob('*/build-*.sh'))
         for manifest, workflow, _ in u.PROFILES.values():
             files.update((manifest, '.github/workflows/' + workflow))

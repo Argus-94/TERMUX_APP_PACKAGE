@@ -56,6 +56,19 @@ def effective_inputs(repo, source_root, nodes, patches):
     """
     allowed = {p[field] for p in nodes.values()
                for field in ('recipePath', 'subpackagePath') if p[field]}
+    # One deliberately narrow data-file exception: the OpenJDK17 closure's
+    # pulseaudio node may overlay its existing meson.patch input, pinned by
+    # the upstream input registry (not by caller-provided patch data).
+    pulse_overlay = ('pulseaudio' in nodes and
+                     nodes['pulseaudio']['recipePath'] == 'packages/pulseaudio/build.sh')
+    overlay_target = 'packages/pulseaudio/meson.patch'
+    overlay_base_sha = None
+    if pulse_overlay:
+        registry = json.loads(regular_input(repo, 'termux-private-package-kit/openjdk17/upstream-recipe-inputs.json'))
+        overlay_base_sha = registry['files'].get(overlay_target)
+        require(re.fullmatch(r'[0-9a-f]{64}', overlay_base_sha or '') is not None,
+                'PULSEAUDIO_OVERLAY_BASE_NOT_REGISTERED')
+        allowed.add(overlay_target)
     # A parent build also processes sibling subpackages outside the required
     # runtime set (e.g. mpg123). Include those existing definitions as context,
     # without adding them to the candidate dependency closure.
@@ -63,6 +76,9 @@ def effective_inputs(repo, source_root, nodes, patches):
         parent = source_root / pathlib.PurePosixPath(node['recipePath']).parent
         allowed.update(str(p.relative_to(source_root)) for p in parent.glob('*.subpackage.sh'))
     original = {name: regular_input(source_root, name) for name in allowed}
+    if pulse_overlay:
+        require(sha(original[overlay_target]) == overlay_base_sha,
+                'PULseaUDIO_PATCH_BASE_HASH_MISMATCH')
     for node in nodes.values():
         for path_field, hash_field in (('recipePath', 'recipeSha256'), ('subpackagePath', 'subpackageSha256')):
             if node[path_field]:
@@ -80,16 +96,22 @@ def effective_inputs(repo, source_root, nodes, patches):
             require(b'\0' not in data, 'UNSUPPORTED_RECIPE_PATCH_FORMAT')
             text = data.decode('utf-8')
             headers, old_paths, new_paths = [], [], []
+            outer_header_state = 0
             for line in text.splitlines():
                 if line.startswith('diff --git '):
                     match = re.fullmatch(r'diff --git a/([A-Za-z0-9+_./-]+) b/([A-Za-z0-9+_./-]+)', line)
-                    require(match is not None and match[1] == match[2] and match[1] in allowed,
+                    require(match is not None and match[1] == match[2] and
+                            (match[1] in allowed and (match[1] != overlay_target or
+                             (pulse_overlay and name == 'termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch'))),
                             'UNSUPPORTED_RECIPE_PATCH_HEADER')
                     headers.append(match[1])
-                elif line.startswith('--- '):
+                    outer_header_state = 1
+                elif outer_header_state == 1 and line.startswith('--- '):
                     old_paths.append(line[6:] if line.startswith('--- a/') else None)
-                elif line.startswith('+++ '):
+                    outer_header_state = 2
+                elif outer_header_state == 2 and line.startswith('+++ '):
                     new_paths.append(line[6:] if line.startswith('+++ b/') else None)
+                    outer_header_state = 0
             require(headers and headers == old_paths == new_paths and len(headers) == len(set(headers)),
                     'UNSUPPORTED_RECIPE_PATCH_HEADER')
             # Existing content edits only; mode/rename/add/delete operations are
@@ -107,13 +129,21 @@ def effective_inputs(repo, source_root, nodes, patches):
                 require(len(fields) == 3 and all(x.isdigit() for x in fields[:2]),
                         'UNSUPPORTED_RECIPE_PATCH_STAT')
                 target = fields[2]
-                require(re.fullmatch(r'packages/[A-Za-z0-9+_.-]+/(?:build\.sh|[A-Za-z0-9+_.-]+\.subpackage\.sh)', target) is not None
-                        and target in allowed, 'RECIPE_PATCH_OUTSIDE_CLOSURE')
+                normal_recipe_target = re.fullmatch(r'packages/[A-Za-z0-9+_.-]+/(?:build\.sh|[A-Za-z0-9+_.-]+\.subpackage\.sh)', target) is not None
+                narrow_data_target = (pulse_overlay and target == overlay_target and
+                    name == 'termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch')
+                require((normal_recipe_target or narrow_data_target) and target in allowed,
+                        'RECIPE_PATCH_OUTSIDE_CLOSURE')
                 require(target not in changed, 'DUPLICATE_RECIPE_PATCH_TARGET')
                 changed.add(target)
             require(changed == set(headers), 'RECIPE_PATCH_STAT_HEADER_MISMATCH')
             git_apply(tree, '--check', '--', str(patch))
             git_apply(tree, '--', str(patch))
+            # The allowlisted meson.patch is itself a unified patch consumed by
+            # the package build; parse it after overlay so bad inner hunk counts
+            # fail during source preflight rather than in the native build.
+            if overlay_target in changed:
+                git_apply(tree, '--numstat', str(tree / overlay_target))
             touched.update(changed)
         effective = {name: regular_input(tree, name) for name in allowed}
         # A patch must not mutate unreported files; the isolated tree contains
@@ -128,7 +158,8 @@ def effective_inputs(repo, source_root, nodes, patches):
             path: sha(data) for path, data in sorted(effective.items())
             if pathlib.PurePosixPath(path).parent == pathlib.PurePosixPath(p['recipePath']).parent
         }, sort_keys=True, separators=(',', ':')).encode()),
-        'overlayTouchesPackageInputs': p['recipePath'] in touched or p['subpackagePath'] in touched,
+        'overlayTouchesPackageInputs': (p['recipePath'] in touched or p['subpackagePath'] in touched or
+            any(pathlib.PurePosixPath(x).parent == pathlib.PurePosixPath(p['recipePath']).parent for x in touched)),
     } for name, p in nodes.items()}
 
 

@@ -179,5 +179,44 @@ class EffectiveRecipeTests(unittest.TestCase):
                 self.run_patch(self.patch())
 
 
+    def pulse_fixture(self):
+        import shutil
+        import subprocess
+        registry = 'termux-private-package-kit/openjdk17/upstream-recipe-inputs.json'
+        patch = 'termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch'
+        self.put(self.repo, registry, (ROOT / registry).read_bytes())
+        self.put(self.repo, patch, (ROOT / patch).read_bytes())
+        meson = 'packages/pulseaudio/meson.patch'
+        self.put(self.source, meson, pathlib.Path('/workspace/termux-source-505e06e') .joinpath(meson).read_bytes())
+        pulse_recipe = 'packages/pulseaudio/build.sh'
+        pulse_data = pathlib.Path('/workspace/termux-source-505e06e').joinpath(pulse_recipe).read_bytes()
+        self.put(self.source, pulse_recipe, pulse_data)
+        # The registered overlay is consumed after openjdk17-license-notices.patch
+        # in the actual package workflow; model its pulseaudio recipe context here.
+        legacy = ROOT / 'termux-private-package-kit/openjdk17/openjdk17-license-notices.patch'
+        result = subprocess.run(['git', '-C', str(self.source), 'apply', '--include=' + pulse_recipe, str(legacy)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        pulse_data = (self.source / pulse_recipe).read_bytes()
+        nodes = {'pulseaudio': {'recipePath': pulse_recipe, 'recipeSha256': e.sha(pulse_data),
+                                'subpackagePath': None, 'subpackageSha256': None}}
+        return patch, meson, nodes
+    def test_registered_pulseaudio_data_overlay(self):
+        patch, meson, nodes = self.pulse_fixture()
+        digest = e.sha((self.repo / patch).read_bytes())
+        result = e.effective_inputs(self.repo, self.source, nodes, [(patch, digest)])
+        self.assertTrue(result['pulseaudio']['overlayTouchesPackageInputs'])
+        self.assertNotEqual(result['pulseaudio']['effectiveRecipeContextSha256'], e.sha(b'{}'))
+    def test_pulseaudio_base_hash_mutation_rejected(self):
+        patch, meson, nodes = self.pulse_fixture()
+        (self.source / meson).write_bytes(b'tampered\n')
+        with self.assertRaisesRegex(e.GateError, 'BASE_HASH_MISMATCH'):
+            e.effective_inputs(self.repo, self.source, nodes, [(patch, e.sha((self.repo / patch).read_bytes()))])
+    def test_pulseaudio_overlay_cannot_target_other_file(self):
+        patch, meson, nodes = self.pulse_fixture()
+        data = (self.repo / patch).read_text()
+        bad = data.replace('packages/pulseaudio/meson.patch', 'packages/pulseaudio/build.sh')
+        (self.repo / patch).write_text(bad)
+        with self.assertRaises(e.GateError):
+            e.effective_inputs(self.repo, self.source, nodes, [(patch, e.sha(bad.encode()))])
 if __name__ == '__main__':
     unittest.main()
