@@ -68,10 +68,7 @@ jobs:
           python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT"
           python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.py -v
           python3 -m unittest discover -s scripts/tests -p test_effective_candidate_recipes.py -v
-          if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-unified-recipes >"$RUNNER_TEMP/unified-recipes-blocked.log" 2>&1; then
-            echo 'ERROR:UNRESOLVED_RECIPES_MUST_STAY_BLOCKED'; exit 2
-          fi
-          grep -Fx 'UNIFIED_INPUT_AUDIT_REJECTED:UNIFIED_RECIPES_DIVERGE:libcurl,ncurses' "$RUNNER_TEMP/unified-recipes-blocked.log"
+          python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-unified-recipes
           if python3 scripts/audit-unified-candidate-inputs.py --source-root "$AIB_PINNED_SOURCE_ROOT" --require-aggregate-ready >"$RUNNER_TEMP/unified-blocked.log" 2>&1; then
             echo 'ERROR:AGGREGATE_MUST_STAY_BLOCKED'; exit 2
           fi
@@ -79,7 +76,7 @@ jobs:
           {
             echo '## Unified source input audit only'
             echo '10 profiles / 144 source occurrences / 79 unique package identities.'
-            echo 'Effective recipe/subpackage overlays reproduced without recipe execution; unresolved duplicate variants: libcurl, ncurses. Unified-recipe gate: BLOCKED.'
+            echo 'Effective recipe/subpackage overlays reproduced without recipe execution; common libcurl and ncurses recipes required. Unified-recipe gate: PASS; binary equivalence NOT proven.'
             echo 'Per-profile and union source dependencies: PASS. Binary aggregate: BLOCKED; signed binary inputs missing.'
             echo 'Binary control/ELF/path-collision audits, aggregate signed APT simulation and Android qualification: NOT RUN.'
             echo 'No build, package upload, signing key, Pages, production feed or Builder change.'

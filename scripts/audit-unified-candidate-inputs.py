@@ -181,11 +181,11 @@ def inventory(repo, source_root):
             'conflictsBreaksReplacesProvides', 'payloadPathCollisions', 'elfProviderClosure',
             'aggregateSignedAptSimulation')},
         'requiredInputs': [
-            'Fresh CI-only signed bundles for all ten profiles, never public uploads; include every exact .deb and SHA-256, Packages/Release/InRelease/Release.gpg and externally pinned ephemeral public key fingerprint/keyring.',
+            'Fresh explicitly retained CI candidate bundles for all ten profiles, not production publication; include every exact .deb and SHA-256, Packages/Release/InRelease/Release.gpg and externally pinned ephemeral public key fingerprint/keyring.',
             'Hash-bound source closure, full effective recipe/patch inputs, builder digest, build-result and static audit reports for each bundle; independently re-run the audits, not just trust success booleans.',
             'Reviewed canonical provider selection for duplicate identities, especially patched libcurl, followed by cross-family consumer re-audits; no arbitrary first/last writer.',
             'Actual control metadata and full payload inventories including type, mode, symlink/hardlink targets and hashes; reject non-directory collisions and path traversal before extraction.',
-            'One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy keys, feeds and binaries afterward.'
+            'One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy runner-local private keys and temporary build trees afterward; retain only allowlisted candidate artifacts when explicitly requested.'
         ],
         'androidInstallRuntimeProjectBuildUpgradeRollback': 'NOT_RUN',
     }
@@ -210,7 +210,7 @@ def main():
         print('UNIFIED_SOURCE_PREFLIGHT_OK profiles={} occurrences={} unique={} binary_coexistence=NOT_RUN aggregate_ready=0 publication=blocked'.format(
             result['summary']['profileCount'], result['summary']['occurrenceCount'], result['summary']['uniquePackageCount']))
         divergent = result['summary']['effectiveRecipeDivergentDuplicateNames']
-        print('EFFECTIVE_RECIPE_DIVERGENCE_UNRESOLVED:' + ','.join(divergent))
+        print('EFFECTIVE_RECIPE_DIVERGENCE_UNRESOLVED:' + ','.join(divergent) if divergent else 'EFFECTIVE_RECIPES_UNIFIED binary_equivalence=NOT_PROVEN')
         require(not args.require_unified_recipes or not divergent,
                 'UNIFIED_RECIPES_DIVERGE:' + ','.join(divergent))
         require(not args.require_aggregate_ready, 'AGGREGATE_BLOCKED_SIGNED_BINARY_INPUTS_MISSING')

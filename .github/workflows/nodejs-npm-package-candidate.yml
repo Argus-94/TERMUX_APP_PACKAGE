@@ -1,6 +1,13 @@
 name: Build and verify pinned Node.js/npm candidate (no publication)
 
 on:
+  workflow_dispatch:
+    inputs:
+      retain_candidate_artifacts:
+        description: Retain verified candidate bundle for 7 days (visible to authenticated repository readers)
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - work/nodejs-npm-candidate-20261017
@@ -131,6 +138,26 @@ jobs:
           PY
           )
           { echo '## Pinned Node.js/npm candidate closure (temporary CI-only feed)'; echo; echo '| Gate | Result |'; echo '|---|---|'; echo '| Exact upstream source closure | PASS; 11 packages / 14 dependency alternatives; npm provider is nodejs |'; echo '| Immutable npm archive and bundled Node/npm license provenance; ICU pinned-source LICENSE preserved | PASS'; echo '| App-private payload paths, licenses, AArch64 ELF and providers | PASS; 11 package audits |'; echo '| Ephemeral signed APT feed and exact simulated install | PASS; install not performed'; echo '| npm package SHA-256 | `'$npm_sha'` |'; echo '| Device install / rollback | NOT RUN |'; echo '| Public artifact / production feed / Pages / GitHub Release | NONE / BLOCKED |'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Stage verified candidate artifacts and provenance
+        if: success() && inputs.retain_candidate_artifacts
+        shell: bash
+        env:
+          CANDIDATE_OUTPUT: ${{ runner.temp }}/aib-nodejs-npm-output
+          CANDIDATE_FEED: ${{ runner.temp }}/aib-nodejs-npm-feed
+          CANDIDATE_KEYROOT: ${{ runner.temp }}/aib-nodejs-npm-signing
+          CANDIDATE_MANIFEST: ${{ github.workspace }}/nodejs-npm-candidate-package-set.json
+          BUILDER_IMAGE_REF: ${{ env.TERMUX_BUILDER_IMAGE_REF }}
+          SOURCE_COMMIT: ${{ env.TERMUX_SOURCE_PIN }}
+          BUNDLE_DIR: ${{ runner.temp }}/candidate-retention-bundle
+        run: python3 scripts/stage-candidate-retention.py
+      - name: Upload verified candidate bundle (7 days)
+        if: success() && inputs.retain_candidate_artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: candidate-nodejs-npm-${{ github.run_id }}
+          path: ${{ runner.temp }}/candidate-retention-bundle/
+          retention-days: 7
+          if-no-files-found: error
       - name: Remove temporary source, package, feed, and signing material
         if: always()
         shell: bash

@@ -1,4 +1,5 @@
 import ast
+import hashlib
 import importlib.util
 import json
 import pathlib
@@ -19,6 +20,9 @@ class CurlAllowlistTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
 
+    def test_build_script_hash_is_reviewed(self):
+        builder = pathlib.Path(__file__).resolve().parents[1] / "build-curl-private-aarch64.sh"
+        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "5c3f3d96f8ba8dcc4dcf70e13bb2d26c6ebcdf5bbf8438a52cecd73f26ce9ea7")
     def test_embedded_builder_python_heredocs_parse(self):
         builder = pathlib.Path(__file__).resolve().parents[1] / "build-curl-private-aarch64.sh"
         text = builder.read_text(encoding="utf-8")
@@ -27,6 +31,11 @@ class CurlAllowlistTests(unittest.TestCase):
         for index, block in enumerate(blocks):
             ast.parse(block, filename=f"{builder}:python-heredoc-{index + 1}")
 
+    def test_local_recipe_overlay_metadata_is_hash_locked(self):
+        spec = next(x for x in self.manifest["packages"] if x["name"] == "libcurl")
+        patch = REPO_ROOT / spec["localRecipePatchPath"]
+        self.assertEqual(hashlib.sha256(patch.read_bytes()).hexdigest(), spec["localRecipePatchSha256"])
+        self.assertIn("--without-zstd", patch.read_text())
     def test_exact_pinned_package_specs_are_accepted(self):
         auditor.validate_package_specs(self.manifest["packages"])
 

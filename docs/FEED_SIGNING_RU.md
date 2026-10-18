@@ -12,9 +12,9 @@
 
 ## Границы
 
-- Все тестовые/candidate данные создаются во временном каталоге GitHub Actions runner. Обычные запуски всё удаляют; один одобренный marker push может сохранить только allowlisted device-test bundle в публичном Actions artifact на 1 день.
+- Все тестовые/candidate данные создаются во временном каталоге GitHub Actions runner. Обычные запуски всё удаляют; явный `workflow_dispatch` с `retain_candidate_artifacts=true` сохраняет проверяемый allowlisted candidate bundle на 7 дней. Исторический marker-push Make handoff остаётся отдельным однодневным механизмом.
 - Candidate CI не проверяет production keypair из `keys/feed-signing.json`; production-подпись должна быть подключена отдельным защищённым workflow после отдельного допуска.
-- Единственное исключение — временный artifact на 1 день: `.deb`, подписанные индексы/Release, только публичный ephemeral keyring, manifest и build/audit reports. Приватный signing key и его GNUPGHOME в artifact не копируются; production private key не используется.
+- Retained bundle содержит только новые candidate `.deb`, подписанные индексы/Release, публичный ephemeral keyring/fingerprint, manifest, build/audit reports и hash-bound provenance. Приватный signing key и его GNUPGHOME не копируются; production private key не используется. В публичном репозитории artifact не конфиденциален. Self-signed ephemeral evidence не назначает доверенного production signer и не разрешает установку.
 - Candidate `.deb`, индексы и подписи не коммитятся, не прикрепляются к GitHub Release и не выкладываются на Pages.
 - Существующий legacy pool из 133 `.deb` не подписывается и не становится доверенным от факта smoke-теста.
 - Legacy build/Pages workflow-файлы в `main` пока не удалены; их cleanup требует отдельного подтверждения.

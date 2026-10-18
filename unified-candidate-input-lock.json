@@ -14,70 +14,7 @@
   "dependencyValidatorSha256": "1d6d888dc9f13dc54b56b0607733bfb2bdc40b4aa9ff46b05355f60fbfcc4665",
   "duplicatePolicy": "No provider selected. Same name/version/architecture is NOT binary equivalence. Require identical SHA-256 for automatic deduplication; otherwise stop for reviewed canonical rebuild and re-audit of every consumer.",
   "effectiveRecipeContextScope": "SHA-256 of compact sorted JSON mapping paths to SHA-256: parent build.sh and all existing sibling *.subpackage.sh after ordered manifest overlays; not all build flags, source archives, upstream patches, environment or binary ABI.",
-  "effectiveRecipeDivergences": [
-    {
-      "occurrences": [
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
-          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": true,
-          "profile": "cmake-ninja"
-        },
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
-          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
-          "profile": "curl"
-        },
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
-          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
-          "profile": "git"
-        }
-      ],
-      "package": "libcurl",
-      "resolution": "UNRESOLVED; no canonical provider selected; reviewed common rebuild and consumer re-audits required",
-      "upstreamRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025"
-    },
-    {
-      "occurrences": [
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "d4c590ffc159acf666abe72725e090b73e7cf713722c638039847091f2398bee",
-          "effectiveRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
-          "profile": "git"
-        },
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
-          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": true,
-          "profile": "pkg-config"
-        },
-        {
-          "binarySha256": null,
-          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
-          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
-          "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": true,
-          "profile": "python"
-        }
-      ],
-      "package": "ncurses",
-      "resolution": "UNRESOLVED; no canonical provider selected; reviewed common rebuild and consumer re-audits required",
-      "upstreamRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34"
-    }
-  ],
+  "effectiveRecipeDivergences": [],
   "effectiveRecipeValidatorSha256": "f7aee9462f5db19519d35d562515975b6727a932eca0984ed38a0f22ee8ae114",
   "inventoryOnly": true,
   "packages": [
@@ -427,10 +364,10 @@
       "occurrences": [
         {
           "binarySha256": null,
-          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
-          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
           "effectiveSubpackageSha256": "47a25ce446d62c15a4911b4ed6e95fb0655cb1624eb1b62a13a6b6e87315daef",
-          "overlayTouchesPackageInputs": false,
+          "overlayTouchesPackageInputs": true,
           "profile": "curl"
         }
       ],
@@ -1295,18 +1232,18 @@
         },
         {
           "binarySha256": null,
-          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
-          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
           "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
+          "overlayTouchesPackageInputs": true,
           "profile": "curl"
         },
         {
           "binarySha256": null,
-          "effectiveRecipeContextSha256": "f7518ca91d26f738dfede51475a6f4cf54bf6e45d078f025f172b9f82ad1dc3e",
-          "effectiveRecipeSha256": "0051cc33b3d3f0b69e74a00c67ba668f295b6eb3574e548154653d7e69f12025",
+          "effectiveRecipeContextSha256": "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "effectiveRecipeSha256": "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
           "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
+          "overlayTouchesPackageInputs": true,
           "profile": "git"
         }
       ],
@@ -2518,10 +2455,10 @@
       "occurrences": [
         {
           "binarySha256": null,
-          "effectiveRecipeContextSha256": "d4c590ffc159acf666abe72725e090b73e7cf713722c638039847091f2398bee",
-          "effectiveRecipeSha256": "350a65eb4f5d5086d95c2b05db129557c62dbbbf0c5f82ee7163e0de12f4ea34",
+          "effectiveRecipeContextSha256": "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "effectiveRecipeSha256": "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
           "effectiveSubpackageSha256": null,
-          "overlayTouchesPackageInputs": false,
+          "overlayTouchesPackageInputs": true,
           "profile": "git"
         },
         {
@@ -3712,14 +3649,19 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/cmake-ninja-package-candidate.yml",
-      "workflowSha256": "c336eb26b3474203fbb2f2ada0551d4b77391cb168729c7fcbbfedf3e27df8ec"
+      "workflowSha256": "af4dce9329210baf54418b92764d239b5198a76ada6dff794665c875cf6765e7"
     },
     "curl": {
       "buildModifications": {},
       "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
-      "localPatches": [],
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/curl-v8.23.0/libcurl-disable-optional-zstd.patch",
+          "sha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788"
+        }
+      ],
       "manifest": "curl-candidate-package-set.json",
-      "manifestSha256": "01cc8692d8a6c36dfe9d995cb9138ae990d747a0b6b3ae04a16cfbd48c3f75c8",
+      "manifestSha256": "554fe82cf534cc338b0af110b7edcbac790720cafd1d060553bb3725e166876e",
       "packageCount": 9,
       "rootPackages": [
         "curl"
@@ -3727,7 +3669,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/curl-package-candidate.yml",
-      "workflowSha256": "b83047cda5f34578c23da6e96d4328b93a258383ce35bc26eec84dd04072deba"
+      "workflowSha256": "46c2e6abd807c05c0b4ca77eb0080141aec4e8e68b2bda3705285e1ded28ada8"
     },
     "gh": {
       "buildModifications": {},
@@ -3742,14 +3684,23 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/package-feed-candidate.yml",
-      "workflowSha256": "2e46d30fac9989bcf08f11ea5e4713d253a63738b6bb2c3b35a656ceafc1bb24"
+      "workflowSha256": "a38e65090442b330375039422a4b1f1abeaeac1c7569755610166f7271b51d37"
     },
     "git": {
       "buildModifications": {},
       "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
-      "localPatches": [],
+      "localPatches": [
+        {
+          "path": "termux-private-package-kit/git-v2.56.0/libcurl-disable-optional-zstd.patch",
+          "sha256": "69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788"
+        },
+        {
+          "path": "termux-private-package-kit/git-v2.56.0/ncurses-ui-libs-license.patch",
+          "sha256": "f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9"
+        }
+      ],
       "manifest": "git-candidate-package-set.json",
-      "manifestSha256": "70105a4898ff9df0af34071d7d59c99accdd0d0d3075dfea2dab56846b2646d5",
+      "manifestSha256": "620a41c892eb0771c461d56da4f2b10cb676ee33dd64467393d740a43f8334b7",
       "packageCount": 14,
       "rootPackages": [
         "git"
@@ -3757,7 +3708,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/git-package-candidate.yml",
-      "workflowSha256": "867634bd6eb8d67fb067c3206400356140f5862b2a27eeeb395c714ab2a81ac8"
+      "workflowSha256": "12176ec5cf39bc04bee7290f1a3b983335ca1b5884af608666f2766aad591400"
     },
     "make": {
       "buildModifications": {},
@@ -3777,7 +3728,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/package-feed-candidate.yml",
-      "workflowSha256": "2e46d30fac9989bcf08f11ea5e4713d253a63738b6bb2c3b35a656ceafc1bb24"
+      "workflowSha256": "a38e65090442b330375039422a4b1f1abeaeac1c7569755610166f7271b51d37"
     },
     "nodejs-npm": {
       "buildModifications": {
@@ -3807,7 +3758,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/nodejs-npm-package-candidate.yml",
-      "workflowSha256": "d1c07da703d6663a502b7cfa01ec35e389d26ce7766dd89df04a0d21801d9d92"
+      "workflowSha256": "440d15f3ce8231afdac1c77628225df985265387166c60b0b99c9b71d9b0b862"
     },
     "openjdk17": {
       "buildModifications": {
@@ -3831,7 +3782,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/openjdk17-package-candidate.yml",
-      "workflowSha256": "1c9cb357dcfdb3683e128fac258aa1c928fe41c94cabeb056ad1dc6ddf0695d9"
+      "workflowSha256": "04e7e2b42f655f4ab4f842972e3d6d4a59bc5ddd7992f26a92e71c731b964b75"
     },
     "pkg-config": {
       "buildModifications": {
@@ -3855,7 +3806,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/pkg-config-package-candidate.yml",
-      "workflowSha256": "47e52bd113ebddf1efa039581258618f1fd426599159d1ec5a9b264c61d19374"
+      "workflowSha256": "55a6a768d84f2fda6a5832b61d6828ab644bf5b31a68cf6f1d3fad8de72a6b75"
     },
     "python": {
       "buildModifications": {
@@ -3879,7 +3830,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/python-package-candidate.yml",
-      "workflowSha256": "1c1f9908658ce9c9a04b1e5544b53096f11e11587a8c338ae667946b8a8e3a8c"
+      "workflowSha256": "1429d8d39d4a1194342f5392c14d1b82d3b2f88524a6eb5e43199562b2e5aeb6"
     },
     "wget": {
       "buildModifications": {
@@ -3908,16 +3859,16 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/wget-package-candidate.yml",
-      "workflowSha256": "b3c7b074ac3f4930a14d5a1d0c2ee613aa9b81ca3c9ad91d6a57555f14778b4a"
+      "workflowSha256": "d1d284a1f2591815ce4468b208c59fe65027e754c13e967132059944a944727c"
     }
   },
   "publicationAllowed": false,
   "requiredInputs": [
-    "Fresh CI-only signed bundles for all ten profiles, never public uploads; include every exact .deb and SHA-256, Packages/Release/InRelease/Release.gpg and externally pinned ephemeral public key fingerprint/keyring.",
+    "Fresh explicitly retained CI candidate bundles for all ten profiles, not production publication; include every exact .deb and SHA-256, Packages/Release/InRelease/Release.gpg and externally pinned ephemeral public key fingerprint/keyring.",
     "Hash-bound source closure, full effective recipe/patch inputs, builder digest, build-result and static audit reports for each bundle; independently re-run the audits, not just trust success booleans.",
     "Reviewed canonical provider selection for duplicate identities, especially patched libcurl, followed by cross-family consumer re-audits; no arbitrary first/last writer.",
     "Actual control metadata and full payload inventories including type, mode, symlink/hardlink targets and hashes; reject non-directory collisions and path traversal before extraction.",
-    "One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy keys, feeds and binaries afterward."
+    "One runner-local aggregate with ephemeral signing only, strict signed-by APT update and all exact roots in one simulated transaction; negative omission/hash/signature/cross-family-hole tests. Destroy runner-local private keys and temporary build trees afterward; retain only allowlisted candidate artifacts when explicitly requested."
   ],
   "resolverSha256": "3a0aaf39f30d00adeb2b183e0acef4e65c9ec10da1f9a2ec00952edd8d7c29c2",
   "schemaVersion": 2,
@@ -3954,10 +3905,7 @@
       "zlib",
       "zstd"
     ],
-    "effectiveRecipeDivergentDuplicateNames": [
-      "libcurl",
-      "ncurses"
-    ],
+    "effectiveRecipeDivergentDuplicateNames": [],
     "occurrenceCount": 144,
     "profileCount": 10,
     "sourceDependencyClosure": "PASS; per-profile and union; not binary control or ELF evidence",
