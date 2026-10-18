@@ -20,6 +20,8 @@ Python и pkg-config уже копировали исходный `COPYING` в `
 
 `--require-unified-recipes` требует отсутствия расходящихся дубликатов. Удаление одного общего overlay вновь выявляет расхождение. Shell recipes при этом не исполняются; патчи применяются к изолированным копиям с проверкой hash и допустимых путей. Это ограниченный recipe context, не полный build environment или ABI.
 
+`packagingPolicy` дополнительно закрепляет hashes двух source packaging functions до/после изменения, helper/applier и всех десяти build entrypoints. Она устраняет зависимость `Installed-Size` от `du` и задаёт частную directory policy до создания нового data archive. Причины, реальные hashes сравнения и оставшиеся ограничения описаны в [разборе воспроизводимости](PACKAGING_REPRODUCIBILITY_RU.md). Старые диагностические `.deb` этой политикой не изменяются.
+
 Lock остаётся **inventory-only**: `binarySha256=null`, `signedBinaryBundle=null`, `aggregateReady=false`, `publicationAllowed=false`. Бинарные результаты нельзя объявлять проверенными правкой этих полей.
 
 ## Повторная сборка и сохранение результатов
@@ -58,6 +60,8 @@ python3 scripts/verify-retained-candidate-bundle.py \
 5. Независимо закрепить доверенный signing key/fingerprint и получить отдельное разрешение публикации. Успешный CI не включает feed, Pages или установщик.
 
 Ограниченный `scripts/audit-deb-payload-collisions.py` читает Debian ar/tar без извлечения payload. Он fail-closed отвергает неподдерживаемые форматы, опасные пути, ссылки и специальные файлы, дубликаты файлов и несовпадающие байты одинаковых package identities; обычные повторные каталоги допустимы. Это полезный preflight, но не полный аудит ссылок/ABI и не provenance qualification. Его `qualified=false` не следует заменять на PASS.
+
+Новый `scripts/audit-unified-deb-set.py` отдельно проверяет полный переданный control/payload set, relations с versioned virtual Provides, file/type/mode collisions и bounded link resolution, не извлекая и не исполняя payload. Общие каталоги с разными modes отклоняются. Его результат также ограничен: ELF/ABI и подписи он самостоятельно не квалифицирует, `qualified=false` и `productionAllowed=false` неизменны. `test-apt-candidate.sh` принимает дополнительные точные корни начиная с аргумента 7 и проверяет их одной общей симуляцией; дубли имён и незакреплённые specs запрещены.
 
 ## Проверка исходного gate
 

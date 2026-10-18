@@ -40,6 +40,7 @@ def module(name, filename):
 source = module('unified_source', 'resolve-pinned-termux-recipe-closure.py')
 deps = module('unified_dependencies', 'verify-candidate-dependency-closure.py')
 effective = module('unified_effective', 'effective-candidate-recipes.py')
+packaging_policy = module('candidate_packaging_policy_applier', 'apply-candidate-packaging-policy.py')
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -72,8 +73,31 @@ def check_dependencies(packages, groups, profile):
                  packages[name]['version'] if r['version'] == 'parent-build-version' else r['version']), packages)
                 for r in group), 'SOURCE_DEPENDENCY_HOLE:' + profile + ':' + name)
 
+BUILD_WRAPPERS = sorted((ROOT / 'termux-private-package-kit').glob('*/build-*.sh'))
+
+def validate_policy_wrappers(repo):
+    expected = {p.relative_to(ROOT).as_posix() for p in BUILD_WRAPPERS}
+    require(len(expected) == 10, 'PACKAGING_POLICY_WRAPPER_SET_MISMATCH')
+    for rel in sorted(expected):
+        path = repo / rel
+        text = path.read_text()
+        lines = text.splitlines()
+        calls = [i for i, line in enumerate(lines) if line.strip() ==
+                 'python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"' or
+                 line.strip() == 'python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W"']
+        require(len(calls) == 1, 'PACKAGING_POLICY_INVOCATION_MISSING_OR_DUPLICATE:' + rel)
+        i = calls[0]
+        require(any('checkout --detach' in line for line in lines[:i]),
+                'PACKAGING_POLICY_BEFORE_PINNED_CHECKOUT:' + rel)
+        require(any('docker info' in line or 'docker image inspect' in line for line in lines[i+1:]),
+                'PACKAGING_POLICY_PREFLIGHT_ORDER_INVALID:' + rel)
+    return {rel: digest(repo / rel) for rel in sorted(expected)}
+
 def inventory(repo, source_root):
     scope = source.load_scope(repo / 'termux-package-source-scope.json')
+    wrapper_hashes = validate_policy_wrappers(repo)
+    policy = packaging_policy.policy_description(repo, source_root)
+    policy['buildWrapperSha256'] = wrapper_hashes
     revision, _ = source.git_source_state(source_root)
     require(revision == scope['sourceCommit'], 'SOURCE_COMMIT_MISMATCH')
     profiles, union = {}, {}
@@ -164,6 +188,7 @@ def inventory(repo, source_root):
         'resolverSha256': digest(ROOT / 'scripts/resolve-pinned-termux-recipe-closure.py'),
         'dependencyValidatorSha256': digest(ROOT / 'scripts/verify-candidate-dependency-closure.py'),
         'effectiveRecipeValidatorSha256': digest(ROOT / 'scripts/effective-candidate-recipes.py'),
+        'packagingPolicy': policy,
         'profiles': profiles, 'packages': [union[n] for n in sorted(union)],
         'effectiveRecipeContextScope': 'SHA-256 of compact sorted JSON mapping paths to SHA-256: parent build.sh and all existing sibling *.subpackage.sh after ordered manifest overlays; not all build flags, source archives, upstream patches, environment or binary ABI.',
         'summary': {'profileCount': len(profiles), 'occurrenceCount': sum(p['packageCount'] for p in profiles.values()),
@@ -215,7 +240,7 @@ def main():
                 'UNIFIED_RECIPES_DIVERGE:' + ','.join(divergent))
         require(not args.require_aggregate_ready, 'AGGREGATE_BLOCKED_SIGNED_BINARY_INPUTS_MISSING')
         return 0
-    except (GateError, source.GateError, deps.GateError, effective.GateError, OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:
+    except (GateError, source.GateError, deps.GateError, effective.GateError, OSError, ValueError, KeyError, subprocess.SubprocessError, AttributeError) as exc:
         print('UNIFIED_INPUT_AUDIT_REJECTED:' + str(exc), file=sys.stderr)
         return 2
 

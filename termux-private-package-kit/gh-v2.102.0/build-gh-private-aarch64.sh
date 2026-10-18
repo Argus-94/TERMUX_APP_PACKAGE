@@ -4,6 +4,7 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
+readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly AUDITOR="$KIT_DIR/audit_deb.py"
 
@@ -81,6 +82,7 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE"
 git -C "$WORKTREE" checkout --detach "$PIN"
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
 python3 "$KIT_DIR/../make-v476/patch_properties.py" "$WORKTREE/scripts/properties.sh" --data-dir "$APP_DATA_DIR" --prefix "$PREFIX"
 git -C "$WORKTREE" diff -- scripts/properties.sh > "$OUTPUT_DIR/app-private-properties.patch"

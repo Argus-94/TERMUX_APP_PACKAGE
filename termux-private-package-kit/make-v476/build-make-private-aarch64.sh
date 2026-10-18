@@ -4,6 +4,7 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
+readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly LOCAL_LICENSE_PATCH="$KIT_DIR/patches/make-embed-gpl-license.patch"
 readonly LOCAL_LICENSE_PATCH_SHA='cdcc66d147f1ca60e3e271a067ca42d91d17aec273c239a308d1e176f66b8b03'
@@ -78,6 +79,7 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE"
 git -C "$WORKTREE" checkout --detach "$PIN"
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
 git -C "$WORKTREE" apply --check "$LOCAL_LICENSE_PATCH" || fail 'LOCAL_RECIPE_LICENSE_PATCH_NOT_APPLICABLE'
 git -C "$WORKTREE" apply "$LOCAL_LICENSE_PATCH" || fail 'LOCAL_RECIPE_LICENSE_PATCH_APPLY_FAILED'

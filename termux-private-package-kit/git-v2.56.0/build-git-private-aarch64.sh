@@ -87,6 +87,7 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE" >/dev/null
 git -C "$WORKTREE" checkout --detach "$PIN" >/dev/null
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"
 # Reviewed shared overlay policy: curl optional zstd off; preserve split ncurses license.
 for spec in \
   'libcurl-disable-optional-zstd.patch 69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788' \

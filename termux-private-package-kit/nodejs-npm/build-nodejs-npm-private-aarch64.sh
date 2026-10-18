@@ -41,6 +41,7 @@ c=json.loads(pathlib.Path(sys.argv[1]).read_text());m=json.loads(pathlib.Path(sy
 PY
 for p in 'scripts/properties.sh 238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725' 'build-package.sh 5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204' 'scripts/run-docker.sh d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2' 'scripts/profile-restricted.apparmor ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8'; do read -r f h <<<"$p"; [[ $(git -C "$SRC" show "$PIN:$f"|sha256sum|awk '{print $1}') == "$h" ]] || fail "PINNED_SCRIPT_HASH:$f"; done
 mkdir -p "$OUT/work"; W="$OUT/work/termux-packages"; git clone --shared --dissociate --no-checkout "$SRC" "$W" >/dev/null; git -C "$W" checkout --detach "$PIN" >/dev/null
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W"
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" "$W/scripts/properties.sh" --data-dir "$AIB_TERMUX_APP_DATA_DIR" --prefix "$AIB_TERMUX_PREFIX"
 git -C "$W" diff -- scripts/properties.sh > "$OUT/app-private-properties.patch"
 git -C "$W" apply --check "$ROOT/$PATCH"; git -C "$W" apply "$ROOT/$PATCH"

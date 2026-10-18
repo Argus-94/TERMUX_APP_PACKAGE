@@ -3617,6 +3617,36 @@
       "version": "1.5.7-1"
     }
   ],
+  "packagingPolicy": {
+    "ancestorPayloadOmitted": true,
+    "applierSha256": "f0a593592f325d280556a53aa9e5e6176ef533e2bac22c7d677dc5ce8ca7ab24",
+    "baseCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "baseInputs": {
+      "scripts/build/termux_create_debian_subpackages.sh": "76ec32cb5f3d161bcb012637a6c5b89d39d63444de046f80dd41af4ee6388490",
+      "scripts/build/termux_step_create_debian_package.sh": "aa61120c840465e016b51da103fd3540079febf1cfed0d636810296dd73e90ff"
+    },
+    "buildWrapperSha256": {
+      "termux-private-package-kit/cmake-ninja/build-cmake-ninja-private-aarch64.sh": "249c461c4c668ecbf172cf56c3b4055a19ccbae128c4db8c123b3a88bb7b123c",
+      "termux-private-package-kit/curl-v8.23.0/build-curl-private-aarch64.sh": "e155b9098fe6cf360129dcd38db5167b2f8764272a46e0cc97014519cba54ce9",
+      "termux-private-package-kit/gh-v2.102.0/build-gh-private-aarch64.sh": "34175ce2c49e5412e8e2bd5f24917b587323a58c3ca702b2c124e469e4869ea3",
+      "termux-private-package-kit/git-v2.56.0/build-git-private-aarch64.sh": "ab130ad9c2dc231a5420397a4659af8c54772b96a3261a6929507e0bcdd869e7",
+      "termux-private-package-kit/make-v476/build-make-private-aarch64.sh": "2e696e8ea156bf7932d996c5094ce134856c3dc6aac4f8ad8319fdb02841c304",
+      "termux-private-package-kit/nodejs-npm/build-nodejs-npm-private-aarch64.sh": "61cf412715aa0c4b5eb80ef1844f2b1f65e2473cf79c0d7d1277514257ab0633",
+      "termux-private-package-kit/openjdk17/build-openjdk17-private-aarch64.sh": "427f335bf8c9e6fcd888ae8b62a30e396775d6de8cd5c840e58c253fdc00e7e1",
+      "termux-private-package-kit/pkg-config-v0.29.2/build-pkg-config-private-aarch64.sh": "aca2e0b1087ebeb8bebf6fea8ad31a86bb59ad6b51eb0a3ab345860bda4e5c0c",
+      "termux-private-package-kit/python-v3.14.6/build-python-private-aarch64.sh": "2bb4b5c7fcfff44c1e074844257d410864d5b1fa5b7aa7a4a2291e50175bea5b",
+      "termux-private-package-kit/wget-v1.25.0/build-wget-private-aarch64.sh": "667ca433a277e0bf9bddd18986bf4ba5c1a79d00e9d68ff22a6f4f5f41f525ed"
+    },
+    "directoryMode": "0700",
+    "helperSha256": "a7d33d27eaaeddf5e34e4dd9c3cf37c127d35c9316cfe6947aab87bc833fde85",
+    "patchedInputs": {
+      "scripts/build/termux_create_debian_subpackages.sh": "df88b0df2fc3680835bd2628196a355ead9fac4e4ef929c27a5f8d3ff369dbbe",
+      "scripts/build/termux_step_create_debian_package.sh": "e6d96412d1c8c780568ee8bf02f41fbdb771a88b6e392f15f44af3b2f6964cf8"
+    },
+    "reference": "https://www.debian.org/doc/debian-policy/ch-controlfields.html#installed-size",
+    "sizePolicy": "sum each regular-file and symlink-target length rounded up individually to 1 KiB; hardlink inode counted once; 1 KiB per directory including prefix root; minimum 1 KiB",
+    "sourceOnly": true
+  },
   "profiles": {
     "cmake-ninja": {
       "buildModifications": {
