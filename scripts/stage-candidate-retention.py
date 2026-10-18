@@ -36,7 +36,7 @@ def safe_path(path):
 
 
 def regular(path):
-    safe_path(path)
+    path = safe_path(path)
     if not path.is_file():
         raise ValueError(f"required regular file missing: {path}")
     return path

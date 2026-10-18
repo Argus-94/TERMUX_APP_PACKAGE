@@ -30,6 +30,25 @@ Candidate workflows строят из закреплённого исходно�
 
 **Репозиторий публичный:** Actions artifacts не являются конфиденциальным хранилищем. Это не production release, не feed для подключения и не разрешение установки. Наличие собственного keyring и подписи доказывает согласованность bundle, но не доверие к production signer; связь с exact GitHub run/commit и digest требует независимой проверки. Private signing material удаляется на runner. Стабильность байтов между двумя независимыми сборками не заявляется без сравнения.
 
+## Независимая проверка скачанного bundle
+
+Сначала сверить SHA-256 внешнего GitHub ZIP с `artifact.digest` из API exact run. ZIP должен содержать только переносимый `.tar.gz`; исходные Debian filenames и подписанные пути внутри него не переименовываются. Fingerprint берётся отдельно из `EPHEMERAL_FEED_SIGNING_KEY_READY` в журнале соответствующего запуска, а не объявляется доверенным по содержимому архива.
+
+```bash
+python3 scripts/verify-retained-candidate-bundle.py \
+  --archive /path/to/candidate-retention-bundle.tar.gz \
+  --repository Argus-94/TERMUX_APP_PACKAGE \
+  --commit EXACT_REPOSITORY_COMMIT --run-id EXACT_GITHUB_RUN_ID \
+  --fingerprint EXTERNALLY_OBSERVED_UPPERCASE_FINGERPRINT \
+  --repo-root /path/to/checkout/at/exact/commit \
+  --output-dir /path/to/new/verified-directory \
+  --report /path/to/verification-report.json
+```
+
+Проверка отвергает traversal, ссылки/специальные entries, повторные и конфликтующие пути; ограничивает tar по размерам; проверяет detached signatures provenance/checksums и обе feed signatures через изолированный `gpgv`. Проверяются точный checkout HEAD, manifest/source/builder, полный snapshot lock/script hashes, build-report hashes, package tuples/bytes, Release SHA-256/размеры и согласованность Packages/Packages.gz/pool. InRelease cleartext должен совпасть с Release. Пакеты не исполняются и не устанавливаются. Новый output появляется только после успешной проверки; до 2 GiB проверяемых tar contents удерживается в памяти.
+
+`valid=true` здесь означает только согласованность подписанных входов. ELF/ABI, полный control/payload audit, общий APT transaction, доверие к production signer и Android qualification этим скриптом не подтверждаются: `qualified=false`, `productionAllowed=false` остаются неизменными. Отдельные CI-запуски могут иметь разные repository commits только с явной фиксацией каждого snapshot и проверкой идентичности всех соответствующих source/recipe/build inputs; совпадение версии пакета не позволяет подменять эти доказательства.
+
 ## Что требуется после сборок
 
 1. Скачать и проверить artifact digest каждого exact run/commit; сверить SHA-256 файлов и GPG signatures с fingerprint, полученным отдельно из run evidence. Повторно выполнить существующие аудиторы на реальных пакетах.
