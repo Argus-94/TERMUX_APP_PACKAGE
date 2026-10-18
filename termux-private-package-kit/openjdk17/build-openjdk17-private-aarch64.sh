@@ -4,9 +4,11 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='6d11683078a4440244921f036db39554b9a63819ff6b19ed92c88ab2d12d4f0d'
+readonly EXPECTED_MANIFEST_SHA='f0d4d7ac98f15b75b37b8dda06dcc1268ee90fc9f4b083be50fc903f94f75d36'
 readonly EXPECTED_CLOSURE_SHA='378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a'
 readonly EXPECTED_PATCH_SHA='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
+readonly EXPECTED_PULSEAUDIO_PATCH_SHA='ca4c6b593a6a0e741113843038338bad0d4ade85eb4aa1d0d2fb409f6261e02e'
+readonly EXPECTED_PULSEAUDIO_BASE_SHA='2507373eed8aa07e432e3dbea791f39fcb7db938bbb299a66bfbccb7b6c4be69'
 readonly MIN_FREE_BYTES=$((12 * 1024 * 1024 * 1024))
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
@@ -39,6 +41,8 @@ fi
 manifest_sha="$(sha256sum "$PACKAGE_SET" | awk '{print $1}')"
 [[ "$manifest_sha" == "$EXPECTED_MANIFEST_SHA" ]] || fail 'PACKAGE_SET_SHA256_NOT_ALLOWLISTED'
 patch="$KIT_DIR/openjdk17-license-notices.patch"
+pulseaudio_patch="$KIT_DIR/patches/pulseaudio-api24-source.patch"
+[[ "$(sha256sum "$pulseaudio_patch" | awk '{print $1}')" == "$EXPECTED_PULSEAUDIO_PATCH_SHA" ]] || fail 'PULSEAUDIO_PATCH_SHA256_NOT_ALLOWLISTED'
 [[ "$(sha256sum "$patch" | awk '{print $1}')" == "$EXPECTED_PATCH_SHA" ]] || fail 'BUILD_PATCH_SHA256_NOT_ALLOWLISTED'
 python3 - "$PACKAGE_SET" <<'PY'
 import json,pathlib,sys
@@ -106,8 +110,11 @@ git -C "$WORKTREE" diff -- scripts/properties.sh > "$OUTPUT_DIR/app-private-prop
 PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | awk '{print $1}')"
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
+[[ "$(sha256sum "$WORKTREE/packages/pulseaudio/meson.patch" | awk '{print $1}')" == "$EXPECTED_PULSEAUDIO_BASE_SHA" ]] || fail 'PULSEAUDIO_BASE_HASH_MISMATCH'
+git -C "$WORKTREE" apply --check "$pulseaudio_patch"
+git -C "$WORKTREE" apply "$pulseaudio_patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"
-[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libmpg123/mpg123.subpackage.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
+[[ "$changed_files" == $'packages/libmpg123/build.sh\npackages/libmpg123/mpg123.subpackage.sh\npackages/libtool/build.sh\npackages/libtool/libltdl.subpackage.sh\npackages/openjdk-17/build.sh\npackages/pulseaudio/build.sh\npackages/pulseaudio/meson.patch\nscripts/build/termux_create_debian_subpackages.sh\nscripts/build/termux_step_create_debian_package.sh\nscripts/properties.sh' ]] || fail 'OPENJDK17_PATCH_SCOPE_MISMATCH'
 python3 "$ROOT/termux-private-package-kit/openjdk17/verify_openjdk17_buildorder.py" --source-root "$WORKTREE"
 
 cat > "$WORKTREE/.aib-private-layout-preflight.sh" <<EOF
@@ -172,6 +179,7 @@ trap cleanup_container EXIT
   printf 'Modeled AI Builder prefix (not device observed): %s\n' "$PREFIX"
   printf 'Patched properties SHA-256: %s\n' "$PROPERTIES_PATCH_SHA"
   printf 'OpenJDK candidate controlled overlay patch SHA-256: %s\n' "$EXPECTED_PATCH_SHA"
+  printf 'OpenJDK17 PulseAudio API24 source overlay SHA-256: %s\n' "$EXPECTED_PULSEAUDIO_PATCH_SHA"
   printf 'Build started UTC: %s\n\n=== layout preflight ===\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } | tee "$OUTPUT_DIR/build.log"
 (

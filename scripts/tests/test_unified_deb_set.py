@@ -45,6 +45,42 @@ class UnifiedTests(unittest.TestCase):
   for spec,code in [({'escape':('symlink','../../../../etc/passwd')},'LINK_ESCAPE'),({'one':('symlink','two'),'two':('symlink','one')},'SYMLINK_CYCLE')]:
    self.debs=[]; self.pkg('bad',files={PREFIX.lstrip('/')+'/'+k:v for k,v in spec.items()})
    with self.assertRaises(U.Reject): self.runaudit()
+ def test_componentwise_directory_alias_and_file_link_chain(self):
+  base=PREFIX.lstrip('/')+'/lib/icu/'
+  self.pkg('icu',files={base+'78.3/Makefile.inc':'icu',base+'current':('symlink','78.3'),base+'Makefile.inc':('symlink','current/Makefile.inc')})
+  self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_private_prefix_does_not_require_android_ancestor_members(self):
+  from unittest.mock import patch
+  base=PREFIX.lstrip('/')+'/'
+  self.pkg('prefix-only',files={base+'file':'ok',base+'alias':('symlink','file')})
+  original=U.inspect
+  def confined_inspect(path,prefix):
+   ctl,ident,digest,entries=original(path,prefix)
+   root=prefix.lstrip('/')
+   return ctl,ident,digest,{n:e for n,e in entries.items() if n==root or n.startswith(root+'/')}
+  with patch.object(U,'inspect',side_effect=confined_inspect): self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_multiple_leaf_aliases_and_absolute_private_target(self):
+  base=PREFIX.lstrip('/')+'/'
+  self.pkg('aliases',files={base+'file':'ok',base+'second':('symlink','file'),base+'first':('symlink','second'),base+'absolute':('symlink',PREFIX+'/first')})
+  self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_symlink_component_escape_and_alias_parent_semantics(self):
+  base=PREFIX.lstrip('/')+'/tree/'
+  self.pkg('bad',files={base+'real/file':'file',base+'alias':('symlink','real'),base+'escape':('symlink','alias/../../../../outside'),base+'walk':('symlink','alias/..')})
+  with self.assertRaisesRegex(U.Reject,'LINK_ESCAPE'): self.runaudit()
+  self.debs=[]
+  self.pkg('good',files={base+'dir/file':'ok',base+'alias':('symlink','dir'),base+'walk':('symlink','alias/..')})
+  self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_directory_alias_cycles_and_finite_dot_alias(self):
+  base=PREFIX.lstrip('/')+'/tree/'
+  self.pkg('loop',files={base+'a':('symlink','b'),base+'b':('symlink','a')})
+  with self.assertRaisesRegex(U.Reject,'SYMLINK_CYCLE'): self.runaudit()
+  self.debs=[]
+  self.pkg('finite',files={base+'alias':('symlink','.'),base+'file':'ok',base+'walk':('symlink','alias/alias/file')})
+  self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_symlink_to_regular_file_with_suffix_rejected(self):
+  base=PREFIX.lstrip('/')+'/tree/'
+  self.pkg('bad',files={base+'file':'x',base+'alias':('symlink','file/child')})
+  with self.assertRaises(U.Reject): self.runaudit()
  def test_cross_package_hardlink_rejected(self):
   self.pkg('a',files={PREFIX.lstrip('/')+'/real':'x'}); self.pkg('b',files={PREFIX.lstrip('/')+'/link':('hardlink',PREFIX.lstrip('/')+'/real')})
   with self.assertRaisesRegex(U.Reject,'CROSS_PACKAGE_COLLISION|HARDLINK_CROSS_PACKAGE'): self.runaudit()

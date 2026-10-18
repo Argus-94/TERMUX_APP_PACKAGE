@@ -1162,7 +1162,9 @@
       "versionExpressionIsLiteral": true,
       "version": "17.0-4",
       "architecture": "aarch64",
-      "licenseExpression": "GPL-2.0"
+      "licenseExpression": "GPL-2.0",
+      "localRecipePatchPath": "termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch",
+      "localRecipePatchSha256": "ca4c6b593a6a0e741113843038338bad0d4ade85eb4aa1d0d2fb409f6261e02e"
     },
     {
       "dependencyGroups": [],

@@ -61,6 +61,8 @@ def inspect(path,prefix):
       stream.stdout.close(); err=stream.stderr.read(); rc=stream.wait(); req(rc==0,'DPKG_TAR_FAILED')
     except Exception:
       stream.kill(); stream.wait(); raise
+    finally:
+      stream.stdout.close(); stream.stderr.close()
     return ctl,ident,h,entries
 
 def audit(manifest,prefix,paths):
@@ -116,17 +118,31 @@ def audit(manifest,prefix,paths):
     for n,(e,_) in owner.items():
       for i in range(1,len(n.split('/'))): req(owner.get('/'.join(n.split('/')[:i]),({'kind':'dir'},))[0]['kind']=='dir','FILE_ANCESTOR_CONFLICT:'+n)
     def resolve(n,seen=()):
-      req(len(seen)<40,'SYMLINK_CHAIN_TOO_LONG:'+n); req(n not in seen,'SYMLINK_CYCLE:'+n); req(n in owner,'DANGLING_LINK:'+n); e,who=owner[n]
-      if e['kind']=='symlink':
-       t=e['linktarget']; req(t and '\0' not in t,'BAD_LINK_TARGET:'+n)
-       base=[] if t.startswith('/') else n.split('/')[:-1]
-       parts=t.lstrip('/').split('/') if t.startswith('/') else t.split('/')
-       for part in parts:
-        if part in ('','.'): continue
-        if part=='..': req(len(base)>len(prefix.strip('/').split('/')),'LINK_ESCAPE:'+n); base.pop()
-        else: base.append(part)
-       dest='/'+ '/'.join(base); req(dest==prefix or dest.startswith(prefix+'/'),'LINK_ESCAPE:'+n); return resolve(dest.lstrip('/'),seen+(n,))
-      return e,who
+      # Walk path tokens in order: `..` is meaningful only after preceding
+      # symlinks have been followed, so never normalize it lexically first.
+      boundary=prefix.strip('/').split('/'); root='/'.join(boundary)
+      req(n==root or n.startswith(root+'/'),'LINK_ESCAPE:'+n)
+      stack=list(boundary); pending=n.split('/')[len(boundary):]; links=0; states=set()
+      while pending:
+       part=pending.pop(0)
+       if part in ('','.'): continue
+       if part=='..':
+        req(len(stack)>len(boundary),'LINK_ESCAPE:'+n); stack.pop(); continue
+       candidate='/'.join(stack+[part]); req(candidate in owner,'DANGLING_LINK:'+candidate); e,who=owner[candidate]
+       if e['kind']=='symlink':
+        links+=1; req(links<=40,'SYMLINK_CHAIN_TOO_LONG:'+n)
+        state=(candidate,tuple(pending)); req(state not in states,'SYMLINK_CYCLE:'+candidate); states.add(state)
+        t=e['linktarget']; req(t and '\0' not in t,'BAD_LINK_TARGET:'+candidate)
+        if t.startswith('/'):
+         req(t==prefix or t.startswith(prefix+'/'),'LINK_ESCAPE:'+candidate)
+         stack=list(boundary); target=t.lstrip('/').split('/')[len(boundary):]
+        else: target=t.split('/')
+        pending=target+pending
+        continue
+       req(not pending or e['kind']=='dir','DANGLING_LINK:'+candidate)
+       stack.append(part)
+      candidate='/'.join(stack); req(candidate in owner,'DANGLING_LINK:'+candidate)
+      return owner[candidate]
     for n,(e,who) in owner.items():
       if e['kind']=='symlink': resolve(n)
       if e['kind']=='hardlink':
