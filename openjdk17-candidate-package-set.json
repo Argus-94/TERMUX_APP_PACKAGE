@@ -1,0 +1,1295 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "runtime": "AI Builder app-private Android/Bionic prefix",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "source": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "commit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+    "propertiesScriptSha256": "238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725",
+    "buildPackageScriptSha256": "5a7e3c1b85a8ddd6b5c197c47d6d384de4b387fa5114a0f679f19d9925f02204",
+    "runDockerScriptSha256": "d67b37a9f1142b5f12b5818f312df7b33889158541e74f04524d1378cabf60b2",
+    "restrictedAppArmorProfileSha256": "ec7680c466c03c9354b890e6860f9fb3e1b5512d380c9d05e426cb47548abbe8",
+    "restrictedAppArmorOutputAllow": "/home/builder/termux-packages/output/** rw,"
+  },
+  "sourceClosure": {
+    "profile": "openjdk17-candidate",
+    "rootPackages": [
+      "openjdk-17"
+    ],
+    "buildTargetPackage": "openjdk-17",
+    "expectedPackageCount": 36,
+    "expectedDependencyAlternativeCount": 46,
+    "semantics": "Exact required pinned runtime closure; recommendations excluded; candidate-only."
+  },
+  "baseLicenseProviderEvidence": {
+    "artifact": "AIBuilder-Expo-v476/assets/termux-bootstrap/termux-bootstrap-aarch64.zip",
+    "archiveSha256": "08a447f60c06783f33561583553149cf992ac7d9779071c71b8aaeeb452451b4",
+    "packageName": "termux-licenses",
+    "version": "2.1",
+    "architecture": "all",
+    "packageStatus": "install ok installed",
+    "licenseFilesSha256": {
+      "share/LICENSES/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "share/LICENSES/GPL-2.0.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "share/LICENSES/GPL-3.0.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "share/LICENSES/LGPL-2.1.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "share/LICENSES/MPL-2.0.txt": "9bc20a15c61407693f16f5bb482035e60c9ac3e9c6611c6c3b6623a1a4453578",
+      "share/LICENSES/Public Domain.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "share/LICENSES/NCSA.txt": "aecb9504bcc76b4ff5e8ff1266344bb607b6bed2bfc3dd8b35233d941401d01e",
+      "share/LICENSES/LGPL-2.0.txt": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c"
+    },
+    "verification": "Eight relevant ZIP license payloads were byte-for-byte compared with pinned termux-licenses source; package status comes from the embedded v476 archive. This is archive evidence, not device observation.",
+    "deviceObserved": false
+  },
+  "sourceLicenseEvidence": {
+    "openjdk-17": {
+      "sourceArchives": [
+        {
+          "url": "https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-17.0.20-ga.tar.gz",
+          "sha256": "ba3ac4b9d7f2c050f46ddcec39b4258660a3f09836f5a71617fd3f7311d06c0b"
+        }
+      ],
+      "licenseFiles": {
+        "LICENSE": "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726",
+        "ADDITIONAL_LICENSE_INFO": "a69bce275ba7a3570af6579cb0f55682cd75fedfcd49e0e8e9022270c447c916",
+        "ASSEMBLY_EXCEPTION": "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb"
+      },
+      "packagePaths": {
+        "LICENSE": "share/doc/openjdk-17/LICENSE",
+        "ADDITIONAL_LICENSE_INFO": "share/doc/openjdk-17/ADDITIONAL_LICENSE_INFO",
+        "ASSEMBLY_EXCEPTION": "share/doc/openjdk-17/ASSEMBLY_EXCEPTION"
+      }
+    }
+  },
+  "buildModifications": {
+    "patchPath": "termux-private-package-kit/openjdk17/openjdk17-license-notices.patch",
+    "patchSha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc",
+    "purpose": "Preserve source/license notices; build only supported libmpg123 decoder component to remove the source build cycle; replace mutable PulseAudio git tag with exact commit archive and verified SHA-256. Runtime dependency inventory and versions remain pinned and unchanged."
+  },
+  "runtimeDependencies": {
+    "openjdkRecommendationsExcludedFromInstallSimulation": [
+      "ca-certificates-java",
+      "openjdk-17-x",
+      "resolv-conf"
+    ],
+    "buildOnlyDependencies": [
+      "cups",
+      "fontconfig",
+      "libxrandr",
+      "libxt",
+      "xorgproto",
+      "alsa-lib"
+    ]
+  },
+  "packages": [
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "abseil-cpp",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/abseil-cpp/build.sh",
+      "recipeSha256": "e143b94f69c3af8b28cd4c9f494a9355e6c349d52f668b3fc00fb302998b3061",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "20260526.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "20260526.0",
+      "architecture": "aarch64",
+      "licenseExpression": "Apache-2.0"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-sysv-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-sysv-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ]
+      ],
+      "name": "alsa-lib",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/alsa-lib/build.sh",
+      "recipeSha256": "bddac5aafb371dd88050583be5fc3f0df579ab1681f5a87e75c5578c0021740b",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.2.16.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.2.16.1",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-sysv-semaphore",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-sysv-semaphore",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "alsa-lib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "alsa-lib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "pulseaudio",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "pulseaudio",
+            "version": null
+          }
+        ]
+      ],
+      "name": "alsa-plugins",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/alsa-plugins/build.sh",
+      "recipeSha256": "d7d9f2fff77de9a4f4f5e45a393ac00c9e6047de51d98c9f776f8a885a5f5440",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.2.12",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.2.12-1",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libexpat",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libexpat",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libx11",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libx11",
+            "version": null
+          }
+        ]
+      ],
+      "name": "dbus",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/dbus/build.sh",
+      "recipeSha256": "d82b006a6b057d480b912f49ac32b39d4c576e1b1546393411050c700c5b1ac4",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "1.16.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.16.2-3",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-execinfo",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-execinfo/build.sh",
+      "recipeSha256": "438cfa28aefbb69ddf767656f031f0eeeee249b7edd719563596fc2b097039b3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.1-3",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 2-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-glob",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-glob/build.sh",
+      "recipeSha256": "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "0.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.6-3",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-shmem",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-shmem/build.sh",
+      "recipeSha256": "db55b10b90c54dd4d39b76b5b074835c09c7c7534a84a12bc29c6a63717ff2fd",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "0.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.7",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libandroid-spawn",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-spawn/build.sh",
+      "recipeSha256": "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "0.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.3",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 2-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-stub",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-stub/build.sh",
+      "recipeSha256": "7cee378836da2051e93294cc93fa7c0b06c8fddc9a702f115718017610b4e407",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "30-2",
+      "architecture": "aarch64",
+      "licenseExpression": "NCSA"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-support",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-support/build.sh",
+      "recipeSha256": "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "(29",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "29-1",
+      "architecture": "aarch64",
+      "licenseExpression": "Apache-2.0, MIT"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libandroid-sysv-semaphore",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libandroid-sysv-semaphore/build.sh",
+      "recipeSha256": "c834d20f18cbed9bd384f2a89eb9da2f0d68aac898a830cb68f2f4e11a54eedf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "0.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.1-1",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 2-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libc++",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libc++/build.sh",
+      "recipeSha256": "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "30",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "30",
+      "architecture": "aarch64",
+      "licenseExpression": "NCSA"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libexpat",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libexpat/build.sh",
+      "recipeSha256": "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.9.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "2.9.0",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libflac",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libflac/build.sh",
+      "recipeSha256": "0c3adf3e6a452c1a566621646a69f251ce37d815eeb061d92e1b2758125db51a",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.5.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.5.0-1",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0, LGPL-2.1, BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libiconv",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libiconv/build.sh",
+      "recipeSha256": "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.19",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.19",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1, GPL-3.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libjpeg-turbo",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libjpeg-turbo/build.sh",
+      "recipeSha256": "8afc22fceacaf759934ce6438e5478f18645ccead9b7012ae621b5dddf3816b3",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "3.2.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "3.2.0",
+      "architecture": "aarch64",
+      "licenseExpression": "IJG, BSD 3-Clause, ZLIB"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libltdl",
+      "packageType": "subpackage",
+      "parentDependencyRule": "none",
+      "parentPackage": "libtool",
+      "recipePath": "packages/libtool/build.sh",
+      "recipeSha256": "5a5f2ef839e6e574c6e3ae569820b7d4a11738f795151d96ff2bf40fb793d2bc",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.6.2",
+      "subpackagePath": "packages/libtool/libltdl.subpackage.sh",
+      "subpackageSha256": "4688ebbd608b3f291e3839cafd0961620611ea263fc01580d7056b9a12dcf340",
+      "versionExpressionIsLiteral": true,
+      "version": "2.6.2",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmpg123",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmpg123",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libmp3lame",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libmp3lame/build.sh",
+      "recipeSha256": "ae386257d3950be46169097a3b32b72a05d3df332da0b09bc62a0d0d4536b94f",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "4.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "4.0-1",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libmpg123",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libmpg123/build.sh",
+      "recipeSha256": "4a1e7d57b284aa8c2d236a7b5c2e3e51aa0f3d89cc4bf8e13926f960027b61bf",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.33.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.33.7",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libogg",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libogg/build.sh",
+      "recipeSha256": "ebd68d519ce8aa5fa851f1868005f4d90b7c5e9585c0ffda022de00d033faf5e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.3.6",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3.6-1",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libopus",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libopus/build.sh",
+      "recipeSha256": "2b3218c6bd300ad72a2eddf60604c4baf4ab75d907587d2834bcba354216da29",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.6.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.6.1",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libflac",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libflac",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmp3lame",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmp3lame",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libmpg123",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libmpg123",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libopus",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libopus",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libvorbis",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libvorbis",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libsndfile",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libsndfile/build.sh",
+      "recipeSha256": "c7feb9a3fd7316cb3259339a2b8a839dacfd451d50e5f6f9a188335b62b77bf4",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "3",
+      "sourceVersionExpression": "1.2.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.2.2-3",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libsoxr",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libsoxr/build.sh",
+      "recipeSha256": "161195b9c049a71282a9f82dfc79dbbc10bc9ca919d144c02be881c1cbb8ba1e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "8",
+      "sourceVersionExpression": "0.1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "0.1.3-8",
+      "architecture": "aarch64",
+      "licenseExpression": "LGPL-2.1"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libogg",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libogg",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libvorbis",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libvorbis/build.sh",
+      "recipeSha256": "295e128fc36df81920083d05538e45ee0a849a87e68948aff628ba431024d3a0",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "4",
+      "sourceVersionExpression": "1.3.7",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3.7-4",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "abseil-cpp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "abseil-cpp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libwebrtc-audio-processing",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libwebrtc-audio-processing/build.sh",
+      "recipeSha256": "a492d38cfeb3f00073e86251256cf618e6f11c20bb096e31a41ae602359c580f",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "5",
+      "sourceVersionExpression": "1.3",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3-5",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-support",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-support",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxcb",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxcb",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "xorgproto",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorgproto",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libx11",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libx11/build.sh",
+      "recipeSha256": "0163c7c054c8d2ebf8a40679d0e9859bc9aea478023102dc11730ce9e36bb521",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "xorg-xauth",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorg-xauth",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.8.13",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.8.13-1",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT, X11"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libxau",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libxau/build.sh",
+      "recipeSha256": "db1c86540a4e09dfcaa7e4320756c67827757474b347681d2fce2c57c96696ea",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.0.12",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.0.12-2",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libxau",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxau",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libxdmcp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libxdmcp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "libxcb",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libxcb/build.sh",
+      "recipeSha256": "dad40cf766b09a3f336f15ea731f742e16d7dbbe6cc94f77daefd487c9483f13",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "xorg-xauth",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorg-xauth",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.17.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.17.0-1",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "libxdmcp",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/libxdmcp/build.sh",
+      "recipeSha256": "c65fc07a144c77cdf281c091e0a6e409ecdf65bfadbff4c854db33cd2621c4c8",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "2",
+      "sourceVersionExpression": "1.1.5",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.1.5-2",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "littlecms",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/littlecms/build.sh",
+      "recipeSha256": "5d93c16fc236d45b01e24cd8f33c35c68119f1c99aad2ac191cf0eba85e90799",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2.19.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "2.19.1",
+      "architecture": "aarch64",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "libandroid-shmem",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-shmem",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-spawn",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-spawn",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libiconv",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libiconv",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libjpeg-turbo",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libjpeg-turbo",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "zlib",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "zlib",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "littlecms",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "littlecms",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "alsa-plugins",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "alsa-plugins",
+            "version": null
+          }
+        ]
+      ],
+      "name": "openjdk-17",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/openjdk-17/build.sh",
+      "recipeSha256": "146236631b213773a18ae82bc10f526234dec42482b601f3c302605dfa74ad82",
+      "recommendationGroupsNotIncludedInRequiredClosure": [
+        [
+          {
+            "name": "ca-certificates-java",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "ca-certificates-java",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "openjdk-17-x",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "openjdk-17-x",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "resolv-conf",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "resolv-conf",
+            "version": null
+          }
+        ]
+      ],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "17.0.20",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "17.0.20",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "dbus",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "dbus",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-stub",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-stub",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-execinfo",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-execinfo",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libandroid-glob",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libandroid-glob",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libc++",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libc++",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libltdl",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libltdl",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsndfile",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsndfile",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libsoxr",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libsoxr",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "libwebrtc-audio-processing",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "libwebrtc-audio-processing",
+            "version": null
+          }
+        ],
+        [
+          {
+            "name": "speexdsp",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "speexdsp",
+            "version": null
+          }
+        ]
+      ],
+      "name": "pulseaudio",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/pulseaudio/build.sh",
+      "recipeSha256": "4fa38f213ca97d6bbb5fb0035d0ca90bbf57872576db6a28cdbb9cc779062e17",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "4",
+      "sourceVersionExpression": "17.0",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "17.0-4",
+      "architecture": "aarch64",
+      "licenseExpression": "GPL-2.0"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "speexdsp",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/speexdsp/build.sh",
+      "recipeSha256": "8424446f3a1bd5a4b0ca5f079d441d296996544dfb9981216c476fa52b411847",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": "1",
+      "sourceVersionExpression": "1.2.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.2.1-1",
+      "architecture": "aarch64",
+      "licenseExpression": "BSD 3-Clause"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "xorg-util-macros",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/xorg-util-macros/build.sh",
+      "recipeSha256": "90834b817c7086e2d7657564ba027d045493ff129e161f80eb99695d81aad57e",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.20.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.20.2",
+      "architecture": "all",
+      "licenseExpression": "HPND, MIT"
+    },
+    {
+      "dependencyGroups": [
+        [
+          {
+            "name": "xorg-util-macros",
+            "operator": null,
+            "qualifier": null,
+            "sourceRelation": "xorg-util-macros",
+            "version": null
+          }
+        ]
+      ],
+      "name": "xorgproto",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/xorgproto/build.sh",
+      "recipeSha256": "6c5fc5b5f3362de2d2eb728054de01aa2368f6b22846de1ddde2c19a214f5238",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "2026.1",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "2026.1",
+      "architecture": "all",
+      "licenseExpression": "MIT"
+    },
+    {
+      "dependencyGroups": [],
+      "name": "zlib",
+      "packageType": "recipe",
+      "parentDependencyRule": null,
+      "parentPackage": null,
+      "recipePath": "packages/zlib/build.sh",
+      "recipeSha256": "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+      "recommendationGroupsNotIncludedInRequiredClosure": [],
+      "revisionExpressionIsLiteral": true,
+      "sourceRevisionExpression": null,
+      "sourceVersionExpression": "1.3.2",
+      "subpackagePath": null,
+      "subpackageSha256": null,
+      "versionExpressionIsLiteral": true,
+      "version": "1.3.2",
+      "architecture": "aarch64",
+      "licenseExpression": "ZLIB"
+    }
+  ],
+  "releaseGate": {
+    "publicationAllowed": false,
+    "deviceInstall": "NOT RUN",
+    "rollback": "NOT RUN",
+    "deviceEvidenceSha256": null
+  },
+  "additionalSourceEvidence": {
+    "pulseaudio": {
+      "sourceUrl": "https://github.com/pulseaudio/pulseaudio/archive/1f020889c9aa44ea0f63d7222e8c2b62c3f45f68.tar.gz",
+      "sourceSha256": "0ccee8a0c9653badc668cf11f0eaad97a1febb85afa82c24c2d1935926446e3b",
+      "commit": "1f020889c9aa44ea0f63d7222e8c2b62c3f45f68",
+      "tag": "v17.0",
+      "tagObject": "16be4f7accce287fd08519591c6356ffa61aaaf1",
+      "archiveVersionMetadata": "Standard git-version-gen .tarball-version is seeded from exact pinned recipe 17.0; commit archive has no .git metadata."
+    },
+    "libmpg123": {
+      "sourceSha256": "31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee",
+      "configureComponentEvidence": "configure.ac lines 375-418: --disable-components --enable-libmpg123; no decoder API removed",
+      "reason": "Hosted run 39066933456: pulseaudio configure cannot resolve sndfile; pinned recipe libmpg123 BUILD_DEPENDS=pulseaudio closes the cycle through pulseaudio runtime sndfile and sndfile runtime mpg123.",
+      "optionalConsoleSubpackage": "Excluded on aarch64 via standard TERMUX_SUBPKG_EXCLUDED_ARCHES so buildorder does not reintroduce its PulseAudio dependency."
+    }
+  },
+  "platformElfRequirements": {
+    "libaaudio.so": {
+      "minimumAndroidApi": 26,
+      "scope": "optional pulseaudio module-aaudio-sink; disabled in default.pa",
+      "evidence": "pinned packages/pulseaudio/build.sh lines 23-30 copies NDK API 26 link stub; lines 60-61 leave AAudio sink disabled by default",
+      "deviceVerified": false
+    }
+  },
+  "elfDuplicateAliases": {
+    "libjsig.so": {
+      "package": "openjdk-17",
+      "paths": [
+        "lib/jvm/java-17-openjdk/lib/libjsig.so",
+        "lib/jvm/java-17-openjdk/lib/server/libjsig.so"
+      ],
+      "equivalence": "identical SHA-256 plus identical SONAME/NEEDED/interpreter/RPATH metadata",
+      "sourceEvidence": "https://github.com/openjdk/jdk17u/blob/8cbbca61432426a3441aa08838d930ef954ea1ba/make/modules/java.base/Lib.gmk#L145-L166"
+    }
+  }
+}
