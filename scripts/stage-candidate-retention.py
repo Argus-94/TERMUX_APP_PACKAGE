@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import tarfile
 from pathlib import Path
 
 METADATA = {"InRelease", "Release", "Release.gpg", "Packages", "Packages.gz"}
@@ -141,7 +142,12 @@ def stage(output, feed, keyroot, manifest, destination, repo, runid, sha_commit,
     debdir = output / "packages"
     debs = files_under(debdir)
     if any(p.suffix != ".deb" for p in debs) or len(debs) != len(expected):
-        raise ValueError("package output contains unexpected files or wrong package count")
+        expected_records = [dict(name=n, version=v, architecture=a) for n, v, a in sorted(expected)]
+        found_names = sorted(p.name for p in debs)
+        detail = json.dumps({"expectedCount": len(expected), "expectedIdentities": expected_records,
+                             "foundCount": len(debs), "foundFilenames": found_names},
+                            ensure_ascii=True, sort_keys=True)
+        raise ValueError(f"package output mismatch: {detail}")
     identities = {deb_identity(p): p for p in debs}
     if set(identities) != expected:
         raise ValueError("package-set mismatch with manifest")
@@ -292,6 +298,19 @@ def stage(output, feed, keyroot, manifest, destination, repo, runid, sha_commit,
             subprocess.run(["gpg", "--batch", "--homedir", str(gpg_home), "--armor", "--detach-sign", "--output", str(destination / (name + ".asc")), str(destination / name)], check=True, capture_output=True)
     else:
         raise ValueError("ephemeral signer required for retained provenance")
+    # Keep original Debian filenames and signed feed metadata byte-for-byte intact;
+    # the single portable artifact avoids upload-artifact path restrictions (e.g. ':').
+    archive = destination.with_name(destination.name + ".tar.gz")
+    if archive.exists() or archive.is_symlink():
+        if archive.is_dir() and not archive.is_symlink():
+            shutil.rmtree(archive)
+        else:
+            archive.unlink()
+    with tarfile.open(archive, "w:gz") as tar:
+        for path in sorted(destination.rglob("*")):
+            if path.is_file():
+                tar.add(path, arcname=path.relative_to(destination).as_posix(), recursive=False)
+    return archive
 
 
 def main():

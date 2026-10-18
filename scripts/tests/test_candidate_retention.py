@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -66,6 +67,20 @@ class RetentionTests(unittest.TestCase):
         self.assertTrue((self.dest / "reports/app-private-properties.patch").is_file())
         self.assertFalse((self.dest / "private.key").exists())
         self.assertTrue((self.dest / "SHA256SUMS").is_file())
+        import tarfile
+        archive = self.dest.with_name(self.dest.name + ".tar.gz")
+        self.assertTrue(archive.is_file())
+        with tarfile.open(archive, "r:gz") as tar:
+            self.assertIn("packages/" + self.deb.name, tar.getnames())
+            self.assertIn("SHA256SUMS", tar.getnames())
+            names = tar.getnames()
+            self.assertIn("signed-feed/pool/main/make/" + self.deb.name, names)
+            self.assertIn("signed-feed/dists/stable/InRelease", names)
+            self.assertIn("signed-feed/dists/stable/Release.gpg", names)
+            self.assertEqual(tar.extractfile("packages/" + self.deb.name).read(), self.deb.read_bytes())
+            self.assertEqual(tar.extractfile("signed-feed/pool/main/make/" + self.deb.name).read(), self.deb.read_bytes())
+            self.assertFalse(any("private-key" in n.lower() or "secret" in n.lower() or "gnupg" in n.lower() for n in names))
+            self.assertTrue(all(not Path(n).is_absolute() and ".." not in Path(n).parts for n in names))
         provenance = json.loads((self.dest / "provenance.json").read_text())
         self.assertEqual(provenance["repository"], "owner/repo")
         self.assertEqual(provenance["repositoryCommit"], COMMIT)
@@ -90,6 +105,24 @@ class RetentionTests(unittest.TestCase):
         self.deb.rename(self.output / "packages/wget_1_aarch64.deb")
         with self.assertRaises(ValueError):
             self.run_stage()
+
+    def test_rejects_extra_package_output_file_with_json_diagnostic(self):
+        (self.output / "packages" / "odd\nname.txt").write_text("unexpected")
+        with self.assertRaisesRegex(ValueError, '"expectedIdentities"') as error:
+            self.run_stage()
+        self.assertIn('"expectedCount": 1', str(error.exception))
+        self.assertIn('"foundFilenames": ["make_4.4.1-1_aarch64.deb", "odd\\nname.txt"]', str(error.exception))
+
+    def test_rejects_extra_packages_sha256sums(self):
+        (self.output / "packages" / "SHA256SUMS").write_text("deadbeef  make.deb\n")
+        with self.assertRaises(ValueError):
+            self.run_stage()
+
+    def test_make_checksum_sidecar_is_outside_package_directory(self):
+        builder = Path(__file__).parents[2] / "termux-private-package-kit/make-v476/build-make-private-aarch64.sh"
+        source = builder.read_text()
+        self.assertIn('> "$OUTPUT_DIR/package-SHA256SUMS"', source)
+        self.assertNotIn('> "$OUTPUT_DIR/packages/SHA256SUMS"', source)
 
     def test_rejects_hash_mismatch_between_pool_and_candidate(self):
         self.pooldeb.write_bytes(b"different")
@@ -131,7 +164,12 @@ class RetentionTests(unittest.TestCase):
         (package_root / "usr/share/doc").mkdir(parents=True)
         subprocess.run(["dpkg-deb", "--build", str(package_root), str(self.deb)], check=True, capture_output=True)
         self.manifest.write_text(json.dumps({"packages": [{"name": "make", "version": "1:4.4.1-1", "architecture": "aarch64", "sourceCommit": SOURCE}]}))
-        self.pooldeb.write_bytes(self.deb.read_bytes())
+        epoch_deb = self.output / "packages" / "make_1:4.4.1-1_aarch64.deb"
+        self.pooldeb.unlink()
+        self.deb.rename(epoch_deb)
+        self.pooldeb = self.feed / "pool/main/make" / epoch_deb.name
+        self.pooldeb.write_bytes(epoch_deb.read_bytes())
+        self.deb = epoch_deb
         digest = hashlib.sha256(self.deb.read_bytes()).hexdigest()
         (self.output / "build-result.json").write_text(json.dumps({"status": "audit-passed; device-runtime-test-not-run", "installed": False, "packageFile": self.deb.name, "packageSha256": digest, "sourceCommit": SOURCE, "builderImageRef": BUILDER}))
 
@@ -149,6 +187,19 @@ class RetentionTests(unittest.TestCase):
         m.stage(*self.args)
         subprocess.run(["gpg", "--batch", "--verify", str(self.dest / "provenance.json.asc"), str(self.dest / "provenance.json")], env=env, check=True, capture_output=True)
         subprocess.run(["gpg", "--batch", "--verify", str(self.dest / "SHA256SUMS.asc"), str(self.dest / "SHA256SUMS")], env=env, check=True, capture_output=True)
+        archive = self.dest.with_name(self.dest.name + ".tar.gz")
+        with tarfile.open(archive, "r:gz") as tar:
+            names = tar.getnames()
+            epoch_path = "make_1:4.4.1-1_aarch64.deb"
+            self.assertIn("packages/" + epoch_path, names)
+            self.assertIn("signed-feed/pool/main/make/" + epoch_path, names)
+            self.assertEqual(tar.extractfile("packages/" + epoch_path).read(), self.deb.read_bytes())
+            self.assertEqual(tar.extractfile("signed-feed/pool/main/make/" + epoch_path).read(), self.deb.read_bytes())
+            for path in ("provenance.json.asc", "SHA256SUMS.asc", "SHA256SUMS",
+                         "signed-feed/dists/stable/InRelease", "signed-feed/dists/stable/Release.gpg"):
+                self.assertIn(path, names)
+            self.assertFalse(any("private-keys-v1.d" in n or "secret" in n.lower() for n in names))
+            self.assertTrue(all(not Path(n).is_absolute() and ".." not in Path(n).parts for n in names))
 
 
 
