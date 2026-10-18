@@ -177,5 +177,14 @@
     "packages/xorgproto",
     "packages/zlib"
   ],
+  "registeredLocalRecipePatches": {
+    "termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch": {
+      "baseSha256": "146236631b213773a18ae82bc10f526234dec42482b601f3c302605dfa74ad82",
+      "epoch": 1791971743,
+      "sha256": "81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5",
+      "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+      "target": "packages/openjdk-17/build.sh"
+    }
+  },
   "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
 }

@@ -15,7 +15,7 @@
   "duplicatePolicy": "No provider selected. Same name/version/architecture is NOT binary equivalence. Require identical SHA-256 for automatic deduplication; otherwise stop for reviewed canonical rebuild and re-audit of every consumer.",
   "effectiveRecipeContextScope": "SHA-256 of compact sorted JSON mapping paths to SHA-256: parent build.sh and all existing sibling *.subpackage.sh after ordered manifest overlays; not all build flags, source archives, upstream patches, environment or binary ABI.",
   "effectiveRecipeDivergences": [],
-  "effectiveRecipeValidatorSha256": "714da828fcbc9e695a1327c5859d80a154600d79a01feb00e4c226f8b7df8e20",
+  "effectiveRecipeValidatorSha256": "8461addf04c422922ff4eac207edc91f3c9c2bed9889c55ac1c4604991134cc0",
   "inventoryOnly": true,
   "packages": [
     {
@@ -2763,8 +2763,8 @@
       "occurrences": [
         {
           "binarySha256": null,
-          "effectiveRecipeContextSha256": "fb37f289a9040bd21e023dcd993e8d6c56fb0d35f775d86018056131e349a0ba",
-          "effectiveRecipeSha256": "8f418340b828accbdf7dbe734a57daeec49d048c67a6dbcd9c03945530c40936",
+          "effectiveRecipeContextSha256": "420669286cb6b5bd4c7d21530bf7512f0370138749236afd6ca2c312883aa324",
+          "effectiveRecipeSha256": "214ba6237d2bc5606fb5706a4fdbb2471984948530e7d301a31d38f8a74d37cb",
           "effectiveSubpackageSha256": null,
           "overlayTouchesPackageInputs": true,
           "profile": "openjdk17"
@@ -3632,7 +3632,7 @@
       "termux-private-package-kit/git-v2.56.0/build-git-private-aarch64.sh": "a94dd2c147bc427f74dd25cde324423e784d554da5c4717ac2bc7c04e5863667",
       "termux-private-package-kit/make-v476/build-make-private-aarch64.sh": "0bdac5f6170683379709b722a3e212b5bfe230b3d7c68eb3cd74921d34e17e29",
       "termux-private-package-kit/nodejs-npm/build-nodejs-npm-private-aarch64.sh": "3e68063f1ff56934255703982c59bdc8e0f9fe46e1befa31e615deb84696b68b",
-      "termux-private-package-kit/openjdk17/build-openjdk17-private-aarch64.sh": "f4ea434d355f67cb06f4d9c470474b365fa141edaa7b83bd8c97dd18337337aa",
+      "termux-private-package-kit/openjdk17/build-openjdk17-private-aarch64.sh": "7e8fefd1c1e1a3ddf57f7e625bf3ca81b069180e30c2ea9c9406f16de1f4ad25",
       "termux-private-package-kit/pkg-config-v0.29.2/build-pkg-config-private-aarch64.sh": "2be7da50c07d9735e5737d4438fda58aa77009c46aba536e5f772277cb646665",
       "termux-private-package-kit/python-v3.14.6/build-python-private-aarch64.sh": "63241fb853965ed4a51cfbe10bc8b16a173e04f44e8421bf871ff632b2f7e00b",
       "termux-private-package-kit/wget-v1.25.0/build-wget-private-aarch64.sh": "5c478c7333e5085d1f29280e1e24e0b9f94bd92d8bb249ea05194a3c13d051a6"
@@ -3794,7 +3794,10 @@
       "buildModifications": {
         "patchPath": "termux-private-package-kit/openjdk17/openjdk17-license-notices.patch",
         "patchSha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc",
-        "purpose": "Preserve source/license notices; build only supported libmpg123 decoder component to remove the source build cycle; replace mutable PulseAudio git tag with exact commit archive and verified SHA-256. Runtime dependency inventory and versions remain pinned and unchanged."
+        "purpose": "Preserve source/license notices; build only supported libmpg123 decoder component to remove the source build cycle; replace mutable PulseAudio git tag with exact commit archive and verified SHA-256. Runtime dependency inventory and versions remain pinned and unchanged.",
+        "reproducibleSourceDateEpoch": 1791971743,
+        "reproducibleSourcePatchPath": "termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch",
+        "reproducibleSourcePatchSha256": "81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5"
       },
       "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
       "localPatches": [
@@ -3803,12 +3806,16 @@
           "sha256": "f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc"
         },
         {
+          "path": "termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch",
+          "sha256": "81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5"
+        },
+        {
           "path": "termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch",
           "sha256": "ca4c6b593a6a0e741113843038338bad0d4ade85eb4aa1d0d2fb409f6261e02e"
         }
       ],
       "manifest": "openjdk17-candidate-package-set.json",
-      "manifestSha256": "f0d4d7ac98f15b75b37b8dda06dcc1268ee90fc9f4b083be50fc903f94f75d36",
+      "manifestSha256": "dc9a16d8aeb987f3ca26427f6cf954aa3b646981793067a2fa54a5e99ee54e01",
       "packageCount": 36,
       "rootPackages": [
         "openjdk-17"
@@ -3816,7 +3823,7 @@
       "signedBinaryBundle": null,
       "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
       "workflow": ".github/workflows/openjdk17-package-candidate.yml",
-      "workflowSha256": "9625824d661f9158ede243aaa63a3947271ffc94a71c0093ac2ce5a51c22a0f3"
+      "workflowSha256": "8d592d2c4e4f272cd0645c7a52fa37f2dad6b716a86ac2907162846c9ef6fb2c"
     },
     "pkg-config": {
       "buildModifications": {

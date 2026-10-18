@@ -70,6 +70,10 @@ class UnifiedTests(unittest.TestCase):
   self.debs=[]
   self.pkg('good',files={base+'dir/file':'ok',base+'alias':('symlink','dir'),base+'walk':('symlink','alias/..')})
   self.assertEqual(self.runaudit()['packageCount'],1)
+ def test_parent_component_uses_resolved_directory_alias(self):
+  base=PREFIX.lstrip('/')+'/tree/'
+  self.pkg('physical-parent',files={base+'deep/real/file':'ok',base+'deep/target':'target',base+'alias':('symlink','deep/real'),base+'walk':('symlink','alias/../target')})
+  self.assertEqual(self.runaudit()['packageCount'],1)
  def test_directory_alias_cycles_and_finite_dot_alias(self):
   base=PREFIX.lstrip('/')+'/tree/'
   self.pkg('loop',files={base+'a':('symlink','b'),base+'b':('symlink','a')})

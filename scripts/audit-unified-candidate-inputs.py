@@ -141,6 +141,8 @@ def inventory(repo, source_root):
         patches = []
         if modifications.get('patchPath'):
             patches.append((modifications['patchPath'], modifications['patchSha256']))
+        if modifications.get('reproducibleSourcePatchPath'):
+            patches.append((modifications['reproducibleSourcePatchPath'], modifications['reproducibleSourcePatchSha256']))
         for p in manifest['packages']:
             if p.get('localRecipePatchPath'):
                 patches.append((p['localRecipePatchPath'], p['localRecipePatchSha256']))

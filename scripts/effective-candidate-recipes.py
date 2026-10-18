@@ -62,6 +62,10 @@ def effective_inputs(repo, source_root, nodes, patches):
     pulse_overlay = ('pulseaudio' in nodes and
                      nodes['pulseaudio']['recipePath'] == 'packages/pulseaudio/build.sh')
     overlay_target = 'packages/pulseaudio/meson.patch'
+    repro_patch_name = 'termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch'
+    repro_patch_sha = '81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5'
+    repro_base_sha = '146236631b213773a18ae82bc10f526234dec42482b601f3c302605dfa74ad82'
+    repro_source_commit = '505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
     overlay_base_sha = None
     if pulse_overlay:
         registry = json.loads(regular_input(repo, 'termux-private-package-kit/openjdk17/upstream-recipe-inputs.json'))
@@ -79,6 +83,12 @@ def effective_inputs(repo, source_root, nodes, patches):
     if pulse_overlay:
         require(sha(original[overlay_target]) == overlay_base_sha,
                 'PULseaUDIO_PATCH_BASE_HASH_MISMATCH')
+    try:
+        registry_data = regular_input(repo, 'termux-private-package-kit/openjdk17/upstream-recipe-inputs.json')
+    except GateError as exc:
+        if str(exc).startswith('REGULAR_INPUT_REQUIRED:'): registry_data = b'{}'
+        else: raise
+    openjdk_patch_registry = json.loads(registry_data).get('registeredLocalRecipePatches', {})
     for node in nodes.values():
         for path_field, hash_field in (('recipePath', 'recipeSha256'), ('subpackagePath', 'subpackageSha256')):
             if node[path_field]:
@@ -100,8 +110,10 @@ def effective_inputs(repo, source_root, nodes, patches):
             for line in text.splitlines():
                 if line.startswith('diff --git '):
                     match = re.fullmatch(r'diff --git a/([A-Za-z0-9+_./-]+) b/([A-Za-z0-9+_./-]+)', line)
+                    registered_openjdk = openjdk_patch_registry.get(name)
+                    exact_openjdk_overlay = bool(registered_openjdk and name == 'termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch' and match and match[1] == registered_openjdk['target'] and match[1] == 'packages/openjdk-17/build.sh' and match[1] in allowed and sha(data) == registered_openjdk['sha256'] == repro_patch_sha and sha(data) == repro_patch_sha and registered_openjdk['baseSha256'] == repro_base_sha and sha(original[match[1]]) == repro_base_sha and registered_openjdk['sourceCommit'] == repro_source_commit)
                     require(match is not None and match[1] == match[2] and
-                            (match[1] in allowed and (match[1] != overlay_target or
+                            (match[1] in allowed and (exact_openjdk_overlay or match[1] != 'packages/openjdk-17/build.sh' or (name == 'termux-private-package-kit/openjdk17/openjdk17-license-notices.patch' and sha(data) == 'f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc')) and (match[1] != overlay_target or
                              (pulse_overlay and name == 'termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch'))),
                             'UNSUPPORTED_RECIPE_PATCH_HEADER')
                     headers.append(match[1])
@@ -130,9 +142,10 @@ def effective_inputs(repo, source_root, nodes, patches):
                         'UNSUPPORTED_RECIPE_PATCH_STAT')
                 target = fields[2]
                 normal_recipe_target = re.fullmatch(r'packages/[A-Za-z0-9+_.-]+/(?:build\.sh|[A-Za-z0-9+_.-]+\.subpackage\.sh)', target) is not None
+                narrow_openjdk_target = (target == 'packages/openjdk-17/build.sh' and name == 'termux-private-package-kit/openjdk17/patches/openjdk17-reproducible-source.patch' and name in openjdk_patch_registry and sha(data) == repro_patch_sha and openjdk_patch_registry[name]['sha256'] == repro_patch_sha and sha(original[target]) == repro_base_sha and openjdk_patch_registry[name]['baseSha256'] == repro_base_sha and openjdk_patch_registry[name]['sourceCommit'] == repro_source_commit)
                 narrow_data_target = (pulse_overlay and target == overlay_target and
                     name == 'termux-private-package-kit/openjdk17/patches/pulseaudio-api24-source.patch')
-                require((normal_recipe_target or narrow_data_target) and target in allowed,
+                require((normal_recipe_target or narrow_data_target) and target in allowed and (target != 'packages/openjdk-17/build.sh' or narrow_openjdk_target or (name == 'termux-private-package-kit/openjdk17/openjdk17-license-notices.patch' and sha(data) == 'f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc')),
                         'RECIPE_PATCH_OUTSIDE_CLOSURE')
                 require(target not in changed, 'DUPLICATE_RECIPE_PATCH_TARGET')
                 changed.add(target)
