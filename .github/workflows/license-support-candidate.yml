@@ -1,0 +1,118 @@
+name: Build supplemental termux-licenses data-only candidate
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_candidate_only:
+        description: Type candidate-only to authorize ephemeral signing and 21-day retention
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: license-support-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.event.inputs.confirm_candidate_only == 'candidate-only'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      SOURCE_COMMIT: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      IMAGE: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install archive and signing tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg binutils gzip tar
+      - name: Verify workflow input and build source package in pinned OCI image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "${{ github.event.inputs.confirm_candidate_only }}" = candidate-only
+          python3 - <<'PY'
+          import json, pathlib, os, re
+          lock=json.loads(pathlib.Path('candidate-license-support-lock.json').read_text())
+          image=os.environ['IMAGE']
+          if lock.get('builderImageDigest') != image:
+              raise SystemExit('workflow builder image does not exactly match locked image URL and digest')
+          if re.fullmatch(r'ghcr\.io/termux/package-builder@sha256:[0-9a-f]{64}', image) is None:
+              raise SystemExit('builder image must use the locked full digest reference')
+          PY
+          source_dir="$RUNNER_TEMP/termux-source"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init -q
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$SOURCE_COMMIT"
+          git -C "$source_dir" checkout --detach "$SOURCE_COMMIT"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -z "$(git -C "$source_dir" status --porcelain)"
+          docker pull "$IMAGE"
+          mkdir -p "$RUNNER_TEMP/candidate" "$RUNNER_TEMP/repeat"
+          run_candidate_builder() {
+            local output_dir="$1"
+            docker run --rm --network none --user "$(id -u):$(id -g)" --entrypoint bash \
+              -v "$GITHUB_WORKSPACE:/repo:ro" -v "$source_dir:/src:ro" -v "$output_dir:/out" \
+              -e SOURCE_DATE_EPOCH="$(git -C "$source_dir" show -s --format=%ct "$SOURCE_COMMIT")" \
+              "$IMAGE" -Eeuo pipefail -c 'python3 /repo/scripts/build-candidate-license-support.py --source /src --output /out/termux-licenses_2.2_all.deb'
+          }
+          run_candidate_builder "$RUNNER_TEMP/candidate"
+          run_candidate_builder "$RUNNER_TEMP/repeat"
+          cmp "$RUNNER_TEMP/candidate/termux-licenses_2.2_all.deb" "$RUNNER_TEMP/repeat/termux-licenses_2.2_all.deb"
+          sha256sum "$RUNNER_TEMP/candidate/termux-licenses_2.2_all.deb" | awk '{print $1}' > "$RUNNER_TEMP/reproducible-sha256.txt"
+          printf 'repositoryCommit=%s\nsourceCommit=%s\nimage=%s\nrepeatBuildMatch=true\n' "$(git rev-parse HEAD)" "$SOURCE_COMMIT" "$IMAGE" > "$RUNNER_TEMP/build.log"
+      - name: Verify package shape and create provenance, sign inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          out="$RUNNER_TEMP/candidate"
+          mkdir -p "$out/packages"
+          mv "$out/termux-licenses_2.2_all.deb" "$out/packages/"
+          export OUT="$out" REPO_COMMIT="$(git rev-parse HEAD)" SOURCE_COMMIT IMAGE
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          o=pathlib.Path(os.environ['OUT']); deb=o/'packages/termux-licenses_2.2_all.deb'
+          h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          lock=pathlib.Path('candidate-license-support-lock.json')
+          lock_data=json.loads(lock.read_text())
+          image=os.environ['IMAGE']
+          if lock_data.get('builderImageDigest') != image:
+              raise SystemExit('provenance image differs from source lock')
+          if lock_data.get('sourceRepository') != 'https://github.com/termux/termux-packages.git':
+              raise SystemExit('unexpected locked source repository URL')
+          if lock_data.get('sourceCommit') != os.environ['SOURCE_COMMIT']:
+              raise SystemExit('provenance source commit differs from lock')
+          (o/'candidate-license-support-lock.json').write_bytes(lock.read_bytes())
+          (o/'candidate-package-set.json').write_text(json.dumps({'packages':[{'name':'termux-licenses','version':'2.2','architecture':'all','sha256':h(deb),'filename':'packages/termux-licenses_2.2_all.deb'}],'qualified':False,'productionAllowed':False},indent=2)+'\n')
+          repeat=pathlib.Path(os.environ['RUNNER_TEMP'],'reproducible-sha256.txt').read_text().strip()
+          (o/'provenance.json').write_text(json.dumps({'repositoryCommit':os.environ['REPO_COMMIT'],'sourceRepository':lock_data['sourceRepository'],'sourceCommit':os.environ['SOURCE_COMMIT'],'builderImage':image,'builderImageDigest':image,'builderContentDigest':image.rsplit('@',1)[1],'sourceLockSha256':h(lock),'packageSha256':h(deb),'repeatBuildSha256':repeat,'repeatBuildMatch':repeat==h(deb),'qualified':False,'productionAllowed':False,'noAndroidInstallation':True},indent=2)+'\n')
+          PY
+          signing="$RUNNER_TEMP/ephemeral-signing-private"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$signing" | tee "$RUNNER_TEMP/fingerprint.log"
+          mkdir -p "$out/keys"
+          cp "$signing/keys/aibuilder-termux-feed-keyring.gpg" "$out/keys/"
+          cp "$signing/keys/feed-signing.json" "$out/keys/"
+          python3 - <<'PY'
+          import hashlib,json,pathlib,os
+          root=pathlib.Path(os.environ['OUT'])
+          files={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob('*')) if p.is_file() and p.name not in ('signed-inventory.json','signed-inventory.json.asc')}
+          (root/'signed-inventory.json').write_text(json.dumps({'files':files},sort_keys=True,indent=2)+'\n')
+          PY
+          GNUPGHOME="$signing/gnupg" gpg --batch --armor --detach-sign --output "$out/signed-inventory.json.asc" "$out/signed-inventory.json"
+          tar -czf "$RUNNER_TEMP/termux-license-support-candidate.tar.gz" -C "$out" candidate-package-set.json provenance.json candidate-license-support-lock.json packages/termux-licenses_2.2_all.deb keys/aibuilder-termux-feed-keyring.gpg keys/feed-signing.json signed-inventory.json signed-inventory.json.asc
+          tar -tzf "$RUNNER_TEMP/termux-license-support-candidate.tar.gz"
+          fingerprint="$(python3 -c 'import json,os; print(json.load(open(os.environ["OUT"]+"/keys/feed-signing.json"))["fingerprint"])')"
+          python3 scripts/verify-candidate-license-support.py --bundle-dir "$out" --expected-fingerprint "$fingerprint" --expected-producer "$REPO_COMMIT" --report "$RUNNER_TEMP/support-self-check.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: termux-license-support-candidate
+          path: ${{ runner.temp }}/termux-license-support-candidate.tar.gz
+          retention-days: 21
+          if-no-files-found: error
+      - name: Print fingerprint outside retained candidate archive
+        if: always()
+        run: cat "$RUNNER_TEMP/fingerprint.log" 2>/dev/null || true

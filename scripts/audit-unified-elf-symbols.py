@@ -48,13 +48,23 @@ def export_matches(exp,imp):
 def resolve_inventory(items):
     errors=[]; context=[]; weak=[]; unresolved=[]; soname_groups={}; byname={}
     for x in items:
-        if x.get('soname'): soname_groups.setdefault(x['soname'],[]).append(x); byname.setdefault(x['soname'],[]).append(x)
+        if x.get('elfType') in ('EXEC','REL'): continue
+        names=set(x.get('providerNames',[]))
+        if x.get('soname'): names.add(x['soname']); soname_groups.setdefault(x['soname'],[]).append(x)
+        path=x.get('path','')
+        if path and not path.startswith('/'):
+            names.add(path.rsplit('/',1)[-1])
+            if '/' not in path: names.add(path)
+        for name in names: byname.setdefault(name,[]).append(x)
     for s,g in soname_groups.items():
         if len({x['sha256'] for x in g if x['source']=='candidate'})>1: errors.append('conflicting candidate providers for SONAME '+s)
+    for name,g in byname.items():
+        if len({x['sha256'] for x in g if x['source']=='candidate'})>1: errors.append('conflicting candidate providers for filename '+name)
+        if len({id(x) for x in g if x['source']=='candidate'})>1 and any(name in x.get('providerNames',[]) for x in g): errors.append('ambiguous candidate alias '+name)
     index={}
-    candidate_names={x['soname'] for x in items if x['source']=='candidate' and x.get('soname')}
+    candidate_names={name for name,group in byname.items() if any(x['source']=='candidate' for x in group)}
     for x in items:
-        if x['source']=='platform' and x.get('soname') in candidate_names: continue
+        if x['source']=='platform' and any(name in candidate_names for name in byname if x in byname[name]): continue
         for e in x['exports']:
             # Reachable platform exports describe API availability only, never runtime proof.
             keys={(e['name'],e['version'])}
@@ -66,7 +76,7 @@ def resolve_inventory(items):
         while todo:
             n=todo.pop()
             if n in seen: continue
-            seen.add(n); providers=byname.get(n,[]); cand=[p for p in providers if p['source']=='candidate']; chosen=cand if cand else [p for p in providers if p['source']=='platform']
+            seen.add(n); providers=[p for p in items if p['path']==n] if '/' in n else byname.get(n,[]); providers=[p for p in providers if p.get('elfType')=='DYN']; cand=[p for p in providers if p['source']=='candidate']; chosen=cand if cand else [p for p in providers if p['source']=='platform']
             if not chosen: errors.append(f"{consumer['path']}: unknown DT_NEEDED {n}"); continue
             reachable.update(id(p) for p in chosen)
             for p in chosen: todo.extend(p.get('needed',[]))
@@ -82,17 +92,42 @@ def resolve_inventory(items):
 def process_elf(path,source,display,pkg=None):
     h=parse_header(run_readelf(path,'h'))
     if h['class']!='ELF64' or not (h['data'] or '').startswith("2's complement, little endian") or 'AArch64' not in (h['machine'] or ''): raise ValueError(f'foreign ELF rejected: {display}: {h}')
+    if h['elfType']=='REL':
+        return {'path':display,'package':pkg,'sha256':hashlib.sha256(Path(path).read_bytes()).hexdigest(),**h,'staticLinkAbi':'NOT_PROVEN'}
     if h['elfType'] not in ('DYN','EXEC'): raise ValueError(f'non-loadable ELF rejected: {display}: {h["elfType"]}')
     interp=parse_program_headers(run_readelf(path,'l'))
     if interp not in (None,ALLOWED_INTERP): raise ValueError(f'unsafe interpreter rejected: {display}: {interp}')
     soname,needed,runpath=parse_dynamic(run_readelf(path,'d')); imports,exports=parse_symbols(run_readelf(path,'s'))
     return {'path':display,'package':pkg,'source':source,'sha256':hashlib.sha256(Path(path).read_bytes()).hexdigest(),**h,'interpreter':interp,'soname':soname,'needed':needed,'runpath':runpath,'imports':imports,'exports':exports,'undefinedCount':len(imports),'undefinedStrongCount':sum(not i['weak'] for i in imports),'undefinedWeakCount':sum(i['weak'] for i in imports),'versionedUndefinedCount':sum(i['version'] is not None for i in imports)}
+def _archive_path(name):
+    """Normalize a tar member path without allowing traversal."""
+    parts=[]
+    for part in name.split('/'):
+        if part in ('', '.'):
+            continue
+        if part=='..':
+            if not parts: return None
+            parts.pop()
+        else: parts.append(part)
+    return '/'.join(parts) if parts else None
+
+def _link_target(member_path, linkname, is_absolute=False):
+    # Debian payload absolute links can name the installed Termux prefix; never
+    # reinterpret arbitrary system paths as candidate payload paths.
+    prefix='/data/user/0/com.karat.aibuilder/files/usr/'
+    if linkname.startswith('/'):
+        if not linkname.startswith(prefix): return None
+        target=linkname[len(prefix):]
+    else:
+        target=linkname if is_absolute else str(Path(member_path).parent / linkname)
+    return _archive_path(target)
+
 def candidate_debs(root,temp):
     root=Path(root)
     if not root.is_dir(): raise ValueError('packages directory missing or not a directory')
     debs=sorted(root.glob('*.deb'))
     if not debs: raise ValueError('packages directory contains no deb files')
-    found=[]
+    found=[]; payload_paths={}; links={}
     for deb in debs:
         p=subprocess.Popen(['dpkg-deb','--fsys-tarfile',str(deb)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=clean_env())
         try:
@@ -101,6 +136,13 @@ def candidate_debs(root,temp):
                 for member in tf:
                     count+=1; total+=max(member.size,0)
                     if count>MAX_MEMBERS or total>MAX_TAR: raise ValueError(f'tar limits exceeded: {deb}')
+                    name=_archive_path(member.name)
+                    if not name: continue
+                    if member.issym() or member.islnk():
+                        # A link name can be mapped later, after every deb was scanned.
+                        target=_link_target(name,member.linkname,member.islnk())
+                        if target: links.setdefault(name,set()).add(target)
+                        continue
                     if not member.isfile(): continue
                     f=tf.extractfile(member)
                     if not f: continue
@@ -111,17 +153,34 @@ def candidate_debs(root,temp):
                     if len(data)>MAX_ELF: raise ValueError(f'ELF exceeds size cap: {member.name}')
                     digest=hashlib.sha256(data).hexdigest(); target=Path(temp)/(digest+'.elf')
                     if not target.exists(): target.write_bytes(data)
-                    found.append(process_elf(target,'candidate',member.name.lstrip('./'),deb.name))
+                    record=process_elf(target,'candidate',name,deb.name)
+                    found.append(record); payload_paths.setdefault(name,[]).append(record)
             err=p.stderr.read().decode(errors='replace') if p.stderr else ''; rc=p.wait()
             if rc: raise ValueError(f'dpkg-deb failed for {deb}: {err.strip()}')
         except Exception: p.kill(); p.wait(); raise
+    # Resolve chains against archive payload paths. Cycles, duplicate targets,
+    # and dangling/external links contribute no provider alias.
+    def resolve(path,seen):
+        if path in seen: return []
+        direct=payload_paths.get(path,set())
+        if direct: return direct
+        targets=links.get(path,set())
+        if len(targets)!=1: return []
+        return resolve(next(iter(targets)),seen|{path})
+    for alias in links:
+        targets=resolve(alias,set())
+        if len(targets)==1:
+            record=targets[0]; record.setdefault('providerNames',[]).append(alias.rsplit('/',1)[-1])
+    for record in found:
+        if record.get('providerNames'): record['providerNames']=sorted(set(record['providerNames']))
     return found
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--packages-dir',required=True); ap.add_argument('--platform-stubs-dir',required=True); ap.add_argument('--report',required=True); a=ap.parse_args()
-    items=[]; fatal=[]; contexts=[]; weak=[]; unresolved=[]; candidate_count=platform_count=0
+    items=[]; non_loadable=[]; fatal=[]; contexts=[]; weak=[]; unresolved=[]; candidate_count=platform_count=0
     try:
         with tempfile.TemporaryDirectory(prefix='termux-elf-audit-') as td:
-            items+=candidate_debs(a.packages_dir,td); candidate_count=sum(x['source']=='candidate' for x in items)
+            candidate_records=candidate_debs(a.packages_dir,td); non_loadable=[x for x in candidate_records if x['elfType']=='REL']; items += [x for x in candidate_records if x['elfType']!='REL']; candidate_count=sum(x['source']=='candidate' for x in items)
             stubdir=Path(a.platform_stubs_dir)
             if not stubdir.is_dir(): raise ValueError('platform stubs directory missing or not a directory')
             for f in sorted(stubdir.rglob('*.so')):
@@ -133,6 +192,6 @@ def main():
             if platform_count==0: fatal.append('no platform ELF stubs found')
             errors,contexts,weak,unresolved=resolve_inventory(items); fatal+=errors
     except Exception as e: fatal.append(str(e))
-    report={'schema':'termux-static-elf-symbol-inventory-v1','qualified':False,'productionAllowed':False,'android':'NOT_RUN','completeElfAbiQualification':False,'staticSymbolCoverage':'PASS' if not fatal and not contexts and not unresolved else 'FAIL','loaderReachability':'NOT_PROVEN','runpathMeaning':'inventory only; does not establish pathname reachability','scopeExclusions':['static archives','relocatable objects (rejected fail-closed if encountered as ELF)','nested archives','runtime behavior','dlopen binding contexts not proven'],'candidateElfCount':candidate_count,'platformStubCount':platform_count,'elfCount':len(items),'elfs':items,'weakUnresolved':weak,'runtimeLoaderContextRequired':contexts,'unresolvedStrong':unresolved,'errors':fatal}
+    report={'schema':'termux-static-elf-symbol-inventory-v1','qualified':False,'productionAllowed':False,'android':'NOT_RUN','completeElfAbiQualification':False,'staticSymbolCoverage':'PASS' if not fatal and not contexts and not unresolved else 'FAIL','loaderReachability':'NOT_PROVEN','runpathMeaning':'inventory only; does not establish pathname reachability','scopeExclusions':['static archives','relocatable objects are inventoried separately; static-link ABI not proven','nested archives','runtime behavior','dlopen binding contexts not proven'],'candidateElfCount':candidate_count,'platformStubCount':platform_count,'elfCount':len(items),'elfs':items,'nonLoadableElfInventory':non_loadable,'weakUnresolved':weak,'runtimeLoaderContextRequired':contexts,'unresolvedStrong':unresolved,'errors':fatal}
     Path(a.report).write_text(json.dumps(report,indent=2,sort_keys=True)+'\n'); return 2 if fatal or contexts or unresolved else 0
 if __name__=='__main__': sys.exit(main())

@@ -3,7 +3,7 @@ import importlib.util, unittest, tempfile, os, subprocess
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('audit',str(Path(__file__).resolve().parents[1]/'audit-unified-elf-symbols.py')); a=importlib.util.module_from_spec(spec); spec.loader.exec_module(a)
 def obj(path,source='candidate',soname=None,needed=(),exports=(),imports=(),digest='x'):
-    return {'path':path,'source':source,'soname':soname,'needed':list(needed),'exports':list(exports),'imports':list(imports),'sha256':digest}
+    return {'path':path,'source':source,'soname':soname,'needed':list(needed),'exports':list(exports),'imports':list(imports),'sha256':digest,'elfType':'DYN'}
 def exp(name,version=None,default=True,typ='FUNC',bind='GLOBAL'): return {'name':name,'version':version,'default':default,'type':typ,'bind':bind}
 def imp(name,version=None,weak=False,typ='FUNC'): return {'name':name,'version':version,'weak':weak,'type':typ}
 class Tests(unittest.TestCase):
@@ -13,6 +13,23 @@ class Tests(unittest.TestCase):
         errors,ctx,weak,unres=a.resolve_inventory([obj('consumer',imports=[imp('optional',weak=True)])]); self.assertFalse(errors or ctx or unres); self.assertEqual(len(weak),1)
     def test_missing_import_fails(self): self.assertEqual(len(a.resolve_inventory([obj('consumer',imports=[imp('missing')])])[3]),1)
     def test_conflicting_candidate_soname(self): self.assertTrue(any('conflicting' in e for e in a.resolve_inventory([obj('a',soname='libx.so',digest='a'),obj('b',soname='libx.so',digest='b')])[0]))
+    def test_filename_only_provider_resolves_needed(self):
+        provider=obj('usr/lib/libx.so',exports=[exp('ok')]); c=obj('consumer',needed=['libx.so'],imports=[imp('ok')])
+        self.assertFalse(any(a.resolve_inventory([provider,c])))
+    def test_absolute_needed_requires_exact_path(self):
+        provider=obj('libx.so',exports=[exp('ok')]); c=obj('consumer',needed=['/system/lib64/libx.so'],imports=[imp('ok')])
+        self.assertTrue(any('unknown DT_NEEDED /system/lib64/libx.so' in e for e in a.resolve_inventory([provider,c])[0]))
+    def test_nonloadable_filename_cannot_provide(self):
+        for typ in ('EXEC','REL'):
+            provider=obj('libx.so',exports=[exp('ok')]); provider['elfType']=typ
+            c=obj('consumer',needed=['libx.so'],imports=[imp('ok')])
+            self.assertTrue(any('unknown DT_NEEDED libx.so' in e for e in a.resolve_inventory([provider,c])[0]))
+    def test_filename_candidate_shadows_platform_export(self):
+        candidate=obj('usr/lib/libx.so',exports=[exp('present')]); platform=obj('stub',source='platform',soname='libx.so',exports=[exp('platform_extra')]); c=obj('consumer',needed=['libx.so'],imports=[imp('platform_extra')])
+        self.assertEqual(len(a.resolve_inventory([candidate,platform,c])[3]),1)
+    def test_conflicting_candidate_filename_fails_closed(self):
+        a1=obj('usr/lib/libx.so',digest='a'); a2=obj('opt/libx.so',digest='b'); c=obj('consumer',needed=['libx.so'])
+        self.assertTrue(any('conflicting candidate providers for filename libx.so'==e for e in a.resolve_inventory([a1,a2,c])[0]))
     def test_tls_consistency(self): self.assertFalse(a.export_matches(exp('x',typ='OBJECT'),imp('x',typ='TLS'))); self.assertTrue(a.export_matches(exp('x',typ='TLS'),imp('x',typ='TLS')))
     def test_candidate_preferred_platform_and_masked_fallback_is_unresolved(self):
         cand=obj('candidate-lib',soname='libx.so',exports=[exp('present')]); plat=obj('platform-lib',source='platform',soname='libx.so',exports=[exp('present'),exp('platform_extra')]); c=obj('consumer',needed=['libx.so'],imports=[imp('platform_extra')]); self.assertEqual(len(a.resolve_inventory([cand,plat,c])[3]),1)
@@ -38,11 +55,38 @@ class Tests(unittest.TestCase):
     def test_empty_dirs_fail(self):
         with tempfile.TemporaryDirectory() as t:
             self.assertRaises(ValueError,a.candidate_debs,t,t)
-    def test_nonloadable_rejected(self):
-        old=a.run_readelf
-        a.run_readelf=lambda p,m: {'h':'  Type: REL (Relocatable file)\n  Class: ELF64\n  Data: 2\'s complement, little endian\n  Machine: AArch64','l':'','d':'','s':''}[m]
-        try: self.assertRaises(ValueError,a.process_elf,'/bin/true','candidate','true')
-        finally: a.run_readelf=old
+    def test_rel_is_separate_inventory_not_runtime_provider(self):
+        header="  Type: REL (Relocatable file)\n  Class: ELF64\n  Data: 2\'s complement, little endian\n  Machine: AArch64"
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(b'relocatable fixture'); f.flush()
+            old=a.run_readelf
+            a.run_readelf=lambda p,m: header if m=='h' else (_ for _ in ()).throw(AssertionError('REL must not reach runtime readelf modes'))
+            try: record=a.process_elf(f.name,'candidate','usr/lib/python3.14/config-3.14-aarch64-linux-android/python.o: REL','python-dev.deb')
+            finally: a.run_readelf=old
+        self.assertEqual((record['elfType'],record['staticLinkAbi'],record['package']),('REL','NOT_PROVEN','python-dev.deb'))
+        self.assertEqual(record['sha256'],__import__('hashlib').sha256(b'relocatable fixture').hexdigest())
+        self.assertNotIn('soname',record); self.assertEqual(a.resolve_inventory([obj('consumer',needed=['python.o'])])[0],['consumer: unknown DT_NEEDED python.o'])
+    def test_loadable_elf_still_processed_and_nonrel_types_rejected(self):
+        base="  Class: ELF64\n  Data: 2\'s complement, little endian\n  Machine: AArch64\n"
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(b'loadable fixture'); f.flush()
+            old=a.run_readelf
+            def fake(p,m):
+                if m=='h': return base+'  Type: DYN (Shared object file)\n'
+                return {'l':'','d':' 0x1 (SONAME) Library soname: [libok.so]','s':''}[m]
+            a.run_readelf=fake
+            try: load=a.process_elf(f.name,'candidate','libok.so')
+            finally: a.run_readelf=old
+            self.assertEqual(load['soname'],'libok.so')
+            for typ in ('CORE','MALFORMED'):
+                a.run_readelf=lambda p,m,t=typ: base+(f'  Type: {t} (Core file)\n' if t=='CORE' else '')
+                try:
+                    with self.assertRaises(ValueError): a.process_elf(f.name,'candidate','bad')
+                finally: a.run_readelf=old
+            a.run_readelf=lambda p,m: "  Class: ELF64\n  Data: 2's complement, little endian\n  Machine: Intel 80386\n  Type: REL (Relocatable file)\n"
+            try:
+                with self.assertRaisesRegex(ValueError,'foreign ELF rejected'): a.process_elf(f.name,'candidate','foreign-rel')
+            finally: a.run_readelf=old
     def test_actual_wrong_arch_negative_no_execution(self):
         if not os.path.exists('/bin/true'): self.skipTest('/bin/true unavailable')
         with self.assertRaises(ValueError): a.process_elf('/bin/true','candidate','/bin/true')
@@ -55,6 +99,24 @@ class Tests(unittest.TestCase):
         c=obj('consumer',imports=[imp('puts','LIBC')])
         errors,context,weak,missing=a.resolve_inventory([platform,c])
         self.assertFalse(errors or context or weak);self.assertEqual(len(missing),1)
+    def test_alias_name_resolves_actual_nosoname_dyn_provider(self):
+        provider=obj('usr/lib/libsqlite3.so.3.50.0',exports=[exp('sqlite3_open')]); provider['elfType']='DYN'; provider['providerNames']=['libsqlite3.so']
+        c=obj('consumer',needed=['libsqlite3.so'],imports=[imp('sqlite3_open')])
+        self.assertFalse(any(a.resolve_inventory([provider,c])))
+    def test_alias_chain_is_lexically_confined(self):
+        target='usr/lib/libsqlite3.so.3'
+        self.assertEqual(a._link_target('usr/lib/libsqlite3.so','libsqlite3.so.3'),target)
+        self.assertEqual(a._link_target('usr/lib/libsqlite3.so','/data/user/0/com.karat.aibuilder/files/usr/usr/lib/libsqlite3.so.3'),target)
+        self.assertIsNone(a._link_target('usr/lib/libsqlite3.so','/system/lib64/libsqlite3.so'))
+        self.assertIsNone(a._link_target('usr/lib/libx.so','../../../../escape'))
+    def test_duplicate_alias_providers_fail_closed(self):
+        x=obj('usr/lib/real-a.so',digest='a'); x['providerNames']=['libalias.so']
+        y=obj('usr/lib/real-b.so',digest='b'); y['providerNames']=['libalias.so']
+        errs=a.resolve_inventory([x,y,obj('consumer',needed=['libalias.so'])])[0]
+        self.assertTrue(any('ambiguous candidate alias libalias.so' in e for e in errs))
+    def test_absolute_needed_is_never_reduced_to_basename(self):
+        provider=obj('usr/lib/libx.so',exports=[exp('ok')]); c=obj('consumer',needed=['/other/path/libx.so'],imports=[imp('ok')])
+        self.assertTrue(any('unknown DT_NEEDED /other/path/libx.so' in e for e in a.resolve_inventory([provider,c])[0]))
     def test_readelf_unique_export(self):
         imports,exports=a.parse_symbols(' 1: 0000000000000100 0x10000 OBJECT UNIQUE DEFAULT 12 shared_var')
         self.assertFalse(imports);self.assertEqual(exports[0]['name'],'shared_var')

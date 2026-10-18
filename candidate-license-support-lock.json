@@ -1,0 +1,217 @@
+{
+  "builderImageDigest": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+  "files": {
+    "LICENSES/AGPL-3.0-only.txt": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "LICENSES/AGPL-3.0-or-later.txt": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "LICENSES/AGPL-3.0.txt": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "LICENSES/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "LICENSES/Artistic-License-2.0.txt": "b06b8a07ae5c40f54601b8daa0b55645bbba3efd1f9a7b2e6a76edf1618297c3",
+    "LICENSES/BSL-1.0.txt": "7f8a88ce52c079968082b1b6fef5339f1af9171e6ea8cd7587ad0b64fff81ec3",
+    "LICENSES/CC0-1.0.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+    "LICENSES/CeCILL-2.1.txt": "506e5ae49c2931f74b74fdf922fccbf20113eb226fb5f10c6f68b57d45621813",
+    "LICENSES/EPL-1.0.txt": "0435570a20c5b24623b98cbcd0b4d0340d5550007388cda4c6b198b0cfa14a86",
+    "LICENSES/EPL-2.0.txt": "2efc4c34579dc45f5e1776bbc56d0be3445b580516c65f3a19fe1d5c16a93b50",
+    "LICENSES/GPL-2.0-only.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+    "LICENSES/GPL-2.0-or-later.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+    "LICENSES/GPL-2.0.txt": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+    "LICENSES/GPL-3.0-only.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "LICENSES/GPL-3.0-or-later.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "LICENSES/GPL-3.0.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "LICENSES/ISC.txt": "45fefea443e839d010df68c932e5c3b1e31cc9b82f8b4f4ea801c6de0cbd58ca",
+    "LICENSES/ImageMagick.txt": "5b47db932754743460eba7a226aea85b63e3408d3c7affb4d0117f70c9594ded",
+    "LICENSES/LGPL-2.0-only.txt": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+    "LICENSES/LGPL-2.0-or-later.txt": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+    "LICENSES/LGPL-2.0.txt": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+    "LICENSES/LGPL-2.1-only.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+    "LICENSES/LGPL-2.1-or-later.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+    "LICENSES/LGPL-2.1.txt": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+    "LICENSES/LGPL-3.0-only.txt": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+    "LICENSES/LGPL-3.0-or-later.txt": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+    "LICENSES/LGPL-3.0.txt": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+    "LICENSES/MPL-2.0.txt": "9bc20a15c61407693f16f5bb482035e60c9ac3e9c6611c6c3b6623a1a4453578",
+    "LICENSES/NCSA.txt": "aecb9504bcc76b4ff5e8ff1266344bb607b6bed2bfc3dd8b35233d941401d01e",
+    "LICENSES/Nethack.txt": "93a3ae2cb8dee482daddfaebe53bcffe5b114b603def19b4dca21621cbc5a747",
+    "LICENSES/OpenLDAP.txt": "310fe25c858a9515fc8c8d7d1f24a67c9496f84a91e0a0e41ea9975b1371e569",
+    "LICENSES/PHP-3.0.txt": "e4f797cb2c221a206a34f575e142e7513546f64d10cd7d2ca11c76797c288dca",
+    "LICENSES/Public Domain.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+    "LICENSES/Unlicense.txt": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd",
+    "LICENSES/VIM License.txt": "cfc1edda2b488ecd5b4f1504ea74f5d4a3965d717b5051a51d968ca0b58b3e65",
+    "LICENSES/WTFPL.txt": "96f17857f3eb28a7d93dad930bc099a3cb65a9a2afb37069bfd1ba5ec5964389",
+    "LICENSES/wxWindows.txt": "5ea1544b51a28bc823b03159190d4108f9fb4f4ef912389f5137c6d295e175b2",
+    "build.sh": "a6645bd79592436e1f90cc0da5ed81f212a125c1ec1e321031f23809825a0adb"
+  },
+  "package": {
+    "architecture": "all",
+    "name": "termux-licenses",
+    "version": "2.2"
+  },
+  "packageTree": {
+    "LICENSES": {
+      "type": "directory"
+    },
+    "LICENSES/AGPL-3.0-only.txt": {
+      "target": "AGPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/AGPL-3.0-or-later.txt": {
+      "target": "AGPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/AGPL-3.0.txt": {
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "type": "file"
+    },
+    "LICENSES/Apache-2.0.txt": {
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "type": "file"
+    },
+    "LICENSES/Artistic-License-2.0.txt": {
+      "sha256": "b06b8a07ae5c40f54601b8daa0b55645bbba3efd1f9a7b2e6a76edf1618297c3",
+      "type": "file"
+    },
+    "LICENSES/BSL-1.0.txt": {
+      "sha256": "7f8a88ce52c079968082b1b6fef5339f1af9171e6ea8cd7587ad0b64fff81ec3",
+      "type": "file"
+    },
+    "LICENSES/CC0-1.0.txt": {
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "type": "file"
+    },
+    "LICENSES/CeCILL-2.1.txt": {
+      "sha256": "506e5ae49c2931f74b74fdf922fccbf20113eb226fb5f10c6f68b57d45621813",
+      "type": "file"
+    },
+    "LICENSES/EPL-1.0.txt": {
+      "sha256": "0435570a20c5b24623b98cbcd0b4d0340d5550007388cda4c6b198b0cfa14a86",
+      "type": "file"
+    },
+    "LICENSES/EPL-2.0.txt": {
+      "sha256": "2efc4c34579dc45f5e1776bbc56d0be3445b580516c65f3a19fe1d5c16a93b50",
+      "type": "file"
+    },
+    "LICENSES/GPL-2.0-only.txt": {
+      "target": "GPL-2.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/GPL-2.0-or-later.txt": {
+      "target": "GPL-2.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/GPL-2.0.txt": {
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "type": "file"
+    },
+    "LICENSES/GPL-3.0-only.txt": {
+      "target": "GPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/GPL-3.0-or-later.txt": {
+      "target": "GPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/GPL-3.0.txt": {
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "type": "file"
+    },
+    "LICENSES/ISC.txt": {
+      "sha256": "45fefea443e839d010df68c932e5c3b1e31cc9b82f8b4f4ea801c6de0cbd58ca",
+      "type": "file"
+    },
+    "LICENSES/ImageMagick.txt": {
+      "sha256": "5b47db932754743460eba7a226aea85b63e3408d3c7affb4d0117f70c9594ded",
+      "type": "file"
+    },
+    "LICENSES/LGPL-2.0-only.txt": {
+      "target": "LGPL-2.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-2.0-or-later.txt": {
+      "target": "LGPL-2.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-2.0.txt": {
+      "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+      "type": "file"
+    },
+    "LICENSES/LGPL-2.1-only.txt": {
+      "target": "LGPL-2.1.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-2.1-or-later.txt": {
+      "target": "LGPL-2.1.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-2.1.txt": {
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "type": "file"
+    },
+    "LICENSES/LGPL-3.0-only.txt": {
+      "target": "LGPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-3.0-or-later.txt": {
+      "target": "LGPL-3.0.txt",
+      "type": "symlink"
+    },
+    "LICENSES/LGPL-3.0.txt": {
+      "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+      "type": "file"
+    },
+    "LICENSES/MPL-2.0.txt": {
+      "sha256": "9bc20a15c61407693f16f5bb482035e60c9ac3e9c6611c6c3b6623a1a4453578",
+      "type": "file"
+    },
+    "LICENSES/NCSA.txt": {
+      "sha256": "aecb9504bcc76b4ff5e8ff1266344bb607b6bed2bfc3dd8b35233d941401d01e",
+      "type": "file"
+    },
+    "LICENSES/Nethack.txt": {
+      "sha256": "93a3ae2cb8dee482daddfaebe53bcffe5b114b603def19b4dca21621cbc5a747",
+      "type": "file"
+    },
+    "LICENSES/OpenLDAP.txt": {
+      "sha256": "310fe25c858a9515fc8c8d7d1f24a67c9496f84a91e0a0e41ea9975b1371e569",
+      "type": "file"
+    },
+    "LICENSES/PHP-3.0.txt": {
+      "sha256": "e4f797cb2c221a206a34f575e142e7513546f64d10cd7d2ca11c76797c288dca",
+      "type": "file"
+    },
+    "LICENSES/Public Domain.txt": {
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "type": "file"
+    },
+    "LICENSES/Unlicense.txt": {
+      "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd",
+      "type": "file"
+    },
+    "LICENSES/VIM License.txt": {
+      "sha256": "cfc1edda2b488ecd5b4f1504ea74f5d4a3965d717b5051a51d968ca0b58b3e65",
+      "type": "file"
+    },
+    "LICENSES/WTFPL.txt": {
+      "sha256": "96f17857f3eb28a7d93dad930bc099a3cb65a9a2afb37069bfd1ba5ec5964389",
+      "type": "file"
+    },
+    "LICENSES/wxWindows.txt": {
+      "sha256": "5ea1544b51a28bc823b03159190d4108f9fb4f4ef912389f5137c6d295e175b2",
+      "type": "file"
+    },
+    "build.sh": {
+      "sha256": "a6645bd79592436e1f90cc0da5ed81f212a125c1ec1e321031f23809825a0adb",
+      "type": "file"
+    }
+  },
+  "qualification": {
+    "androidInstallationTested": false,
+    "productionAllowed": false,
+    "qualified": false
+  },
+  "recipeText": "TERMUX_PKG_HOMEPAGE=https://termux.dev\nTERMUX_PKG_DESCRIPTION=\"Contains LICENSE files for common licenses\"\nTERMUX_PKG_LICENSE=\"GPL-3.0\"\nTERMUX_PKG_MAINTAINER=\"@termux\"\nTERMUX_PKG_VERSION=2.2\nTERMUX_PKG_AUTO_UPDATE=false\nTERMUX_PKG_SKIP_SRC_EXTRACT=true\nTERMUX_PKG_PLATFORM_INDEPENDENT=true\nTERMUX_PKG_ESSENTIAL=true\n\ntermux_step_make_install() {\n\tmkdir -p \"$TERMUX_PREFIX/share/LICENSES\"\n\tfor LICENSE in \"$TERMUX_PKG_BUILDER_DIR/LICENSES/\"*.txt; do\n\t\tcp -df \"$LICENSE\" \"$TERMUX_PREFIX/share/LICENSES/\"\n\tdone\n}\n",
+  "schemaVersion": 1,
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "target": {
+    "prefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  }
+}
