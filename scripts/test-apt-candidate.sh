@@ -7,7 +7,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_ROOT="${AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT:-$ROOT}"
 MANIFEST="$CONFIG_ROOT/keys/feed-signing.json"
 fail() { printf 'ERROR:%s\n' "$*" >&2; exit 2; }
-[[ $# -ge 4 && $# -le 7 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count] [expected-root-architecture] [additional-package=exact-version]'
+[[ $# -ge 4 ]] || fail 'USAGE:test-apt-candidate.sh <feed-root> <aarch64|amd64> <package> <version> [expected-source-deb-count] [expected-root-architecture] [additional-package=exact-version ...]'
 FEED_ROOT="$(realpath -e -- "$1")"
 ARCH="$2"
 PACKAGE="$3"
@@ -20,11 +20,16 @@ case "$ARCH" in aarch64|amd64) ;; *) fail 'ARCHITECTURE_NOT_ALLOWLISTED';; esac
 [[ "$VERSION" =~ ^[A-Za-z0-9.+:~_-]+$ ]] || fail 'PACKAGE_VERSION_INVALID'
 [[ "$EXPECTED_SOURCE_DEB_COUNT" =~ ^[1-9][0-9]*$ ]] || fail 'EXPECTED_SOURCE_DEB_COUNT_INVALID'
 INSTALL_SPECS=("$PACKAGE=$VERSION")
-if [[ -n "${7:-}" ]]; then
-  [[ "$7" =~ ^[a-z0-9][a-z0-9+.-]*=[A-Za-z0-9.+:~_-]+$ ]] || fail 'ADDITIONAL_ROOT_SPEC_INVALID'
-  [[ "${7%%=*}" != "$PACKAGE" ]] || fail 'ADDITIONAL_ROOT_DUPLICATES_PRIMARY'
-  INSTALL_SPECS+=("$7")
-fi
+declare -A ROOT_NAMES=(["$PACKAGE"]=1)
+for ((arg_index=7; arg_index<=$#; arg_index++)); do
+  spec="${!arg_index}"
+  [[ "$spec" =~ ^[a-z0-9][a-z0-9+.-]*=[A-Za-z0-9.+:~_-]+$ ]] || fail 'ADDITIONAL_ROOT_SPEC_INVALID'
+  spec_name="${spec%%=*}"
+  [[ "$spec_name" != "$PACKAGE" ]] || fail 'ADDITIONAL_ROOT_DUPLICATES_PRIMARY'
+  [[ -z "${ROOT_NAMES[$spec_name]+present}" ]] || fail 'ADDITIONAL_ROOT_DUPLICATE_NAME'
+  ROOT_NAMES["$spec_name"]=1
+  INSTALL_SPECS+=("$spec")
+done
 [[ -f "$MANIFEST" ]] || fail 'SIGNING_MANIFEST_MISSING'
 for tool in gpg gpgv sha256sum python3 apt-get apt-cache; do command -v "$tool" >/dev/null 2>&1 || fail "TOOL_REQUIRED:$tool"; done
 

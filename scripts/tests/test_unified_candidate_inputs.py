@@ -71,7 +71,8 @@ class InventoryTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.repo = pathlib.Path(self.tmp.name)
-        files = {'termux-package-source-scope.json'}
+        files = {'termux-package-source-scope.json', 'scripts/candidate-packaging-policy.py', 'scripts/apply-candidate-packaging-policy.py'}
+        files.update(str(p.relative_to(ROOT)) for p in (ROOT / 'termux-private-package-kit').glob('*/build-*.sh'))
         for manifest, workflow, _ in u.PROFILES.values():
             files.update((manifest, '.github/workflows/' + workflow))
         for profile in self.baseline['profiles'].values():
@@ -208,6 +209,26 @@ class InventoryTests(unittest.TestCase):
     def test_source_dependency_tamper(self):
         self.mutate('curl-candidate-package-set.json', lambda m: m['packages'][0].update(dependencyGroups=[[relation('fake')]]))
         self.reject('SOURCE_DEPENDENCY_METADATA_MISMATCH')
+
+    def test_all_wrappers_invoke_policy_and_hashes_are_global(self):
+        policy = self.baseline['packagingPolicy']
+        helper = u.packaging_policy.policy_description(self.repo, self.source_root)
+        for key in ('baseCommit', 'baseInputs', 'patchedInputs', 'helperSha256', 'applierSha256'):
+            self.assertEqual(policy[key], helper[key])
+        self.assertEqual(len(policy['buildWrapperSha256']), 10)
+        for rel, expected in policy['buildWrapperSha256'].items():
+            self.assertEqual(u.digest(self.repo / rel), expected)
+            text = (self.repo / rel).read_text()
+            self.assertEqual(text.count('apply-candidate-packaging-policy.py'), 1)
+
+    def test_missing_wrapper_policy_call_rejected(self):
+        rel = sorted(self.baseline['packagingPolicy']['buildWrapperSha256'])[0]
+        path = self.repo / rel
+        path.write_text(path.read_text().replace(
+            'python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"\n', '', 1).replace(
+            'python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W"\n', '', 1))
+        with self.assertRaisesRegex(u.GateError, 'PACKAGING_POLICY_INVOCATION_MISSING_OR_DUPLICATE'):
+            u.validate_policy_wrappers(self.repo)
 
     def test_workflow_hash_bound(self):
         p = self.repo / '.github/workflows/curl-package-candidate.yml'

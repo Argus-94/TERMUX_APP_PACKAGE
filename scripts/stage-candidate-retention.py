@@ -141,6 +141,17 @@ def stage(output, feed, keyroot, manifest, destination, repo, runid, sha_commit,
 
     debdir = output / "packages"
     debs = files_under(debdir)
+    checksum_file = debdir / "SHA256SUMS"
+    if checksum_file in debs:
+        # gh's existing builder emits this exact diagnostic alongside its .deb.
+        # It is not a package and is never retained as a package payload.
+        debs = [p for p in debs if p != checksum_file]
+        if checksum_file.stat().st_size > 65536:
+            raise ValueError("package SHA256SUMS metadata too large")
+        expected_sums = {f"{sha(p)}  {p}" for p in debs if p.suffix == ".deb"}
+        sums = checksum_file.read_text(encoding="utf-8").splitlines()
+        if not sums or len(sums) != len(set(sums)) or set(sums) != expected_sums:
+            raise ValueError("package SHA256SUMS metadata does not exactly match candidate bytes/paths")
     if any(p.suffix != ".deb" for p in debs) or len(debs) != len(expected):
         expected_records = [dict(name=n, version=v, architecture=a) for n, v, a in sorted(expected)]
         found_names = sorted(p.name for p in debs)

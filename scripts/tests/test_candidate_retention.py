@@ -121,6 +121,21 @@ class RetentionTests(unittest.TestCase):
         self.assertIn('"expectedCount": 1', str(error.exception))
         self.assertIn('"foundFilenames": ["make_4.4.1-1_aarch64.deb", "odd\\nname.txt"]', str(error.exception))
 
+    def test_accepts_exact_gh_builder_checksum_metadata_without_retaining_it(self):
+        (self.output / "packages/SHA256SUMS").write_text(f"{m.sha(self.deb)}  {self.deb}\n")
+        self.run_stage()
+        self.assertEqual([p.name for p in (self.dest / "packages").iterdir()], [self.deb.name])
+
+    def test_rejects_checksum_metadata_with_wrong_digest(self):
+        (self.output / "packages/SHA256SUMS").write_text(f"{'0' * 64}  {self.deb}\n")
+        with self.assertRaisesRegex(ValueError, "SHA256SUMS metadata"):
+            self.run_stage()
+
+    def test_rejects_checksum_metadata_with_unbound_path(self):
+        (self.output / "packages/SHA256SUMS").write_text(f"{m.sha(self.deb)}  /different/root/{self.deb.name}\n")
+        with self.assertRaisesRegex(ValueError, "SHA256SUMS metadata"):
+            self.run_stage()
+
     def test_rejects_extra_packages_sha256sums(self):
         (self.output / "packages" / "SHA256SUMS").write_text("deadbeef  make.deb\n")
         with self.assertRaises(ValueError):

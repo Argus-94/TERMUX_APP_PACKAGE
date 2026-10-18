@@ -42,6 +42,7 @@ curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --retry
 curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --retry 2 https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz -o "$OUT/root-sources/ninja.tar.gz"
 python3 "$KIT/verify_cmake_ninja_source_inputs.py" --source-root "$SRC" --download-root "$OUT/root-sources" --package-set "$MANIFEST"
 mkdir -p "$OUT/work"; W="$OUT/work/termux-packages"; git clone --shared --dissociate --no-checkout "$SRC" "$W" >/dev/null; git -C "$W" checkout --detach "$PIN" >/dev/null
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$W"
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" "$W/scripts/properties.sh" --data-dir "$AIB_TERMUX_APP_DATA_DIR" --prefix "$AIB_TERMUX_PREFIX"
 git -C "$W" diff -- scripts/properties.sh > "$OUT/app-private-properties.patch"
 test -s "$OUT/app-private-properties.patch" || fail PRIVATE_PROPERTIES_PATCH_MISSING

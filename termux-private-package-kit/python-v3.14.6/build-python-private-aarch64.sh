@@ -102,6 +102,7 @@ mkdir -p "$OUTPUT_DIR/work"
 WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE" >/dev/null
 git -C "$WORKTREE" checkout --detach "$PIN" >/dev/null
+python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"
 [[ "$(git -C "$WORKTREE" rev-parse HEAD)" == "$PIN" ]] || fail 'WORKTREE_COMMIT_MISMATCH'
 python3 "$ROOT/termux-private-package-kit/make-v476/patch_properties.py" \
   "$WORKTREE/scripts/properties.sh" --data-dir "$APP_DATA_DIR" --prefix "$PREFIX"
