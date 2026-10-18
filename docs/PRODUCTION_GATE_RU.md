@@ -1,28 +1,47 @@
 # Production gate пакетного репозитория AI Builder
 
-## Что подтверждено сейчас
+## Текущий статус: production закрыт
 
-- В `main` сохраняется legacy pool из 133 `.deb`. Полный pinned build provenance отсутствует; статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. Это не доверенный install source.
-- Отдельный signing smoke проходит на синтетическом fixture: закреплённый keyring, `Release`/`InRelease`, строгий `signed-by`, отказ при подмене индекса. Это не удостоверяет legacy-пакеты.
-- Candidate CI закрепляет Termux source commit и builder image digest. Отдельно собираются GNU Make `4.4.1-1` и GitHub CLI `gh` `2.102.0`; Git workflow собрал Git `2.56.0` и его 14-пакетную source-built dependency closure (20 dependency alternatives; [run `38829235485`](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38829235485)). Добавленный curl workflow фиксирует кандидат `curl` `8.23.0` и closure из 9 пакетов/12 alternatives; результат — только CI check связанного PR, не device proof. Успешная сборка не означает production approval.
-- В CI compile prefix моделируется как `/data/user/0/com.karat.aibuilder/files/usr`; это не измерение реального устройства.
+- Целевое приложение — приватный AI Builder `com.karat.aibuilder`, архитектура `aarch64`; это не feed для stock Termux. В `main` (`2a2dd775`, merge PR #9; PR #8 добавил Java) остаётся legacy pool из 133 `.deb` без полного pinned build provenance. Статический аудит оставил `fontconfig`, `libx11` и `termux-auth` неподтверждёнными. Не считать legacy pool доверенным источником установки.
+- Кандидатные workflows закрепляют версии исходников/рецептов и builder image и выполняют статический аудит и проверку временного подписанного APT feed с `signed-by` и `apt-get --simulate`. Это hosted CI, а не Android install/runtime proof; симуляция не устанавливает пакеты.
+- **CMake + Ninja:** `cmake` `4.4.4` и `ninja` `1.13.2`; required pinned closure — 22 пакета / 34 dependency alternatives. Источники: Termux packages commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`, CMake archive SHA-256 `bd24c30d80a7744ae84b845ff080cc8453b06c622ef01066564108e9cefc44cf`, Ninja archive SHA-256 `974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17`. Успешный CI: [run 39086630210](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39086630210), head `d038f6080babd6f465cb6d1dbb0baf253ec65171`.
+- **OpenJDK 17:** root `openjdk-17` `17.0.20`; required pinned runtime closure — 36 пакетов / 46 dependency alternatives. Успешный CI: [run 39080124869](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39080124869), head `d58ede99b4b746d7a4ed4253d33b575ffd323d8a`. В этот required набор не включены рекомендации; не подменять этим фактом самостоятельные device tests.
+- Полные package/version/recipe/archive locks см. в [CMake+Ninja manifest](../cmake-ninja-candidate-package-set.json), [CMake+Ninja source closure](../toolchain-candidate-source-closures/cmake-ninja-candidate.json), [OpenJDK manifest](../openjdk17-candidate-package-set.json) и [OpenJDK source closure](../toolchain-candidate-source-closures/openjdk17-candidate.json). Выше приведены root versions и точные closure sizes, а не утверждение, что все пакеты уже проверены на устройстве.
+- CI моделирует prefix `/data/user/0/com.karat.aibuilder/files/usr`; это не наблюдённые `applicationInfo.dataDir` или `filesDir/usr` реального устройства. Ручной просмотр evidence не является криптографической аттестацией: **никакой автоматической promotion** candidate → production нет.
+- Ранее опубликованный Make Actions artifact истёк **2026-10-16**; его доступность не обещается. Нет основания считать, что старый artifact даёт актуальный install source.
 
-## Что делает candidate pipeline
+## Qualification matrix — Android обязательно
 
-1. Сборки Make и `gh` проверяют точные source/recipe/archive locks; Git workflow проверяет pinned Git source и все 14 пакетов closure, curl workflow — pinned curl source, subpackage и все 9 пакетов closure. Dependency downloads отключены в Git/curl builds.
-2. Каждый `.deb` проходит отдельный fail-closed static audit: control metadata, payload paths/links, embedded app paths, ELF ABI/interpreter/needed libraries, maintainer scripts и лицензии. Для `curl` subpackage отсутствие собственного copyright payload допускается только при наличии в том же closure прошедшего audit `libcurl` parent с идентичными pinned recipe/source/version/license; validator сверяет paths/hashes parent evidence с report для `curl`.
-3. Package pool сверяется с manifest, build-result, audit report и APT indices; любое добавление, подмена или mismatch отклоняется.
-4. Для кандидатов создаётся временный подписанный APT feed; CI использует `signed-by=<pinned public keyring>`, проверяет загрузку и `apt-get --simulate install`. Фактической установки нет.
-5. Каждый `Depends`/`Pre-Depends` проверяется на точное разрешение в candidate allowlist с совместимой Debian-версией. Git closure содержит 14 source-built пакетов; curl closure включает 9 пакетов и 12 alternatives; `gh` не имеет обязательных `Depends` (`openssh` указан только как `Recommends`).
-6. Обычные CI runs удаляют source tree, `.deb`, candidate feeds и signing workspace с runner. Единственный заранее одобренный marker push выдал публичный Actions artifact **только для Make**: `.deb`, временные подписанные APT metadata, публичный ephemeral keyring, manifest и build/audit provenance; Git, `gh`, `curl` и приватный ключ не включены. Artifact истекает **2026-10-16 17:29:27Z** ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)). Это handoff только для device smoke, не production publication.
+Все проверки выполняются на отдельном тестовом устройстве/API-профиле для точного APK приложения и точного candidate manifest; фиксируются устройство/API, APK и manifest hashes, команды, exit codes и журналы. До получения и review полного evidence каждая ячейка остаётся **NOT RUN**.
 
-## Остаточные условия до production
+| Область | Практическая проверка | Минимальное evidence / критерий |
+|---|---|---|
+| Установка | На чистом тестовом состоянии импортировать закреплённый ключ; сверить fingerprint и SHA-256 keyring; настроить только HTTPS candidate feed с `signed-by`; установить allowlist из manifest через Builder/APT. | APK identity, реальные `applicationInfo.dataDir` и `filesDir/usr`, manifest/keyring/feed hashes, APT logs; ни `trusted=yes`, ни insecure flags, ни stock Termux feed. |
+| Runtime | Проверить `cmake --version`, `ninja --version`, `java -version`/`javac -version` для разрешённых компонентов; запустить минимальный CMake configure/build с Ninja и Java smoke test в app-private каталоге. | Exit codes и logs; ELF/ABI и реальные пути; отсутствие записи за пределы приватного каталога и доступа к чужому Termux. |
+| Project build | Собрать репрезентативный проект приложения с зафиксированными исходниками/инструкцией, используя именно установленные кандидаты; проверить чистую сборку и повторный запуск. | Commit/hash проекта, команды/версии, build outputs и logs; успешный результат должен быть воспроизводим на заявленной конфигурации. |
+| Upgrade | Применить заранее описанное обновление candidate версии/closure, затем проверить бинарники, проект и сохранность пользовательских данных. | До/после manifest и package versions; успешные runtime/project checks; отсутствие неожиданных изменений данных. |
+| Rollback/uninstall | Вернуться к предыдущему закреплённому набору либо удалить candidate packages штатным механизмом; проверить runtime и проекты после отката, остаточные файлы и отсутствие изменений внешнего Termux. | Команды и exit codes, package state до/после, проверка файлов/данных; rollback должен быть документирован и успешен. |
 
-- Отдельно утвердить production allowlist и точный dependency closure; 133 legacy `.deb` не использовать как доверенный набор.
-- CI уже собрал, статически проверил и смоделировал APT install для Git closure; production feed не опубликован. На `main` `curl`, `wget` и `openssh` из профиля `base` пока только inventory. Отдельный curl candidate pipeline проверяется в review PR: даже его CI pass не докажет Android install/runtime и не откроет production feed.
-- Проверить конкретные APK/runtime на Android: получить реальный `applicationInfo.dataDir` и `filesDir/usr`, установить пакет через Builder, выполнить бинарник, удалить/откатить пакет и подтвердить отсутствие изменений внешнего Termux и проектов пользователя.
-- Проверить импорт закреплённого feed key по exact fingerprint и keyring SHA-256; убедиться, что APT использует `signed-by` без insecure flags.
-- После успешных device tests настроить HTTPS Pages, опубликовать только утверждённый allowlist и повторить download/index-signature checks с публичного URL.
-- Отдельно изменить app-side fail-closed gate/`pkg.ensure`; успешный CI build сам по себе этот gate не открывает.
+Сейчас Android install, runtime, project build, upgrade и rollback — **все NOT RUN**. Hosted CI green не меняет этот статус.
 
-До закрытия всех пунктов запрещены `trusted=yes`, `AllowUnauthenticated`, `AllowInsecureRepositories`, stock `com.termux` feed/packages и любые сторонние package binaries. Cleanup в PR #2 ограничен шестью legacy workflow/script файлами; он не переписывает ветку `gh-pages` и не публикует пакеты.
+### Что подготовить перед device-прогоном
+
+- Нужен доступный авторизованный Android test runtime с точным APK. В текущей среде нет доступного Android-устройства, `adb` или эмулятора; команда на Linux не считается Android-тестом.
+- CMake/Ninja не предоставляют автоматически C/C++ compiler, а OpenJDK не предоставляет Gradle и Android SDK. Для native/Android project build сначала отдельно закрепить и проверить необходимые инструменты и исходники проекта; не подгружать stock/legacy binaries ради зелёного smoke. Java-only smoke можно выполнить через `javac`/`java`; он не докажет Android APK build.
+- Не склеивать отдельные feeds по совпадению package/version. В CMake-профиле [локальный libcurl patch](../termux-private-package-kit/cmake-ninja/libcurl-disable-optional-zstd.patch) меняет effective recipe и отключает необъявленную zstd linkage, хотя upstream recipe hash совпадает с другими профилями. Для объединённого набора нужен единый reviewed lock, однозначный выбор каждого `.deb`, повторные source/path/ABI/provider/conflict/dependency audits и signed APT checks.
+- Для настоящего upgrade/downgrade нужны два разрешённых, source-built и проверенных набора версий. Переустановка той же версии, `--simulate` и synthetic fixtures не закрывают upgrade/rollback gate. Проверка удаления отдельно не доказывает возврат к предыдущей версии.
+
+### Проверки безопасности handoff
+
+Make-only `scripts/stage-device-test-artifact.py` повторно вызывает существующий candidate-policy validator, сверяет plaintext `InRelease` с `Release`, root Release с distribution Release, exact SHA-256/размеры двух подписанных индексов и срок действия metadata. Это проверка целостности handoff, не сборка новых пакетов и не Android evidence. Она не расширяет ранее разрешённый allowlist публикации artifacts.
+
+`scripts/test-device-test-artifact-staging.sh` проверяет реальные временные подписи и отказы при подмене; `scripts/tests/test_device_handoff_validation.py` покрывает metadata edge cases. Fixtures синтетические и никогда не предназначены для установки. Новый workflow `device-handoff-policy.yml` выполняет только эти policy/regression tests, без upload-artifact, production keys, Pages и package installation.
+
+## Gate перед публикацией
+
+1. Сохранить/утвердить allowlist и точное dependency closure по pinned manifests; не использовать 133 legacy `.deb` как доверенную базу.
+2. Завершить и независимо просмотреть Android qualification matrix и подписанное evidence; ручной review не заменяет криптографическую аттестацию и сам по себе ничего не продвигает автоматически.
+3. Проверить app-side fail-closed gate и `pkg.ensure` отдельно; кандидатный CI не открывает их.
+4. Только после явного отдельного разрешения на публикацию настроить HTTPS Pages, опубликовать утверждённый набор и повторить download/index/signature checks с публичного URL. В рамках текущей работы публикация не выполняется.
+
+Запрещены `trusted=yes`, `AllowUnauthenticated`, `AllowInsecureRepositories`, stock `com.termux` feed/packages, legacy debs как доверенная база, fake/bypass packages и PocketForge. Успешный CI не означает production approval и не является Android proof.

@@ -1,35 +1,31 @@
 # TERMUX_APP_PACKAGE — пакеты для AI Builder
 
-Отдельный APT-репозиторий для приватного runtime AI Builder (`com.karat.aibuilder`, `aarch64`). Он не предназначен для stock Termux и не использует пакеты `com.termux` или PocketForge.
+Изолированный candidate APT-набор для приватного runtime AI Builder (`com.karat.aibuilder`, `aarch64`). Не предназначен для stock Termux; не использует feed или пакеты `com.termux` и не имеет отношения к PocketForge.
 
 ## Текущее состояние — production закрыт
 
-- В `main` сохранён старый пул из 133 `.deb`, но у него нет подтверждённого полного provenance; статический аудит отметил 3 неподтверждённых записи. Эти файлы **не являются доверенным установочным feed**.
-- GitHub Pages для этого репозитория не включён; безопасный production URL пока не объявлен.
-- PR #2 содержит gated candidate pipeline без production publication и ограниченный cleanup шести legacy workflow/script файлов.
-- CI отдельно собирает GNU Make `4.4.1-1` и GitHub CLI `gh` `2.102.0`, а отдельный Git workflow — Git `2.56.0` вместе с 14-пакетной source-built dependency closure. Все кандидаты проходят статический аудит и временную подписанную APT download/`--simulate` проверку; реальной установки нет.
-- Для Python `3.14.6` добавлен отдельный candidate-only kit/workflow: pinned runtime closure — 17 пакетов / 25 alternatives; `tk` указан только как build dependency, а `python-pip` и `python-ensurepip-wheels` исключены из required closure. [Hosted CI](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39036690122) для commit `b39ebbf624a19adee282f28568c50a5619a192af` успешно выполнил source build, static audit и подписанную временную APT download/simulation; artifacts не загружались, cleanup завершён. Android install/rollback остаются NOT RUN, production publication заблокирована. OpenJDK 17 и CMake+Ninja пока остаются только metadata inventories.
-- Node.js `26.4.0-1` + npm `11.20.0` прошли [hosted source build, static audit и ephemeral-signed APT simulation](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39053197442/attempts/2) на commit `281edbb3e832ab8d3e3c2fc27a7c4c1aae2a26bd`: все 11 pinned runtime-пакетов / 14 source alternatives; единственный выбранный npm provider — `nodejs`, npm имеет architecture `all`. Индекс подтвердил 13 required dependency relations без внешних base assumptions; simulated install точно совпал с 11 пакетами. Пройдены immutable npm archive / LICENSE hashes Node/npm/ICU, private-path / AArch64 ELF / provider / index / hash gates. Загруженных artifacts — 0; временные source, binaries, feed и ключи удалены. Android install/runtime/rollback — NOT RUN, production publication и Builder `pkg.ensure` закрыты.
-- Обычные CI-запуски удаляют `.deb` и feed с runner. Единственный заранее одобренный marker push выдал публичный Actions artifact **только для Make**: candidate `.deb`, подписанные временные APT metadata, публичный ephemeral keyring, manifest, build-result и audit-report. `gh`, Git и приватный ключ в artifact не входят; срок истечения — `2026-10-16 17:29 UTC` ([Actions run](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/38777394187)).
-- Временный Make artifact предназначен только для device smoke: он не прошёл device validation и не является production feed. Пакеты не коммитятся, не выпускаются через GitHub Release и не публикуются на Pages.
-- `pkg.ensure` и подключение production source остаются закрыты до точного Android install/rollback smoke-теста.
+- В `main` (`2a2dd775`, merge PR #9; PR #8 добавил Java) остаётся legacy pool из 133 `.deb`. У него нет полного подтверждённого build provenance, а три записи — `fontconfig`, `libx11`, `termux-auth` — остались неподтверждёнными статическим аудитом. Не устанавливать этот pool как доверенный набор.
+- **CMake + Ninja:** pinned roots `cmake` `4.4.4` и `ninja` `1.13.2`, required closure 22 пакета / 34 dependency alternatives. [Успешный hosted CI run 39086630210](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39086630210), head `d038f6080babd6f465cb6d1dbb0baf253ec65171`.
+- **OpenJDK 17:** pinned root `openjdk-17` `17.0.20`, required runtime closure 36 пакетов / 46 dependency alternatives; recommendations не входят в required closure. [Успешный hosted CI run 39080124869](https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39080124869), head `d58ede99b4b746d7a4ed4253d33b575ffd323d8a`.
+- Кандидатные workflows выполняют source build, static audit и проверку временного подписанного APT feed с `signed-by` / `apt-get --simulate`; hosted CI не устанавливает пакеты на Android и не доказывает runtime, project build, upgrade или rollback. Эти пять Android проверок — **все NOT RUN**.
+- CI моделирует app-private prefix; это не измерения реального APK/устройства. Ручной evidence review не является криптографической аттестацией, автоматического candidate → production promotion нет.
+- Make Actions artifact истёк 2026-10-16; доступность и пригодность к установке не обещаются. GitHub Pages/production feed не объявляются в этом документе.
 
-## Никаких обходов доверия
+Остальные отдельные кандидаты сохраняются в `main`: Make `4.4.1-1` (1 пакет), gh `2.102.0` (1), Git `2.56.0` (14), curl `8.23.0` (9), wget `1.25.0-1` (11), pkg-config `0.29.2-3` (22), Python `3.14.6-1` (17), Node.js `26.4.0-1` + npm `11.20.0` (11). Это размеры отдельных required closures, не сумма уникальных пакетов и не разрешение объединять feeds. Полные версии/входы находятся в соответствующих `*candidate-package-set.json`.
 
-Не использовать `trusted=yes`, `AllowUnauthenticated`, `AllowInsecureRepositories`, официальный `com.termux` feed, пакеты из неизвестного источника или артефакты PocketForge. Наличие подписи Release подтверждает целостность индекса, но не происхождение/совместимость самих `.deb`.
+Версии и package locks приведены в [CMake+Ninja manifest](cmake-ninja-candidate-package-set.json), [его closure](toolchain-candidate-source-closures/cmake-ninja-candidate.json), [OpenJDK manifest](openjdk17-candidate-package-set.json) и [его closure](toolchain-candidate-source-closures/openjdk17-candidate.json). Полный статус gate и практичная Android qualification matrix: [docs/PRODUCTION_GATE_RU.md](docs/PRODUCTION_GATE_RU.md). Настройка APT feed описана в [APT_REPO_SETUP_RU.md](APT_REPO_SETUP_RU.md); это не разрешение на публикацию.
 
-## Проверки
+До отдельного разрешения запрещены production publish, Pages/signing/pkg.ensure promotion, `trusted=yes` и любые insecure APT flags, использование stock `com.termux`, legacy debs как доверенной базы, fake/bypass packages и PocketForge. Успешный CI не равен Android proof или production approval.
+
+## Локальные policy-проверки
 
 ```sh
-./scripts/test-candidate-feed-policy.sh
-./scripts/test-candidate-dependency-closure.sh
-./scripts/test-pinned-termux-recipe-closure.sh
-./scripts/test-device-test-artifact-staging.sh
-./scripts/test-signed-feed-smoke.sh
-./termux-private-package-kit/make-v476/verify-kit.sh
-python3 -m unittest discover -s termux-private-package-kit/python-v3.14.6/tests -p 'test_*.py' -v
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s termux-private-package-kit/nodejs-npm/tests -v
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -v
+bash scripts/test-device-test-artifact-staging.sh
+bash scripts/test-candidate-feed-policy.sh
+bash scripts/test-candidate-dependency-closure.sh
+bash scripts/test-pinned-termux-recipe-closure.sh
+bash scripts/test-signed-feed-smoke.sh
 ```
 
-Политика кандидата и текущие блокеры описаны в [APT_REPO_SETUP_RU.md](./APT_REPO_SETUP_RU.md); схема подписи — в [docs/FEED_SIGNING_RU.md](./docs/FEED_SIGNING_RU.md).
+Handoff tests используют только synthetic fixtures и ephemeral signatures, ничего не устанавливают и не публикуют. Make-only staging связывает подписи с точными индексами и повторно проверяет candidate provenance policy. Для upgrade/downgrade на Android всё ещё нужны два проверенных набора версий; для native/Android project build — отдельно проверенные compiler/Gradle/SDK, если они нужны проекту. Существующие кандидаты этого не заменяют.

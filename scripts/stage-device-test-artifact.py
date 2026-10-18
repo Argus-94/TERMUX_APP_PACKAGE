@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import datetime
+import email.utils
 import gzip
 import hashlib
 import json
@@ -77,9 +79,62 @@ def parse_index(data: bytes) -> list[dict[str, str]]:
 
 def verify_signatures(keyring: pathlib.Path, dist: pathlib.Path) -> None:
     for args in (("gpgv", "--keyring", str(keyring), str(dist / "Release.gpg"), str(dist / "Release")),
-                 ("gpgv", "--keyring", str(keyring), str(dist / "InRelease"))):
-        result = subprocess.run(args, capture_output=True, text=True, timeout=30, check=False)
+                 ("gpgv", "--keyring", str(keyring), "--output", "-", str(dist / "InRelease"))):
+        result = subprocess.run(args, capture_output=True, timeout=30, check=False)
         require(result.returncode == 0, "SIGNED_RELEASE_VERIFICATION_FAILED")
+        if "--output" in args:
+            require(result.stdout == (dist / "Release").read_bytes(), "INRELEASE_PAYLOAD_MISMATCH")
+
+
+def verify_release_indices(feed: pathlib.Path, dist: pathlib.Path) -> None:
+    """Bind the authenticated Release to the exact indices shipped to a device."""
+    release = (dist / "Release").read_bytes()
+    require((feed / "Release").read_bytes() == release, "ROOT_RELEASE_MISMATCH")
+    records = parse_index(release)
+    require(len(records) == 1, "RELEASE_RECORD_NOT_EXACT")
+    fields = records[0]
+    for key, value in {"Origin": "AI Builder Termux", "Label": "termux-main",
+                       "Suite": "stable", "Codename": "stable",
+                       "Architectures": "aarch64", "Components": "main"}.items():
+        require(fields.get(key) == value, "RELEASE_IDENTITY_MISMATCH")
+    try:
+        date = email.utils.parsedate_to_datetime(fields.get("Date", ""))
+        expires = email.utils.parsedate_to_datetime(fields.get("Valid-Until", ""))
+        require(date.utcoffset() is not None and expires.utcoffset() is not None,
+                "RELEASE_DATE_TIMEZONE_REQUIRED")
+        now = datetime.datetime.now(datetime.timezone.utc)
+        require(date <= now + datetime.timedelta(minutes=5) and date < expires and now < expires,
+                "RELEASE_EXPIRED_OR_FUTURE_DATED")
+    except (ValueError, TypeError, OverflowError) as exc:
+        raise StageError("RELEASE_DATE_INVALID") from exc
+    entries: dict[str, tuple[str, int]] = {}
+    for line in fields.get("SHA256", "").splitlines():
+        if not line.strip():
+            continue
+        parts = line.split()
+        require(len(parts) == 3 and re.fullmatch(r"[a-f0-9]{64}", parts[0]) is not None
+                and re.fullmatch(r"[0-9]+", parts[1]) is not None,
+                "RELEASE_SHA256_ENTRY_INVALID")
+        digest, size, rel = parts
+        require(rel not in entries, "RELEASE_DUPLICATE_INDEX")
+        entries[rel] = (digest, int(size))
+    expected = {"main/binary-aarch64/Packages", "main/binary-aarch64/Packages.gz"}
+    require(set(entries) == expected, "RELEASE_INDEX_ALLOWLIST_MISMATCH")
+    for rel, (digest, size) in entries.items():
+        data = (dist / rel).read_bytes()
+        require(len(data) == size and hashlib.sha256(data).hexdigest() == digest,
+                "SIGNED_INDEX_HASH_MISMATCH")
+
+
+def verify_candidate_policy(args: argparse.Namespace) -> None:
+    """Staging must not rely on an earlier caller having checked provenance/control."""
+    result = subprocess.run(
+        [sys.executable, str(pathlib.Path(__file__).with_name("validate-candidate-feed.py")),
+         "--package-set", str(args.package_set), "--feed-root", str(args.feed_root),
+         "--build-result", str(args.build_result), "--audit-report", str(args.audit_report)],
+        capture_output=True, text=True, timeout=60, check=False,
+    )
+    require(result.returncode == 0, "CANDIDATE_PROVENANCE_OR_FEED_POLICY_FAILED")
 
 
 def primary_fingerprints(keyring: pathlib.Path) -> list[str]:
@@ -196,6 +251,8 @@ def stage(args: argparse.Namespace) -> tuple[str, str, list[str]]:
             and record.get("SHA256") == package_sha,
             "PACKAGES_INDEX_PACKAGE_MISMATCH")
     verify_signatures(keyring_path, dist)
+    verify_release_indices(feed, dist)
+    verify_candidate_policy(args)
 
     files: dict[str, pathlib.Path] = {
         **metadata,
