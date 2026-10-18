@@ -16,7 +16,7 @@ Separate candidate pipelines have passed hosted source builds, static package/EL
 
 Production signing/feed publication, Pages deployment, and Builder `pkg.ensure` must remain disabled until the exact Android qualification evidence is independently reviewed and publication is separately authorized. No evidence validator, passing CI, or manual report automatically promotes a candidate.
 
-See the [Android qualification and production gate](docs/PRODUCTION_GATE_RU.md), [signed evidence bundle checks](docs/ANDROID_EVIDENCE_RU.md), and [feed signing notes](docs/FEED_SIGNING_RU.md).
+See the [Android qualification and production gate](docs/PRODUCTION_GATE_RU.md), [signed evidence bundle checks](docs/ANDROID_EVIDENCE_RU.md), and [feed signing notes](docs/FEED_SIGNING_RU.md). The bounded, non-extracting `.deb` payload collision audit and its limitations are documented in [UNIFIED_CANDIDATE_INPUTS_RU.md](docs/UNIFIED_CANDIDATE_INPUTS_RU.md).
 
 ## Local policy checks
 

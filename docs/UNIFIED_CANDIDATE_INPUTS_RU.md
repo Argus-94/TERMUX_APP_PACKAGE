@@ -67,3 +67,11 @@ python3 -m unittest discover -s scripts/tests -p test_unified_candidate_inputs.p
 `--write-lock` обновляет inventory для review, но ничего не разрешает. `--require-aggregate-ready` обязан завершаться с кодом 2 и `AGGREGATE_BLOCKED_SIGNED_BINARY_INPUTS_MISSING`. 26 новых тестов проверяют source omissions, версии/epoch/альтернативы/subpackage parent, architecture, subpackage path/hash, cross-family source hole, изменения recipe/patch/manifest/workflow и сохранение запрета публикации. Это **не** тесты подписи или файловых коллизий настоящего aggregate. Весь scripts suite: 79 тестов с заданным clean pinned source; интеграционные тесты этого шага без него пропускаются явно.
 
 Существующие успешные candidate workflows не изменены. Никаких новых `.deb`, публичных artifacts, Pages, production signing secret, продвижения кандидатов или изменений Builder `pkg.ensure`. Android install/runtime/project build/upgrade/rollback — **NOT RUN**.
+
+## Неизвлекающий аудит путей payload `.deb`
+
+`scripts/audit-deb-payload-collisions.py FILE.deb...` читает ограниченный subset формата Debian `ar` и tar в памяти, не извлекая payload на диск. Он отклоняет абсолютные/ traversal пути, ссылки (symlink/hardlink), специальные файлы, setuid/setgid, внутрипакетные и межпакетные коллизии, кроме повторных обычных каталогов. Повторное имя package/version/architecture с разными SHA-256 отвергается; одинаковые байты считаются одним входом только для отчёта, не как подтверждение provenance.
+
+Результат намеренно содержит `qualified=false` и `provenanceValidated=false`. Это только статическая проверка пересечения payload путей; она **не** проверяет подписи/подписанную provenance, доверенные builder, ABI/ELF, зависимости, совместимость runtime, полноту набора или пригодность к установке, и ничего не агрегирует, не устанавливает и не публикует. Безопасность ограничена поддерживаемым subset: максимальный вход 512 MiB, член 128 MiB, суммарный payload 1 GiB и 200 000 записей. Форматы ar/tar extensions и компрессии вне распознаваемого набора fail closed.
+
+Синтетические тесты: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_deb_payload_collisions.py -v`.
