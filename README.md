@@ -2,6 +2,10 @@
 
 Candidate package pipelines for the private AI Builder Android runtime (`com.karat.aibuilder`, `aarch64`), not stock Termux.
 
+## New aggregate candidate: evidence, not production
+
+The [80-package evidence report](docs/FINAL_CANDIDATE_80_RU.md) records reproducibility for 80/80 packages, passing payload/control checks and one signed 13-root APT simulation. **The ELF gate remains FAIL for two PulseAudio runtime-loader-context requirements; Android qualification is NOT_RUN.** Twelve fresh source CI ZIPs and the aggregate evidence archive are retained in a digest-checked draft, not a published release or installation feed.
+
 ## Production remains blocked
 
 The repository contains a legacy pool of 133 `.deb` files without complete verified build provenance. It is **not** a trusted installation source. Do not use legacy packages, stock `com.termux` feeds/packages, PocketForge artifacts, `trusted=yes`, or unauthenticated/insecure APT options. GitHub Pages is not enabled; no production feed URL is available.
