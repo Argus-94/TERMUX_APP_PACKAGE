@@ -55,10 +55,21 @@ def main():
     destination = args.output / 'base80'
     destination.mkdir()
     found = set()
+    checksums = None
     with tarfile.open(args.output / 'base80.tar.gz', 'r:gz') as archive:
         for member in archive:
             name = PurePosixPath(member.name)
             need(not name.is_absolute() and '..' not in name.parts and member.isfile(), 'ARCHIVE_MEMBER_UNSAFE')
+            if member.name == 'SHA256SUMS':
+                need(checksums is None and member.size <= 1024 * 1024, 'CHECKSUM_MEMBER_INVALID')
+                data = archive.extractfile(member).read()
+                checksums = {}
+                for line in data.decode('ascii').splitlines():
+                    digest_value, relative = line.split('  ', 1)
+                    need(relative not in checksums, 'DUPLICATE_CHECKSUM_RECORD')
+                    checksums[relative] = digest_value
+                (destination / 'SHA256SUMS').write_bytes(data)
+                continue
             need(member.name in expected and member.name not in found, 'ARCHIVE_MEMBER_SET_MISMATCH')
             spec = expected[member.name]
             need(member.size == spec['size'] and member.size <= 512 * 1024 * 1024, 'ARCHIVE_MEMBER_SIZE_MISMATCH')
@@ -72,8 +83,9 @@ def main():
             need(digest(target) == spec['sha256'], 'ARCHIVE_MEMBER_SHA256_MISMATCH')
             found.add(member.name)
     need(found == set(expected), 'ARCHIVE_INCOMPLETE')
+    need(checksums == {name: spec['sha256'] for name, spec in expected.items()}, 'CHECKSUM_MANIFEST_MISMATCH')
     need(digest(destination / 'aggregate/aggregate-manifest.json') == base['manifestSha256'], 'BASE_MANIFEST_BINDING_MISMATCH')
-    (args.output / 'input-fetch-receipt.json').write_text(json.dumps({'valid': True, 'repository': REPOSITORY, 'archiveSha256': base['sha256'], 'bootstrapSha256': bootstrap['sha256'], 'regularFileCount': len(found), 'qualified': False, 'productionAllowed': False}, indent=2) + '\n')
+    (args.output / 'input-fetch-receipt.json').write_text(json.dumps({'valid': True, 'repository': REPOSITORY, 'archiveSha256': base['sha256'], 'bootstrapSha256': bootstrap['sha256'], 'regularFileCount': len(found) + 1, 'inventoryFileCount': len(found), 'qualified': False, 'productionAllowed': False}, indent=2) + '\n')
     print('IMMUTABLE_BOOTSTRAP_COMPAT_INPUTS_READY', flush=True)
 
 if __name__ == '__main__':
