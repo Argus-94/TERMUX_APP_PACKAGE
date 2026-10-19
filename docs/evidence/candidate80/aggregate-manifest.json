@@ -1,0 +1,700 @@
+{
+  "baselineInputLockSha256": "44a050ff9ec30a2a001cee048f97ead775f4c49177de006aac591a90cf754793",
+  "baselineNativeProducerCommit": "568401d96543d9471311778615ad1428bda50b91",
+  "channel": "candidate-only",
+  "comparisonSha256": "f85185f5107ab1d30a4625c6301a249b0fbebb0fc631611c236cad131c9e3d09",
+  "inputLockSha256": "953ea37421a32341e26935b1c96576b31a76b729a5eb09a1ce74df0630bf95b1",
+  "nativeReplacementProvenance": {
+    "externalAnchorSha256": [
+      "22728137dec606ac98ebd52464eaabc943807b24a7e482cade4f3dd1895f47c1",
+      "1ea8f5067523f51552a3eaed776d8566ff1f396980af93bba620e4a3a9111a6a"
+    ],
+    "packageCount": 36,
+    "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+    "profile": "openjdk17",
+    "runIds": [
+      39177655402,
+      39177662093
+    ],
+    "sourceOverlays": {
+      "openjdk17-reproducible-source.patch": "81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5",
+      "pulseaudio-api24-source.patch": "ca4c6b593a6a0e741113843038338bad0d4ade85eb4aa1d0d2fb409f6261e02e"
+    }
+  },
+  "nativeSourceInventoryCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+  "otherSourceRepeatEvidenceSha256": "203c47ed9669c1b51fbbfaac45a9e03f3d2affb7a7e6a13cf296a8ec58da8eaa",
+  "packages": [
+    {
+      "architecture": "aarch64",
+      "filename": "abseil-cpp_20260526.0_aarch64.deb",
+      "name": "abseil-cpp",
+      "occurrenceCount": 1,
+      "sha256": "d29eba6f28a977e3fb80ff3765bd56697036d825c15f280cef2abc67f579cd8a",
+      "version": "20260526.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "alsa-lib_1.2.16.1_aarch64.deb",
+      "name": "alsa-lib",
+      "occurrenceCount": 1,
+      "sha256": "1ca4b72160d793ded64f5735e226d8548c5e1c659a9a921c5d94dcbdabdc91e8",
+      "version": "1.2.16.1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "alsa-plugins_1.2.12-1_aarch64.deb",
+      "name": "alsa-plugins",
+      "occurrenceCount": 1,
+      "sha256": "3911a8dad6d69be2a253c6f53da21956c5a1afdb3890fbeb411da856257ef2fb",
+      "version": "1.2.12-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "c-ares_1.34.8_aarch64.deb",
+      "name": "c-ares",
+      "occurrenceCount": 1,
+      "sha256": "0dda2645c01b674326f35a7e5502d765b37ba5b5e0ab7a12f8266548f33ce357",
+      "version": "1.34.8"
+    },
+    {
+      "architecture": "all",
+      "filename": "ca-certificates_1:2026.09.25_all.deb",
+      "name": "ca-certificates",
+      "occurrenceCount": 7,
+      "sha256": "3e972e7fb254c566cfc0cd21dc3f9097f6d9795254b3e55df9c4303d18b49992",
+      "version": "1:2026.09.25"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "cmake_4.4.4_aarch64.deb",
+      "name": "cmake",
+      "occurrenceCount": 1,
+      "sha256": "4b03f5de7c18d4f8915f525fed1abb13fcacd553cb799c9556b4f33ad160e75e",
+      "version": "4.4.4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "curl_8.23.0_aarch64.deb",
+      "name": "curl",
+      "occurrenceCount": 1,
+      "sha256": "c3a9026686f4ba00f48f99a98800fc3967c4a9bf61f1b5d5129aa1635938c11d",
+      "version": "8.23.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "dbus_1.16.2-3_aarch64.deb",
+      "name": "dbus",
+      "occurrenceCount": 1,
+      "sha256": "f3b5f7bb815af895e7087120f3b92b64a53b464b00ae6f9bd8dc7600665757af",
+      "version": "1.16.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "gdbm_1.26-1_aarch64.deb",
+      "name": "gdbm",
+      "occurrenceCount": 2,
+      "sha256": "5b7986b55297dcb3b9735d30a54e845008f9d30e36bfb9e9eb466c0a921f53de",
+      "version": "1.26-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "gh_2.102.0_aarch64.deb",
+      "name": "gh",
+      "occurrenceCount": 1,
+      "sha256": "c0404ec10b01dce725f73bfa12039ad8a04b2bd0a89bb078d1d4b5b2668ef109",
+      "version": "2.102.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "git_2.56.0_aarch64.deb",
+      "name": "git",
+      "occurrenceCount": 1,
+      "sha256": "506adba236e9f5b9b72b0dc22c2a08abbaf57858fad827add2421bb6b30be859",
+      "version": "2.56.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "glib_2.90.1_aarch64.deb",
+      "name": "glib",
+      "occurrenceCount": 1,
+      "sha256": "3f1a62c72f17b0561a5b3fae9f09b7079efcf2a0a338e1e6a525c50bcac6bc25",
+      "version": "2.90.1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "jsoncpp_1.9.8_aarch64.deb",
+      "name": "jsoncpp",
+      "occurrenceCount": 1,
+      "sha256": "b7a05b40ce90f1b01699c20c69d0c1591289110a40fd4282e2b72d3c219fb6e9",
+      "version": "1.9.8"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "less_710_aarch64.deb",
+      "name": "less",
+      "occurrenceCount": 1,
+      "sha256": "a839d3bc08fae19a0b3e1e3ed316786ac54769f71d10e56ef2c82d7585c9a2c0",
+      "version": "710"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-execinfo_0.1-3_aarch64.deb",
+      "name": "libandroid-execinfo",
+      "occurrenceCount": 1,
+      "sha256": "0d7a509c2476c0ac6b4f62419b5585fc712c26566cccc35fd58169650a300fed",
+      "version": "0.1-3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-glob_0.6-3_aarch64.deb",
+      "name": "libandroid-glob",
+      "occurrenceCount": 2,
+      "sha256": "79fb9a646179d29c31c971dee0a0402815c5a38dcc0835047fbea4380b9afe07",
+      "version": "0.6-3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-posix-semaphore_0.1-4_aarch64.deb",
+      "name": "libandroid-posix-semaphore",
+      "occurrenceCount": 3,
+      "sha256": "c2f58b1c80721c7e3d4354b5fdb5b6065c6cb9a0442271740e148e614a771b2f",
+      "version": "0.1-4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-shmem_0.7_aarch64.deb",
+      "name": "libandroid-shmem",
+      "occurrenceCount": 1,
+      "sha256": "9da50cced39ef01eced66e20af4e24176e1947b7549b593bffd438c7a032e48c",
+      "version": "0.7"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-spawn_0.3_aarch64.deb",
+      "name": "libandroid-spawn",
+      "occurrenceCount": 2,
+      "sha256": "8247e6ec3345cc908102053053924de305dc6baa79734b38232f2b22388c47bf",
+      "version": "0.3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-stub_30-2_aarch64.deb",
+      "name": "libandroid-stub",
+      "occurrenceCount": 1,
+      "sha256": "de1225c81a858c584c80622b8e41014d1a2a62ebc870370070daddcbd0ddeb0b",
+      "version": "30-2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-support_29-1_aarch64.deb",
+      "name": "libandroid-support",
+      "occurrenceCount": 4,
+      "sha256": "de1166c8617dfafad4e8d30efd88f1ba9971f09f796ce4bffba2f6dfcdb88c56",
+      "version": "29-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libandroid-sysv-semaphore_0.1-1_aarch64.deb",
+      "name": "libandroid-sysv-semaphore",
+      "occurrenceCount": 1,
+      "sha256": "23d5e397a173a25a75594d2694f8a830de25f710e150e35b8b28492a7bc7286f",
+      "version": "0.1-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libarchive_3.8.9_aarch64.deb",
+      "name": "libarchive",
+      "occurrenceCount": 1,
+      "sha256": "4fd66fb4350528b858894d42062a10c8740a4b66bb78d109e9517faeddadaa5f",
+      "version": "3.8.9"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libbz2_1.0.8-8_aarch64.deb",
+      "name": "libbz2",
+      "occurrenceCount": 3,
+      "sha256": "5342c6355b7f2d2e7d4c882a8b24b1f1d37168d04bcfa6ce68197a4b3ca20387",
+      "version": "1.0.8-8"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libc++_30_aarch64.deb",
+      "name": "libc++",
+      "occurrenceCount": 3,
+      "sha256": "7bf7f053de9136c79a33abf13574f28dc28e9b815fb4e37d6f094f0f31333b85",
+      "version": "30"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libcrypt_0.2-6_aarch64.deb",
+      "name": "libcrypt",
+      "occurrenceCount": 2,
+      "sha256": "735ac58b08c343eceb59ddedceb780024bc9c621ed4f928ecb0ada5f2f53fd75",
+      "version": "0.2-6"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libcurl_8.23.0_aarch64.deb",
+      "name": "libcurl",
+      "occurrenceCount": 3,
+      "sha256": "ced63ab29e00d27d5a974b8a1ceb96fd151bec634b4a45aaa9e7d5ba51229907",
+      "version": "8.23.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libexpat_2.9.0_aarch64.deb",
+      "name": "libexpat",
+      "occurrenceCount": 5,
+      "sha256": "adb3c9de72c86579e2bc8733fda17df314083d3b6a9411748142afae6cb9b3fb",
+      "version": "2.9.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libffi_3.8.0_aarch64.deb",
+      "name": "libffi",
+      "occurrenceCount": 3,
+      "sha256": "a5a278eece70c7199d27d705b8614056d8589f1abbb78b1ba6ff96fa71181814",
+      "version": "3.8.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libflac_1.5.0-1_aarch64.deb",
+      "name": "libflac",
+      "occurrenceCount": 1,
+      "sha256": "7637ad4ff6470aeaffa6d50ebbece95a43e344f511d341b89a61c0a66f5894ea",
+      "version": "1.5.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libiconv_1.19_aarch64.deb",
+      "name": "libiconv",
+      "occurrenceCount": 5,
+      "sha256": "400aba47f51f603264cfe753cc31750b4fbe31851863cc409b9e52c5213d9ee1",
+      "version": "1.19"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libicu_78.3_aarch64.deb",
+      "name": "libicu",
+      "occurrenceCount": 1,
+      "sha256": "4dbcba5f56383f7de4006cb6909f4f96c1ff349e41effedad0d1050c3b6cd115",
+      "version": "78.3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libidn2_2.3.8-1_aarch64.deb",
+      "name": "libidn2",
+      "occurrenceCount": 1,
+      "sha256": "ae7ec7f3c935eecd359eec5e7ca880ad20bbead6101d70530800403f8c4768ab",
+      "version": "2.3.8-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libjpeg-turbo_3.2.0_aarch64.deb",
+      "name": "libjpeg-turbo",
+      "occurrenceCount": 1,
+      "sha256": "2bbf474ffc0d819dbfdb0d4cc53b1f436b2165b9f056272423b11bfd0dcdad03",
+      "version": "3.2.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libltdl_2.6.2_aarch64.deb",
+      "name": "libltdl",
+      "occurrenceCount": 1,
+      "sha256": "fa6b8e2eb1ec3197f32a6935fd215ed7b3f065d123e24709f6f24418e21727fe",
+      "version": "2.6.2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "liblzma_5.8.4_aarch64.deb",
+      "name": "liblzma",
+      "occurrenceCount": 3,
+      "sha256": "cf62c3edf7e291aeb6817e01cb3bc0a2c234626b47a285d16aa0621007f1da7a",
+      "version": "5.8.4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libmp3lame_4.0-1_aarch64.deb",
+      "name": "libmp3lame",
+      "occurrenceCount": 1,
+      "sha256": "0cf3f2534bd7376292db951c56b4950f1cc51a232f8bae3d81b0f38a00a149d6",
+      "version": "4.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libmpg123_1.33.7_aarch64.deb",
+      "name": "libmpg123",
+      "occurrenceCount": 1,
+      "sha256": "b3146f430e1b703fe9726a7db7efe74d50eca510c4279074a278512d16a742c8",
+      "version": "1.33.7"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libnghttp2_1.70.0_aarch64.deb",
+      "name": "libnghttp2",
+      "occurrenceCount": 3,
+      "sha256": "fc638e65e52c95e68e51c34299a2a2eea266b3cc618b6a9a2961fb07a9acfcbb",
+      "version": "1.70.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libnghttp3_1.18.0_aarch64.deb",
+      "name": "libnghttp3",
+      "occurrenceCount": 3,
+      "sha256": "9229b4761b82fc0697f6230ca951e958d7bf6efcbbe5e9febc818fced2aab4e9",
+      "version": "1.18.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libngtcp2_1.25.0_aarch64.deb",
+      "name": "libngtcp2",
+      "occurrenceCount": 3,
+      "sha256": "1801b2881d72fe12ca6a367f74a296e379e316279fef31ea1fd236994e2e4da5",
+      "version": "1.25.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libogg_1.3.6-1_aarch64.deb",
+      "name": "libogg",
+      "occurrenceCount": 1,
+      "sha256": "ee339f7aea0dcf0f18836892c00ca3553d492de978ab270ee44ef3eb194a3b4b",
+      "version": "1.3.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libopus_1.6.1_aarch64.deb",
+      "name": "libopus",
+      "occurrenceCount": 1,
+      "sha256": "ae8db58cec03f8a90884806b9d01b6432c0e14cda7592bda9e1e0562eb2dab9e",
+      "version": "1.6.1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libsndfile_1.2.2-3_aarch64.deb",
+      "name": "libsndfile",
+      "occurrenceCount": 1,
+      "sha256": "d929016fd8095516ab2787fdc6049224828aebee80c59014a9e41f5d1dd0487f",
+      "version": "1.2.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libsoxr_0.1.3-8_aarch64.deb",
+      "name": "libsoxr",
+      "occurrenceCount": 1,
+      "sha256": "58576ffad62f14b7c60a7f6e3b3b2de0ed22888587a6d7603a7ca92e3333900e",
+      "version": "0.1.3-8"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libsqlite_3.54.0_aarch64.deb",
+      "name": "libsqlite",
+      "occurrenceCount": 3,
+      "sha256": "474b271e852503eba6e940e89d1dd6a8c494d40fc48fb6c0d8b4039d54e38b22",
+      "version": "3.54.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libssh2_1.11.1-2_aarch64.deb",
+      "name": "libssh2",
+      "occurrenceCount": 3,
+      "sha256": "6edee8da14a3f96174256fe4a38863e44f06fbb7d870360e1c3fbc4160ce0736",
+      "version": "1.11.1-2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libunistring_1.4.2_aarch64.deb",
+      "name": "libunistring",
+      "occurrenceCount": 1,
+      "sha256": "299752764bdb7d1616fbc73ae2ddf8a9b21bb76f937e93e73aed5e7d12d10cc2",
+      "version": "1.4.2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libuuid_2.42.4_aarch64.deb",
+      "name": "libuuid",
+      "occurrenceCount": 1,
+      "sha256": "40a79d2052d53d16c0530b78949d2fc6f4f625d55ba0f603e322d66aa08783c5",
+      "version": "2.42.4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libuv_1.53.0_aarch64.deb",
+      "name": "libuv",
+      "occurrenceCount": 1,
+      "sha256": "e9c1425aa9ba24da0f5121f8dd0be807d498f2d6aa916ee4c9ef265eac175a03",
+      "version": "1.53.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libvorbis_1.3.7-4_aarch64.deb",
+      "name": "libvorbis",
+      "occurrenceCount": 1,
+      "sha256": "87296a011695a79f941b0f79ad82acddef8026768f9778c8b9cf6783b15c86f9",
+      "version": "1.3.7-4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libwebrtc-audio-processing_1.3-5_aarch64.deb",
+      "name": "libwebrtc-audio-processing",
+      "occurrenceCount": 1,
+      "sha256": "0d04e09acbc2d21bd3e72e3ddd80491af7601ac4c8e96d220fcb5e9ef3d80922",
+      "version": "1.3-5"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libx11_1.8.13-1_aarch64.deb",
+      "name": "libx11",
+      "occurrenceCount": 1,
+      "sha256": "7c54b85598804f667558ef33c5606e6e7a9b27f1eedb1b3a144ac36b54f07095",
+      "version": "1.8.13-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libxau_1.0.12-2_aarch64.deb",
+      "name": "libxau",
+      "occurrenceCount": 1,
+      "sha256": "8821dc4118fce86cf578bfcb4125c04c1f1f5efa07eee12db529c38d75ff43d1",
+      "version": "1.0.12-2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libxcb_1.17.0-1_aarch64.deb",
+      "name": "libxcb",
+      "occurrenceCount": 1,
+      "sha256": "f528fa48dbf7fc186bd96b3aeb9e79b58e1f884c0d794e8f2b959155c1b473e1",
+      "version": "1.17.0-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libxdmcp_1.1.5-2_aarch64.deb",
+      "name": "libxdmcp",
+      "occurrenceCount": 1,
+      "sha256": "d745aab0ddc9ca4d06fe666d582e73462b4d30b537366ce40587cebe3b340fc1",
+      "version": "1.1.5-2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "libxml2_2.15.4-1_aarch64.deb",
+      "name": "libxml2",
+      "occurrenceCount": 1,
+      "sha256": "7ad3348c636b71269c39f4aed4ed48e66fff6ac8e5c2db5e3afbdfb4e0beeca9",
+      "version": "2.15.4-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "littlecms_2.19.1_aarch64.deb",
+      "name": "littlecms",
+      "occurrenceCount": 1,
+      "sha256": "9e33356ecc8144d55181043444fee20beffcce065c9be3285831d1fadc5bc496",
+      "version": "2.19.1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "make_4.4.1-1_aarch64.deb",
+      "name": "make",
+      "occurrenceCount": 1,
+      "sha256": "466531ed242215361f3bf18dc995d9b3358dd422b71db2c6addeedf17f2b563f",
+      "version": "4.4.1-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "ncurses_6.6.20260307+really6.5.20250830_aarch64.deb",
+      "name": "ncurses",
+      "occurrenceCount": 3,
+      "sha256": "3dc2a24ae48b6b1586a71f15f019b2d4a861a8a94f5ff6f81837b68850894d10",
+      "version": "6.6.20260307+really6.5.20250830"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "ncurses-ui-libs_6.6.20260307+really6.5.20250830_aarch64.deb",
+      "name": "ncurses-ui-libs",
+      "occurrenceCount": 2,
+      "sha256": "69e405659a2057d2cc4ec193aa42d9629dfbaf77c89f7c362b75cb1726f7c562",
+      "version": "6.6.20260307+really6.5.20250830"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "ninja_1.13.2_aarch64.deb",
+      "name": "ninja",
+      "occurrenceCount": 1,
+      "sha256": "eaedae96fe68fbafda6740f4c6c6d78d795c9ddc4cadcde53e3a177621e6dabc",
+      "version": "1.13.2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "nodejs_26.4.0-1_aarch64.deb",
+      "name": "nodejs",
+      "occurrenceCount": 1,
+      "sha256": "428345c8082c677bf5ede22d4a3356e444e63a1af86b4584e8cf026a7e777556",
+      "version": "26.4.0-1"
+    },
+    {
+      "architecture": "all",
+      "filename": "npm_11.20.0_all.deb",
+      "name": "npm",
+      "occurrenceCount": 1,
+      "sha256": "b9024e1bafe10de411f2f8420b9f48e1fa264d3839b7adfbc14613853699247f",
+      "version": "11.20.0"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "openjdk-17_17.0.20_aarch64.deb",
+      "name": "openjdk-17",
+      "occurrenceCount": 1,
+      "sha256": "354bb22da60cfb46750485798cfd58dc3176485768fd5c09b917ff38a98ac887",
+      "version": "17.0.20"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "openssl_1:3.6.5_aarch64.deb",
+      "name": "openssl",
+      "occurrenceCount": 7,
+      "sha256": "9d8c4cc6c436b4f3a7981b0762c1c7c3f6d3e164749c73d7c62a0246a4cad4d1",
+      "version": "1:3.6.5"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "pcre2_10.49_aarch64.deb",
+      "name": "pcre2",
+      "occurrenceCount": 3,
+      "sha256": "4de633ea1095ca34473e819ac8083f5f45d701fefe877652ef0787fe49c03ca8",
+      "version": "10.49"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "pkg-config_0.29.2-3_aarch64.deb",
+      "name": "pkg-config",
+      "occurrenceCount": 1,
+      "sha256": "24f876126e0fbaab42f9240e03e70e346df37898585af352450e6b254a1cf698",
+      "version": "0.29.2-3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "pulseaudio_17.0-4_aarch64.deb",
+      "name": "pulseaudio",
+      "occurrenceCount": 1,
+      "sha256": "149edf3df6571094f6dca0dc5f90751f012c1b6a45eb23cd55c7856a0fc5faf2",
+      "version": "17.0-4"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "python_3.14.6-1_aarch64.deb",
+      "name": "python",
+      "occurrenceCount": 2,
+      "sha256": "844f99d5bf80bed99f151fd76ee58a040f8499b1f54cd6a43246a7a782bcfe99",
+      "version": "3.14.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "readline_8.3.6_aarch64.deb",
+      "name": "readline",
+      "occurrenceCount": 2,
+      "sha256": "eed98fbba8b374d58ac952b2d746a61f2e7892545f8cbff31194e524070d7ffe",
+      "version": "8.3.6"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "resolv-conf_1.3_aarch64.deb",
+      "name": "resolv-conf",
+      "occurrenceCount": 2,
+      "sha256": "ea5024c284731a3e278f0180750aafde6f5aca90c5125ab258782a5539e03bf6",
+      "version": "1.3"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "rhash_1.4.6-1_aarch64.deb",
+      "name": "rhash",
+      "occurrenceCount": 1,
+      "sha256": "d86fc7f106e0b88fbd75e9310b13e91e895bddcdf4110418a027fb69124a825f",
+      "version": "1.4.6-1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "speexdsp_1.2.1-1_aarch64.deb",
+      "name": "speexdsp",
+      "occurrenceCount": 1,
+      "sha256": "85eff68a2ba6bc05dc1fc45ff366699f65df5b87d109cf010ec6e54ae8a60566",
+      "version": "1.2.1-1"
+    },
+    {
+      "architecture": "all",
+      "filename": "termux-licenses_2.2_all.deb",
+      "name": "termux-licenses",
+      "occurrenceCount": 1,
+      "sha256": "fa9184dd2c7c2690d45458d5570c80e72c9b3650c63fc2fc857ea7627f785378",
+      "version": "2.2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "wget_1.25.0-1_aarch64.deb",
+      "name": "wget",
+      "occurrenceCount": 1,
+      "sha256": "4a51a7a4104ca3d09136c25027cf07dc217184fa094fce80ec730d7111f715d2",
+      "version": "1.25.0-1"
+    },
+    {
+      "architecture": "all",
+      "filename": "xorg-util-macros_1.20.2_all.deb",
+      "name": "xorg-util-macros",
+      "occurrenceCount": 1,
+      "sha256": "bad6b6e59b564c9b889da9e7b0b398db9c5510eaec203f2ca393aad77aa7a1c6",
+      "version": "1.20.2"
+    },
+    {
+      "architecture": "all",
+      "filename": "xorgproto_2026.1_all.deb",
+      "name": "xorgproto",
+      "occurrenceCount": 1,
+      "sha256": "cb0cc8dc7bd2ac3693615bf160e601960093d52319ab913112cba782237e4fba",
+      "version": "2026.1"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "zlib_1.3.2_aarch64.deb",
+      "name": "zlib",
+      "occurrenceCount": 8,
+      "sha256": "548400e20a687863bce4eafd239c5a340ade54d953c6d3bf75d1972ca8c48c85",
+      "version": "1.3.2"
+    },
+    {
+      "architecture": "aarch64",
+      "filename": "zstd_1.5.7-1_aarch64.deb",
+      "name": "zstd",
+      "occurrenceCount": 2,
+      "sha256": "8367664693c327a1f85fd29d63d9eb53f62d3971e78792ccc653dc69041fbbe9",
+      "version": "1.5.7-1"
+    }
+  ],
+  "productionAllowed": false,
+  "qualified": false,
+  "releaseGate": {
+    "androidInstallUpgradeRollback": "NOT_RUN",
+    "completeElfAbiQualification": false,
+    "publicationAllowed": false,
+    "trustedProductionSigner": "NOT_EVIDENCED"
+  },
+  "repositoryCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+  "reproducibilityCoverageSha256": "1b5089ea3e70d63879ada7d9026353888d87edbb7f41d923965e240e57b1ffeb",
+  "schemaVersion": 1,
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "supplementalSources": [
+    {
+      "architecture": "all",
+      "artifactDigest": "sha256:3f05f0babd91842f18ce1fa8150eeb41e2078ed3b1d132f0b5c5eaf5a296900b",
+      "artifactId": 12154724518,
+      "ciRunId": 39178098496,
+      "fingerprintFromCiLog": "DD20A47FAAE2AD962A4AECC99B5592EAA379359C",
+      "package": "termux-licenses",
+      "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+      "repeatBuildMatch": true,
+      "verificationReportSha256": "03e1582b1b1961be864e1b0b46cd3a1f10e09ea0cc43df33423ab75d3294997d",
+      "version": "2.2"
+    }
+  ],
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  }
+}

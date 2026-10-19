@@ -1,0 +1,26 @@
+{
+  "aggregateArchiveSha256": "46f3341b8933ad76fa62b9a6713172e997ee65b02186446e62ae237f6a74dd76",
+  "android": "NOT_RUN",
+  "assets": [
+    {
+      "digest": "sha256:46f3341b8933ad76fa62b9a6713172e997ee65b02186446e62ae237f6a74dd76",
+      "id": 654986280,
+      "name": "aggregate80-static-reproducible-evidence-9acaf2f.tar.gz",
+      "size": 175384798
+    },
+    {
+      "digest": "sha256:54b5234027eee61dd4407b7287b7a0d2f6f040169c7a182eefba8cac74d0b716",
+      "id": 654986261,
+      "name": "aggregate-archive-inventory.json",
+      "size": 51104
+    }
+  ],
+  "draft": true,
+  "finalAuditSummarySha256": "066e277859d2433dd1f832ec437fdc55e369d11e83565a0b1df0cc131b0d24b4",
+  "prerelease": true,
+  "productionAllowed": false,
+  "qualified": false,
+  "regularArchiveFileCount": 283,
+  "releaseId": 416777571,
+  "tag": "candidate-static80-evidence-20261019"
+}

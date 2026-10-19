@@ -1,0 +1,94 @@
+{
+  "repository": "Argus-94/TERMUX_APP_PACKAGE",
+  "defaultBranch": "main",
+  "visibility": "public",
+  "hasPages": false,
+  "publishedReleases": [],
+  "draftReleases": [
+    {
+      "id": 416601314,
+      "tag": "diagnostic-candidates-27b1cd7"
+    },
+    {
+      "id": 416777571,
+      "tag": "candidate-static80-evidence-20261019"
+    },
+    {
+      "id": 416622083,
+      "tag": "candidate-evidence-568401d"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "Build and verify pinned CMake/Ninja candidate (no publication)",
+      "path": ".github/workflows/cmake-ninja-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned curl package closure (no publication)",
+      "path": ".github/workflows/curl-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Device handoff policy and tamper tests (no publication)",
+      "path": ".github/workflows/device-handoff-policy.yml",
+      "state": "active"
+    },
+    {
+      "name": "Synthetic APT signing and tamper smoke (no publication)",
+      "path": ".github/workflows/feed-signing-smoke.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned Git package closure (no publication)",
+      "path": ".github/workflows/git-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build supplemental termux-licenses data-only candidate",
+      "path": ".github/workflows/license-support-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned Node.js/npm candidate (no publication)",
+      "path": ".github/workflows/nodejs-npm-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned OpenJDK 17 package closure (no publication)",
+      "path": ".github/workflows/openjdk17-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify one AI Builder package candidate (no publication)",
+      "path": ".github/workflows/package-feed-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned pkg-config package closure (no publication)",
+      "path": ".github/workflows/pkg-config-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned Python package closure (no publication)",
+      "path": ".github/workflows/python-package-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Verify pinned toolchain source closures (inventory only)",
+      "path": ".github/workflows/toolchain-source-closure-candidate.yml",
+      "state": "active"
+    },
+    {
+      "name": "Unified candidate source input audit (no binary aggregation)",
+      "path": ".github/workflows/unified-candidate-input-audit.yml",
+      "state": "active"
+    },
+    {
+      "name": "Build and verify pinned wget package closure (no publication)",
+      "path": ".github/workflows/wget-package-candidate.yml",
+      "state": "active"
+    }
+  ],
+  "productionEnabledByTask": false
+}

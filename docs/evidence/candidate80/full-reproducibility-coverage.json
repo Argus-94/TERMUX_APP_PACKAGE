@@ -1,0 +1,2273 @@
+{
+  "android": "NOT_RUN",
+  "complete": true,
+  "packageCount": 80,
+  "packages": [
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "e143b94f69c3af8b28cd4c9f494a9355e6c349d52f668b3fc00fb302998b3061",
+          "860979782815de6e65a5e987eaf6bbcb0e81baccd174b19f08cae7d61b39e460",
+          null
+        ]
+      ],
+      "name": "abseil-cpp",
+      "reproducibilityVerified": true,
+      "sha256": "d29eba6f28a977e3fb80ff3765bd56697036d825c15f280cef2abc67f579cd8a",
+      "version": "20260526.0",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "d29eba6f28a977e3fb80ff3765bd56697036d825c15f280cef2abc67f579cd8a"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "d29eba6f28a977e3fb80ff3765bd56697036d825c15f280cef2abc67f579cd8a"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "bddac5aafb371dd88050583be5fc3f0df579ab1681f5a87e75c5578c0021740b",
+          "904c6ed207ab5ba37b0e497b8c35adae2e5109f6112568bebeed2a4737a9a698",
+          null
+        ]
+      ],
+      "name": "alsa-lib",
+      "reproducibilityVerified": true,
+      "sha256": "1ca4b72160d793ded64f5735e226d8548c5e1c659a9a921c5d94dcbdabdc91e8",
+      "version": "1.2.16.1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "1ca4b72160d793ded64f5735e226d8548c5e1c659a9a921c5d94dcbdabdc91e8"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "1ca4b72160d793ded64f5735e226d8548c5e1c659a9a921c5d94dcbdabdc91e8"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "d7d9f2fff77de9a4f4f5e45a393ac00c9e6047de51d98c9f776f8a885a5f5440",
+          "7d3672a979fe3396ee5cc9daf4cd5ea7cc8421b9d8a43f3c0fefa4a6c2077d4c",
+          null
+        ]
+      ],
+      "name": "alsa-plugins",
+      "reproducibilityVerified": true,
+      "sha256": "3911a8dad6d69be2a253c6f53da21956c5a1afdb3890fbeb411da856257ef2fb",
+      "version": "1.2.12-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "3911a8dad6d69be2a253c6f53da21956c5a1afdb3890fbeb411da856257ef2fb"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "3911a8dad6d69be2a253c6f53da21956c5a1afdb3890fbeb411da856257ef2fb"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "39364f4135281f12c103e20468f8776c4dec2008f268d3cea73c9d17ff3441d3",
+          "d1fb0a3fc074a2eee4cf5c6cefe79c0a779fb3fcbd5ba3edc62a07282e162a42",
+          null
+        ]
+      ],
+      "name": "c-ares",
+      "reproducibilityVerified": true,
+      "sha256": "0dda2645c01b674326f35a7e5502d765b37ba5b5e0ab7a12f8266548f33ce357",
+      "version": "1.34.8",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "0dda2645c01b674326f35a7e5502d765b37ba5b5e0ab7a12f8266548f33ce357"
+        },
+        {
+          "artifactId": 12159170119,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "nodejs-npm",
+          "runId": 39177896995,
+          "sha256": "0dda2645c01b674326f35a7e5502d765b37ba5b5e0ab7a12f8266548f33ce357"
+        }
+      ]
+    },
+    {
+      "architecture": "all",
+      "effectiveSourceVariants": [
+        [
+          "49346cd737c0c8f423f26cb0cb04467f93fb9d69c9c1fb1aff5840a9ea215861",
+          "664d8b4fab253734eb57fdd3d9e63b05f237fe7ed4e4d37bdb5604028baf544c",
+          null
+        ]
+      ],
+      "name": "ca-certificates",
+      "reproducibilityVerified": true,
+      "sha256": "3e972e7fb254c566cfc0cd21dc3f9097f6d9795254b3e55df9c4303d18b49992",
+      "version": "1:2026.09.25",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "3e972e7fb254c566cfc0cd21dc3f9097f6d9795254b3e55df9c4303d18b49992"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "3e972e7fb254c566cfc0cd21dc3f9097f6d9795254b3e55df9c4303d18b49992"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "36556f15fe7e055c6d4ba10adf580802a1fe50b45f3b8ebb6a75b88cc5b492e4",
+          "3ca9339f15180ce69be77f6b871ec871d371eb96ea9cc4ddde0189d35c2bab08",
+          null
+        ]
+      ],
+      "name": "cmake",
+      "reproducibilityVerified": true,
+      "sha256": "4b03f5de7c18d4f8915f525fed1abb13fcacd553cb799c9556b4f33ad160e75e",
+      "version": "4.4.4",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "4b03f5de7c18d4f8915f525fed1abb13fcacd553cb799c9556b4f33ad160e75e"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "4b03f5de7c18d4f8915f525fed1abb13fcacd553cb799c9556b4f33ad160e75e"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+          "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          "47a25ce446d62c15a4911b4ed6e95fb0655cb1624eb1b62a13a6b6e87315daef"
+        ]
+      ],
+      "name": "curl",
+      "reproducibilityVerified": true,
+      "sha256": "c3a9026686f4ba00f48f99a98800fc3967c4a9bf61f1b5d5129aa1635938c11d",
+      "version": "8.23.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "curl",
+          "runId": 39153860849,
+          "sha256": "c3a9026686f4ba00f48f99a98800fc3967c4a9bf61f1b5d5129aa1635938c11d"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "c3a9026686f4ba00f48f99a98800fc3967c4a9bf61f1b5d5129aa1635938c11d"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "d82b006a6b057d480b912f49ac32b39d4c576e1b1546393411050c700c5b1ac4",
+          "95520b0b102406de25c4d31a9b6416b3e6d6c0528d119ba4f6f200f10321d4b9",
+          null
+        ]
+      ],
+      "name": "dbus",
+      "reproducibilityVerified": true,
+      "sha256": "f3b5f7bb815af895e7087120f3b92b64a53b464b00ae6f9bd8dc7600665757af",
+      "version": "1.16.2-3",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "f3b5f7bb815af895e7087120f3b92b64a53b464b00ae6f9bd8dc7600665757af"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "f3b5f7bb815af895e7087120f3b92b64a53b464b00ae6f9bd8dc7600665757af"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ef44697164fd19b8433ceb9ac4cd35cd88eb99ed51b39fb6f8958f87c9db7b2a",
+          "b1b5d53382e1e4a35a2f99c13b37a1cd8fda7509ae59f2fe5749dd4523714ab0",
+          null
+        ]
+      ],
+      "name": "gdbm",
+      "reproducibilityVerified": true,
+      "sha256": "5b7986b55297dcb3b9735d30a54e845008f9d30e36bfb9e9eb466c0a921f53de",
+      "version": "1.26-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "5b7986b55297dcb3b9735d30a54e845008f9d30e36bfb9e9eb466c0a921f53de"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "5b7986b55297dcb3b9735d30a54e845008f9d30e36bfb9e9eb466c0a921f53de"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "a26022905b66f39851553abea3b5e68c38671988b4e2a9a649366845dadfb266",
+          "2613cf52eca8667bd01fd36f56ba79d2fe0f6daa2c470afd5a7beedce061bcb8",
+          null
+        ]
+      ],
+      "name": "gh",
+      "reproducibilityVerified": true,
+      "sha256": "c0404ec10b01dce725f73bfa12039ad8a04b2bd0a89bb078d1d4b5b2668ef109",
+      "version": "2.102.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "gh",
+          "runId": 39153847391,
+          "sha256": "c0404ec10b01dce725f73bfa12039ad8a04b2bd0a89bb078d1d4b5b2668ef109"
+        },
+        {
+          "artifactId": 12154822402,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "gh",
+          "runId": 39177886777,
+          "sha256": "c0404ec10b01dce725f73bfa12039ad8a04b2bd0a89bb078d1d4b5b2668ef109"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8ec1f92e20e9a18c3c20a725102ed445df1a07c66250e1bd94fd7539625c08a9",
+          "299bb2ba29f20faf92ef68bcf9bf4607dcdab7abd978dc56adc44c7f96c0ab46",
+          null
+        ]
+      ],
+      "name": "git",
+      "reproducibilityVerified": true,
+      "sha256": "506adba236e9f5b9b72b0dc22c2a08abbaf57858fad827add2421bb6b30be859",
+      "version": "2.56.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "git",
+          "runId": 39153854294,
+          "sha256": "506adba236e9f5b9b72b0dc22c2a08abbaf57858fad827add2421bb6b30be859"
+        },
+        {
+          "artifactId": 12155394238,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "git",
+          "runId": 39177894183,
+          "sha256": "506adba236e9f5b9b72b0dc22c2a08abbaf57858fad827add2421bb6b30be859"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8181771500b14ada8f28beae580843644fe65ca324d23dd9cd984d28d1e36a62",
+          "3f59fee041ca8bf3081d076ab89350c6de7d2f2619b730d52d29fe4e734c8280",
+          null
+        ]
+      ],
+      "name": "glib",
+      "reproducibilityVerified": true,
+      "sha256": "3f1a62c72f17b0561a5b3fae9f09b7079efcf2a0a338e1e6a525c50bcac6bc25",
+      "version": "2.90.1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "3f1a62c72f17b0561a5b3fae9f09b7079efcf2a0a338e1e6a525c50bcac6bc25"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "3f1a62c72f17b0561a5b3fae9f09b7079efcf2a0a338e1e6a525c50bcac6bc25"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ddd00bd024424d9919e9ce7837c544f4501253b655c88a51288cff10423c0e28",
+          "7faa0ba0f68f8d5f0c605a3a448cdba0588430cc28e2da9cac076c2fc88589ba",
+          null
+        ]
+      ],
+      "name": "jsoncpp",
+      "reproducibilityVerified": true,
+      "sha256": "b7a05b40ce90f1b01699c20c69d0c1591289110a40fd4282e2b72d3c219fb6e9",
+      "version": "1.9.8",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "b7a05b40ce90f1b01699c20c69d0c1591289110a40fd4282e2b72d3c219fb6e9"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "b7a05b40ce90f1b01699c20c69d0c1591289110a40fd4282e2b72d3c219fb6e9"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "24addf768a261d47bbacd34a81ed3c8bdd59e57be0a992de5f8879e9d9706350",
+          "46394eb6374af1cd79b22af1c6ba656e8f0d459a03c62a620b7b9dbd3f73f2a6",
+          null
+        ]
+      ],
+      "name": "less",
+      "reproducibilityVerified": true,
+      "sha256": "a839d3bc08fae19a0b3e1e3ed316786ac54769f71d10e56ef2c82d7585c9a2c0",
+      "version": "710",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "git",
+          "runId": 39153854294,
+          "sha256": "a839d3bc08fae19a0b3e1e3ed316786ac54769f71d10e56ef2c82d7585c9a2c0"
+        },
+        {
+          "artifactId": 12155394238,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "git",
+          "runId": 39177894183,
+          "sha256": "a839d3bc08fae19a0b3e1e3ed316786ac54769f71d10e56ef2c82d7585c9a2c0"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "438cfa28aefbb69ddf767656f031f0eeeee249b7edd719563596fc2b097039b3",
+          "b0ab634605054c8f97f93572081e1feaef9f8eca1e6fe7dd2fe983405b87eece",
+          null
+        ]
+      ],
+      "name": "libandroid-execinfo",
+      "reproducibilityVerified": true,
+      "sha256": "0d7a509c2476c0ac6b4f62419b5585fc712c26566cccc35fd58169650a300fed",
+      "version": "0.1-3",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "0d7a509c2476c0ac6b4f62419b5585fc712c26566cccc35fd58169650a300fed"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "0d7a509c2476c0ac6b4f62419b5585fc712c26566cccc35fd58169650a300fed"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "d21990594578e13a1b792508e023c9b385fd837c7f2ac0b851ada50a5c953132",
+          "152949272a7f74c2691a18fb051df8c10fe6fbc9fc4cf814222a0624cfde1974",
+          null
+        ]
+      ],
+      "name": "libandroid-glob",
+      "reproducibilityVerified": true,
+      "sha256": "79fb9a646179d29c31c971dee0a0402815c5a38dcc0835047fbea4380b9afe07",
+      "version": "0.6-3",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "79fb9a646179d29c31c971dee0a0402815c5a38dcc0835047fbea4380b9afe07"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "79fb9a646179d29c31c971dee0a0402815c5a38dcc0835047fbea4380b9afe07"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ef7431b10b8f6c9e60e0c785e435138f6de39fa2a301a6fe73fabf2948dd6fec",
+          "a0fb63001c766fcaa4e9801ed6de70e1e98886c4fe6af876242f5175fc0fe7e6",
+          null
+        ]
+      ],
+      "name": "libandroid-posix-semaphore",
+      "reproducibilityVerified": true,
+      "sha256": "c2f58b1c80721c7e3d4354b5fdb5b6065c6cb9a0442271740e148e614a771b2f",
+      "version": "0.1-4",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "c2f58b1c80721c7e3d4354b5fdb5b6065c6cb9a0442271740e148e614a771b2f"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "c2f58b1c80721c7e3d4354b5fdb5b6065c6cb9a0442271740e148e614a771b2f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "db55b10b90c54dd4d39b76b5b074835c09c7c7534a84a12bc29c6a63717ff2fd",
+          "6681e7834177b943579f0461af65695473b2b8b498c5e7b47ca2573119bd3042",
+          null
+        ]
+      ],
+      "name": "libandroid-shmem",
+      "reproducibilityVerified": true,
+      "sha256": "9da50cced39ef01eced66e20af4e24176e1947b7549b593bffd438c7a032e48c",
+      "version": "0.7",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "9da50cced39ef01eced66e20af4e24176e1947b7549b593bffd438c7a032e48c"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "9da50cced39ef01eced66e20af4e24176e1947b7549b593bffd438c7a032e48c"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "f4b450c8c352b583c0733eb4fe5eba255e0c3ef300902d609f6fe95198ac945b",
+          "d6f4556038f0ea7a4c6e641e50dbef62fe5eeda09abea3534b55afc2a90fd7b4",
+          null
+        ]
+      ],
+      "name": "libandroid-spawn",
+      "reproducibilityVerified": true,
+      "sha256": "8247e6ec3345cc908102053053924de305dc6baa79734b38232f2b22388c47bf",
+      "version": "0.3",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "8247e6ec3345cc908102053053924de305dc6baa79734b38232f2b22388c47bf"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "8247e6ec3345cc908102053053924de305dc6baa79734b38232f2b22388c47bf"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "7cee378836da2051e93294cc93fa7c0b06c8fddc9a702f115718017610b4e407",
+          "a77194f3880f8a2a40922f1c2bf615323e708736c6d8bfde7b97b52f767a3015",
+          null
+        ]
+      ],
+      "name": "libandroid-stub",
+      "reproducibilityVerified": true,
+      "sha256": "de1225c81a858c584c80622b8e41014d1a2a62ebc870370070daddcbd0ddeb0b",
+      "version": "30-2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "de1225c81a858c584c80622b8e41014d1a2a62ebc870370070daddcbd0ddeb0b"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "de1225c81a858c584c80622b8e41014d1a2a62ebc870370070daddcbd0ddeb0b"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "23f10711528bcc66a3a8728d218f43efea8467bfbb7db222796e5f5b89ac0d79",
+          "3368e15e36268cb941dfe67f6aea7fc4b993a3d56f4fdb1ffef54b7d93f6dccf",
+          null
+        ]
+      ],
+      "name": "libandroid-support",
+      "reproducibilityVerified": true,
+      "sha256": "de1166c8617dfafad4e8d30efd88f1ba9971f09f796ce4bffba2f6dfcdb88c56",
+      "version": "29-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "de1166c8617dfafad4e8d30efd88f1ba9971f09f796ce4bffba2f6dfcdb88c56"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "de1166c8617dfafad4e8d30efd88f1ba9971f09f796ce4bffba2f6dfcdb88c56"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "c834d20f18cbed9bd384f2a89eb9da2f0d68aac898a830cb68f2f4e11a54eedf",
+          "ea885183b9fafbe578e11ed6bc1e6f47eb1cb9b56a5d8ff501601ec97d086483",
+          null
+        ]
+      ],
+      "name": "libandroid-sysv-semaphore",
+      "reproducibilityVerified": true,
+      "sha256": "23d5e397a173a25a75594d2694f8a830de25f710e150e35b8b28492a7bc7286f",
+      "version": "0.1-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "23d5e397a173a25a75594d2694f8a830de25f710e150e35b8b28492a7bc7286f"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "23d5e397a173a25a75594d2694f8a830de25f710e150e35b8b28492a7bc7286f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "c22a609e59872c8f0e0d3d0fe4a027c6fd8e4bcd79e9e937e219f968ac94f8de",
+          "3f8fbfa13663215d67ac5493164ff0974d1a97cddb005c342d0efa7daaa8f443",
+          null
+        ]
+      ],
+      "name": "libarchive",
+      "reproducibilityVerified": true,
+      "sha256": "4fd66fb4350528b858894d42062a10c8740a4b66bb78d109e9517faeddadaa5f",
+      "version": "3.8.9",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "4fd66fb4350528b858894d42062a10c8740a4b66bb78d109e9517faeddadaa5f"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "4fd66fb4350528b858894d42062a10c8740a4b66bb78d109e9517faeddadaa5f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+          "7d76f0ec0793ffe2a733a8e523247c85934d5bab56df4413f242669ef43ae2ec",
+          null
+        ]
+      ],
+      "name": "libbz2",
+      "reproducibilityVerified": true,
+      "sha256": "5342c6355b7f2d2e7d4c882a8b24b1f1d37168d04bcfa6ce68197a4b3ca20387",
+      "version": "1.0.8-8",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "5342c6355b7f2d2e7d4c882a8b24b1f1d37168d04bcfa6ce68197a4b3ca20387"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "5342c6355b7f2d2e7d4c882a8b24b1f1d37168d04bcfa6ce68197a4b3ca20387"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "f0e670ec0f30469e91920a42427115e4bee082c8a22a6dc72e983603dfe659cf",
+          "71c5b88eeca755df521a37eea21671a8fc6366ad7bf53591e9acb779c3822610",
+          null
+        ]
+      ],
+      "name": "libc++",
+      "reproducibilityVerified": true,
+      "sha256": "7bf7f053de9136c79a33abf13574f28dc28e9b815fb4e37d6f094f0f31333b85",
+      "version": "30",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "7bf7f053de9136c79a33abf13574f28dc28e9b815fb4e37d6f094f0f31333b85"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "7bf7f053de9136c79a33abf13574f28dc28e9b815fb4e37d6f094f0f31333b85"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8d3d827030f2d51687dcf7fcb1a7dce8f79730bdbefbd5b90492def19ea43629",
+          "23bf34fc9f9dcb3448c38de3cab05215ef02004c2a197628b5e10631a708454f",
+          null
+        ]
+      ],
+      "name": "libcrypt",
+      "reproducibilityVerified": true,
+      "sha256": "735ac58b08c343eceb59ddedceb780024bc9c621ed4f928ecb0ada5f2f53fd75",
+      "version": "0.2-6",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "735ac58b08c343eceb59ddedceb780024bc9c621ed4f928ecb0ada5f2f53fd75"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "735ac58b08c343eceb59ddedceb780024bc9c621ed4f928ecb0ada5f2f53fd75"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ba13efc16ac98cec77ebd9c0718c65ea69cef87c96e3cb0c27864593f8ede348",
+          "c5ec7b6c831bc161d217c68e22b41631c02d5ea63b9a5f51aa83cb4eb8b29ee1",
+          null
+        ]
+      ],
+      "name": "libcurl",
+      "reproducibilityVerified": true,
+      "sha256": "ced63ab29e00d27d5a974b8a1ceb96fd151bec634b4a45aaa9e7d5ba51229907",
+      "version": "8.23.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "ced63ab29e00d27d5a974b8a1ceb96fd151bec634b4a45aaa9e7d5ba51229907"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "ced63ab29e00d27d5a974b8a1ceb96fd151bec634b4a45aaa9e7d5ba51229907"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "f8101759677259a33b83edd45cb47a57d19f4ddee52afc3d6e138ad04438e8f3",
+          "7a2af26462cfbc7ccb44a5b32e235b693139b6eb951233bd1b2cd2b5ae392874",
+          null
+        ]
+      ],
+      "name": "libexpat",
+      "reproducibilityVerified": true,
+      "sha256": "adb3c9de72c86579e2bc8733fda17df314083d3b6a9411748142afae6cb9b3fb",
+      "version": "2.9.0",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "adb3c9de72c86579e2bc8733fda17df314083d3b6a9411748142afae6cb9b3fb"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "adb3c9de72c86579e2bc8733fda17df314083d3b6a9411748142afae6cb9b3fb"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "0a7f2e44163fe2d43a48680968a5254bad0ee1032f89fe20cfcfe5dbddb2555e",
+          "420e15d0759ee3e8aa9901e4ecd4e9de911bffea8c86f5b9509712a48ef576b5",
+          null
+        ]
+      ],
+      "name": "libffi",
+      "reproducibilityVerified": true,
+      "sha256": "a5a278eece70c7199d27d705b8614056d8589f1abbb78b1ba6ff96fa71181814",
+      "version": "3.8.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "a5a278eece70c7199d27d705b8614056d8589f1abbb78b1ba6ff96fa71181814"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "a5a278eece70c7199d27d705b8614056d8589f1abbb78b1ba6ff96fa71181814"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "0c3adf3e6a452c1a566621646a69f251ce37d815eeb061d92e1b2758125db51a",
+          "ded503791ac6c41355a06905f5f233cd931d0aed30d7e8859b360a06ac9a3313",
+          null
+        ]
+      ],
+      "name": "libflac",
+      "reproducibilityVerified": true,
+      "sha256": "7637ad4ff6470aeaffa6d50ebbece95a43e344f511d341b89a61c0a66f5894ea",
+      "version": "1.5.0-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "7637ad4ff6470aeaffa6d50ebbece95a43e344f511d341b89a61c0a66f5894ea"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "7637ad4ff6470aeaffa6d50ebbece95a43e344f511d341b89a61c0a66f5894ea"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "5542ba656ce53cf6c13659afe25c6fe69e254d2b9e05b0d8105f4f4b3dc9cb15",
+          "2f005c8cdb668aa9ede0141486954993afe184576d4b5dc5bd440380afa30cbc",
+          null
+        ]
+      ],
+      "name": "libiconv",
+      "reproducibilityVerified": true,
+      "sha256": "400aba47f51f603264cfe753cc31750b4fbe31851863cc409b9e52c5213d9ee1",
+      "version": "1.19",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "400aba47f51f603264cfe753cc31750b4fbe31851863cc409b9e52c5213d9ee1"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "400aba47f51f603264cfe753cc31750b4fbe31851863cc409b9e52c5213d9ee1"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "2336f891972b3a4eb4e801839a401eca68eea40240758aab2462665e6e211bc7",
+          "3d9966b8b876772af94a4694d031f9d5a8f670cb2897828cfe6fa9fd22ec1c0a",
+          null
+        ]
+      ],
+      "name": "libicu",
+      "reproducibilityVerified": true,
+      "sha256": "4dbcba5f56383f7de4006cb6909f4f96c1ff349e41effedad0d1050c3b6cd115",
+      "version": "78.3",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "4dbcba5f56383f7de4006cb6909f4f96c1ff349e41effedad0d1050c3b6cd115"
+        },
+        {
+          "artifactId": 12159170119,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "nodejs-npm",
+          "runId": 39177896995,
+          "sha256": "4dbcba5f56383f7de4006cb6909f4f96c1ff349e41effedad0d1050c3b6cd115"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "13dcbe4d713bc6beb01c9e666527594db097f271d368dfd97d46bca196412a9f",
+          "99a3b43aa1dd380f872ec86db3ba056285c230f8613c31fbb8ecb446aec0843b",
+          null
+        ]
+      ],
+      "name": "libidn2",
+      "reproducibilityVerified": true,
+      "sha256": "ae7ec7f3c935eecd359eec5e7ca880ad20bbead6101d70530800403f8c4768ab",
+      "version": "2.3.8-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "wget",
+          "runId": 39153866740,
+          "sha256": "ae7ec7f3c935eecd359eec5e7ca880ad20bbead6101d70530800403f8c4768ab"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "ae7ec7f3c935eecd359eec5e7ca880ad20bbead6101d70530800403f8c4768ab"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8afc22fceacaf759934ce6438e5478f18645ccead9b7012ae621b5dddf3816b3",
+          "572f7578349738516bc6a1168eb82e90472d4aa031a349ba4ee9b121965d2030",
+          null
+        ]
+      ],
+      "name": "libjpeg-turbo",
+      "reproducibilityVerified": true,
+      "sha256": "2bbf474ffc0d819dbfdb0d4cc53b1f436b2165b9f056272423b11bfd0dcdad03",
+      "version": "3.2.0",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "2bbf474ffc0d819dbfdb0d4cc53b1f436b2165b9f056272423b11bfd0dcdad03"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "2bbf474ffc0d819dbfdb0d4cc53b1f436b2165b9f056272423b11bfd0dcdad03"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ae0624ab38d8b83fe3f7ce216a7ad740595c40fc813d8b27d87daf0b844c1471",
+          "4ff7c23eaedbc0636776134215c6088a5992c3fe1480fe91a6fd3ed82bd169b6",
+          "e284ad5da173fa9aad18232d397e6e24a15e2ecd0de8b198449e1483175b0606"
+        ]
+      ],
+      "name": "libltdl",
+      "reproducibilityVerified": true,
+      "sha256": "fa6b8e2eb1ec3197f32a6935fd215ed7b3f065d123e24709f6f24418e21727fe",
+      "version": "2.6.2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "fa6b8e2eb1ec3197f32a6935fd215ed7b3f065d123e24709f6f24418e21727fe"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "fa6b8e2eb1ec3197f32a6935fd215ed7b3f065d123e24709f6f24418e21727fe"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+          "dc23317606aabaaab4f690edb9092397dd78799fe34dff80691f43f9ddc8e708",
+          null
+        ]
+      ],
+      "name": "liblzma",
+      "reproducibilityVerified": true,
+      "sha256": "cf62c3edf7e291aeb6817e01cb3bc0a2c234626b47a285d16aa0621007f1da7a",
+      "version": "5.8.4",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "cf62c3edf7e291aeb6817e01cb3bc0a2c234626b47a285d16aa0621007f1da7a"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "cf62c3edf7e291aeb6817e01cb3bc0a2c234626b47a285d16aa0621007f1da7a"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ae386257d3950be46169097a3b32b72a05d3df332da0b09bc62a0d0d4536b94f",
+          "1c6806158e94c45937c1fc499ad9fd8036af78037d01a57aa090e58f02de52ac",
+          null
+        ]
+      ],
+      "name": "libmp3lame",
+      "reproducibilityVerified": true,
+      "sha256": "0cf3f2534bd7376292db951c56b4950f1cc51a232f8bae3d81b0f38a00a149d6",
+      "version": "4.0-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "0cf3f2534bd7376292db951c56b4950f1cc51a232f8bae3d81b0f38a00a149d6"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "0cf3f2534bd7376292db951c56b4950f1cc51a232f8bae3d81b0f38a00a149d6"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "90f9a350aabdcd25e723ecd1933371bff9e898ff9a357bcfa854efac0734c771",
+          "22dfc1dc727251e3a973928a84a8f1d611652791531c68214fe6ca65ee36f05b",
+          null
+        ]
+      ],
+      "name": "libmpg123",
+      "reproducibilityVerified": true,
+      "sha256": "b3146f430e1b703fe9726a7db7efe74d50eca510c4279074a278512d16a742c8",
+      "version": "1.33.7",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "b3146f430e1b703fe9726a7db7efe74d50eca510c4279074a278512d16a742c8"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "b3146f430e1b703fe9726a7db7efe74d50eca510c4279074a278512d16a742c8"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "0860290bcf314619c3744d9ae75ab7c7b20951baf2013e9e04dafc7f29b55447",
+          "6f1d5152ec82157ad2a7fbe06aedb14d1e0226861c9368bfd47e67ce5c5388de",
+          null
+        ]
+      ],
+      "name": "libnghttp2",
+      "reproducibilityVerified": true,
+      "sha256": "fc638e65e52c95e68e51c34299a2a2eea266b3cc618b6a9a2961fb07a9acfcbb",
+      "version": "1.70.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "fc638e65e52c95e68e51c34299a2a2eea266b3cc618b6a9a2961fb07a9acfcbb"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "fc638e65e52c95e68e51c34299a2a2eea266b3cc618b6a9a2961fb07a9acfcbb"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "3c36d3fb8a483efaa0252a113f87e283e83f549632bf22562e0e7415e71cb30f",
+          "3c2a406504c535b56b39c9004b770995be27f9a3a117d9e429dc0aad13722b8f",
+          null
+        ]
+      ],
+      "name": "libnghttp3",
+      "reproducibilityVerified": true,
+      "sha256": "9229b4761b82fc0697f6230ca951e958d7bf6efcbbe5e9febc818fced2aab4e9",
+      "version": "1.18.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "9229b4761b82fc0697f6230ca951e958d7bf6efcbbe5e9febc818fced2aab4e9"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "9229b4761b82fc0697f6230ca951e958d7bf6efcbbe5e9febc818fced2aab4e9"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "622048f19724f9f28c47909be37d94a751c5fd14b6eb33557bf53da26ea7c5ff",
+          "a18df5e0d1e3153e955f8938d1452e0a2b0f65c05f2fb76d9fc132a2639d5acb",
+          null
+        ]
+      ],
+      "name": "libngtcp2",
+      "reproducibilityVerified": true,
+      "sha256": "1801b2881d72fe12ca6a367f74a296e379e316279fef31ea1fd236994e2e4da5",
+      "version": "1.25.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "1801b2881d72fe12ca6a367f74a296e379e316279fef31ea1fd236994e2e4da5"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "1801b2881d72fe12ca6a367f74a296e379e316279fef31ea1fd236994e2e4da5"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ebd68d519ce8aa5fa851f1868005f4d90b7c5e9585c0ffda022de00d033faf5e",
+          "ee6a4c8c31f59ce8d4cbc5ab6b6adc29b18566c965aea46f64d86934e1f4fa36",
+          null
+        ]
+      ],
+      "name": "libogg",
+      "reproducibilityVerified": true,
+      "sha256": "ee339f7aea0dcf0f18836892c00ca3553d492de978ab270ee44ef3eb194a3b4b",
+      "version": "1.3.6-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "ee339f7aea0dcf0f18836892c00ca3553d492de978ab270ee44ef3eb194a3b4b"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "ee339f7aea0dcf0f18836892c00ca3553d492de978ab270ee44ef3eb194a3b4b"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "2b3218c6bd300ad72a2eddf60604c4baf4ab75d907587d2834bcba354216da29",
+          "c46d6fcbc8d1fbbec93aa1b863f725c7b7c00e80a4a2c26458d715628c3cebb6",
+          null
+        ]
+      ],
+      "name": "libopus",
+      "reproducibilityVerified": true,
+      "sha256": "ae8db58cec03f8a90884806b9d01b6432c0e14cda7592bda9e1e0562eb2dab9e",
+      "version": "1.6.1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "ae8db58cec03f8a90884806b9d01b6432c0e14cda7592bda9e1e0562eb2dab9e"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "ae8db58cec03f8a90884806b9d01b6432c0e14cda7592bda9e1e0562eb2dab9e"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "c7feb9a3fd7316cb3259339a2b8a839dacfd451d50e5f6f9a188335b62b77bf4",
+          "432f53f9d16fc736e14529ea559a64f066fc67740d6c62909620a437c8f7ea6c",
+          null
+        ]
+      ],
+      "name": "libsndfile",
+      "reproducibilityVerified": true,
+      "sha256": "d929016fd8095516ab2787fdc6049224828aebee80c59014a9e41f5d1dd0487f",
+      "version": "1.2.2-3",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "d929016fd8095516ab2787fdc6049224828aebee80c59014a9e41f5d1dd0487f"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "d929016fd8095516ab2787fdc6049224828aebee80c59014a9e41f5d1dd0487f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "161195b9c049a71282a9f82dfc79dbbc10bc9ca919d144c02be881c1cbb8ba1e",
+          "f3cec55552c09b63df83ccda6649b1d994426c48ba4c67156fdb2e0a3a7596cc",
+          null
+        ]
+      ],
+      "name": "libsoxr",
+      "reproducibilityVerified": true,
+      "sha256": "58576ffad62f14b7c60a7f6e3b3b2de0ed22888587a6d7603a7ca92e3333900e",
+      "version": "0.1.3-8",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "58576ffad62f14b7c60a7f6e3b3b2de0ed22888587a6d7603a7ca92e3333900e"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "58576ffad62f14b7c60a7f6e3b3b2de0ed22888587a6d7603a7ca92e3333900e"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "27664a1e5479eb98eedc775e383be4395e53463250078de97262a9aed311415d",
+          "514eee1371c395cdb626ee7a515cd390b8203fb41d6f11ddcfcaa1d26d58cc2f",
+          null
+        ]
+      ],
+      "name": "libsqlite",
+      "reproducibilityVerified": true,
+      "sha256": "474b271e852503eba6e940e89d1dd6a8c494d40fc48fb6c0d8b4039d54e38b22",
+      "version": "3.54.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "474b271e852503eba6e940e89d1dd6a8c494d40fc48fb6c0d8b4039d54e38b22"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "474b271e852503eba6e940e89d1dd6a8c494d40fc48fb6c0d8b4039d54e38b22"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "222db4a13edf104316a53bc4c57214b9c351e6a816286c63e1850ca07fe75067",
+          "f00504a853d1d0f7b3031ed3d91acb8e4b6cafc2112dc7e83607385ecb8cfd29",
+          null
+        ]
+      ],
+      "name": "libssh2",
+      "reproducibilityVerified": true,
+      "sha256": "6edee8da14a3f96174256fe4a38863e44f06fbb7d870360e1c3fbc4160ce0736",
+      "version": "1.11.1-2",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "6edee8da14a3f96174256fe4a38863e44f06fbb7d870360e1c3fbc4160ce0736"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "6edee8da14a3f96174256fe4a38863e44f06fbb7d870360e1c3fbc4160ce0736"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "ad3070ea9961bbe5cc0a8fbab9f9207e7620c9596f208b5f5b0f3d44266ef392",
+          "446e2a2e92b0aeaa77b885b9236c3d04f6aca0e4e84e60e0ed4144ec00a7de4e",
+          null
+        ]
+      ],
+      "name": "libunistring",
+      "reproducibilityVerified": true,
+      "sha256": "299752764bdb7d1616fbc73ae2ddf8a9b21bb76f937e93e73aed5e7d12d10cc2",
+      "version": "1.4.2",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "wget",
+          "runId": 39153866740,
+          "sha256": "299752764bdb7d1616fbc73ae2ddf8a9b21bb76f937e93e73aed5e7d12d10cc2"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "299752764bdb7d1616fbc73ae2ddf8a9b21bb76f937e93e73aed5e7d12d10cc2"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "b0e858474aeee9071785c5535f084e2071523610f6e1de4f45eab8c4dfb6cc7e",
+          "305f13b00f28d1fdf1cd45451bd8edf75ca1d56bcf61729b1142e8d0e7dbb10c",
+          "2bd84456f1da009e54c12edf1573914f5e989cfca766e51ea9dd60789bc47cb1"
+        ]
+      ],
+      "name": "libuuid",
+      "reproducibilityVerified": true,
+      "sha256": "40a79d2052d53d16c0530b78949d2fc6f4f625d55ba0f603e322d66aa08783c5",
+      "version": "2.42.4",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "wget",
+          "runId": 39153866740,
+          "sha256": "40a79d2052d53d16c0530b78949d2fc6f4f625d55ba0f603e322d66aa08783c5"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "40a79d2052d53d16c0530b78949d2fc6f4f625d55ba0f603e322d66aa08783c5"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "5306178facd555b28439aae348d0e561c541cdaace4d04ab1eeec540997b2dfc",
+          "144fc7e2d47e3a6219f074a4850c8e57c64062c459298953e4dc62806fbfb98d",
+          null
+        ]
+      ],
+      "name": "libuv",
+      "reproducibilityVerified": true,
+      "sha256": "e9c1425aa9ba24da0f5121f8dd0be807d498f2d6aa916ee4c9ef265eac175a03",
+      "version": "1.53.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "e9c1425aa9ba24da0f5121f8dd0be807d498f2d6aa916ee4c9ef265eac175a03"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "e9c1425aa9ba24da0f5121f8dd0be807d498f2d6aa916ee4c9ef265eac175a03"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "295e128fc36df81920083d05538e45ee0a849a87e68948aff628ba431024d3a0",
+          "c51fcbb74c805dcd77b51ecc71cf9caac381b646d92a3cab337e98468bedd39c",
+          null
+        ]
+      ],
+      "name": "libvorbis",
+      "reproducibilityVerified": true,
+      "sha256": "87296a011695a79f941b0f79ad82acddef8026768f9778c8b9cf6783b15c86f9",
+      "version": "1.3.7-4",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "87296a011695a79f941b0f79ad82acddef8026768f9778c8b9cf6783b15c86f9"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "87296a011695a79f941b0f79ad82acddef8026768f9778c8b9cf6783b15c86f9"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "a492d38cfeb3f00073e86251256cf618e6f11c20bb096e31a41ae602359c580f",
+          "5ea9b97ba618689c72d6e253336be97d7ca88dba4ce54bee1cadfbc599f66ff2",
+          null
+        ]
+      ],
+      "name": "libwebrtc-audio-processing",
+      "reproducibilityVerified": true,
+      "sha256": "0d04e09acbc2d21bd3e72e3ddd80491af7601ac4c8e96d220fcb5e9ef3d80922",
+      "version": "1.3-5",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "0d04e09acbc2d21bd3e72e3ddd80491af7601ac4c8e96d220fcb5e9ef3d80922"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "0d04e09acbc2d21bd3e72e3ddd80491af7601ac4c8e96d220fcb5e9ef3d80922"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "0163c7c054c8d2ebf8a40679d0e9859bc9aea478023102dc11730ce9e36bb521",
+          "5058efff0cadc5ca560f46bc5edd7b9dbcbee08d84012c138a09872ae2588fe8",
+          null
+        ]
+      ],
+      "name": "libx11",
+      "reproducibilityVerified": true,
+      "sha256": "7c54b85598804f667558ef33c5606e6e7a9b27f1eedb1b3a144ac36b54f07095",
+      "version": "1.8.13-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "7c54b85598804f667558ef33c5606e6e7a9b27f1eedb1b3a144ac36b54f07095"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "7c54b85598804f667558ef33c5606e6e7a9b27f1eedb1b3a144ac36b54f07095"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "db1c86540a4e09dfcaa7e4320756c67827757474b347681d2fce2c57c96696ea",
+          "45904259cfaac6f360bab9cf36cf6415671f6dbad148407d1e53b4e34e8addda",
+          null
+        ]
+      ],
+      "name": "libxau",
+      "reproducibilityVerified": true,
+      "sha256": "8821dc4118fce86cf578bfcb4125c04c1f1f5efa07eee12db529c38d75ff43d1",
+      "version": "1.0.12-2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "8821dc4118fce86cf578bfcb4125c04c1f1f5efa07eee12db529c38d75ff43d1"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "8821dc4118fce86cf578bfcb4125c04c1f1f5efa07eee12db529c38d75ff43d1"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "dad40cf766b09a3f336f15ea731f742e16d7dbbe6cc94f77daefd487c9483f13",
+          "601f5086b1ddbc5ddae132087c17c9bd8941c8b1c04964eedbfeec93ab5d4467",
+          null
+        ]
+      ],
+      "name": "libxcb",
+      "reproducibilityVerified": true,
+      "sha256": "f528fa48dbf7fc186bd96b3aeb9e79b58e1f884c0d794e8f2b959155c1b473e1",
+      "version": "1.17.0-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "f528fa48dbf7fc186bd96b3aeb9e79b58e1f884c0d794e8f2b959155c1b473e1"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "f528fa48dbf7fc186bd96b3aeb9e79b58e1f884c0d794e8f2b959155c1b473e1"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "c65fc07a144c77cdf281c091e0a6e409ecdf65bfadbff4c854db33cd2621c4c8",
+          "b7b833f3bcdac7679bd79fe9a18e96e5e75d87dafcabb45404c00b946f48d408",
+          null
+        ]
+      ],
+      "name": "libxdmcp",
+      "reproducibilityVerified": true,
+      "sha256": "d745aab0ddc9ca4d06fe666d582e73462b4d30b537366ce40587cebe3b340fc1",
+      "version": "1.1.5-2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "d745aab0ddc9ca4d06fe666d582e73462b4d30b537366ce40587cebe3b340fc1"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "d745aab0ddc9ca4d06fe666d582e73462b4d30b537366ce40587cebe3b340fc1"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "52de9d390c6594e2a9bc45b1301a21fadc157b20a7c203d9e4eb3a841b058f7c",
+          "c7720f5350d2ced8941d81e12b320a0c4eac6f90fa8f1b61deb31ce1dc7294ba",
+          null
+        ]
+      ],
+      "name": "libxml2",
+      "reproducibilityVerified": true,
+      "sha256": "7ad3348c636b71269c39f4aed4ed48e66fff6ac8e5c2db5e3afbdfb4e0beeca9",
+      "version": "2.15.4-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "7ad3348c636b71269c39f4aed4ed48e66fff6ac8e5c2db5e3afbdfb4e0beeca9"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "7ad3348c636b71269c39f4aed4ed48e66fff6ac8e5c2db5e3afbdfb4e0beeca9"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "5d93c16fc236d45b01e24cd8f33c35c68119f1c99aad2ac191cf0eba85e90799",
+          "37ec6f1af492d0f03a179f97bcab62bfd7193c35377c9326bc8883ddc4c0cf11",
+          null
+        ]
+      ],
+      "name": "littlecms",
+      "reproducibilityVerified": true,
+      "sha256": "9e33356ecc8144d55181043444fee20beffcce065c9be3285831d1fadc5bc496",
+      "version": "2.19.1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "9e33356ecc8144d55181043444fee20beffcce065c9be3285831d1fadc5bc496"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "9e33356ecc8144d55181043444fee20beffcce065c9be3285831d1fadc5bc496"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "03511a03c804abfed630861c0932431e775adabe00e8720a7c9c12931b13f3cb",
+          "23c5bcd77f8e3f1f0dfc49cc41fa3e0324d4152e5fc0e0712bc1137e783e4df8",
+          null
+        ]
+      ],
+      "name": "make",
+      "reproducibilityVerified": true,
+      "sha256": "466531ed242215361f3bf18dc995d9b3358dd422b71db2c6addeedf17f2b563f",
+      "version": "4.4.1-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "make",
+          "runId": 39153847391,
+          "sha256": "466531ed242215361f3bf18dc995d9b3358dd422b71db2c6addeedf17f2b563f"
+        },
+        {
+          "artifactId": 12154488960,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "make",
+          "runId": 39177886777,
+          "sha256": "466531ed242215361f3bf18dc995d9b3358dd422b71db2c6addeedf17f2b563f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          null
+        ]
+      ],
+      "name": "ncurses",
+      "reproducibilityVerified": true,
+      "sha256": "3dc2a24ae48b6b1586a71f15f019b2d4a861a8a94f5ff6f81837b68850894d10",
+      "version": "6.6.20260307+really6.5.20250830",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "git",
+          "runId": 39153854294,
+          "sha256": "3dc2a24ae48b6b1586a71f15f019b2d4a861a8a94f5ff6f81837b68850894d10"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "3dc2a24ae48b6b1586a71f15f019b2d4a861a8a94f5ff6f81837b68850894d10"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "5b90e2b0155d90530371484aedf329ab9eeb915e2a1efbb41013e22e436dec0f",
+          "2ae8f0e3998e5eb28f3a3c59e226314034e2faaa45a25e51682cec77ae2ce461",
+          "d1d31425d957f19142e1ec3fa168a1dd2b2f73914c36331bf368ebaf7240bf54"
+        ]
+      ],
+      "name": "ncurses-ui-libs",
+      "reproducibilityVerified": true,
+      "sha256": "69e405659a2057d2cc4ec193aa42d9629dfbaf77c89f7c362b75cb1726f7c562",
+      "version": "6.6.20260307+really6.5.20250830",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "69e405659a2057d2cc4ec193aa42d9629dfbaf77c89f7c362b75cb1726f7c562"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "69e405659a2057d2cc4ec193aa42d9629dfbaf77c89f7c362b75cb1726f7c562"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "6a3c1ec0da0494531079bed1604965eb2163e602781ba12be04d3e60ef5cddbe",
+          "20d96c449c6ccc2f044a0eeb29e31e94ae5d3aa9867216f7b90bbf0d98d8d5af",
+          null
+        ]
+      ],
+      "name": "ninja",
+      "reproducibilityVerified": true,
+      "sha256": "eaedae96fe68fbafda6740f4c6c6d78d795c9ddc4cadcde53e3a177621e6dabc",
+      "version": "1.13.2",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "eaedae96fe68fbafda6740f4c6c6d78d795c9ddc4cadcde53e3a177621e6dabc"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "eaedae96fe68fbafda6740f4c6c6d78d795c9ddc4cadcde53e3a177621e6dabc"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "74d54ee138a8225ec8ddbb38f60d14f1538ee089e76817c6044e5f2b0d4e0bc9",
+          "639bb1fbd34e45cc31e3cc594225fbd64332924bd418035dbad5279c3a9b21bb",
+          null
+        ]
+      ],
+      "name": "nodejs",
+      "reproducibilityVerified": true,
+      "sha256": "428345c8082c677bf5ede22d4a3356e444e63a1af86b4584e8cf026a7e777556",
+      "version": "26.4.0-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "428345c8082c677bf5ede22d4a3356e444e63a1af86b4584e8cf026a7e777556"
+        },
+        {
+          "artifactId": 12159170119,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "nodejs-npm",
+          "runId": 39177896995,
+          "sha256": "428345c8082c677bf5ede22d4a3356e444e63a1af86b4584e8cf026a7e777556"
+        }
+      ]
+    },
+    {
+      "architecture": "all",
+      "effectiveSourceVariants": [
+        [
+          "c3299a45a89403a0ef4d1cf1e60b4af2fd4fb089690a60fa55a2282f1f9bab3b",
+          "cfc3c9b5434ca38c4e8a3313bfb04d1d15455ea308c5f9cc6724b30c2df7e78e",
+          null
+        ]
+      ],
+      "name": "npm",
+      "reproducibilityVerified": true,
+      "sha256": "b9024e1bafe10de411f2f8420b9f48e1fa264d3839b7adfbc14613853699247f",
+      "version": "11.20.0",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "b9024e1bafe10de411f2f8420b9f48e1fa264d3839b7adfbc14613853699247f"
+        },
+        {
+          "artifactId": 12159170119,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "nodejs-npm",
+          "runId": 39177896995,
+          "sha256": "b9024e1bafe10de411f2f8420b9f48e1fa264d3839b7adfbc14613853699247f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "214ba6237d2bc5606fb5706a4fdbb2471984948530e7d301a31d38f8a74d37cb",
+          "420669286cb6b5bd4c7d21530bf7512f0370138749236afd6ca2c312883aa324",
+          null
+        ]
+      ],
+      "name": "openjdk-17",
+      "reproducibilityVerified": true,
+      "sha256": "354bb22da60cfb46750485798cfd58dc3176485768fd5c09b917ff38a98ac887",
+      "version": "17.0.20",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "354bb22da60cfb46750485798cfd58dc3176485768fd5c09b917ff38a98ac887"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "354bb22da60cfb46750485798cfd58dc3176485768fd5c09b917ff38a98ac887"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "4520f242c196cf19cc68b1502484fbf27606da07c04752f98e91ceba667db224",
+          "ed6328c0967f3aedc21b465e00ebd68ac9196764ec4ab3cbdcfd4effe096901b",
+          null
+        ]
+      ],
+      "name": "openssl",
+      "reproducibilityVerified": true,
+      "sha256": "9d8c4cc6c436b4f3a7981b0762c1c7c3f6d3e164749c73d7c62a0246a4cad4d1",
+      "version": "1:3.6.5",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "9d8c4cc6c436b4f3a7981b0762c1c7c3f6d3e164749c73d7c62a0246a4cad4d1"
+        },
+        {
+          "artifactId": 12154764779,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "curl",
+          "runId": 39177888185,
+          "sha256": "9d8c4cc6c436b4f3a7981b0762c1c7c3f6d3e164749c73d7c62a0246a4cad4d1"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "3d4f6e3cd27218fb539e4d812255c2a8787b43319bb45a6ad76bb3abf70fe293",
+          "01faf52265125c1625b5068ec60829bf7648498ea3c6099804d4749bf013522c",
+          null
+        ]
+      ],
+      "name": "pcre2",
+      "reproducibilityVerified": true,
+      "sha256": "4de633ea1095ca34473e819ac8083f5f45d701fefe877652ef0787fe49c03ca8",
+      "version": "10.49",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "git",
+          "runId": 39153854294,
+          "sha256": "4de633ea1095ca34473e819ac8083f5f45d701fefe877652ef0787fe49c03ca8"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "4de633ea1095ca34473e819ac8083f5f45d701fefe877652ef0787fe49c03ca8"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8378c3bfb5e91c6a91aef8a7083d8f9b017f25913d1f0c5ff0603a5b1d858669",
+          "6712d8b0caafed2c5c87ce5aa8544a3aea589be7fb7cf8ea2e3e3300162c6de2",
+          null
+        ]
+      ],
+      "name": "pkg-config",
+      "reproducibilityVerified": true,
+      "sha256": "24f876126e0fbaab42f9240e03e70e346df37898585af352450e6b254a1cf698",
+      "version": "0.29.2-3",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "24f876126e0fbaab42f9240e03e70e346df37898585af352450e6b254a1cf698"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "24f876126e0fbaab42f9240e03e70e346df37898585af352450e6b254a1cf698"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "16d19b7cdf7afa7fe3711a58e8bee90022966b9938b29ebc73563e41893d0b28",
+          "bc77e0fbd6c4fc7436f8a82c7109cae7f4e6228e2452a1fa1963cec9884637ea",
+          null
+        ]
+      ],
+      "name": "pulseaudio",
+      "reproducibilityVerified": true,
+      "sha256": "149edf3df6571094f6dca0dc5f90751f012c1b6a45eb23cd55c7856a0fc5faf2",
+      "version": "17.0-4",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "149edf3df6571094f6dca0dc5f90751f012c1b6a45eb23cd55c7856a0fc5faf2"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "149edf3df6571094f6dca0dc5f90751f012c1b6a45eb23cd55c7856a0fc5faf2"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "354ad5204056395bc423780da9112395aad862c01636ae3a56d2f4c025d69f12",
+          "44ef33aba38df71490113e83f1a960b27efbb6ae133be0562006a171e47d5d4f",
+          null
+        ]
+      ],
+      "name": "python",
+      "reproducibilityVerified": true,
+      "sha256": "844f99d5bf80bed99f151fd76ee58a040f8499b1f54cd6a43246a7a782bcfe99",
+      "version": "3.14.6-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "844f99d5bf80bed99f151fd76ee58a040f8499b1f54cd6a43246a7a782bcfe99"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "844f99d5bf80bed99f151fd76ee58a040f8499b1f54cd6a43246a7a782bcfe99"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "29e24da6099650f92703b2772e9515cfc6004901733b1c8a4dbb3938b85762e3",
+          "a186f593377f6bcaff6571fce794eb39938cf027d367b1fdc80cf4d14fbca426",
+          null
+        ]
+      ],
+      "name": "readline",
+      "reproducibilityVerified": true,
+      "sha256": "eed98fbba8b374d58ac952b2d746a61f2e7892545f8cbff31194e524070d7ffe",
+      "version": "8.3.6",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "eed98fbba8b374d58ac952b2d746a61f2e7892545f8cbff31194e524070d7ffe"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "eed98fbba8b374d58ac952b2d746a61f2e7892545f8cbff31194e524070d7ffe"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "29d51b364bc436629089e347a40cd8517817a4a6d9b01e0c838574fdb274c69d",
+          "889385d821802de729c1e47b8ccd16bc8f482836c6db7013475f08ce37b7469f",
+          null
+        ]
+      ],
+      "name": "resolv-conf",
+      "reproducibilityVerified": true,
+      "sha256": "ea5024c284731a3e278f0180750aafde6f5aca90c5125ab258782a5539e03bf6",
+      "version": "1.3",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "nodejs-npm",
+          "runId": 39153885717,
+          "sha256": "ea5024c284731a3e278f0180750aafde6f5aca90c5125ab258782a5539e03bf6"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "ea5024c284731a3e278f0180750aafde6f5aca90c5125ab258782a5539e03bf6"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "471c7efe285a2d81169dbc5fcc0e339ab1a47317021057eea8ab0028318c0f1f",
+          "072ba91f7bc6fa269d1e34fd63ddda9c9083caf7e3e9a5e3a8173085bfbf9255",
+          null
+        ]
+      ],
+      "name": "rhash",
+      "reproducibilityVerified": true,
+      "sha256": "d86fc7f106e0b88fbd75e9310b13e91e895bddcdf4110418a027fb69124a825f",
+      "version": "1.4.6-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "cmake-ninja",
+          "runId": 39153898064,
+          "sha256": "d86fc7f106e0b88fbd75e9310b13e91e895bddcdf4110418a027fb69124a825f"
+        },
+        {
+          "artifactId": 12155808147,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "cmake-ninja",
+          "runId": 39177895413,
+          "sha256": "d86fc7f106e0b88fbd75e9310b13e91e895bddcdf4110418a027fb69124a825f"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "8424446f3a1bd5a4b0ca5f079d441d296996544dfb9981216c476fa52b411847",
+          "80a13bbaa5069792238bebfd4386c1c7dc120e124e9c22458e8e1f7870f64437",
+          null
+        ]
+      ],
+      "name": "speexdsp",
+      "reproducibilityVerified": true,
+      "sha256": "85eff68a2ba6bc05dc1fc45ff366699f65df5b87d109cf010ec6e54ae8a60566",
+      "version": "1.2.1-1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "85eff68a2ba6bc05dc1fc45ff366699f65df5b87d109cf010ec6e54ae8a60566"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "85eff68a2ba6bc05dc1fc45ff366699f65df5b87d109cf010ec6e54ae8a60566"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "e61e307393f61ca1488ebba5884f188fb23d6ea4d39a78001b807c7248d45b85",
+          "94ebfaad4238f95ec150ecb8837670ccfe0aa364cf74e5afe305c9b23bbed176",
+          null
+        ]
+      ],
+      "name": "wget",
+      "reproducibilityVerified": true,
+      "sha256": "4a51a7a4104ca3d09136c25027cf07dc217184fa094fce80ec730d7111f715d2",
+      "version": "1.25.0-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "wget",
+          "runId": 39153866740,
+          "sha256": "4a51a7a4104ca3d09136c25027cf07dc217184fa094fce80ec730d7111f715d2"
+        },
+        {
+          "artifactId": 12155227804,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "wget",
+          "runId": 39177889739,
+          "sha256": "4a51a7a4104ca3d09136c25027cf07dc217184fa094fce80ec730d7111f715d2"
+        }
+      ]
+    },
+    {
+      "architecture": "all",
+      "effectiveSourceVariants": [
+        [
+          "90834b817c7086e2d7657564ba027d045493ff129e161f80eb99695d81aad57e",
+          "e7d759d70eae64e41c0740c6f1a0c53c19bda7906657884a4874ef4cc54272ff",
+          null
+        ]
+      ],
+      "name": "xorg-util-macros",
+      "reproducibilityVerified": true,
+      "sha256": "bad6b6e59b564c9b889da9e7b0b398db9c5510eaec203f2ca393aad77aa7a1c6",
+      "version": "1.20.2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "bad6b6e59b564c9b889da9e7b0b398db9c5510eaec203f2ca393aad77aa7a1c6"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "bad6b6e59b564c9b889da9e7b0b398db9c5510eaec203f2ca393aad77aa7a1c6"
+        }
+      ]
+    },
+    {
+      "architecture": "all",
+      "effectiveSourceVariants": [
+        [
+          "6c5fc5b5f3362de2d2eb728054de01aa2368f6b22846de1ddde2c19a214f5238",
+          "46b46fe895e83ac2ea9725dad2e8c23032ee0f71c17bb5c06a165d031433456a",
+          null
+        ]
+      ],
+      "name": "xorgproto",
+      "reproducibilityVerified": true,
+      "sha256": "cb0cc8dc7bd2ac3693615bf160e601960093d52319ab913112cba782237e4fba",
+      "version": "2026.1",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "cb0cc8dc7bd2ac3693615bf160e601960093d52319ab913112cba782237e4fba"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "cb0cc8dc7bd2ac3693615bf160e601960093d52319ab913112cba782237e4fba"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "9edf6e044f5ca08c91bde6e6b0d99c2569ba0f6bbbc57700bb9a0c5b3b4c27ec",
+          "c9676416d99699867ab821ad9d337e9df5a5fae8a88ae7a0e504529bf93afc58",
+          null
+        ]
+      ],
+      "name": "zlib",
+      "reproducibilityVerified": true,
+      "sha256": "548400e20a687863bce4eafd239c5a340ade54d953c6d3bf75d1972ca8c48c85",
+      "version": "1.3.2",
+      "witnesses": [
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177655402,
+          "sha256": "548400e20a687863bce4eafd239c5a340ade54d953c6d3bf75d1972ca8c48c85"
+        },
+        {
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "openjdk17",
+          "runId": 39177662093,
+          "sha256": "548400e20a687863bce4eafd239c5a340ade54d953c6d3bf75d1972ca8c48c85"
+        }
+      ]
+    },
+    {
+      "architecture": "aarch64",
+      "effectiveSourceVariants": [
+        [
+          "d7768dbd39af796ae9d5d1f0cc95d963ed5fa842332aecd9b6b046d87bbc48ec",
+          "6df6c25ff6d7f1e309e18d79efa058f40d1ce566b53a4cedf7c93c4bf40d8993",
+          null
+        ]
+      ],
+      "name": "zstd",
+      "reproducibilityVerified": true,
+      "sha256": "8367664693c327a1f85fd29d63d9eb53f62d3971e78792ccc653dc69041fbbe9",
+      "version": "1.5.7-1",
+      "witnesses": [
+        {
+          "producerCommit": "568401d96543d9471311778615ad1428bda50b91",
+          "profile": "pkg-config",
+          "runId": 39153873422,
+          "sha256": "8367664693c327a1f85fd29d63d9eb53f62d3971e78792ccc653dc69041fbbe9"
+        },
+        {
+          "artifactId": 12155282454,
+          "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+          "profile": "pkg-config",
+          "runId": 39177891062,
+          "sha256": "8367664693c327a1f85fd29d63d9eb53f62d3971e78792ccc653dc69041fbbe9"
+        }
+      ]
+    },
+    {
+      "architecture": "all",
+      "name": "termux-licenses",
+      "reproducibilityVerified": true,
+      "runId": 39178098496,
+      "sha256": "fa9184dd2c7c2690d45458d5570c80e72c9b3650c63fc2fc857ea7627f785378",
+      "twoCleanOutputBuildsComparedInSignedProvenance": true,
+      "version": "2.2"
+    }
+  ],
+  "productionAllowed": false,
+  "qualified": false
+}

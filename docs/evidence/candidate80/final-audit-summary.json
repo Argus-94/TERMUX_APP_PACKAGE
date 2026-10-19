@@ -1,0 +1,237 @@
+{
+  "android": "NOT_RUN",
+  "architectureCounts": {
+    "aarch64": 75,
+    "all": 5
+  },
+  "blockers": [
+    "Actual Android install/runtime/project-build/upgrade/rollback qualification NOT_RUN; APK/device unavailable.",
+    "ELF auditor remains FAIL: two libwebrtc-util.so imports require the module-echo-cancel runtime loading context; complete ELF/ABI qualification NOT_PROVEN.",
+    "Trusted production signer/fingerprint and separate publication authorization NOT_EVIDENCED."
+  ],
+  "builderInstallerEnabledByTask": false,
+  "nativePackageSetCount": 79,
+  "packageCount": 80,
+  "pagesEnabledByTask": false,
+  "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+  "productionAllowed": false,
+  "productionFeedEnabledByTask": false,
+  "qualified": false,
+  "reportSha256": {
+    "aggregate-control-report.json": "4974b12af56265ed29b383aaf3eae9c8c25b30039fef80cbf1d1f8b51bb4fb8a",
+    "aggregate-elf-symbols.json": "5ce6f00fdfeef570de64e317c87c3b2b59b9835dbf499f40a79799cbeda12708",
+    "aggregate-manifest.json": "e5a2e3cdb0d1010436f850da4511b993bac9ddb8d9f9f6b941c29a925386d911",
+    "aggregate-payload-report.json": "62d7f16317c68ae9f3e4726c9bf04e0315ccfe310853dcfb9d745d88bcf0f540",
+    "candidate-feed/validation-report.json": "6202ea76c05f5b18bcf24d8becaff0767febaea011e36dd5fcf19fb80841dc8c",
+    "comparison.json": "f85185f5107ab1d30a4625c6301a249b0fbebb0fc631611c236cad131c9e3d09",
+    "full-reproducibility-coverage.json": "1b5089ea3e70d63879ada7d9026353888d87edbb7f41d923965e240e57b1ffeb",
+    "native-reproducibility.json": "be780918d06c6ef18e68eed3621cd7de4782a3972052071e59ae13abbbb90ad0",
+    "openjdk17-a-re-audit.json": "efde95b0a3d39298800d0710c275478f215a805c7bf9e42949976f379c113e18",
+    "openjdk17-b-re-audit.json": "efde95b0a3d39298800d0710c275478f215a805c7bf9e42949976f379c113e18",
+    "source-input-invariance.json": "ea25fcff245a2f7972deee2c3805ba1b18a2748979a4b5bded8d20a6f73a89eb"
+  },
+  "repository": "Argus-94/TERMUX_APP_PACKAGE",
+  "reproducibility": {
+    "allOtherProfilesVerified": [
+      "cmake-ninja",
+      "curl",
+      "gh",
+      "git",
+      "make",
+      "nodejs-npm",
+      "pkg-config",
+      "python",
+      "wget"
+    ],
+    "coverageFile": "full-reproducibility-coverage.json",
+    "licenseTwoCleanBuildsComparedInSignedProvenance": true,
+    "nativeTwoIndependentRunPackageCount": 36,
+    "verifiedPackageCount": 80
+  },
+  "result": "REPRODUCIBLE_CANDIDATE_ELF_RUNTIME_BLOCKED",
+  "retention": {
+    "aggregateArchive": "aggregate80-static-reproducible-evidence-9acaf2f.tar.gz",
+    "aggregateArchiveInventory": "aggregate-archive-inventory.json",
+    "aggregateArchiveRetentionProof": "final-candidate-retention-proof.json",
+    "draft": true,
+    "legacyBaselineRetentionProofSha256": "e1ca9c7d0b20de1b91eb5ad0edaeca910d5d2439dffe05e1534a2fd1a12fa76b",
+    "prerelease": true,
+    "releaseId": 416777571,
+    "retainedNewOriginalSourceArtifactCount": 12,
+    "sourceArtifacts": [
+      {
+        "assetId": 654940641,
+        "digest": "sha256:bb0a2db34e744c3885cbc1b786e1993e10a782b2789684f12b4c9da2e800dc33",
+        "githubArtifactId": 12157186136,
+        "name": "native-repro-a-run39177655402.zip",
+        "size": 210309114
+      },
+      {
+        "assetId": 654940642,
+        "digest": "sha256:d9487d6f2107988b07faf3ec95f54e1ee142feeb3c9c350e554655be55daad65",
+        "githubArtifactId": 12156888596,
+        "name": "native-repro-b-run39177662093.zip",
+        "size": 210309113
+      },
+      {
+        "assetId": 654940640,
+        "digest": "sha256:3f05f0babd91842f18ce1fa8150eeb41e2078ed3b1d132f0b5c5eaf5a296900b",
+        "githubArtifactId": 12154724518,
+        "name": "license-support-run39178098496.zip",
+        "size": 98660
+      },
+      {
+        "assetId": 654940160,
+        "digest": "sha256:c95a02a6a8b0a640c5b77db3c70f02883c9fa5e26dcc3e360371b8f9f90eea1c",
+        "githubArtifactId": 12154488960,
+        "name": "repeat-make-run39177886777.zip"
+      },
+      {
+        "assetId": 654940510,
+        "digest": "sha256:89ee80fe829a71c9bfdc89e93768f235f30b95f10c5e8cbaef502d04c08f5249",
+        "githubArtifactId": 12154822402,
+        "name": "repeat-gh-run39177886777.zip"
+      },
+      {
+        "assetId": 654940872,
+        "digest": "sha256:f0ecbf319755ee522227ff82d90b957b5b2ffcbb8d8c83e5b6fce2871c74be97",
+        "githubArtifactId": 12154764779,
+        "name": "repeat-curl-run39177888185.zip"
+      },
+      {
+        "assetId": 654941267,
+        "digest": "sha256:80bc76f35f7eb452e48c5e7c9085dee46ba1c1b7af1b07e472b8422e6ee84397",
+        "githubArtifactId": 12155227804,
+        "name": "repeat-wget-run39177889739.zip"
+      },
+      {
+        "assetId": 654942182,
+        "digest": "sha256:c99d98734692417ba13eeb2d8224adb7b29f06996f99bd3193e488c5e128233b",
+        "githubArtifactId": 12155282454,
+        "name": "repeat-pkg-config-run39177891062.zip"
+      },
+      {
+        "assetId": 654942962,
+        "digest": "sha256:5dba1aaee8943ebb03f7880bf855782b75c2d7a873e4281678371cf1cfcdcd98",
+        "githubArtifactId": 12155107590,
+        "name": "repeat-python-run39177892859.zip"
+      },
+      {
+        "assetId": 654943607,
+        "digest": "sha256:7240ec126c34ae18400fae68f57f593e8edd6e892f3e8d6943b2ad562b0823fb",
+        "githubArtifactId": 12155394238,
+        "name": "repeat-git-run39177894183.zip"
+      },
+      {
+        "assetId": 654944763,
+        "digest": "sha256:f8accf448e344c4b966a50bfbdf8e5cd30b730269f8c8b5cfc631d713254fe61",
+        "githubArtifactId": 12155808147,
+        "name": "repeat-cmake-ninja-run39177895413.zip"
+      },
+      {
+        "assetId": 654975857,
+        "digest": "sha256:1872835b3c8c7049371330ebe0173816578be4e34c65bb677330d6952a15f8cf",
+        "githubArtifactId": 12159170119,
+        "name": "repeat-nodejs-npm-run39177896995.zip"
+      }
+    ],
+    "tag": "candidate-static80-evidence-20261019"
+  },
+  "sameProducerAndMergedMainSourceTree": true,
+  "schemaVersion": 1,
+  "sourceCiRuns": [
+    {
+      "id": 39177655402,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177655402"
+    },
+    {
+      "id": 39177662093,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177662093"
+    },
+    {
+      "id": 39177886777,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177886777"
+    },
+    {
+      "id": 39177888185,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177888185"
+    },
+    {
+      "id": 39177889739,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177889739"
+    },
+    {
+      "id": 39177891062,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177891062"
+    },
+    {
+      "id": 39177892859,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177892859"
+    },
+    {
+      "id": 39177894183,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177894183"
+    },
+    {
+      "id": 39177895413,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177895413"
+    },
+    {
+      "id": 39177896995,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39177896995"
+    },
+    {
+      "id": 39178098496,
+      "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/39178098496"
+    }
+  ],
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "sourceCorrections": [
+    "unified libcurl without implicit zstd",
+    "ncurses COPYING preserved",
+    "deterministic Installed-Size and private directory modes",
+    "PulseAudio optional API26 AAudio backend omitted for API24; OpenSLES preserved",
+    "OpenJDK fixed source date, native compiler seed and gzip -n"
+  ],
+  "sourceFixMergedMainCommit": "4033e8fad9ca6f7fda5d40a84301b8d733e6196c",
+  "sourceFixPr": 26,
+  "sourceFixPrUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/pull/26",
+  "sourceTreeSha": "71c23a91c0c2a97f907e33348050559cee307a27",
+  "supplementalLicensePackage": "termux-licenses 2.2 all",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "validation": {
+    "api24StaticErrorCount": 0,
+    "api24UnresolvedStrongCount": 0,
+    "candidateElfCount": 490,
+    "completeElfAbiQualification": false,
+    "controlMetadataAudit": "PASS",
+    "elfAuditorResult": "FAIL",
+    "exactAptRootCount": 13,
+    "genericTestsPassed": 270,
+    "installPerformed": false,
+    "loaderReachability": "NOT_PROVEN",
+    "payloadAndLinkAudit": "PASS",
+    "profileTestsPassed": 149,
+    "runtimeLoaderContextsRequired": [
+      {
+        "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+        "symbol": "pa_echo_canceller_get_capture_volume",
+        "type": "NOTYPE",
+        "version": null
+      },
+      {
+        "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+        "symbol": "pa_echo_canceller_set_capture_volume",
+        "type": "NOTYPE",
+        "version": null
+      }
+    ],
+    "signedAptTransaction": "PASS",
+    "weakUnresolvedCount": 89
+  }
+}
