@@ -1,0 +1,90 @@
+name: Signed bootstrap-compatible candidate aggregate (test only)
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .github/workflows/bootstrap-compatibility-aggregate.yml
+      - bootstrap-compatible-candidate-inputs.json
+      - scripts/build-bootstrap-compatible-candidate.py
+      - scripts/prepare-bootstrap-compatible-inputs.py
+      - scripts/finalize-bootstrap-compatible-evidence.py
+      - scripts/audit-bootstrap-compression-compat.py
+      - scripts/test-bootstrap-compatible-apt.py
+      - scripts/test-bootstrap-compression-behavior.sh
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout producer without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install host-only verification tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends apt-utils dpkg-dev gnupg python3-requests build-essential xz-utils bzip2
+      - name: Validate source-build run and fetch its two independent artifacts
+        run: |
+          set -Eeuo pipefail
+          run=$(python3 -c 'import json;print(json.load(open("bootstrap-compatible-candidate-inputs.json"))["buildRunId"])')
+          expected=$(python3 -c 'import json;print(json.load(open("bootstrap-compatible-candidate-inputs.json"))["buildProducerCommit"])')
+          actual=$(gh run view "$run" --repo Argus-94/TERMUX_APP_PACKAGE --json headSha --jq .headSha)
+          test "$actual" = "$expected"
+          gh run watch "$run" --repo Argus-94/TERMUX_APP_PACKAGE --exit-status --interval 30
+          gh run download "$run" --repo Argus-94/TERMUX_APP_PACKAGE --name bootstrap-compat-repro-a --dir "$RUNNER_TEMP/repro-a"
+          gh run download "$run" --repo Argus-94/TERMUX_APP_PACKAGE --name bootstrap-compat-repro-b --dir "$RUNNER_TEMP/repro-b"
+          python3 -m unittest discover -s scripts/tests -p 'test_bootstrap_compat*.py' -v
+          python3 -m unittest discover -s scripts/tests -p test_bootstrap_compression_compat.py -v
+      - name: Fetch only hash-pinned unpublished baseline inputs
+        run: python3 scripts/prepare-bootstrap-compatible-inputs.py --lock bootstrap-compatible-candidate-inputs.json --output "$RUNNER_TEMP/compat-inputs"
+      - name: Reproduce all package identities and sign new aggregate in ephemeral CI keyring
+        run: |
+          set -Eeuo pipefail
+          expected=$(python3 -c 'import json;print(json.load(open("bootstrap-compatible-candidate-inputs.json"))["buildProducerCommit"])')
+          python3 scripts/build-bootstrap-compatible-candidate.py --base-root "$RUNNER_TEMP/compat-inputs/base80/aggregate" --repro-a "$RUNNER_TEMP/repro-a" --repro-b "$RUNNER_TEMP/repro-b" --bootstrap-zip "$RUNNER_TEMP/compat-inputs/bootstrap.zip" --output "$RUNNER_TEMP/compatible/aggregate/candidate-feed" --repo-root "$GITHUB_WORKSPACE" --producer-commit "$expected"
+      - name: Replay whole 82-package payload, ownership and control audits
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/compatible/aggregate"
+          mapfile -d '' debs < <(find "$root/candidate-feed/pool" -name '*.deb' -type f -print0 | sort -z)
+          python3 scripts/audit-unified-deb-set.py --package-set "$root/candidate-feed/aggregate-manifest.json" --prefix /data/user/0/com.karat.aibuilder/files/usr --report "$root/aggregate-payload-report.json" "${debs[@]}" > "$root/aggregate-payload-report.log"
+          python3 scripts/audit-unified-control-metadata.py --package-set "$root/candidate-feed/aggregate-manifest.json" --prefix /data/user/0/com.karat.aibuilder/files/usr --report "$root/aggregate-control-report.json" "${debs[@]}" > "$root/aggregate-control-report.log"
+      - name: Prove baseline compression ABI and pinned-source host behavior
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/compatible/aggregate"
+          python3 scripts/audit-bootstrap-compression-compat.py --bootstrap-zip "$RUNNER_TEMP/compat-inputs/bootstrap.zip" --packages-dir "$RUNNER_TEMP/repro-a/packages" --report "$root/compression-abi.json"
+          mkdir "$RUNNER_TEMP/compression-host-work"
+          bash scripts/test-bootstrap-compression-behavior.sh --source-bzip2 "$RUNNER_TEMP/repro-a/bzip2-1.0.8.tar.xz" --source-xz "$RUNNER_TEMP/repro-a/xz-5.8.4.tar.xz" --work-dir "$RUNNER_TEMP/compression-host-work" --report "$root/compression-host-behavior.json" > "$root/compression-host-behavior.log" 2>&1
+      - name: Authenticate and simulate 13 requested roots and all 82 exact packages against actual bootstrap
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/compatible/aggregate"
+          python3 scripts/test-bootstrap-compatible-apt.py --feed-root "$root/candidate-feed" --manifest "$root/candidate-feed/aggregate-manifest.json" --bootstrap-zip "$RUNNER_TEMP/compat-inputs/bootstrap.zip" --roots-file bootstrap-compatible-candidate-inputs.json --output "$root/apt-proof"
+      - name: Curate immutable evidence and retain only an unpublished draft
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/finalize-bootstrap-compatible-evidence.py --aggregate "$RUNNER_TEMP/compatible/aggregate" --base-root "$RUNNER_TEMP/compat-inputs/base80" --repro-a "$RUNNER_TEMP/repro-a" --repro-b "$RUNNER_TEMP/repro-b" --lock bootstrap-compatible-candidate-inputs.json --output "$RUNNER_TEMP/final-evidence"
+          tag="candidate-bootstrap82-${GITHUB_RUN_ID}"
+          gh release create "$tag" --repo Argus-94/TERMUX_APP_PACKAGE --draft --prerelease --latest=false --target "$GITHUB_SHA" --title 'Signed source-verified bootstrap-compatible candidate (not published)' --notes 'Test-only candidate. Production feed and Pages stay disabled. Host ABI/source/cryptographic/APT checks do not qualify Android device execution.' "$RUNNER_TEMP/final-evidence/aggregate82-bootstrap-compatible-evidence.tar.gz" "$RUNNER_TEMP/final-evidence/aggregate-archive-inventory.json" "$RUNNER_TEMP/compatible/aggregate/replay-summary.json"
+          echo 'Source-based 82-package test candidate. Production/Pages disabled; Android NOT_RUN.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve verification reports even on a rejected gate
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bootstrap-compatible-verification-${{ github.run_id }}
+          path: ${{ runner.temp }}/compatible/aggregate/
+          if-no-files-found: warn
+          retention-days: 7
