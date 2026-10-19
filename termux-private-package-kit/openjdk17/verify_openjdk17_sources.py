@@ -10,7 +10,7 @@ import tarfile
 import urllib.request
 
 PIN = '505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
-INPUT_LOCK_SHA = '98c6585c348954f844c4943f08ce1f6fc91afc337f8002bd9401a0c9b3d790c1'
+INPUT_LOCK_SHA = '0edc56dbc6c1a4388fdbc95691a59fd35b34cf521e1ba162ec8ab459c06f33e6'
 SOURCE_URL = 'https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-17.0.20-ga.tar.gz'
 SOURCE_SHA = 'ba3ac4b9d7f2c050f46ddcec39b4258660a3f09836f5a71617fd3f7311d06c0b'
 TAG_OBJECT = '54877207ef029d155cb3a6bd02bfe6bace8b6c9c'

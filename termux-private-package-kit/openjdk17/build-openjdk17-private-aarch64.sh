@@ -4,9 +4,11 @@ set -Eeuo pipefail
 readonly PIN='505e06ef0c8dbd7611abfb90e9eb60826dcd01d7'
 readonly APP_ID='com.karat.aibuilder'
 readonly IMAGE='ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9'
-readonly EXPECTED_MANIFEST_SHA='f0d4d7ac98f15b75b37b8dda06dcc1268ee90fc9f4b083be50fc903f94f75d36'
+readonly EXPECTED_MANIFEST_SHA='dc9a16d8aeb987f3ca26427f6cf954aa3b646981793067a2fa54a5e99ee54e01'
 readonly EXPECTED_CLOSURE_SHA='378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a'
 readonly EXPECTED_PATCH_SHA='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
+readonly EXPECTED_REPRO_PATCH_SHA='81cea0230ad5de232a1c72b168d6f944d42f39e7448d44eef686f34e6e005ad5'
+readonly EXPECTED_REPRO_BASE_SHA='146236631b213773a18ae82bc10f526234dec42482b601f3c302605dfa74ad82'
 readonly EXPECTED_PULSEAUDIO_PATCH_SHA='ca4c6b593a6a0e741113843038338bad0d4ade85eb4aa1d0d2fb409f6261e02e'
 readonly EXPECTED_PULSEAUDIO_BASE_SHA='2507373eed8aa07e432e3dbea791f39fcb7db938bbb299a66bfbccb7b6c4be69'
 readonly MIN_FREE_BYTES=$((12 * 1024 * 1024 * 1024))
@@ -42,9 +44,12 @@ manifest_sha="$(sha256sum "$PACKAGE_SET" | awk '{print $1}')"
 [[ "$manifest_sha" == "$EXPECTED_MANIFEST_SHA" ]] || fail 'PACKAGE_SET_SHA256_NOT_ALLOWLISTED'
 patch="$KIT_DIR/openjdk17-license-notices.patch"
 pulseaudio_patch="$KIT_DIR/patches/pulseaudio-api24-source.patch"
+repro_patch="$KIT_DIR/patches/openjdk17-reproducible-source.patch"
+[[ "$(sha256sum "$repro_patch" | awk '{print $1}')" == "$EXPECTED_REPRO_PATCH_SHA" ]] || fail 'REPRO_PATCH_SHA256_NOT_ALLOWLISTED'
+[[ "$(sha256sum "$SOURCE_REPO/packages/openjdk-17/build.sh" | awk '{print $1}')" == "$EXPECTED_REPRO_BASE_SHA" ]] || fail 'REPRO_BASE_SHA256_NOT_ALLOWLISTED'
 [[ "$(sha256sum "$pulseaudio_patch" | awk '{print $1}')" == "$EXPECTED_PULSEAUDIO_PATCH_SHA" ]] || fail 'PULSEAUDIO_PATCH_SHA256_NOT_ALLOWLISTED'
 [[ "$(sha256sum "$patch" | awk '{print $1}')" == "$EXPECTED_PATCH_SHA" ]] || fail 'BUILD_PATCH_SHA256_NOT_ALLOWLISTED'
-python3 - "$PACKAGE_SET" <<'PY'
+python3 - "$PACKAGE_SET" "$EXPECTED_REPRO_PATCH_SHA" <<'PY'
 import json,pathlib,sys
 m=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
 assert m['schemaVersion']==1 and m['channel']=='candidate-only'
@@ -56,6 +61,7 @@ assert m['sourceClosure']['expectedPackageCount']==36 and m['sourceClosure']['ex
 assert len(m['packages'])==36 and [p['name'] for p in m['packages']]==sorted(p['name'] for p in m['packages'])
 assert m['releaseGate']=={'publicationAllowed':False,'deviceInstall':'NOT RUN','rollback':'NOT RUN','deviceEvidenceSha256':None}
 assert m['buildModifications']['patchSha256']=='f1155733943b8e98bd53e5ad825e0005106ec4c7c89f9bc3bb334dc4b9b8b7bc'
+assert m['buildModifications']['reproducibleSourcePatchSha256']==sys.argv[2] and m['buildModifications']['reproducibleSourceDateEpoch']==1791971743
 assert set(m['sourceLicenseEvidence'])=={'openjdk-17'}
 PY
 
@@ -111,6 +117,8 @@ PROPERTIES_PATCH_SHA="$(sha256sum "$OUTPUT_DIR/app-private-properties.patch" | a
 git -C "$WORKTREE" apply --check "$patch"
 git -C "$WORKTREE" apply "$patch"
 [[ "$(sha256sum "$WORKTREE/packages/pulseaudio/meson.patch" | awk '{print $1}')" == "$EXPECTED_PULSEAUDIO_BASE_SHA" ]] || fail 'PULSEAUDIO_BASE_HASH_MISMATCH'
+git -C "$WORKTREE" apply --check "$repro_patch"
+git -C "$WORKTREE" apply "$repro_patch"
 git -C "$WORKTREE" apply --check "$pulseaudio_patch"
 git -C "$WORKTREE" apply "$pulseaudio_patch"
 changed_files="$(git -C "$WORKTREE" diff --name-only | sort)"

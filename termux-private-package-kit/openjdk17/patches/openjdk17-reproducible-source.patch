@@ -1,0 +1,26 @@
+diff --git a/packages/openjdk-17/build.sh b/packages/openjdk-17/build.sh
+--- a/packages/openjdk-17/build.sh
++++ b/packages/openjdk-17/build.sh
+@@ -31,10 +31,13 @@
+ }
+ 
+ termux_step_configure() {
++export SOURCE_DATE_EPOCH=1791971743
+ 	local jdk_ldflags="-L${TERMUX_PREFIX}/lib \
+ 		-Wl,-rpath=$TERMUX_PREFIX/lib/jvm/java-17-openjdk/lib \
+ 		-Wl,-rpath=${TERMUX_PREFIX}/lib -Wl,--enable-new-dtags"
+ 	bash ./configure \
++--with-source-date="$SOURCE_DATE_EPOCH" \
++--enable-reproducible-build \
+ 		--disable-precompiled-headers \
+ 		--disable-warnings-as-errors \
+ 		--enable-option-checking=fatal \
+@@ -100,7 +103,7 @@
+ termux_step_post_make_install() {
+ 	cd $TERMUX_PREFIX/lib/jvm/java-17-openjdk/man/man1
+ 	for manpage in *.1; do
+-		gzip "$manpage"
++		gzip -n "$manpage"
+ 	done
+ 
+ 	# Make sure that our alternatives file is up to date.
