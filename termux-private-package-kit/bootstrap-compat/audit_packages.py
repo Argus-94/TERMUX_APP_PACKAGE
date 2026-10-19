@@ -47,7 +47,7 @@ for deb in sorted(root.glob('*.deb')):
                     for rpath in re.findall(r'\((?:RPATH|RUNPATH)\).*?\[([^]]+)\]', dynamic):
                         if any(item != '/' + str(prefix) + '/lib' for item in rpath.split(':')):
                             raise SystemExit('ELF_FOREIGN_RPATH:' + str(rel))
-                elif not path.is_dir():
+                elif not (path.is_dir() or path.is_file()):
                     raise SystemExit('SPECIAL_PAYLOAD_OBJECT:' + str(rel))
     found[name] = {'version': version, 'architecture': fields['Architecture'], 'depends': fields['Depends'], 'essential': fields['Essential'], 'sha256': hashlib.sha256(deb.read_bytes()).hexdigest(), 'file': deb.name}
 if set(found) != set(expected):
