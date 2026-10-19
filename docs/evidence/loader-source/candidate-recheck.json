@@ -1,0 +1,24 @@
+{
+  "packageHashesUnchanged": 80,
+  "signedAptExitCode": 0,
+  "rootSpecs": [
+    "make=4.4.1-1",
+    "gh=2.102.0",
+    "git=2.56.0",
+    "curl=8.23.0",
+    "wget=1.25.0-1",
+    "pkg-config=0.29.2-3",
+    "python=3.14.6-1",
+    "nodejs=26.4.0-1",
+    "npm=11.20.0",
+    "openjdk-17=17.0.20",
+    "cmake=4.4.4",
+    "ninja=1.13.2",
+    "termux-licenses=2.2"
+  ],
+  "signatureChecksUnchanged": true,
+  "installed": false,
+  "android": "NOT_RUN",
+  "qualified": false,
+  "productionAllowed": false
+}

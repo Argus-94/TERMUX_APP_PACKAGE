@@ -1,0 +1,24 @@
+{
+  "exitCode": 2,
+  "candidateElfCount": 490,
+  "errors": [],
+  "unresolvedStrong": [],
+  "runtimeLoaderContextRequired": [
+    {
+      "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+      "symbol": "pa_echo_canceller_get_capture_volume",
+      "type": "NOTYPE",
+      "version": null
+    },
+    {
+      "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+      "symbol": "pa_echo_canceller_set_capture_volume",
+      "type": "NOTYPE",
+      "version": null
+    }
+  ],
+  "weakUnresolvedCount": 89,
+  "sha256": "5ce6f00fdfeef570de64e317c87c3b2b59b9835dbf499f40a79799cbeda12708",
+  "qualified": false,
+  "productionAllowed": false
+}

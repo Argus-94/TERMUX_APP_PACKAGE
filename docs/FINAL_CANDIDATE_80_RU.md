@@ -44,3 +44,9 @@ SHA-256: 46f3341b8933ad76fa62b9a6713172e997ee65b02186446e62ae237f6a74dd76
 См. [archive inventory](evidence/candidate80/aggregate-archive-inventory.json) и [REST retention proof](evidence/candidate80/final-candidate-retention-proof.json). Доступ к draft требует прав владельца репозитория; это не публичный feed URL. После скачивания сначала сверяется внешний SHA-256, затем внутренний `SHA256SUMS`, а подписи отдельных source bundles проверяются с fingerprint из соответствующих CI logs, не из самого bundle. Команды independent verifier описаны в [source/candidate guide](UNIFIED_CANDIDATE_INPUTS_RU.md).
 
 **Дальнейший допуск:** нужны реальные Android/loader-context проверки, отдельно доверенный production signer/fingerprint и отдельное разрешение публикации. Inventory lock остаётся source-only; `qualified=false`, `productionAllowed=false`. Pages, production feed и Builder `pkg.ensure` не включались; [снимок GitHub](evidence/candidate80/github-publication-state.json) показывает Pages выключенными и отсутствие опубликованных releases.
+
+## Дополнение: loader source contract и финальный Android-тест
+
+[Анализ PulseAudio/Bionic](LOADER_SOURCE_ANALYSIS_RU.md) устанавливает условный корректный путь разрешения двух WebRTC-символов через родительскую `DT_NEEDED`-группу; 6/6 synthetic host controls прошли. [Полная классификация 89 weak imports](evidence/loader-source/weak-final-classification.json) сохраняет непроверенные consumers `memfd_create` и не объявляет их безопасными автоматически. Это не меняет исходный ELF `FAIL`, `qualified=false` или Android `NOT_RUN`. Пакеты, рецепты и подписи не изменены.
+
+Подготовлен [пошаговый Android-handoff](ANDROID_FINAL_HANDOFF_RU.md) с реальным loader probe, изолированным WebRTC smoke, проверкой проекта, upgrade и rollback. Файлы harness находятся в `scripts/runtime-validation/`; в архиве дополнения — в `tests/`. Ни один Android harness здесь не запускался. Публикация и production installer остаются запрещены.
