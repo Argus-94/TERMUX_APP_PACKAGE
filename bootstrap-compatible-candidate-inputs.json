@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "channel": "candidate-only",
+  "qualified": false,
+  "productionAllowed": false,
+  "repository": "Argus-94/TERMUX_APP_PACKAGE",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "architecture": "aarch64",
+    "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "baseAggregate": {
+    "releaseId": 416777571,
+    "assetId": 654986280,
+    "sha256": "46f3341b8933ad76fa62b9a6713172e997ee65b02186446e62ae237f6a74dd76",
+    "inventoryAssetId": 654986261,
+    "inventorySha256": "54b5234027eee61dd4407b7287b7a0d2f6f040169c7a182eefba8cac74d0b716",
+    "manifestSha256": "e5a2e3cdb0d1010436f850da4511b993bac9ddb8d9f9f6b941c29a925386d911",
+    "fingerprint": "90CD2EAF115DA42B87194C5C8BB5824E095857FE",
+    "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954"
+  },
+  "bootstrap": {
+    "releaseId": 417562486,
+    "assetId": 656949086,
+    "sha256": "08a447f60c06783f33561583553149cf992ac7d9779071c71b8aaeeb452451b4",
+    "size": 29861465,
+    "provenanceAssetId": 656949087,
+    "provenanceSha256": "254f0cfa3a48babd1383f280357a9b2fa8870bde79feb7fce5fe904c06372d7a"
+  },
+  "sourceFiles": {
+    "packages/libbz2/build.sh": "68f9d95c4f2323a14ba8768884b88b782c922b80c9888c23dd8c3892631cf625",
+    "packages/libbz2/bzip2.subpackage.sh": "d6b23cb24dcd8b90bdf1b97514ece79ef270effcc3369b340ef5c91b92a522b1",
+    "packages/liblzma/build.sh": "b75e6d0c87edd1579e834139c66cd99c1a74de4f0d68bee9c0c9ad46eda30772",
+    "packages/liblzma/xz-utils.subpackage.sh": "b25e036e06f5c5a8b0e1fa17b20bb50e442fad63f9245c953972a25919cebd8e"
+  },
+  "reproducedParents": [
+    {
+      "name": "libbz2",
+      "version": "1.0.8-8",
+      "architecture": "aarch64",
+      "sha256": "5342c6355b7f2d2e7d4c882a8b24b1f1d37168d04bcfa6ce68197a4b3ca20387"
+    },
+    {
+      "name": "liblzma",
+      "version": "5.8.4",
+      "architecture": "aarch64",
+      "sha256": "cf62c3edf7e291aeb6817e01cb3bc0a2c234626b47a285d16aa0621007f1da7a"
+    }
+  ],
+  "newCompanions": [
+    {
+      "name": "bzip2",
+      "version": "1.0.8-8",
+      "architecture": "aarch64",
+      "depends": "libbz2 (= 1.0.8-8)",
+      "essential": true
+    },
+    {
+      "name": "xz-utils",
+      "version": "5.8.4",
+      "architecture": "aarch64",
+      "depends": "liblzma (= 5.8.4)",
+      "essential": true
+    }
+  ],
+  "requestedRoots": [
+    "make=4.4.1-1",
+    "gh=2.102.0",
+    "git=2.56.0",
+    "curl=8.23.0",
+    "wget=1.25.0-1",
+    "pkg-config=0.29.2-3",
+    "python=3.14.6-1",
+    "nodejs=26.4.0-1",
+    "npm=11.20.0",
+    "openjdk-17=17.0.20",
+    "cmake=4.4.4",
+    "ninja=1.13.2",
+    "termux-licenses=2.2"
+  ]
+}

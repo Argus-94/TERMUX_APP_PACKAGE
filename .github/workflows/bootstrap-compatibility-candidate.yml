@@ -1,0 +1,47 @@
+name: Bootstrap compatibility source-build candidate
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - termux-private-package-kit/bootstrap-compat/**
+      - .github/workflows/bootstrap-compatibility-candidate.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-build:
+    name: Independent source rebuild (${{ matrix.replica }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        replica: [a, b]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Checkout pinned upstream source
+        run: |
+          git init "$RUNNER_TEMP/termux-source"
+          git -C "$RUNNER_TEMP/termux-source" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$RUNNER_TEMP/termux-source" fetch --no-tags --depth=1 origin 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+          git -C "$RUNNER_TEMP/termux-source" checkout --detach 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+          test "$(git -C "$RUNNER_TEMP/termux-source" rev-parse HEAD)" = 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      - name: Pull pinned builder and build all four upstream debs
+        env:
+          DOCKER_BUILDKIT: "1"
+        run: |
+          docker pull ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+          termux-private-package-kit/bootstrap-compat/build-candidate.sh "$RUNNER_TEMP/termux-source" "$RUNNER_TEMP/bootstrap-compat-output"
+      - name: Attach replica and compiler provenance
+        run: |
+          python3 -c 'import json,sys; p=sys.argv[1]; d=json.load(open(p)); d["replica"]="${{ matrix.replica }}"; d["runner"]="${{ runner.os }}"; open(p,"w").write(json.dumps(d,indent=2)+"\n")' "$RUNNER_TEMP/bootstrap-compat-output/build-result.json"
+          docker image inspect ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9 > "$RUNNER_TEMP/bootstrap-compat-output/builder-image-inspect.json"
+          find "$RUNNER_TEMP/bootstrap-compat-output" -maxdepth 2 -type f -print | sort
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bootstrap-compat-repro-${{ matrix.replica }}
+          path: ${{ runner.temp }}/bootstrap-compat-output/
+          if-no-files-found: error
+          retention-days: 7

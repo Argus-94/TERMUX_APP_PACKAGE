@@ -1,0 +1,7 @@
+# Bootstrap compatibility source-build candidate
+
+This kit builds upstream Termux `libbz2` (including its upstream `bzip2` split) and `liblzma` (including `xz-utils`) from pinned source commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7` using the digest-pinned Termux package-builder image. The recipes and split metadata are copied unchanged into the evidence output. No control-field repackaging or library replacement is performed.
+
+Run `./termux-private-package-kit/bootstrap-compat/build-candidate.sh /path/to/clean/pinned/source /path/to/empty/output` from this repository. It requires Docker and the pinned image, invokes the repository packaging policy, runs the source recipes with dependency installation disabled, and audits exactly four native aarch64 debs. `audit_packages.py` verifies names, versions, architectures, split dependencies, payload paths, symlink safety and ELF architecture/RPATH. Build evidence records recipe hashes, source commit/date and image digest. The upstream release archives and hash record are included if exposed in the builder checkout.
+
+CI runs the complete build independently on two fresh runners, uploads separate seven-day evidence artifacts and grants no write token. It neither signs nor publishes a feed. Runtime install/upgrade testing is deliberately not claimed. The policy/helper changes and artifacts are private candidate inputs until reviewed and aggregated by the parent workflow.
