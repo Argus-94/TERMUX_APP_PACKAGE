@@ -1,0 +1,14 @@
+[
+  {
+    "gate": "payload",
+    "exitCode": 0,
+    "reportSha256": "62d7f16317c68ae9f3e4726c9bf04e0315ccfe310853dcfb9d745d88bcf0f540",
+    "previousReportSha256": "62d7f16317c68ae9f3e4726c9bf04e0315ccfe310853dcfb9d745d88bcf0f540"
+  },
+  {
+    "gate": "control",
+    "exitCode": 0,
+    "reportSha256": "4974b12af56265ed29b383aaf3eae9c8c25b30039fef80cbf1d1f8b51bb4fb8a",
+    "previousReportSha256": "4974b12af56265ed29b383aaf3eae9c8c25b30039fef80cbf1d1f8b51bb4fb8a"
+  }
+]

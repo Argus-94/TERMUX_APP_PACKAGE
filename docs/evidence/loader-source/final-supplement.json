@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "repository": "Argus-94/TERMUX_APP_PACKAGE",
+  "baseMainCommit": "bc9328d5bf2c2dd1d8bd7130d2d4f0e28f200059",
+  "producerCommit": "9acaf2fe959f728680569b7794ee5234f01b7954",
+  "result": "LOADER_SOURCE_CONTRACT_PROVEN_ANDROID_RUNTIME_NOT_RUN",
+  "canonicalPackageBytesChanged": false,
+  "recipeChanges": false,
+  "rebuildRequiredByThisAnalysis": false,
+  "candidateCount": 80,
+  "candidateElfCount": 490,
+  "originalElfAuditorResult": "FAIL",
+  "originalElfAuditorModified": false,
+  "conditionalLoaderSourceContract": "module-echo-cancel.so must be dlopen root with libwebrtc-util.so as its direct DT_NEEDED child in the same namespace; exact ELF verified",
+  "actualAppLoaderExecution": "NOT_RUN",
+  "weakRecordCount": 89,
+  "weakUniqueSymbolCount": 15,
+  "weakClassification": "weak-final-classification.json",
+  "weakBroadMemfdOrigin": "NOT_PROVEN",
+  "hostSyntheticCasesPassed": 6,
+  "hostSyntheticCasesTotal": 6,
+  "genericTestsPassed": 270,
+  "profileTestsPassed": 149,
+  "signedAptRecheck": {
+    "packageHashesUnchanged": 80,
+    "signedAptExitCode": 0,
+    "rootSpecs": [
+      "make=4.4.1-1",
+      "gh=2.102.0",
+      "git=2.56.0",
+      "curl=8.23.0",
+      "wget=1.25.0-1",
+      "pkg-config=0.29.2-3",
+      "python=3.14.6-1",
+      "nodejs=26.4.0-1",
+      "npm=11.20.0",
+      "openjdk-17=17.0.20",
+      "cmake=4.4.4",
+      "ninja=1.13.2",
+      "termux-licenses=2.2"
+    ],
+    "signatureChecksUnchanged": true,
+    "installed": false,
+    "android": "NOT_RUN",
+    "qualified": false,
+    "productionAllowed": false
+  },
+  "qualified": false,
+  "productionAllowed": false,
+  "android": "NOT_RUN",
+  "productionFeedEnabled": false,
+  "pagesEnabled": false,
+  "builderInstallerEnabled": false,
+  "blockers": [
+    "Actual same-app Android execution, install/runtime/project build/upgrade/rollback not performed.",
+    "Broad origin and complete per-consumer callsite coverage for 68 memfd_create weak entries remain unproven.",
+    "Trusted production signer and separate publication authorization absent."
+  ],
+  "originalElfAuditorReplay": {
+    "exitCode": 2,
+    "candidateElfCount": 490,
+    "errors": [],
+    "unresolvedStrong": [],
+    "runtimeLoaderContextRequired": [
+      {
+        "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+        "symbol": "pa_echo_canceller_get_capture_volume",
+        "type": "NOTYPE",
+        "version": null
+      },
+      {
+        "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+        "symbol": "pa_echo_canceller_set_capture_volume",
+        "type": "NOTYPE",
+        "version": null
+      }
+    ],
+    "weakUnresolvedCount": 89,
+    "sha256": "5ce6f00fdfeef570de64e317c87c3b2b59b9835dbf499f40a79799cbeda12708",
+    "qualified": false,
+    "productionAllowed": false
+  },
+  "payloadControlReplay": [
+    {
+      "gate": "payload",
+      "exitCode": 0,
+      "reportSha256": "62d7f16317c68ae9f3e4726c9bf04e0315ccfe310853dcfb9d745d88bcf0f540",
+      "previousReportSha256": "62d7f16317c68ae9f3e4726c9bf04e0315ccfe310853dcfb9d745d88bcf0f540"
+    },
+    {
+      "gate": "control",
+      "exitCode": 0,
+      "reportSha256": "4974b12af56265ed29b383aaf3eae9c8c25b30039fef80cbf1d1f8b51bb4fb8a",
+      "previousReportSha256": "4974b12af56265ed29b383aaf3eae9c8c25b30039fef80cbf1d1f8b51bb4fb8a"
+    }
+  ]
+}

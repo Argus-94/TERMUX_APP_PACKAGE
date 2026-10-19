@@ -1,0 +1,47 @@
+{
+  "scope": "synthetic host ELF graph, NOT Android qualification",
+  "platform": "Linux-6.18.38+-x86_64-with-glibc2.39",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cases": [
+    {
+      "case": "alone",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": "./helper.so: undefined symbol: pa_echo_canceller_get_capture_volume"
+    },
+    {
+      "case": "local",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": ""
+    },
+    {
+      "case": "global",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": ""
+    },
+    {
+      "case": "unrelated-local",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": "./helper.so: undefined symbol: pa_echo_canceller_get_capture_volume"
+    },
+    {
+      "case": "unrelated-global",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": ""
+    },
+    {
+      "case": "ltdl",
+      "pass": true,
+      "exitCode": 0,
+      "diagnostic": ""
+    }
+  ],
+  "passed": 6,
+  "total": 6,
+  "android": "NOT_RUN",
+  "productionAllowed": false
+}

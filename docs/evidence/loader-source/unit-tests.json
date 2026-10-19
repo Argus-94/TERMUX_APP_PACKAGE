@@ -1,0 +1,57 @@
+[
+  {
+    "name": "generic",
+    "returncode": 0,
+    "count": 270
+  },
+  {
+    "name": "cmake-ninja",
+    "returncode": 0,
+    "count": 17
+  },
+  {
+    "name": "curl-v8.23.0",
+    "returncode": 0,
+    "count": 12
+  },
+  {
+    "name": "gh-v2.102.0",
+    "returncode": 0,
+    "count": 5
+  },
+  {
+    "name": "git-v2.56.0",
+    "returncode": 0,
+    "count": 14
+  },
+  {
+    "name": "make-v476",
+    "returncode": 0,
+    "count": 14
+  },
+  {
+    "name": "nodejs-npm",
+    "returncode": 0,
+    "count": 13
+  },
+  {
+    "name": "openjdk17",
+    "returncode": 0,
+    "count": 36
+  },
+  {
+    "name": "pkg-config-v0.29.2",
+    "returncode": 0,
+    "count": 11
+  },
+  {
+    "name": "python-v3.14.6",
+    "returncode": 0,
+    "count": 10
+  },
+  {
+    "name": "wget-v1.25.0",
+    "returncode": 0,
+    "count": 17
+  }
+]

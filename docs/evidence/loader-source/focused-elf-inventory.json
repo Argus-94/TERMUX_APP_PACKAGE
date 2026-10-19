@@ -1,0 +1,3738 @@
+{
+  "android": "NOT_RUN",
+  "candidateElfCount": 490,
+  "completeElfAbiQualification": false,
+  "elfCount": 507,
+  "errors": [],
+  "loaderReachability": "NOT_PROVEN",
+  "platformStubCount": 17,
+  "productionAllowed": false,
+  "qualified": false,
+  "runpathMeaning": "inventory only; does not establish pathname reachability",
+  "runtimeLoaderContextRequired": [
+    {
+      "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+      "symbol": "pa_echo_canceller_get_capture_volume",
+      "type": "NOTYPE",
+      "version": null
+    },
+    {
+      "consumer": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+      "symbol": "pa_echo_canceller_set_capture_volume",
+      "type": "NOTYPE",
+      "version": null
+    }
+  ],
+  "schema": "termux-static-elf-symbol-inventory-v1",
+  "scopeExclusions": [
+    "static archives",
+    "relocatable objects are inventoried separately; static-link ABI not proven",
+    "nested archives",
+    "runtime behavior",
+    "dlopen binding contexts not proven"
+  ],
+  "staticSymbolCoverage": "FAIL",
+  "unresolvedStrong": [],
+  "elfs": [
+    {
+      "class": "ELF64",
+      "data": "2's complement, little endian",
+      "elfType": "DYN",
+      "exports": [
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlpreload_default",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__malloc",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlloader_next",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlinterface_register",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_unbox",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_delete",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_nth",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlinterface_free",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladdsearchdir",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlopen",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__memdup",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlhandle_iterate",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__argz_next",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlcaller_get_data",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__argz_insert",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__zalloc",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__error_string",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlloader_add",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_preload",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlopenext",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__argz_append",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlpreload",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_sort",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__strdup",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlseterror",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlexit",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_ext",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__argz_create_sep",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_cons",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlloader_find",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__get_last_error",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_destroy",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlopenadvise",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlerror",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlinsertsearchdir",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "preopen_LTX_get_vtable",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__realloc",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_concat",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlloader_get",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlclose",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlcaller_set_data",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_tail",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlinit",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_box",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlisresident",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_remove",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlsetsearchpath",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlgetsearchpath",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlmakeresident",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlforeachfile",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_resident",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_length",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlloader_remove",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladderror",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlsym",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_foreach",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__argz_stringify",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "dlopen_LTX_get_vtable",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__alloc_die",
+          "type": "OBJECT",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__alloc_die_callback",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_libltdl_LTX_preloaded_symbols",
+          "type": "OBJECT",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_local",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlhandle_fetch",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlhandle_map",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__set_last_error",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlpreload_open",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_find",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dladvise_global",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt_dlgetinfo",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "lt__slist_reverse",
+          "type": "FUNC",
+          "version": null
+        }
+      ],
+      "imports": [
+        {
+          "name": "__cxa_finalize",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__cxa_atexit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__register_atfork",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strcmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "free",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "stderr",
+          "type": "OBJECT",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fwrite",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "exit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "malloc",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memset",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "realloc",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strlen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__assert2",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__stack_chk_fail",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "sprintf",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strrchr",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strlcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fopen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "feof",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strncmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fclose",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "opendir",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "readdir",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memchr",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strncat",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "closedir",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strcat",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "access",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "getenv",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fgets",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memmove",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlopen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlerror",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlclose",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlsym",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        }
+      ],
+      "interpreter": null,
+      "machine": "AArch64",
+      "needed": [
+        "libdl.so",
+        "libc.so"
+      ],
+      "package": "libltdl_2.6.2_aarch64.deb",
+      "path": "data/user/0/com.karat.aibuilder/files/usr/lib/libltdl.so",
+      "runpath": [
+        "/data/user/0/com.karat.aibuilder/files/usr/lib"
+      ],
+      "sha256": "7caaadf087763113cb210407fb14151e30a2d26f9cc4f73c64e5f7a485076b75",
+      "soname": "libltdl.so",
+      "source": "candidate",
+      "undefinedCount": 37,
+      "undefinedStrongCount": 37,
+      "undefinedWeakCount": 0,
+      "versionedUndefinedCount": 37
+    },
+    {
+      "class": "ELF64",
+      "data": "2's complement, little endian",
+      "elfType": "DYN",
+      "exports": [
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "main",
+          "type": "FUNC",
+          "version": null
+        }
+      ],
+      "imports": [
+        {
+          "name": "__libc_init",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__cxa_atexit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__register_atfork",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_path_get_filename",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "printf",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_log_level_meta",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "abort",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_strbuf_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strbuf_puts",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "optarg",
+          "type": "OBJECT",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "getopt_long",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_parse_boolean",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_make_path_absolute",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strbuf_printf",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xfree",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xstrdup",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strbuf_to_string_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "optind",
+          "type": "OBJECT",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_strbuf_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "atoi",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_rtclock_now",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_pipe_cloexec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_make_fd_nonblock",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "sigemptyset",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "sigaction",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__errno",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_cstrerror",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "__stack_chk_fail",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_read",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_write",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_close_pipe",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "getrusage",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "getrlimit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "setrlimit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strlen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_loop_write",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xmemdup",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_run_from_build_tree",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_target_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_parse_target",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_atou",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_parse_resample_method",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_bool",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_not_bool",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_int",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_unsigned",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse_size",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_fopen_cloexec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_open_config_file",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_config_parse",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_channel_map_init_extend",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "fclose",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "sched_get_priority_min",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "sched_get_priority_max",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_parse_sample_format",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_atoi",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_channels_valid",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_channel_map_parse",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "strspn",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "getenv",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_find_config_file",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_target_to_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_resample_method_to_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sample_format_to_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_channel_map_snprint",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_startswith",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "strcmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_sample_rate_valid",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "strncmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_snprintf",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "lt_dlforeachfile",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modinfo_get_by_name",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modinfo_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "putchar",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "puts",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strrchr",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "lt_dlinit",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "lt_dlloader_find",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "malloc",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "lt_dlloader_add",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "free",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlopen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlerror",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "lt_dlseterror",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dlclose",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dlsym",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "lt_dlexit",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_set_ident",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_set_level",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_set_flags",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_set_env",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_realpath",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_readlink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "execv",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_xmalloc",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_reset_personality",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_close_allv",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_reset_sigs",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_unblock_sigs",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_reset_priority",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "setlocale",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_init_i18n",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_set_target",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_set_show_backtrace",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "getuid",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "lt_dlpreload_default",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "lt_dlsetsearchpath",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_random_seed",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "stdout",
+          "type": "OBJECT",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fputs",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_shm_cleanup",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_pid_file_check_running",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_pid_file_kill",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_resample_method_supported",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_client_conf_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_client_conf_load",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_client_conf_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_runtime_path",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_machine_id",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strlist_parse",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strlist_pop",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_strlist_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_autospawn_lock_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_autospawn_lock_acquire",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_stdio_acquire",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pipe",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fork",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_close",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_loop_read",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_autospawn_lock_release",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_autospawn_lock_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "setsid",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_signal_done",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_mainloop_free",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_pid_file_remove",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_unset_env_recorded",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dbus_shutdown",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_nullify_stdfds",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_set_env_and_record",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "chdir",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "umask",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_rtclock_hrtimer_enable",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_raise_priority",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_uname_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_ncpus",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_page_size",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_running_in_vm",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_session_id",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_get_runtime_dir",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_get_state_dir",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_in_system_mode",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_pid_file_create",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_module_unload_all",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_scache_free_all",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_object_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_object_unref",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_disable_sigpipe",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_rtclock_hrtimer",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memtrap_install",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_mainloop_new",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_mainloop_get_api",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_core_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_core_check_idle",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_cpu_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_signal_init",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "dbus_threads_init_default",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_cli_command_execute_file_stream",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_cli_command_execute",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_idxset_size",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_mainloop_run",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_dbus_connection_unref",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sig2str",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_module_load",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_full_status_string",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dbus_error_init",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_dbus_bus_get",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dbus_error_is_set",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_error_free",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_dbus_connection_get",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dbus_bus_request_name",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_signal_new",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "signal",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dbus_connection_register_object_path",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_connection_unregister_object_path",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_get_type",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_new_method_return",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_append_args",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_get_args",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_iter_open_container",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_new_error_printf",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_unref",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_iter_close_container",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "pa_get_dbus_address_from_server_type",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "dbus_connection_send",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_is_method_call",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_has_member",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_get_interface",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_new_error",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_iter_append_basic",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        },
+        {
+          "name": "dbus_message_iter_init_append",
+          "type": "FUNC",
+          "version": "LIBDBUS_1_3",
+          "weak": false
+        }
+      ],
+      "interpreter": "/system/bin/linker64",
+      "machine": "AArch64",
+      "needed": [
+        "libpulsecore-17.0.so",
+        "libpulsecommon-17.0.so",
+        "libpulse.so",
+        "libltdl.so",
+        "libdbus-1.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "package": "pulseaudio_17.0-4_aarch64.deb",
+      "path": "data/user/0/com.karat.aibuilder/files/usr/bin/pulseaudio",
+      "runpath": [
+        "/data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio:/data/user/0/com.karat.aibuilder/files/usr/lib"
+      ],
+      "sha256": "5bd91653c35bb25cac5353143dcf68b85dc39a01f5346db15073742e914113af",
+      "soname": null,
+      "source": "candidate",
+      "undefinedCount": 202,
+      "undefinedStrongCount": 202,
+      "undefinedWeakCount": 0,
+      "versionedUndefinedCount": 75
+    },
+    {
+      "class": "ELF64",
+      "data": "2's complement, little endian",
+      "elfType": "DYN",
+      "exports": [
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "WEAK",
+          "default": true,
+          "name": "_ZN6webrtc15AudioProcessing6ConfigC2Ev",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "WEAK",
+          "default": true,
+          "name": "_ZN6webrtc15AudioProcessing6Config15GainController1C2Ev",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_play",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_set_drift",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "WEAK",
+          "default": true,
+          "name": "_ZN6webrtc16ProcessingConfigC2Ev",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "WEAK",
+          "default": true,
+          "name": "_ZN6webrtc15AudioProcessing6Config15GainController2C2Ev",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_record",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_webrtc_ec_run",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "WEAK",
+          "default": true,
+          "name": "_ZN6webrtc15AudioProcessing6Config15GainController2Ut0_C2Ev",
+          "type": "FUNC",
+          "version": null
+        }
+      ],
+      "imports": [
+        {
+          "name": "__cxa_finalize",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__cxa_atexit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__register_atfork",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "_ZN6webrtc22AudioProcessingBuilderC1Ev",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "_ZN6webrtc22AudioProcessingBuilder6CreateEv",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "_ZN6webrtc22AudioProcessingBuilderD1Ev",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value_boolean",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value_u32",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "memcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "__stack_chk_fail",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "_ZN6webrtc15AudioProcessing6Config8PipelineC1Ev",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_levelv_meta",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xmalloc",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "__assert2",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_deinterleave",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "abort",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_echo_canceller_get_capture_volume",
+          "type": "NOTYPE",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_echo_canceller_set_capture_volume",
+          "type": "NOTYPE",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sample_size",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_interleave",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xfree",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "__gxx_personality_v0",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "fwrite",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "free",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "malloc",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fprintf",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pthread_rwlock_wrlock",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__sF",
+          "type": "OBJECT",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "syscall",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pthread_rwlock_unlock",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pthread_rwlock_rdlock",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__errno",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memset",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fflush",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "dl_iterate_phdr",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        }
+      ],
+      "interpreter": null,
+      "machine": "AArch64",
+      "needed": [
+        "libpulse.so",
+        "libpulsecommon-17.0.so",
+        "libpulsecore-17.0.so",
+        "libwebrtc-audio-processing-1.so",
+        "libc.so",
+        "libc++_shared.so",
+        "libdl.so"
+      ],
+      "package": "pulseaudio_17.0-4_aarch64.deb",
+      "path": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/libwebrtc-util.so",
+      "providerNames": [
+        "libwebrtc-util.so"
+      ],
+      "runpath": [
+        "/data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio:/data/user/0/com.karat.aibuilder/files/usr/lib"
+      ],
+      "sha256": "90b77eb9eadfb7578eae320545d72e6073e665b9cecd73606a2062fd3b8f1f8d",
+      "soname": "libwebrtc-util.so",
+      "source": "candidate",
+      "undefinedCount": 37,
+      "undefinedStrongCount": 37,
+      "undefinedWeakCount": 0,
+      "versionedUndefinedCount": 23
+    },
+    {
+      "class": "ELF64",
+      "data": "2's complement, little endian",
+      "elfType": "DYN",
+      "exports": [
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__get_version",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__get_usage",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_echo_canceller_get_capture_volume",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_speex_ec_run",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_adrian_ec_run",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__get_author",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_echo_canceller_blocksize_power2",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_null_ec_done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__get_description",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_echo_canceller_set_capture_volume",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_null_ec_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_speex_ec_done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "AEC_done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__load_once",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_null_ec_run",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_speex_ec_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_adrian_ec_done",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "AEC_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "module_echo_cancel_LTX_pa__get_n_used",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "pa_adrian_ec_init",
+          "type": "FUNC",
+          "version": null
+        },
+        {
+          "bind": "GLOBAL",
+          "default": true,
+          "name": "AEC_doAEC",
+          "type": "FUNC",
+          "version": null
+        }
+      ],
+      "imports": [
+        {
+          "name": "__cxa_finalize",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__cxa_atexit",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__register_atfork",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_cvolume_avg",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_thread_mq_get",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_asyncmsgq_post",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_msgobject_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "abort",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_namereg_get",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value_boolean",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_log_level_meta",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_channel_map_init_auto",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_xmalloc0",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value_u32",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_sample_spec_and_channel_map",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "strcmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_asyncmsgq_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "memcpy",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_frame_size",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_new_data_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xstrdup",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_new_data_set_sample_spec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_new_data_set_channel_map",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_contains",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_gets",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_setf",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_new_data_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_set_mute_callback",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_get_volume_callback",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_set_volume_callback",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_enable_decibel_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_asyncmsgq",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_new_data_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_new_data_set_sample_spec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_new_data_set_channel_map",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_new_data_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_set_mute_callback",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_set_volume_callback",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_enable_decibel_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_asyncmsgq",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new_data_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new_data_set_source",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_sets",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new_data_set_sample_spec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new_data_set_channel_map",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_new_data_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new_data_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new_data_set_sink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new_data_set_sample_spec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new_data_set_channel_map",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_new_data_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_get_silence",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblock_unref",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_rtclock_now",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_core_rttime_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "fopen",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_msgobject_new_internal",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_bytes_to_usec",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_latency_range",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_set_requested_latency",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_latency_range",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_set_requested_latency",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_put",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_put",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_put",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_put",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_cork",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_cork",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "__stack_chk_fail",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_source_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_get_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_process_msg",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_get_requested_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_set_requested_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_set_mute",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_get_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_cvolume_equal",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_soft_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_set_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_get_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_process_msg",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_request_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_get_requested_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_set_requested_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_set_mute",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_set_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_flush_write",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_process_msg",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_push_align",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_asyncmsgq_process_one",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "fprintf",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_peek_fixed_size",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblock_acquire",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblock_release",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_drop",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_post",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_process_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_get_length",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_max_rewind_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_latency_range_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_fixed_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_unlink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_unlink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_rtpoll",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_output_get_max_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_attach_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_rtpoll_item_new_asyncmsgq_read",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_detach_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_rtpoll_item_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_update_flags",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_idxset_first",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_idxset_next",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_new",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_update_proplist",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_proplist_free",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_process_msg",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_resampler_request",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_process_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_render_full",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_set_maxrewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_max_rewind_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_max_request_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_latency_range_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_fixed_latency_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_unlink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_unlink",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_set_rtpoll",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_get_max_request",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_get_max_rewind",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_rtpoll_item_new_asyncmsgq_write",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_attach_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_detach_within_thread",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_update_flags",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_update_proplist",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_volume_changed",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_mute_changed",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sink_input_set_rate",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_core_rttime_restart",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_msgobject_check_type",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_cvolume_set",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_source_set_volume",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_free",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_object_unref",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_xfree",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_asyncmsgq_unref",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "fclose",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_sink_linked_by",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_source_linked_by",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_object_type_id",
+          "type": "OBJECT",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_usec_to_bytes",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "perror",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "fwrite",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "pa_asyncmsgq_send",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_seek",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblockq_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_resampler_get_delay_usec",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_memblock_new",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_module_unload_request",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_proplist",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sprintf_malloc",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_play",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_record",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_run",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_set_drift",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_webrtc_ec_done",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_sample_spec_snprint",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_channel_map_init_mono",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "pa_xmalloc",
+          "type": "FUNC",
+          "version": "PULSE_0",
+          "weak": false
+        },
+        {
+          "name": "memset",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "expf",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "memmove",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "speex_echo_state_init_mc",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_echo_ctl",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "pa_modargs_get_value_s32",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_preprocess_state_destroy",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_echo_state_destroy",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_preprocess_state_init",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_preprocess_ctl",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_echo_cancellation",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "speex_preprocess_run",
+          "type": "FUNC",
+          "version": null,
+          "weak": false
+        },
+        {
+          "name": "memfd_create",
+          "type": "NOTYPE",
+          "version": null,
+          "weak": true
+        },
+        {
+          "name": "getauxval",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "__system_property_get",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        },
+        {
+          "name": "strncmp",
+          "type": "FUNC",
+          "version": "LIBC",
+          "weak": false
+        }
+      ],
+      "interpreter": null,
+      "machine": "AArch64",
+      "needed": [
+        "libwebrtc-util.so",
+        "libpulse.so",
+        "libpulsecommon-17.0.so",
+        "libpulsecore-17.0.so",
+        "libm.so",
+        "libspeexdsp.so",
+        "libc.so"
+      ],
+      "package": "pulseaudio_17.0-4_aarch64.deb",
+      "path": "data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules/module-echo-cancel.so",
+      "runpath": [
+        "/data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio:/data/user/0/com.karat.aibuilder/files/usr/lib/pulseaudio/modules:/data/user/0/com.karat.aibuilder/files/usr/lib"
+      ],
+      "sha256": "31ec3001982525eb9d66487a418b133e7ccf719ed32ffe6bd3322862016e2c00",
+      "soname": null,
+      "source": "candidate",
+      "undefinedCount": 196,
+      "undefinedStrongCount": 195,
+      "undefinedWeakCount": 1,
+      "versionedUndefinedCount": 38
+    }
+  ]
+}
