@@ -191,12 +191,18 @@ def main(argv=None):
             downloaded = apt(['download'] + fullspec, cwd=download_dir)
             found = list(download_dir.glob('*.deb'))
             require(len(found) == 82, 'APT_DOWNLOAD_COUNT_NOT_82')
+            by_hash = {row['sha256']: (identity, row) for identity, row in records.items()}
+            require(len(by_hash) == 82, 'SIGNED_PACKAGE_HASH_IDENTITIES_NOT_UNIQUE')
+            seen_hashes = set()
             for p in found:
-                require(p.name in debs, 'APT_DOWNLOADED_UNKNOWN_DEB:'+p.name)
-                require(sha(p) == next(r['sha256'] for r in records.values() if r['filename'] == p.name), 'APT_DOWNLOADED_HASH_MISMATCH:'+p.name)
+                require(p.is_file() and not p.is_symlink(), 'APT_DOWNLOADED_NONREGULAR_FILE')
+                digest_value = sha(p)
+                require(digest_value in by_hash and digest_value not in seen_hashes, 'APT_DOWNLOADED_UNKNOWN_OR_DUPLICATE_SIGNED_IDENTITY:'+p.name)
+                seen_hashes.add(digest_value)
+            require(seen_hashes == set(by_hash), 'APT_DOWNLOAD_SIGNED_IDENTITY_SET_MISMATCH')
             status_after = (state/'status').read_bytes()
             require(hashlib.sha256(status_after).digest() == hashlib.sha256(status_bytes).digest(), 'BOOTSTRAP_STATUS_CHANGED')
-            inventory = {'packages': [{'filename': p.name, 'sha256': sha(p)} for p in sorted(found)], 'packageCount': len(found)}
+            inventory = {'packages': [{'downloadedFilename': p.name, 'filename': by_hash[sha(p)][1]['filename'], 'name': by_hash[sha(p)][0][0], 'sha256': sha(p)} for p in sorted(found)], 'packageCount': len(found)}
             (args.output/'apt-download-inventory.json').write_text(json.dumps(inventory, indent=2, sort_keys=True)+'\n')
             (args.output/'root-plan.txt').write_text(roots)
             (args.output/'full-plan.txt').write_text(full)
