@@ -192,6 +192,38 @@ class GradleCandidateToolTests(unittest.TestCase):
                 self.assertIsNone(archive.testzip())
                 self.assertIn("gradle-9.8.2/bin/gradle", archive.namelist())
 
+    def test_binary_distribution_version_markers_replace_source_only_version_txt(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-version-markers-") as tmp:
+            root = Path(tmp)
+
+            def make_archive(path: Path, version: str) -> None:
+                entries = {
+                    "bin/gradle": (b"#!/bin/sh\nexit 0\n", 0o100755),
+                    "LICENSE": (b"license\n", 0o100644),
+                    "NOTICE": (b"notice\n", 0o100644),
+                    f"lib/gradle-core-{version}.jar": (b"core", 0o100644),
+                    f"lib/gradle-launcher-{version}.jar": (b"launcher", 0o100644),
+                    f"lib/gradle-base-services-{version}.jar": (b"base", 0o100644),
+                }
+                with zipfile.ZipFile(path, "w") as archive:
+                    for name, (payload, mode) in entries.items():
+                        info = zipfile.ZipInfo("gradle-9.8.2/" + name)
+                        info.create_system = 3
+                        info.external_attr = mode << 16
+                        archive.writestr(info, payload)
+
+            good_zip = root / "gradle-9.8.2-bin.zip"
+            make_archive(good_zip, "9.8.2")
+            result = ASSEMBLER.extract_distribution(good_zip, root / "good-extract")
+            extracted_root = Path(result["root"])
+            self.assertTrue((extracted_root / "lib/gradle-core-9.8.2.jar").is_file())
+            self.assertFalse((extracted_root / "version.txt").exists())
+
+            bad_zip = root / "wrong-version-bin.zip"
+            make_archive(bad_zip, "9.8.1")
+            with self.assertRaisesRegex(ValueError, "GRADLE_DISTRIBUTION_VERSION_MARKERS_MISMATCH"):
+                ASSEMBLER.extract_distribution(bad_zip, root / "bad-extract")
+
     @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb is required")
     def test_feed_index_binds_identity_size_and_hash_to_deb_bytes(self):
         with tempfile.TemporaryDirectory(prefix="gradle-candidate-feed-") as tmp:

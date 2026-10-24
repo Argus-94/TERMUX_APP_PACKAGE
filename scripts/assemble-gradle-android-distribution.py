@@ -263,8 +263,10 @@ def extract_distribution(source_zip: Path, dest: Path) -> dict[str, Any]:
     root = dest / "gradle-9.8.2"
     need(root.is_dir() and (root / "bin/gradle").is_file() and os.access(root / "bin/gradle", os.X_OK),
          "GRADLE_DISTRIBUTION_LAUNCHER_MISSING_OR_NOT_EXECUTABLE")
-    need((root / "version.txt").read_text(encoding="utf-8").strip() == "9.8.2",
-         "GRADLE_DISTRIBUTION_VERSION_FILE_MISMATCH")
+    version_markers = ("lib/gradle-core-9.8.2.jar", "lib/gradle-launcher-9.8.2.jar",
+                       "lib/gradle-base-services-9.8.2.jar")
+    need(all((root / marker).is_file() and not (root / marker).is_symlink() for marker in version_markers),
+         "GRADLE_DISTRIBUTION_VERSION_MARKERS_MISMATCH")
     need((root / "LICENSE").is_file() and (root / "NOTICE").is_file(),
          "GRADLE_DISTRIBUTION_LICENSE_OR_NOTICE_MISSING")
     return {"root": str(root), "fileCount": file_count, "expandedBytes": total}
