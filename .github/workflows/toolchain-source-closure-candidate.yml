@@ -11,11 +11,14 @@ on:
       - scripts/test-pinned-termux-recipe-closure.sh
       - scripts/test-toolchain-candidate-source-closures.sh
       - scripts/test-toolchain-source-readiness.sh
+      - scripts/inspect-gradle-source-archive.py
+      - scripts/tests/test_gradle_source_archive_inspection.py
       - scripts/verify-toolchain-source-readiness.py
       - termux-package-source-scope.json
       - toolchain-candidate-source-closure-locks.json
       - toolchain-candidate-source-closures/**
       - toolchain-source-readiness-inventory.json
+      - docs/evidence/gradle-source-bootstrap-inspection.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
   pull_request:
     branches:
@@ -26,11 +29,14 @@ on:
       - scripts/test-pinned-termux-recipe-closure.sh
       - scripts/test-toolchain-candidate-source-closures.sh
       - scripts/test-toolchain-source-readiness.sh
+      - scripts/inspect-gradle-source-archive.py
+      - scripts/tests/test_gradle_source_archive_inspection.py
       - scripts/verify-toolchain-source-readiness.py
       - termux-package-source-scope.json
       - toolchain-candidate-source-closure-locks.json
       - toolchain-candidate-source-closures/**
       - toolchain-source-readiness-inventory.json
+      - docs/evidence/gradle-source-bootstrap-inspection.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
 
 permissions:
@@ -101,6 +107,32 @@ jobs:
             echo
             echo 'Build / binary audit / signed APT / artifact / Android install / rollback: NOT RUN. Production publication and app-side installation remain blocked.'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Recheck pinned Gradle source ZIP without running the wrapper
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          archive="$RUNNER_TEMP/gradle-9.8.2-src.zip"
+          sidecar="$RUNNER_TEMP/gradle-9.8.2-src.zip.sha256"
+          report="$RUNNER_TEMP/gradle-source-bootstrap-inspection.json"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors --max-time 240 \
+            --output "$archive" https://services.gradle.org/distributions/gradle-9.8.2-src.zip
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors --max-time 60 \
+            --output "$sidecar" https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256
+          test "$(awk 'NR==1 {print $1}' "$sidecar")" = \
+            96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/inspect-gradle-source-archive.py \
+            --archive "$archive" --output "$report"
+          cmp --silent "$report" docs/evidence/gradle-source-bootstrap-inspection.json
+          {
+            echo '## Gradle source archive bootstrap inspection (no wrapper execution)'
+            echo
+            echo '- Source archive checksum and ZIP CRC: PASS.'
+            echo '- Wrapper points to a prebuilt Gradle 9.8.1 binary distribution without distributionSha256Sum.'
+            echo '- Wrapper execution, binary download, source build, package, feed, Android runtime, and qualification: NOT RUN.'
+            echo
+            cat "$report"
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f -- "$archive" "$sidecar"
       - name: Remove only this job's temporary source checkout
         if: always()
         shell: bash

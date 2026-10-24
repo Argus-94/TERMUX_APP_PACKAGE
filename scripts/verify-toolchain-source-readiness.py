@@ -102,7 +102,8 @@ def verify_manifest_gates(manifest: dict[str, Any]) -> None:
             "SDK_SOURCE_RECIPE_MUST_NOT_BE_INVENTED")
 
 
-def verify_recipe_inputs(manifest: dict[str, Any], source_root: pathlib.Path) -> None:
+def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
+                         source_root: pathlib.Path) -> None:
     profiles = manifest["profiles"]
     inputs: list[tuple[str, str]] = []
     inputs.append((profiles["clang"]["upstreamRecipe"]["path"],
@@ -147,8 +148,23 @@ def verify_recipe_inputs(manifest: dict[str, Any], source_root: pathlib.Path) ->
             and gradle_source.get("url") == "https://services.gradle.org/distributions/gradle-9.8.2-src.zip"
             and gradle_source.get("sha256") == "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
             "GRADLE_SOURCE_RESEARCH_PIN_MISMATCH")
-    require(gradle_source.get("kind") == "official source archive; not yet built or inspected as a package input",
+    require(gradle_source.get("kind") == "official source archive; checksum verified and wrapper inspected; not built or qualified as package input",
             "GRADLE_SOURCE_INPUT_MUST_REMAIN_UNQUALIFIED")
+    inspection = profiles["gradle"].get("sourceArchiveInspection")
+    evidence = read_json(repo_root / "docs/evidence/gradle-source-bootstrap-inspection.json",
+                         "GRADLE_SOURCE_INSPECTION_EVIDENCE_UNREADABLE")
+    require(inspection == evidence, "GRADLE_SOURCE_INSPECTION_EVIDENCE_MISMATCH")
+    require(evidence.get("result") == "SOURCE_ARCHIVE_INTEGRITY_AND_WRAPPER_INSPECTION_OK"
+            and evidence.get("archive", {}).get("sha256") == gradle_source.get("sha256")
+            and evidence.get("wrapper", {}).get("distributionUrl")
+            == "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip"
+            and evidence.get("wrapper", {}).get("distributionSha256Sum") is None
+            and evidence.get("bootstrap", {}).get("decision") == "BLOCKED_PREBUILT_GRADLE_BINARY"
+            and evidence.get("bootstrap", {}).get("wrapperExecuted") is False
+            and evidence.get("bootstrap", {}).get("binaryDistributionDownloaded") is False
+            and evidence.get("gates", {}).get("candidateEligible") is False
+            and evidence.get("gates", {}).get("productionAllowed") is False,
+            "GRADLE_SOURCE_BOOTSTRAP_MUST_REMAIN_BLOCKED")
 
 
 def verify_closure_inventories(repo_root: pathlib.Path, source_root: pathlib.Path,
@@ -208,7 +224,7 @@ def main() -> int:
                          "TOOLCHAIN_READINESS_INVENTORY_UNREADABLE")
     verify_source_checkout(source_root)
     verify_manifest_gates(manifest)
-    verify_recipe_inputs(manifest, source_root)
+    verify_recipe_inputs(repo_root, manifest, source_root)
     verify_closure_inventories(repo_root, source_root, manifest)
     print("TOOLCHAIN_SOURCE_READINESS_INVENTORY_OK profiles=4 reference_closures=3 "
           "package_build=NOT_RUN signed_feed=NOT_CREATED android=NOT_RUN "

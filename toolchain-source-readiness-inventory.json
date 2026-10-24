@@ -61,7 +61,7 @@
       ]
     },
     "gradle": {
-      "status": "BLOCKED: the pinned Termux recipe packages a prebuilt -bin.zip. An official source archive is pinned as a research input, but its bootstrap/rebuild path and Android/Bionic runtime are not verified.",
+      "status": "BLOCKED: the pinned Termux recipe packages a prebuilt -bin.zip. The pinned official 9.8.2 source archive is integrity-checked, but its wrapper points to a prebuilt 9.8.1 binary distribution and supplies no distributionSha256Sum; no source bootstrap or Android/Bionic runtime is verified.",
       "candidateEligible": false,
       "upstreamRecipe": {
         "path": "packages/gradle/build.sh",
@@ -76,7 +76,49 @@
         "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
         "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
         "checksumSource": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256",
-        "kind": "official source archive; not yet built or inspected as a package input"
+        "kind": "official source archive; checksum verified and wrapper inspected; not built or qualified as package input"
+      },
+      "sourceArchiveInspection": {
+        "schemaVersion": 1,
+        "result": "SOURCE_ARCHIVE_INTEGRITY_AND_WRAPPER_INSPECTION_OK",
+        "archive": {
+          "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+          "version": "9.8.2",
+          "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+          "sizeBytes": 88741444,
+          "root": "gradle-9.8.2/",
+          "entryCount": 47569,
+          "fileEntryCount": 28956,
+          "duplicateEntryCount": 0,
+          "crcCheck": "PASS",
+          "symlinkEntryCount": 0
+        },
+        "wrapper": {
+          "propertiesPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.properties",
+          "propertiesSha256": "3cbe35d0020d8393c73f4cc2572838d1db338dd27885dd4d88c46b4d28f762e0",
+          "jarPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.jar",
+          "jarSha256": "3b8a25775a69158b5ad2b1d17a80a88dc7b40a352a73eb27d06c612a7ce68e98",
+          "launcherPath": "gradle-9.8.2/gradlew",
+          "launcherSha256": "e01b5c97892572c82405c02b96a3382379100e7d825ce7c48883d95c26928750",
+          "distributionUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+          "distributionType": "prebuilt Gradle binary distribution",
+          "distributionSha256Sum": null
+        },
+        "bootstrap": {
+          "decision": "BLOCKED_PREBUILT_GRADLE_BINARY",
+          "wrapperExecuted": false,
+          "binaryDistributionDownloaded": false,
+          "sourceBuildStarted": false,
+          "reason": "The source archive wrapper points to gradle-9.8.1-bin.zip and supplies no distributionSha256Sum."
+        },
+        "gates": {
+          "candidateEligible": false,
+          "packageBuilt": false,
+          "feedSigned": false,
+          "androidRuntime": "NOT_RUN",
+          "qualified": false,
+          "productionAllowed": false
+        }
       },
       "sourceClosureInventory": {
         "profile": "gradle-recipe-reference",

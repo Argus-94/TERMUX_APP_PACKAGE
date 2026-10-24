@@ -19,6 +19,8 @@
 
 Версии и package locks приведены в [CMake+Ninja manifest](cmake-ninja-candidate-package-set.json), [его closure](toolchain-candidate-source-closures/cmake-ninja-candidate.json), [OpenJDK manifest](openjdk17-candidate-package-set.json) и [его closure](toolchain-candidate-source-closures/openjdk17-candidate.json). Полный статус gate и практичная Android qualification matrix: [docs/PRODUCTION_GATE_RU.md](docs/PRODUCTION_GATE_RU.md). Текущие pinned source findings и точные блокеры для Gradle/Clang/Android SDK/NDK: [docs/TOOLCHAIN_SOURCE_GAPS_RU.md](docs/TOOLCHAIN_SOURCE_GAPS_RU.md) и [inventory-only manifest](toolchain-source-readiness-inventory.json). Настройка APT feed описана в [APT_REPO_SETUP_RU.md](APT_REPO_SETUP_RU.md); это не разрешение на публикацию.
 
+Gradle source ZIP проверяется по SHA-256 и CRC; его wrapper всё ещё указывает на готовый `gradle-9.8.1-bin.zip`, поэтому сборка и кандидат остаются заблокированы. Детали: [Gradle source bootstrap evidence](docs/evidence/gradle-source-bootstrap-inspection.json).
+
 До отдельного разрешения запрещены production publish, Pages/signing/pkg.ensure promotion, `trusted=yes` и любые insecure APT flags, использование stock `com.termux`, legacy debs как доверенной базы, fake/bypass packages и PocketForge. Успешный CI не равен Android proof или production approval.
 
 ## Локальные policy-проверки

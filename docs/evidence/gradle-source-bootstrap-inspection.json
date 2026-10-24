@@ -1,0 +1,42 @@
+{
+  "archive": {
+    "crcCheck": "PASS",
+    "duplicateEntryCount": 0,
+    "entryCount": 47569,
+    "fileEntryCount": 28956,
+    "root": "gradle-9.8.2/",
+    "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+    "sizeBytes": 88741444,
+    "symlinkEntryCount": 0,
+    "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+    "version": "9.8.2"
+  },
+  "bootstrap": {
+    "binaryDistributionDownloaded": false,
+    "decision": "BLOCKED_PREBUILT_GRADLE_BINARY",
+    "reason": "The source archive wrapper points to gradle-9.8.1-bin.zip and supplies no distributionSha256Sum.",
+    "sourceBuildStarted": false,
+    "wrapperExecuted": false
+  },
+  "gates": {
+    "androidRuntime": "NOT_RUN",
+    "candidateEligible": false,
+    "feedSigned": false,
+    "packageBuilt": false,
+    "productionAllowed": false,
+    "qualified": false
+  },
+  "result": "SOURCE_ARCHIVE_INTEGRITY_AND_WRAPPER_INSPECTION_OK",
+  "schemaVersion": 1,
+  "wrapper": {
+    "distributionSha256Sum": null,
+    "distributionType": "prebuilt Gradle binary distribution",
+    "distributionUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+    "jarPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.jar",
+    "jarSha256": "3b8a25775a69158b5ad2b1d17a80a88dc7b40a352a73eb27d06c612a7ce68e98",
+    "launcherPath": "gradle-9.8.2/gradlew",
+    "launcherSha256": "e01b5c97892572c82405c02b96a3382379100e7d825ce7c48883d95c26928750",
+    "propertiesPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.properties",
+    "propertiesSha256": "3cbe35d0020d8393c73f4cc2572838d1db338dd27885dd4d88c46b4d28f762e0"
+  }
+}
