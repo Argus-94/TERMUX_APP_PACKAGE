@@ -437,7 +437,11 @@ class GradleCandidateToolTests(unittest.TestCase):
                 "distribution": {"sha256": hashlib.sha256(distribution_zip.read_bytes()).hexdigest()},
             }
 
-            def build_deb(stem: str, copyright_target: str) -> Path:
+            self.assertEqual(AUDITOR.termux_private_file_mode(0o644), 0o600)
+            self.assertEqual(AUDITOR.termux_private_file_mode(0o755), 0o700)
+
+            def build_deb(stem: str, copyright_target: str, private_modes: bool = True,
+                          directory_mode: int = 0o700, extra_directory: bool = False) -> Path:
                 package_root = root / (stem + "-root")
                 control = package_root / "DEBIAN" / "control"
                 control.parent.mkdir(parents=True)
@@ -451,18 +455,26 @@ class GradleCandidateToolTests(unittest.TestCase):
                     dest = prefix_root / "opt" / "gradle" / name
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     dest.write_bytes(content)
-                    dest.chmod(mode)
+                    dest.chmod((0o600 | (mode & 0o100)) if private_modes else mode)
                 for name in ("LICENSE", "NOTICE", "LICENSE.native-platform.txt",
                              "ANDROID-CANDIDATE-STATUS.txt"):
                     dest = prefix_root / "share" / "doc" / "gradle" / name
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     dest.write_bytes(payloads[name][0])
-                    dest.chmod(0o644)
+                    dest.chmod(0o600 if private_modes else 0o644)
                 launcher = prefix_root / "bin" / "gradle"
                 launcher.parent.mkdir(parents=True, exist_ok=True)
                 launcher.symlink_to("../opt/gradle/bin/gradle")
                 copyright_link = prefix_root / "share" / "doc" / "gradle" / "copyright"
                 copyright_link.symlink_to(copyright_target)
+                if extra_directory:
+                    (prefix_root / "share" / "doc" / "gradle" / "unexpected-empty").mkdir()
+                for base, dirs, _ in os.walk(prefix_root, topdown=False, followlinks=False):
+                    for name in dirs:
+                        child = Path(base) / name
+                        if not child.is_symlink():
+                            child.chmod(directory_mode)
+                    Path(base).chmod(directory_mode)
                 deb = root / (stem + ".deb")
                 subprocess.run(["dpkg-deb", "--build", "--root-owner-group", str(package_root), str(deb)],
                                check=True, capture_output=True, text=True)
@@ -475,6 +487,23 @@ class GradleCandidateToolTests(unittest.TestCase):
                 "packagePath": prefix.lstrip("/") + "/share/doc/gradle/copyright",
                 "linkTarget": "../../LICENSES/Apache-2.0.txt",
             })
+            self.assertTrue(report["payloadFileModesMatchTermuxAppPrivatePolicy"])
+            self.assertTrue(report["payloadDirectoryModesMatchTermuxAppPrivatePolicy"])
+
+            public_mode_deb = build_deb("world-readable-payload", "../../LICENSES/Apache-2.0.txt",
+                                        private_modes=False)
+            with self.assertRaisesRegex(ValueError, "PACKAGE_ENTRY_MODE_MISMATCH"):
+                AUDITOR.audit(lock, distribution_zip, public_mode_deb, prefix)
+
+            public_directory_deb = build_deb("public-directory-modes",
+                                              "../../LICENSES/Apache-2.0.txt", directory_mode=0o755)
+            with self.assertRaisesRegex(ValueError, "PACKAGE_DIRECTORY_MODE_MISMATCH"):
+                AUDITOR.audit(lock, distribution_zip, public_directory_deb, prefix)
+
+            extra_directory_deb = build_deb("extra-empty-directory",
+                                            "../../LICENSES/Apache-2.0.txt", extra_directory=True)
+            with self.assertRaisesRegex(ValueError, "PACKAGE_DIRECTORY_PATH_SET_MISMATCH"):
+                AUDITOR.audit(lock, distribution_zip, extra_directory_deb, prefix)
 
             invalid_deb = build_deb("invalid-license-link", "../../LICENSES/Other-License.txt")
             with self.assertRaisesRegex(ValueError, "PACKAGE_SYMLINK_TARGET_MISMATCH"):

@@ -21,6 +21,11 @@ def need(ok: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def termux_private_file_mode(source_mode: int) -> int:
+    """Termux massage adds owner read/write and strips all group/other bits."""
+    return 0o600 | (source_mode & stat.S_IXUSR)
+
+
 def sha_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -85,10 +90,11 @@ def distribution_inventory(path: Path, expected_sha: str) -> tuple[dict[str, dic
     return files, docs
 
 
-def data_inventory(deb: Path, prefix: str) -> tuple[dict[str, dict[str, Any]], int]:
+def data_inventory(deb: Path, prefix: str) -> tuple[dict[str, dict[str, Any]], int, dict[str, int]]:
     result = subprocess.run(["dpkg-deb", "--fsys-tarfile", str(deb)], check=True, capture_output=True)
     inventory: dict[str, dict[str, Any]] = {}
     directories = 0
+    directory_modes: dict[str, int] = {}
     prefix_rel = prefix.lstrip("/")
     try:
         with tarfile.open(fileobj=io.BytesIO(result.stdout), mode="r:*") as archive:
@@ -109,6 +115,8 @@ def data_inventory(deb: Path, prefix: str) -> tuple[dict[str, dict[str, Any]], i
                     need(is_prefix_ancestor or is_inside_prefix,
                          "PACKAGE_DIRECTORY_OUTSIDE_MODELED_PREFIX:" + raw)
                     directories += 1
+                    if is_inside_prefix:
+                        directory_modes[raw] = stat.S_IMODE(member.mode)
                     continue
                 need(raw.startswith(prefix_rel + "/"), "PACKAGE_PATH_OUTSIDE_MODELED_PREFIX:" + raw)
                 kind: str
@@ -147,7 +155,7 @@ def data_inventory(deb: Path, prefix: str) -> tuple[dict[str, dict[str, Any]], i
                                   "linkname": linkname}
     except (tarfile.TarError, OSError) as exc:
         raise ValueError("PACKAGE_DATA_TAR_INVALID:" + str(exc)) from exc
-    return inventory, directories
+    return inventory, directories, directory_modes
 
 
 def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) -> dict[str, Any]:
@@ -178,15 +186,17 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
     need(re.fullmatch(r"[a-f0-9]{64}", expected_zip_sha or "") is not None,
          "ASSEMBLED_DISTRIBUTION_SHA_MISSING_IN_LOCK_OR_REPORT")
     dist_files, docs = distribution_inventory(distribution_zip, expected_zip_sha)
-    data, dir_count = data_inventory(deb, prefix)
+    data, dir_count, directory_modes = data_inventory(deb, prefix)
     prefix_rel = prefix.lstrip("/")
     expected: dict[str, dict[str, Any]] = {}
     for rel, record in dist_files.items():
         expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": record["sha256"],
-                                             "mode": record["mode"], "sizeBytes": record["sizeBytes"],
+                                             "mode": termux_private_file_mode(record["mode"]),
+                                             "sizeBytes": record["sizeBytes"],
                                              "linkname": None}
     for rel, digest in docs.items():
-        expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": digest, "mode": 0o644,
+        expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": digest,
+                                             "mode": termux_private_file_mode(0o644),
                                              "sizeBytes": None, "linkname": None}
     for rel, record in dist_files.items():
         if not rel.startswith("opt/gradle/bin/") or "/" in rel[len("opt/gradle/bin/"):]:
@@ -204,10 +214,25 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
     need(set(data) == set(expected),
          "PACKAGE_DATA_PATH_SET_MISMATCH:missing=" + repr(sorted(set(expected) - set(data))[:20])
          + ";extra=" + repr(sorted(set(data) - set(expected))[:20]))
+    expected_directories = {prefix_rel}
+    for path in expected:
+        parent = PurePosixPath(path).parent.as_posix()
+        while parent.startswith(prefix_rel + "/"):
+            expected_directories.add(parent)
+            parent = PurePosixPath(parent).parent.as_posix()
+    need(set(directory_modes) == expected_directories,
+         "PACKAGE_DIRECTORY_PATH_SET_MISMATCH:missing="
+         + repr(sorted(expected_directories - set(directory_modes))[:20])
+         + ";extra=" + repr(sorted(set(directory_modes) - expected_directories)[:20]))
+    for path, mode in directory_modes.items():
+        need(mode == 0o700,
+             "PACKAGE_DIRECTORY_MODE_MISMATCH:" + path + f":expected=0700:actual={mode:04o}")
     for path, wanted in expected.items():
         actual = data[path]
         need(actual["kind"] == wanted["kind"], "PACKAGE_ENTRY_TYPE_MISMATCH:" + path)
-        need(actual["mode"] == wanted["mode"], "PACKAGE_ENTRY_MODE_MISMATCH:" + path)
+        need(actual["mode"] == wanted["mode"],
+             "PACKAGE_ENTRY_MODE_MISMATCH:" + path
+             + f":expected={wanted['mode']:04o}:actual={actual['mode']:04o}")
         if wanted["kind"] == "file":
             need(actual["sha256"] == wanted["sha256"], "PACKAGE_FILE_CONTENT_MISMATCH:" + path)
             if wanted["sizeBytes"] is not None:
@@ -229,11 +254,17 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
         "payloadSymlinkCount": sum(1 for item in data.values() if item["kind"] == "symlink"),
         "payloadDirectoryEntryCount": dir_count,
         "payloadPathSetMatchesSourceDistributionAndExpectedDocs": True,
+        "payloadFileHashesMatchSourceDistribution": True,
+        "payloadFileModesMatchTermuxAppPrivatePolicy": True,
+        "payloadDirectoryModesMatchTermuxAppPrivatePolicy": True,
+        "termuxAppPrivateModePolicy": {
+            "regularFiles": "0600, or 0700 when the source file has owner-execute set; group/other permissions removed by pinned Termux massage",
+            "directories": "0700",
+        },
         "termuxGeneratedLicenseCopyrightSymlinkAudited": {
             "packagePath": license_copyright_path,
             "linkTarget": "../../LICENSES/Apache-2.0.txt",
         },
-        "payloadFileHashesAndModesMatchSourceDistribution": True,
         "aptSimulation": "NOT_RUN",
         "installed": False,
         "androidDeviceRuntime": "NOT_RUN",
