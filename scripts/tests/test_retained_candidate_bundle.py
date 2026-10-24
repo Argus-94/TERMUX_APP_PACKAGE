@@ -58,6 +58,16 @@ class CandidatePaxArchiveSafetyTests(unittest.TestCase):
                 archive.addfile(info,__import__('io').BytesIO(b"Suite: x"))
             self.assertEqual(zip_verify.inspect_pax_tar(path.read_bytes()),{"dists/stable/Release":b"Suite: x"})
 
+class CandidateReleaseMetadataTests(unittest.TestCase):
+    def test_release_hash_entries_are_suite_relative(self):
+        body=b"Packages index\n"; digest=zip_verify.sha(body); size=len(body)
+        release=("Origin: test\nSHA256:\n  "+digest+" "+str(size)+" main/binary-aarch64/Packages\n").encode()
+        entries=zip_verify.release_sha256_entries(release)
+        archive_path="dists/stable/main/binary-aarch64/Packages"
+        self.assertEqual(zip_verify.release_relative_path(archive_path),"main/binary-aarch64/Packages")
+        self.assertEqual(entries[zip_verify.release_relative_path(archive_path)],(digest,size))
+        with self.assertRaises(zip_verify.Invalid): zip_verify.release_relative_path("pool/main/example.deb")
+
 class CandidateSignedEvidenceTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)

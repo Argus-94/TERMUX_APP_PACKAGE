@@ -207,6 +207,35 @@ def sha256_sums(data: bytes, members: dict[str, bytes], expected_names: set[str]
     need(all(actual[name] == sha(members[name]) for name in actual), "SHA256SUMS digest mismatch")
 
 
+def release_sha256_entries(release: bytes) -> dict[str, tuple[str, int]]:
+    try:
+        text = release.decode("utf-8")
+    except UnicodeError as exc:
+        raise Invalid("Release is not UTF-8") from exc
+    entries: dict[str, tuple[str, int]] = {}
+    in_section = False
+    for line in text.splitlines():
+        if line == "SHA256:":
+            in_section = True
+            continue
+        if in_section:
+            if line and not line[0].isspace():
+                in_section = False
+                continue
+            match = re.fullmatch(r"\s+([0-9a-f]{64})\s+([0-9]+)\s+(\S+)\s*", line)
+            need(match is not None, "malformed Release SHA256 entry")
+            digest, size, name = match.groups()
+            need(name not in entries, "duplicate Release path")
+            entries[name] = (digest, int(size))
+    return entries
+
+
+def release_relative_path(index_path: str) -> str:
+    prefix = "dists/stable/"
+    need(index_path.startswith(prefix), "index path is outside the stable suite")
+    return index_path[len(prefix):]
+
+
 def verify_feed(feed: dict[str, bytes], manifest: dict[str, Any], keyring: Path,
                 fingerprint: str, lock: dict[str, Any], members: dict[str, bytes]) -> tuple[list[dict[str, str]], dict[tuple[str, str, str], bytes]]:
     spec = manifest.get("signedFeedArchive")
@@ -248,27 +277,9 @@ def verify_feed(feed: dict[str, bytes], manifest: dict[str, Any], keyring: Path,
             need(stream.read(len(feed[index_path]) + 1) == feed[index_path], "Packages.gz differs from Packages")
     except (OSError, EOFError) as exc:
         raise Invalid("invalid Packages.gz") from exc
-    try:
-        release_text = release.decode("utf-8")
-    except UnicodeError as exc:
-        raise Invalid("Release is not UTF-8") from exc
-    release_hashes: dict[str, tuple[str, int]] = {}
-    in_section = False
-    for line in release_text.splitlines():
-        if line == "SHA256:":
-            in_section = True
-            continue
-        if in_section:
-            if line and not line[0].isspace():
-                in_section = False
-                continue
-            match = re.fullmatch(r"\s+([0-9a-f]{64})\s+([0-9]+)\s+(\S+)\s*", line)
-            need(match is not None, "malformed Release SHA256 entry")
-            digest, size, name = match.groups()
-            need(name not in release_hashes, "duplicate Release path")
-            release_hashes[name] = (digest, int(size))
+    release_hashes = release_sha256_entries(release)
     for name in (index_path, gz_path):
-        need(release_hashes.get(name) == (sha(feed[name]), len(feed[name])),
+        need(release_hashes.get(release_relative_path(name)) == (sha(feed[name]), len(feed[name])),
              "Release index digest or size mismatch: " + name)
 
     records = parse_packages(feed[index_path])
