@@ -140,6 +140,7 @@ jobs:
           run_check source_extract unzip -q "$source_archive" -d "$source_extract"
           source_root="$source_extract/gradle-9.8.2"
           test -f "$source_root/gradle/verification-metadata.xml"
+          run_check source_version python3 -c 'import pathlib, sys; version = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").strip(); assert version == "9.8.2", version' "$source_root/version.txt"
 
           bootstrap_archive="$RUNNER_TEMP/gradle-9.8.1-bin.zip"
           bootstrap_sidecar="$RUNNER_TEMP/gradle-9.8.1-bin.zip.sha256"
@@ -185,7 +186,10 @@ jobs:
           bootstrap_gradle="$RUNNER_TEMP/gradle-bootstrap/gradle-9.8.1/bin/gradle"
           source_root="$RUNNER_TEMP/gradle-source/gradle-9.8.2"
           build_log="$status_dir/source-build.log"
-          command=("$bootstrap_gradle" -p "$source_root" :distributions-full:binDistributionZip
+          # Official module-identity defaults to a timestamped snapshot root/version,
+          # while the ZIP filename uses baseVersion. Select unchanged version.txt=9.8.2
+          # through its supported finalRelease property; this target never publishes.
+          command=("$bootstrap_gradle" -p "$source_root" :distributions-full:binDistributionZip -PfinalRelease=true
             --no-daemon --no-parallel --max-workers=2 --stacktrace
             '-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8')
           printf '%q ' "${command[@]}" > "$status_dir/source-build-command.txt"
@@ -228,21 +232,38 @@ jobs:
           unzip -q "$distribution" -d "$audit_root"
           printf '0\n' > "$status_dir/distribution_extract.exit"
           generated_gradle="$audit_root/gradle-9.8.2/bin/gradle"
-          test -x "$generated_gradle"
+          if [ ! -x "$generated_gradle" ]; then
+            printf '1\n' > "$status_dir/distribution_launcher_check.exit"
+            {
+              printf 'Expected executable generated launcher was not found: %s\n' "$generated_gradle"
+              echo 'Actual generated launcher candidates (mode and path):'
+              find "$audit_root" -maxdepth 3 -type f -path '*/bin/gradle' -exec stat -c '%a %n' {} \;
+            } > "$status_dir/distribution-audit-error.txt"
+            cat "$status_dir/distribution-audit-error.txt" >&2
+            exit 1
+          fi
+          printf '0\n' > "$status_dir/distribution_launcher_check.exit"
           if "$generated_gradle" --version > "$status_dir/distribution-version.txt" 2>&1; then
             printf '0\n' > "$status_dir/distribution_version.exit"
           else
             rc=$?
             printf '%s\n' "$rc" > "$status_dir/distribution_version.exit"
-            cat "$status_dir/distribution-version.txt" >&2
+            {
+              printf 'Generated launcher --version returned exit code %s.\n' "$rc"
+              cat "$status_dir/distribution-version.txt"
+            } > "$status_dir/distribution-audit-error.txt"
+            cat "$status_dir/distribution-audit-error.txt" >&2
             exit "$rc"
           fi
           if grep -Fxq 'Gradle 9.8.2' "$status_dir/distribution-version.txt"; then
             printf '0\n' > "$status_dir/distribution_version_check.exit"
           else
             printf '1\n' > "$status_dir/distribution_version_check.exit"
-            cat "$status_dir/distribution-version.txt" >&2
-            echo 'Generated distribution did not report Gradle 9.8.2.' >&2
+            {
+              echo 'Generated distribution did not report Gradle 9.8.2.'
+              cat "$status_dir/distribution-version.txt"
+            } > "$status_dir/distribution-audit-error.txt"
+            cat "$status_dir/distribution-audit-error.txt" >&2
             exit 1
           fi
           cp "$distribution" "$artifact_dir/gradle-9.8.2-bin.zip"
@@ -320,7 +341,8 @@ jobs:
                   source_report = None
               shutil.copy2(source_report_path, artifact / "source-inspection.json")
           for name in ("source-build.log", "bootstrap-version.txt", "distribution-version.txt",
-                       "host-java-version.txt", "source-build-command.txt", "distribution-matches.txt"):
+                       "host-java-version.txt", "source-build-command.txt", "distribution-matches.txt",
+                       "distribution-audit-error.txt"):
               path = status / name
               if path.is_file():
                   shutil.copy2(path, artifact / name)
@@ -344,10 +366,10 @@ jobs:
               for name in (
                   "host-java-version", "host-java-check", "source_download", "source_sidecar_download",
                   "source_sidecar_check", "source_sha256", "source_zip_crc", "source_inspector",
-                  "source_structure", "source_extract", "bootstrap_download", "bootstrap_sidecar_download",
+                  "source_structure", "source_extract", "source_version", "bootstrap_download", "bootstrap_sidecar_download",
                   "bootstrap_sidecar_check", "bootstrap_sha256", "bootstrap_zip_crc", "bootstrap_extract",
                   "bootstrap_version", "bootstrap_version_check", "source_build", "distribution_locate",
-                  "distribution_zip_crc", "distribution_extract", "distribution_version",
+                  "distribution_zip_crc", "distribution_extract", "distribution_launcher_check", "distribution_version",
                   "distribution_version_check",
               )
           }
@@ -358,6 +380,8 @@ jobs:
               "expectedSha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
               "sidecarSha256": sidecar_digest(source_sidecar),
               "actualSha256": sha256(source_archive),
+              "versionTxt": text(temp / "gradle-source/gradle-9.8.2/version.txt"),
+              "versionSelection": "official -PfinalRelease=true selects unchanged source version.txt=9.8.2; this rebuilt host output is not an official Gradle release or a package/feed candidate",
               "inspectionScope": "archive-only checks performed before bootstrap download and source build; inspector bootstrap fields are local to that inspection",
               "inspection": source_report,
           }
@@ -373,7 +397,7 @@ jobs:
           build_command = [
               str(temp / "gradle-bootstrap/gradle-9.8.1/bin/gradle"),
               "-p", str(temp / "gradle-source/gradle-9.8.2"),
-              ":distributions-full:binDistributionZip", "--no-daemon", "--no-parallel",
+              ":distributions-full:binDistributionZip", "-PfinalRelease=true", "--no-daemon", "--no-parallel",
               "--max-workers=2", "--stacktrace",
               "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8",
           ]
@@ -413,6 +437,7 @@ jobs:
                   "sizeBytes": output_archive.stat().st_size if output_ok else None,
                   "integrityCheckExitCode": exit_code("distribution_zip_crc"),
                   "generatedVersionOutput": text(status / "distribution-version.txt"),
+                  "auditError": text(status / "distribution-audit-error.txt"),
                   "hostOnly": True,
               },
               "scope": {
@@ -452,6 +477,9 @@ jobs:
                   lines_out += ["", "### First Gradle build error (verbatim)", "", "```text", first_error, "```"]
               elif os.environ.get("BUILD_OUTCOME") == "failure":
                   lines_out += ["", "Gradle returned a non-zero exit but no recognized error marker was extracted; inspect the preserved `source-build.log` in the run artifact."]
+              audit_error = text(status / "distribution-audit-error.txt")
+              if audit_error:
+                  lines_out += ["", "### Generated distribution audit error (verbatim)", "", "```text", audit_error.rstrip(), "```"]
           lines_out += ["", "This host build is not an Android/Bionic compatibility result and does not enable package, feed, signing, readiness, or production gates.", ""]
           with summary.open("a", encoding="utf-8") as stream:
               stream.write("\n".join(lines_out))
