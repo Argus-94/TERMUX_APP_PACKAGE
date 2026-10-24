@@ -14,24 +14,22 @@
     "distributionUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
     "distributionSha256Sum": null,
     "executed": false,
-    "binaryDistributionDownloaded": false
+    "note": "The source-archive wrapper was not executed. CI downloaded the same official Gradle 9.8.1 distribution separately via the explicit URL, verified its pinned SHA-256 and sidecar, and invoked that executable directly as a build-only host bootstrap.",
+    "binaryDistributionDownloadedViaWrapper": false
   },
   "bootstrapEnvironment": {
     "gradleExecutableOnPath": false,
-    "hostJdkVersion": "21.0.12.1",
-    "cachedGradleVersions": [
-      "8.14.3",
-      "9.3.1"
-    ],
-    "cachedGradleProvenancePinned": false,
-    "cachedGradleVersionsUsed": false,
-    "configuredWrapperVersionCached": false,
-    "trustedPinnedBootstrapAvailable": false,
+    "hostJdkVersion": "25.0.4.1",
+    "trustedPinnedBootstrapAvailable": true,
+    "bootstrapVersion": "9.8.1",
+    "bootstrapUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+    "bootstrapExpectedSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+    "bootstrapActualSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+    "bootstrapRole": "verified build-only host bootstrap; never included in an app payload or feed",
     "sourceOnlyBootstrapPathFound": false,
-    "reproducibleSourceBuildWithTrustedExternalBootstrap": "POSSIBLE_IN_PRINCIPLE_BUT_NOT_ASSESSED; a previously installed, provenance-verified Gradle could remain a host build tool and stay out of the package payload, but it would be a binary bootstrap input rather than a source-only bootstrap.",
-    "sourceBuildStarted": false,
-    "decision": "BLOCKED_NO_TRUSTED_PINNED_BOOTSTRAP",
-    "reason": "The official source-build instruction invokes the wrapper, whose pinned source-archive configuration downloads Gradle 9.8.1 binary ZIP without distributionSha256Sum. No Gradle executable is on PATH; only cached 8.14.3 and 9.3.1 distributions were found, with no tracked provenance/checksum evidence and neither matching the configured wrapper version. They were not run."
+    "sourceBuildStarted": true,
+    "decision": "SOURCE_BUILD_SUCCEEDED_HOST_ONLY",
+    "reason": "The committed wrapper still points to Gradle 9.8.1 without distributionSha256Sum and was not run. Instead, GitHub Actions downloaded and verified the official Gradle 9.8.1 distribution against its fixed digest and sidecar, then invoked its executable explicitly to build the 9.8.2 host binary distribution."
   },
   "sourceBuildInputs": {
     "verificationMetadataPath": "gradle-9.8.2/gradle/verification-metadata.xml",
@@ -45,26 +43,64 @@
       "gradlePluginPortal()"
     ],
     "dependencyResolutionIsSelfContainedInSourceArchive": false,
-    "note": "The source tree includes dependency-verification metadata, but also configures external artifact repositories; no dependency resolution or source build was run."
+    "note": "The source tree includes dependency-verification metadata and configures Maven Central and the Gradle Plugin Portal. The CI source-build command completed successfully; this host-only result does not by itself establish a hermetic or independently audited dependency closure for an Android package candidate."
   },
   "targetRuntime": {
     "gradleJvmRange": "17-27",
     "bundledOpenJdk17VersionCheck": "PASS_VERSION_RANGE_ONLY",
     "activeGradlePlatformMatrixIncludesAndroidBionic": false,
     "androidBionicArm64Runtime": "NOT_VERIFIED",
-    "nativeLoaderAndNeededLibraries": "UNKNOWN_NO_BUILT_DISTRIBUTION_OR_ELF_TO_AUDIT",
+    "nativeLoaderAndNeededLibraries": "HOST_DISTRIBUTION_BUILT; ARM64/BIONIC ELF, native-loader, and DT_NEEDED audit NOT_PERFORMED",
     "nativePlatformEvidence": "Gradle's supported-platform matrix lists Ubuntu AArch64 but not Android/Bionic; its file-watching documentation lists Linux distributions and inotify but not Android/Bionic.",
-    "fileWatching": "NOT_VERIFIED_ON_BIONIC; Gradle documents --no-watch-fs as a way to disable watching, not as proof of Android runtime compatibility.",
-    "daemon": "NOT_VERIFIED_ON_ANDROID; Gradle's daemon is a long-lived background JVM process by default. --no-daemon can disable reuse, but app-private process, local-socket, memory, and lifecycle behavior must still be tested.",
+    "fileWatching": "NOT_VERIFIED_ON_BIONIC; CI built and version-checked the Ubuntu host distribution only; --no-watch-fs is not proof of Android runtime compatibility.",
+    "daemon": "NOT_VERIFIED_ON_ANDROID; the host CI build does not test app-private process, local-socket, memory, or lifecycle behavior.",
     "deviceProof": "NOT_RUN"
   },
   "decision": {
-    "result": "NO_REPRODUCIBLE_SOURCE_ONLY_BOOTSTRAP_IN_CURRENT_ENVIRONMENT",
-    "sourceBuildComplete": false,
+    "result": "SOURCE_BUILD_SUCCESS_HOST_ONLY",
+    "sourceBuildComplete": true,
+    "sourceBuildTarget": "host binary distribution only",
+    "hostSourceBuildEvidencePath": "docs/evidence/gradle-source-build-host-success.json",
     "packageBuilt": false,
     "candidateEligible": false,
     "androidRuntimeQualified": false,
     "productionAllowed": false,
-    "nextActionableBlocker": "Establish an approved, trusted and provenance-pinned existing Gradle bootstrap compatible with the Gradle 9.8.2 source build, without invoking the wrapper or downloading its binary distribution; then lock/verify all resolved build dependencies before attempting a source build."
+    "nextActionableBlocker": "Prove the required Gradle runtime and native-loader behavior on ARM64 Android/Bionic, including app-private daemon and file-watching lifecycle; separately complete target package construction, payload/license/ELF/dependency audits, test-only feed signing and APT simulation, and real device/project-build tests before any candidate claim."
+  },
+  "hostSourceBuild": {
+    "result": "SOURCE_BUILD_SUCCESS_HOST_ONLY",
+    "sourceBuildComplete": true,
+    "evidencePath": "docs/evidence/gradle-source-build-host-success.json",
+    "runId": 40079300326,
+    "runUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326",
+    "commit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+    "ref": "refs/heads/work/bootstrap-compatibility-20261019",
+    "artifactId": 12554961307,
+    "artifactUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326/artifacts/12554961307",
+    "artifactExpiresAt": "2026-10-31",
+    "bootstrap": {
+      "version": "9.8.1",
+      "url": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+      "sha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+      "role": "verified build-only host bootstrap; never included in an app payload or feed"
+    },
+    "runner": {
+      "image": "ubuntu-24.04",
+      "jdk": "Temurin 25.0.4.1"
+    },
+    "command": {
+      "task": ":distributions-full:binDistributionZip",
+      "finalRelease": true,
+      "exitCode": 0
+    },
+    "outputDistribution": {
+      "filename": "gradle-9.8.2-bin.zip",
+      "sha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+      "sizeBytes": 151620051,
+      "integrityCheckExitCode": 0,
+      "reportedLauncherVersion": "Gradle 9.8.2",
+      "hostOnly": true
+    },
+    "localOutputVerification": "NOT_PERFORMED; the full artifact download was truncated, so the recorded output digest, size, CRC, and launcher checks are from CI evidence only."
   }
 }

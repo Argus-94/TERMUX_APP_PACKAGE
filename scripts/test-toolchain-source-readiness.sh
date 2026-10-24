@@ -13,8 +13,10 @@ mkdir -p "$TMP/docs/evidence"
 cp "$ROOT/scripts/resolve-pinned-termux-recipe-closure.py" "$TMP/scripts/"
 cp "$ROOT/termux-package-source-scope.json" "$TMP/"
 cp "$ROOT/toolchain-source-readiness-inventory.json" "$TMP/"
+cp "$ROOT/docs/TOOLCHAIN_SOURCE_GAPS_RU.md" "$TMP/docs/"
 cp "$ROOT/docs/evidence/gradle-source-bootstrap-inspection.json" "$TMP/docs/evidence/"
 cp "$ROOT/docs/evidence/gradle-source-bootstrap-assessment.json" "$TMP/docs/evidence/"
+cp "$ROOT/docs/evidence/gradle-source-build-host-success.json" "$TMP/docs/evidence/"
 
 PYTHONDONTWRITEBYTECODE=1 python3 "$ROOT/scripts/tests/test_gradle_source_archive_inspection.py"
 
@@ -77,4 +79,37 @@ if python3 "$ROOT/scripts/verify-toolchain-source-readiness.py" \
 fi
 grep -q 'GRADLE_SOURCE_BOOTSTRAP_ASSESSMENT_EVIDENCE_MISMATCH' "$TMP/bootstrap-assessment.out"
 
-printf 'TOOLCHAIN_READINESS_TESTS_OK valid_inventory=1 open_production_gate_rejected=1 blocked_profile_promotion_rejected=1 gradle_source_unit_tests=6 drifted_archive_evidence_rejected=1 drifted_bootstrap_assessment_rejected=1\n'
+cp "$ROOT/docs/evidence/gradle-source-build-host-success.json" "$TMP/docs/evidence/gradle-source-build-host-success.json"
+python3 - "$TMP/docs/evidence/gradle-source-build-host-success.json" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["scope"]["packageBuilt"] = True
+path.write_text(json.dumps(value), encoding="utf-8")
+PY
+if python3 "$ROOT/scripts/verify-toolchain-source-readiness.py" \
+  --repo-root "$TMP" --source-root "$SOURCE_ROOT" >"$TMP/host-gate.out" 2>&1; then
+  echo 'ERROR:OPEN_HOST_SOURCE_BUILD_PACKAGE_GATE_ACCEPTED' >&2
+  exit 2
+fi
+grep -q 'GRADLE_HOST_SOURCE_BUILD_EVIDENCE_MISMATCH' "$TMP/host-gate.out"
+
+cp "$ROOT/docs/evidence/gradle-source-build-host-success.json" "$TMP/docs/evidence/gradle-source-build-host-success.json"
+mv "$TMP/docs/TOOLCHAIN_SOURCE_GAPS_RU.md" "$TMP/docs/TOOLCHAIN_SOURCE_GAPS_RU.md.saved"
+if python3 "$ROOT/scripts/verify-toolchain-source-readiness.py" \
+  --repo-root "$TMP" --source-root "$SOURCE_ROOT" >"$TMP/missing-doc.out" 2>&1; then
+  echo 'ERROR:MISSING_GRADLE_READINESS_DOC_ACCEPTED' >&2
+  exit 2
+fi
+grep -q 'GRADLE_SOURCE_READINESS_DOC_MISSING' "$TMP/missing-doc.out"
+
+mv "$TMP/docs/TOOLCHAIN_SOURCE_GAPS_RU.md.saved" "$TMP/docs/TOOLCHAIN_SOURCE_GAPS_RU.md"
+rm "$TMP/docs/evidence/gradle-source-build-host-success.json"
+if python3 "$ROOT/scripts/verify-toolchain-source-readiness.py" \
+  --repo-root "$TMP" --source-root "$SOURCE_ROOT" >"$TMP/missing-host-evidence.out" 2>&1; then
+  echo 'ERROR:MISSING_HOST_SOURCE_BUILD_EVIDENCE_ACCEPTED' >&2
+  exit 2
+fi
+grep -q 'GRADLE_HOST_SOURCE_BUILD_EVIDENCE_UNREADABLE' "$TMP/missing-host-evidence.out"
+
+printf 'TOOLCHAIN_READINESS_TESTS_OK valid_inventory=1 open_production_gate_rejected=1 blocked_profile_promotion_rejected=1 gradle_source_unit_tests=6 drifted_archive_evidence_rejected=1 drifted_bootstrap_assessment_rejected=1 open_host_source_build_gate_rejected=1 missing_readiness_doc_rejected=1 missing_host_build_evidence_rejected=1\n'

@@ -1,0 +1,145 @@
+{
+  "actions": {
+    "checkout": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+    "setupJava": "actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961",
+    "uploadArtifact": "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+  },
+  "bootstrap": {
+    "actualSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+    "expectedSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+    "role": "verified build-only host bootstrap; never included in an app payload or feed",
+    "sha256SidecarUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip.sha256",
+    "sidecarSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+    "url": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+    "versionOutput": "\nWelcome to Gradle 9.8.1!\n\nHere are the highlights of this release:\n - Java 27 support\n - Maven mirror settings reuse\n - Linked problem locations in build output\n\nFor more details see https://docs.gradle.org/9.8.1/release-notes.html\n\n\n------------------------------------------------------------\nGradle 9.8.1\n------------------------------------------------------------\n\nBuild time:    2026-10-07 16:57:46 UTC\nRevision:      39daf39feb60a18b1b6ddccde53366522fef516f\n\nKotlin:        2.4.10\nGroovy:        4.0.33\nAnt:           Apache Ant(TM) version 1.10.17 compiled on April 6 2026\nLauncher JVM:  25.0.4.1 (Eclipse Adoptium 25.0.4.1+1-LTS)\nDaemon JVM:    /usr/lib/jvm/temurin-25-jdk-amd64 (no Daemon JVM specified, using current Java home)\nOS:            Linux 6.17.0-1022-azure amd64\n\n"
+  },
+  "build": {
+    "commandArgv": [
+      "/home/runner/work/_temp/gradle-bootstrap/gradle-9.8.1/bin/gradle",
+      "-p",
+      "/home/runner/work/_temp/gradle-source/gradle-9.8.2",
+      ":distributions-full:binDistributionZip",
+      "-PfinalRelease=true",
+      "--no-daemon",
+      "--no-parallel",
+      "--max-workers=2",
+      "--stacktrace",
+      "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
+    ],
+    "commandExitCode": 0,
+    "firstError": null,
+    "logPathInArtifact": "source-build.log"
+  },
+  "checksExitCodes": {
+    "bootstrap_download": 0,
+    "bootstrap_extract": 0,
+    "bootstrap_sha256": 0,
+    "bootstrap_sidecar_check": 0,
+    "bootstrap_sidecar_download": 0,
+    "bootstrap_version": 0,
+    "bootstrap_version_check": 0,
+    "bootstrap_zip_crc": 0,
+    "distribution_extract": 0,
+    "distribution_launcher_check": 0,
+    "distribution_locate": 0,
+    "distribution_version": 0,
+    "distribution_version_check": 0,
+    "distribution_zip_crc": 0,
+    "host-java-check": 0,
+    "host-java-version": 0,
+    "source_build": 0,
+    "source_download": 0,
+    "source_extract": 0,
+    "source_inspector": 0,
+    "source_sha256": 0,
+    "source_sidecar_check": 0,
+    "source_sidecar_download": 0,
+    "source_structure": 0,
+    "source_version": 0,
+    "source_zip_crc": 0
+  },
+  "outputDistribution": {
+    "auditError": null,
+    "filename": "gradle-9.8.2-bin.zip",
+    "generatedVersionOutput": "\nWelcome to Gradle 9.8.2!\n\nHere are the highlights of this release:\n - Java 27 support\n - Maven mirror settings reuse\n - Linked problem locations in build output\n\nFor more details see https://docs.gradle.org/9.8.2/release-notes.html\n\n\n------------------------------------------------------------\nGradle 9.8.2\n------------------------------------------------------------\n\nBuild time:    2026-10-24 08:54:22 UTC\nRevision:      <unknown>\n\nKotlin:        2.4.10\nGroovy:        4.0.33\nAnt:           Apache Ant(TM) version 1.10.17 compiled on April 6 2026\nLauncher JVM:  25.0.4.1 (Eclipse Adoptium 25.0.4.1+1-LTS)\nDaemon JVM:    /usr/lib/jvm/temurin-25-jdk-amd64 (no Daemon JVM specified, using current Java home)\nOS:            Linux 6.17.0-1022-azure amd64\n\n",
+    "hostOnly": true,
+    "integrityCheckExitCode": 0,
+    "sha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+    "sizeBytes": 151620051
+  },
+  "result": "SOURCE_BUILD_SUCCESS_HOST_ONLY",
+  "run": {
+    "commit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+    "ref": "refs/heads/work/bootstrap-compatibility-20261019",
+    "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326"
+  },
+  "runner": {
+    "distributionAuditStep": "success",
+    "hostJdkStep": "success",
+    "image": "ubuntu-24.04",
+    "javaVersionOutput": "openjdk version \"25.0.4.1\" 2026-08-18 LTS\nOpenJDK Runtime Environment Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS)\nOpenJDK 64-Bit Server VM Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS, mixed mode, sharing)\n",
+    "prepareStep": "success",
+    "sourceBuildStep": "success"
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "androidBionicRuntime": "NOT_VERIFIED",
+    "buildTarget": "host binary distribution only",
+    "candidateOrProductionGateEnabled": false,
+    "feedPublishedOrSigned": false,
+    "packageBuilt": false,
+    "productionAllowed": false
+  },
+  "source": {
+    "actualSha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+    "expectedSha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+    "inspection": {
+      "archive": {
+        "crcCheck": "PASS",
+        "duplicateEntryCount": 0,
+        "entryCount": 47569,
+        "fileEntryCount": 28956,
+        "root": "gradle-9.8.2/",
+        "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+        "sizeBytes": 88741444,
+        "symlinkEntryCount": 0,
+        "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+        "version": "9.8.2"
+      },
+      "bootstrap": {
+        "binaryDistributionDownloaded": false,
+        "decision": "BLOCKED_PREBUILT_GRADLE_BINARY",
+        "reason": "The source archive wrapper points to gradle-9.8.1-bin.zip and supplies no distributionSha256Sum.",
+        "sourceBuildStarted": false,
+        "wrapperExecuted": false
+      },
+      "gates": {
+        "androidRuntime": "NOT_RUN",
+        "candidateEligible": false,
+        "feedSigned": false,
+        "packageBuilt": false,
+        "productionAllowed": false,
+        "qualified": false
+      },
+      "result": "SOURCE_ARCHIVE_INTEGRITY_AND_WRAPPER_INSPECTION_OK",
+      "schemaVersion": 1,
+      "wrapper": {
+        "distributionSha256Sum": null,
+        "distributionType": "prebuilt Gradle binary distribution",
+        "distributionUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+        "jarPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.jar",
+        "jarSha256": "3b8a25775a69158b5ad2b1d17a80a88dc7b40a352a73eb27d06c612a7ce68e98",
+        "launcherPath": "gradle-9.8.2/gradlew",
+        "launcherSha256": "e01b5c97892572c82405c02b96a3382379100e7d825ce7c48883d95c26928750",
+        "propertiesPath": "gradle-9.8.2/gradle/wrapper/gradle-wrapper.properties",
+        "propertiesSha256": "3cbe35d0020d8393c73f4cc2572838d1db338dd27885dd4d88c46b4d28f762e0"
+      }
+    },
+    "inspectionScope": "archive-only checks performed before bootstrap download and source build; inspector bootstrap fields are local to that inspection",
+    "sha256SidecarUrl": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256",
+    "sidecarSha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+    "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+    "versionSelection": "official -PfinalRelease=true selects unchanged source version.txt=9.8.2; this rebuilt host output is not an official Gradle release or a package/feed candidate",
+    "versionTxt": "9.8.2"
+  }
+}

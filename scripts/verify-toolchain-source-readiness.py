@@ -148,7 +148,7 @@ def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
             and gradle_source.get("url") == "https://services.gradle.org/distributions/gradle-9.8.2-src.zip"
             and gradle_source.get("sha256") == "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
             "GRADLE_SOURCE_RESEARCH_PIN_MISMATCH")
-    require(gradle_source.get("kind") == "official source archive; checksum verified and wrapper inspected; not built or qualified as package input",
+    require(gradle_source.get("kind") == "official source archive; checksum verified, wrapper inspected, and built for host-only output; not qualified as package input",
             "GRADLE_SOURCE_INPUT_MUST_REMAIN_UNQUALIFIED")
     inspection = profiles["gradle"].get("sourceArchiveInspection")
     evidence = read_json(repo_root / "docs/evidence/gradle-source-bootstrap-inspection.json",
@@ -165,6 +165,81 @@ def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
             and evidence.get("gates", {}).get("candidateEligible") is False
             and evidence.get("gates", {}).get("productionAllowed") is False,
             "GRADLE_SOURCE_BOOTSTRAP_MUST_REMAIN_BLOCKED")
+
+    host_evidence = read_json(
+        repo_root / "docs/evidence/gradle-source-build-host-success.json",
+        "GRADLE_HOST_SOURCE_BUILD_EVIDENCE_UNREADABLE",
+    )
+    host_run = host_evidence.get("run", {})
+    host_source = host_evidence.get("source", {})
+    host_bootstrap = host_evidence.get("bootstrap", {})
+    host_build = host_evidence.get("build", {})
+    host_runner = host_evidence.get("runner", {})
+    output = host_evidence.get("outputDistribution", {})
+    scope = host_evidence.get("scope", {})
+    checks_exit_codes = host_evidence.get("checksExitCodes", {})
+    command_argv = host_build.get("commandArgv", [])
+    require(host_evidence.get("result") == "SOURCE_BUILD_SUCCESS_HOST_ONLY"
+            and host_evidence.get("schemaVersion") == 1
+            and host_run == {
+                "commit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+                "ref": "refs/heads/work/bootstrap-compatibility-20261019",
+                "url": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326",
+            }
+            and host_source.get("versionTxt") == "9.8.2"
+            and host_source.get("actualSha256") == gradle_source.get("sha256")
+            and host_source.get("expectedSha256") == gradle_source.get("sha256")
+            and host_source.get("inspection", {}).get("archive", {}).get("sizeBytes") == 88741444
+            and host_bootstrap.get("url")
+            == "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip"
+            and host_bootstrap.get("expectedSha256")
+            == "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f"
+            and host_bootstrap.get("actualSha256") == host_bootstrap.get("expectedSha256")
+            and host_bootstrap.get("sidecarSha256") == host_bootstrap.get("expectedSha256")
+            and host_bootstrap.get("role")
+            == "verified build-only host bootstrap; never included in an app payload or feed"
+            and host_build.get("commandExitCode") == 0
+            and isinstance(command_argv, list)
+            and command_argv
+            and command_argv[0].endswith("/gradle-9.8.1/bin/gradle")
+            and ":distributions-full:binDistributionZip" in command_argv
+            and "-PfinalRelease=true" in command_argv
+            and host_runner.get("image") == "ubuntu-24.04"
+            and host_runner.get("sourceBuildStep") == "success"
+            and host_runner.get("distributionAuditStep") == "success"
+            and "25.0.4.1" in host_runner.get("javaVersionOutput", "")
+            and "Temurin" in host_runner.get("javaVersionOutput", "")
+            and bool(checks_exit_codes)
+            and all(code == 0 for code in checks_exit_codes.values())
+            and output.get("filename") == "gradle-9.8.2-bin.zip"
+            and output.get("sha256")
+            == "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814"
+            and output.get("sizeBytes") == 151620051
+            and output.get("integrityCheckExitCode") == 0
+            and output.get("auditError") is None
+            and output.get("hostOnly") is True
+            and "Gradle 9.8.2" in output.get("generatedVersionOutput", "")
+            and scope == {
+                "buildTarget": "host binary distribution only",
+                "androidBionicRuntime": "NOT_VERIFIED",
+                "packageBuilt": False,
+                "feedPublishedOrSigned": False,
+                "candidateOrProductionGateEnabled": False,
+                "productionAllowed": False,
+            },
+            "GRADLE_HOST_SOURCE_BUILD_EVIDENCE_MISMATCH")
+
+    doc_path = repo_root / "docs/TOOLCHAIN_SOURCE_GAPS_RU.md"
+    require(doc_path.is_file(), "GRADLE_SOURCE_READINESS_DOC_MISSING")
+    try:
+        doc_text = doc_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise GateError("GRADLE_SOURCE_READINESS_DOC_UNREADABLE") from exc
+    require("gradle-source-build-host-success.json" in doc_text
+            and "SOURCE_BUILD_SUCCESS_HOST_ONLY" in doc_text
+            and "NOT_VERIFIED" in doc_text
+            and "1:9.8.1" in doc_text,
+            "GRADLE_SOURCE_READINESS_DOC_EVIDENCE_MISMATCH")
 
     assessment = read_json(repo_root / "docs/evidence/gradle-source-bootstrap-assessment.json",
                            "GRADLE_SOURCE_BOOTSTRAP_ASSESSMENT_UNREADABLE")
@@ -190,17 +265,18 @@ def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
             == "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip"
             and wrapper.get("distributionSha256Sum") is None
             and wrapper.get("executed") is False
-            and wrapper.get("binaryDistributionDownloaded") is False
+            and wrapper.get("binaryDistributionDownloadedViaWrapper") is False
             and bootstrap.get("gradleExecutableOnPath") is False
-            and bootstrap.get("cachedGradleVersions") == ["8.14.3", "9.3.1"]
-            and bootstrap.get("cachedGradleProvenancePinned") is False
-            and bootstrap.get("cachedGradleVersionsUsed") is False
-            and bootstrap.get("configuredWrapperVersionCached") is False
-            and bootstrap.get("trustedPinnedBootstrapAvailable") is False
+            and bootstrap.get("hostJdkVersion") == "25.0.4.1"
+            and bootstrap.get("trustedPinnedBootstrapAvailable") is True
+            and bootstrap.get("bootstrapVersion") == "9.8.1"
+            and bootstrap.get("bootstrapExpectedSha256")
+            == "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f"
+            and bootstrap.get("bootstrapActualSha256") == bootstrap.get("bootstrapExpectedSha256")
             and bootstrap.get("sourceOnlyBootstrapPathFound") is False
-            and bootstrap.get("sourceBuildStarted") is False
-            and bootstrap.get("decision") == "BLOCKED_NO_TRUSTED_PINNED_BOOTSTRAP",
-            "GRADLE_BOOTSTRAP_ASSESSMENT_MUST_REMAIN_BLOCKED")
+            and bootstrap.get("sourceBuildStarted") is True
+            and bootstrap.get("decision") == "SOURCE_BUILD_SUCCEEDED_HOST_ONLY",
+            "GRADLE_BOOTSTRAP_ASSESSMENT_MISMATCH")
     require(inputs.get("verificationMetadataPath")
             == "gradle-9.8.2/gradle/verification-metadata.xml"
             and inputs.get("verificationMetadataSha256")
@@ -218,15 +294,28 @@ def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
             and runtime.get("activeGradlePlatformMatrixIncludesAndroidBionic") is False
             and runtime.get("androidBionicArm64Runtime") == "NOT_VERIFIED"
             and runtime.get("nativeLoaderAndNeededLibraries")
-            == "UNKNOWN_NO_BUILT_DISTRIBUTION_OR_ELF_TO_AUDIT"
+            == "HOST_DISTRIBUTION_BUILT; ARM64/BIONIC ELF, native-loader, and DT_NEEDED audit NOT_PERFORMED"
             and runtime.get("deviceProof") == "NOT_RUN"
             and decision.get("result")
-            == "NO_REPRODUCIBLE_SOURCE_ONLY_BOOTSTRAP_IN_CURRENT_ENVIRONMENT"
-            and decision.get("sourceBuildComplete") is False
+            == "SOURCE_BUILD_SUCCESS_HOST_ONLY"
+            and decision.get("sourceBuildComplete") is True
+            and decision.get("sourceBuildTarget") == "host binary distribution only"
             and decision.get("packageBuilt") is False
             and decision.get("candidateEligible") is False
             and decision.get("androidRuntimeQualified") is False
-            and decision.get("productionAllowed") is False,
+            and decision.get("productionAllowed") is False
+            and assessment.get("hostSourceBuild", {}).get("result")
+            == "SOURCE_BUILD_SUCCESS_HOST_ONLY"
+            and assessment.get("hostSourceBuild", {}).get("evidencePath")
+            == "docs/evidence/gradle-source-build-host-success.json"
+            and assessment.get("hostSourceBuild", {}).get("runId") == 40079300326
+            and assessment.get("hostSourceBuild", {}).get("artifactId") == 12554961307
+            and assessment.get("hostSourceBuild", {}).get("artifactExpiresAt") == "2026-10-31"
+            and assessment.get("hostSourceBuild", {}).get("outputDistribution", {}).get("sha256")
+            == output.get("sha256")
+            and assessment.get("hostSourceBuild", {}).get("localOutputVerification", "").startswith("NOT_PERFORMED")
+            and decision.get("hostSourceBuildEvidencePath")
+            == "docs/evidence/gradle-source-build-host-success.json",
             "GRADLE_ANDROID_BIONIC_AND_PACKAGE_GATES_MUST_REMAIN_CLOSED")
 
 
@@ -290,7 +379,8 @@ def main() -> int:
     verify_recipe_inputs(repo_root, manifest, source_root)
     verify_closure_inventories(repo_root, source_root, manifest)
     print("TOOLCHAIN_SOURCE_READINESS_INVENTORY_OK profiles=4 reference_closures=3 "
-          "package_build=NOT_RUN signed_feed=NOT_CREATED android=NOT_RUN "
+          "gradle_source_build=HOST_ONLY_SUCCESS package_build=NOT_RUN "
+          "signed_feed=NOT_CREATED android=NOT_RUN "
           "qualified=false production=false")
     return 0
 

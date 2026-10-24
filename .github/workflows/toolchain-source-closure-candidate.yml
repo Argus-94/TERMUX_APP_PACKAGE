@@ -20,6 +20,7 @@ on:
       - toolchain-source-readiness-inventory.json
       - docs/evidence/gradle-source-bootstrap-inspection.json
       - docs/evidence/gradle-source-bootstrap-assessment.json
+      - docs/evidence/gradle-source-build-host-success.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
   pull_request:
     branches:
@@ -39,6 +40,7 @@ on:
       - toolchain-source-readiness-inventory.json
       - docs/evidence/gradle-source-bootstrap-inspection.json
       - docs/evidence/gradle-source-bootstrap-assessment.json
+      - docs/evidence/gradle-source-build-host-success.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
 
 permissions:
@@ -107,7 +109,7 @@ jobs:
               print(f"- `{name}`: candidate eligible = `{str(profile['candidateEligible']).lower()}`; status = {profile['status']}")
           PY
             echo
-            echo 'Build / binary audit / signed APT / artifact / Android install / rollback: NOT RUN. Production publication and app-side installation remain blocked.'
+            echo 'Package build / binary candidate audit / signed APT / candidate artifact / Android install / rollback: NOT RUN. The separate Gradle 9.8.2 source-build artifact is host-only; production publication and app-side installation remain blocked.'
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Recheck pinned Gradle source ZIP without running the wrapper
         shell: bash
@@ -130,7 +132,8 @@ jobs:
             echo
             echo '- Source archive checksum and ZIP CRC: PASS.'
             echo '- Wrapper points to a prebuilt Gradle 9.8.1 binary distribution without distributionSha256Sum.'
-            echo '- Wrapper execution, binary download, source build, package, feed, Android runtime, and qualification: NOT RUN.'
+            echo '- This archive-inspection step did not execute the wrapper or run a source build; a separate host-only Gradle 9.8.2 source-build result is recorded in `docs/evidence/gradle-source-build-host-success.json`.'
+            echo '- Package, feed, Android/Bionic runtime, and qualification: NOT RUN.'
             echo
             cat "$report"
           } >> "$GITHUB_STEP_SUMMARY"
@@ -152,7 +155,7 @@ jobs:
             echo
             echo '- The v9.8.2 contributor guide hash and documented source-build command match the assessment.'
             echo '- The documented command invokes the wrapper; this job did not run it or fetch any Gradle binary distribution.'
-            echo '- Source build, package, feed signing, Android/Bionic runtime, and qualification remain NOT RUN.'
+            echo '- A separate CI run built the host-only distribution using a verified build-only bootstrap; package, feed signing, Android/Bionic runtime, and qualification remain NOT RUN.'
           } >> "$GITHUB_STEP_SUMMARY"
           rm -f -- "$guide"
       - name: Remove only this job's temporary source checkout
