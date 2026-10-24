@@ -416,16 +416,26 @@ class Audit:
             bad = archive.testzip()
             if bad is not None:
                 raise AuditError("GRADLE_BOOTSTRAP_CRC_FAILURE", f"Gradle bootstrap ZIP CRC failure at {bad}")
+            launcher_entries = [info for info in archive.infolist() if info.filename == "gradle-8.14.3/bin/gradle"]
+            if len(launcher_entries) != 1:
+                raise AuditError("GRADLE_EXECUTABLE_MISSING", f"Expected exactly one Gradle launcher in the verified ZIP; found {len(launcher_entries)}")
+            launcher_mode = (launcher_entries[0].external_attr >> 16) & 0o777
+            if not (launcher_mode & 0o111):
+                raise AuditError("GRADLE_LAUNCHER_MODE_MISSING", f"Verified archive launcher lacks executable bits: mode={oct(launcher_mode)}")
             archive.extractall(gradle_root)
         gradle = gradle_root / "gradle-8.14.3/bin/gradle"
+        os.chmod(gradle, launcher_mode)
         if not gradle.is_file() or not os.access(gradle, os.X_OK):
-            raise AuditError("GRADLE_EXECUTABLE_MISSING", "Explicit verified Gradle executable is absent")
+            raise AuditError("GRADLE_EXECUTABLE_MISSING", "Explicit verified Gradle executable is absent after restoring the archive mode")
         self.data["bootstrap"].update({
             "actualSha256": actual_hash,
             "sidecarSha256": sidecar_hash,
             "sizeBytes": gradle_zip.stat().st_size,
             "verified": True,
             "explicitBinaryUsed": True,
+            "launcherArchiveMode": oct(launcher_mode),
+            "launcherExecutableBitRestoredAfterPythonZipExtraction": True,
+            "extractorNote": "Python zipfile.extractall does not preserve Unix executable permissions; mode was restored from the already SHA-256-verified archive entry.",
         })
         self.run("explicit_gradle_version", [str(gradle), "--version"], timeout=120)
         version_text = (self.logs / "explicit_gradle_version.log").read_text(encoding="utf-8", errors="replace")
