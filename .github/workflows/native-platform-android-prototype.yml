@@ -1,0 +1,81 @@
+name: native-platform Android core cross-build prototype (not a package)
+
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .github/workflows/native-platform-android-prototype.yml
+      - scripts/build-native-platform-android-prototype.py
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-platform-android-prototype-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android-core-prototype:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Temurin JDK 17 for upstream JNI header generation
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+          check-latest: false
+
+      - name: Build pinned Android-targeted core JNI prototype
+        id: cross_build
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -Eeuo pipefail
+          python3 -u scripts/build-native-platform-android-prototype.py \
+            --output "$RUNNER_TEMP/native-platform-android-prototype-artifact"
+
+      - name: Summarize prototype evidence
+        if: always() && steps.cross_build.outcome != 'skipped'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          evidence="$RUNNER_TEMP/native-platform-android-prototype-artifact/evidence.json"
+          if [ -f "$evidence" ]; then
+            python3 - "$evidence" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, pathlib, sys
+          e = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print("## Native-platform Android core prototype")
+          print()
+          print(f"**Outcome:** `{e.get('outcome')}` — **PROTOTYPE_ONLY**")
+          print()
+          print(f"**Source:** `{e['source'].get('actualCommit') or e['source']['expectedCommit']}`; target `{e['target']['triple']}`")
+          if e.get("elfAudit", {}).get("status") == "PASS":
+              print(f"**ELF:** AArch64; DT_NEEDED `{', '.join(e['elfAudit']['needed'])}`; SHA-256 `{e['elfAudit']['sha256']}`")
+          if e.get("blocker"):
+              print(f"**First blocker:** `{e['blocker']['message']}`")
+          print()
+          print("No package/feed input, Android/Bionic runtime test, or curses integration is claimed. See the short-retention artifact evidence and logs.")
+          PY
+          fi
+
+      - name: Upload prototype, machine-readable evidence, license and logs (3-day retention)
+        if: always() && steps.cross_build.outcome != 'skipped'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: native-platform-android-core-prototype-${{ github.run_id }}
+          path: ${{ runner.temp }}/native-platform-android-prototype-artifact/
+          if-no-files-found: error
+          retention-days: 3
