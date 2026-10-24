@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "assessedBranch": "work/bootstrap-compatibility-20261019",
+  "assessedCommit": "4756f7c63b433aa945224ad5fba9593d546e7ef3",
+  "result": "BLOCKED_NO_REPRODUCIBLE_SOURCE_GROUNDED_GRADLE_PACKAGE_RECIPE",
+  "requestedCandidate": {
+    "package": "gradle",
+    "versionUnderReview": "9.8.2",
+    "architecture": "aarch64",
+    "targetRuntime": "Android/Bionic",
+    "testOnly": true
+  },
+  "verifiedInputs": {
+    "officialSourceArchive": {
+      "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+      "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+      "sizeBytes": 88741444,
+      "localChecksumReverified": true
+    },
+    "sourceBuiltHostDistribution": {
+      "filename": "gradle-9.8.2-bin.zip",
+      "sha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+      "sizeBytes": 151620051,
+      "localChecksumReverified": true,
+      "buildRunId": 40079300326,
+      "buildRunUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326",
+      "buildCommit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+      "scope": "Ubuntu host-only distribution; not an Android/Bionic package input",
+      "buildOnlyBootstrap": {
+        "version": "9.8.1",
+        "sha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+        "includedInPayload": false
+      }
+    }
+  },
+  "blockers": [
+    {
+      "id": "PACKAGE_RECIPE_AND_VERSION_MISMATCH",
+      "evidence": "The pinned Termux reference recipe is gradle 1:9.8.1 and installs the prebuilt gradle-9.8.1-bin.zip (SHA-256 dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f). The repository has no Gradle package-builder kit or source-grounded Gradle package recipe. The separate Gradle 9.8.2 source build produces only a host distribution and is not a replacement package recipe/version by implication.",
+      "references": [
+        "toolchain-source-readiness-inventory.json#/profiles/gradle/upstreamRecipe",
+        "toolchain-source-readiness-inventory.json#/profiles/gradle/sourceArchiveResearchPin",
+        ".github/workflows/gradle-source-build-candidate.yml"
+      ]
+    },
+    {
+      "id": "NATIVE_PLATFORM_DEPENDENCY_PROVENANCE_INCOMPLETE",
+      "evidence": "The verified Gradle 9.8.2 source archive declares net.rubygrapefruit:native-platform:0.22-milestone-29 in gradle/dependency-management/distribution.versions.toml and uses it as a runtime API dependency in platforms/core-runtime/native/build.gradle.kts. The official gradle/verification-metadata.xml contains 88 verified components and 98 verified artifacts but no native-platform component or artifact checksum. The Gradle source archive contains Gradle's Java integration code, not the separate native-platform native-library source project. The source-built distribution contains Linux/AArch64 native-platform JARs with glibc-linked .so payloads; the native-platform binary JARs inspected contain no embedded license/notice files. The dependency's exact artifact/source hashes, license notices and a Bionic-compatible native build are therefore not established by this source-build evidence.",
+      "references": [
+        "docs/evidence/gradle-source-bootstrap-assessment.json#/sourceBuildInputs",
+        "docs/evidence/gradle-source-build-host-success.json#/source/inspection",
+        "official Gradle 9.8.2 source archive: gradle-9.8.2/gradle/dependency-management/distribution.versions.toml (nativePlatform, lines 42 and 149)",
+        "official Gradle 9.8.2 source archive: gradle-9.8.2/platforms/core-runtime/native/build.gradle.kts (line 19)"
+      ],
+      "nativePlatform": {
+        "coordinate": "net.rubygrapefruit:native-platform:0.22-milestone-29",
+        "versionDeclared": true,
+        "artifactChecksumInGradleVerificationMetadata": false,
+        "separateNativeLibrarySourceIncludedInGradleSourceArchive": false,
+        "distributionJars": [
+          "native-platform-linux-aarch64-0.22-milestone-29.jar",
+          "native-platform-linux-aarch64-ncurses5-0.22-milestone-29.jar",
+          "native-platform-linux-aarch64-ncurses6-0.22-milestone-29.jar"
+        ],
+        "androidBionicCompatibility": "NOT_VERIFIED"
+      }
+    },
+    {
+      "id": "NATIVE_LIBRARY_REMOVAL_IS_NOT_A_PACKAGE_RECIPE",
+      "evidence": "The ARM64 fallback workflow removes Linux/AArch64 .so ZIP entries only from copied native-platform JARs for a bounded smoke test on Ubuntu ARM64 with glibc and Temurin JDK 17. It verifies the original distribution remains unchanged. The removal is not part of a Gradle package recipe or reproducible package diff, and the smoke does not demonstrate that all required Gradle operations work without native-platform or that Android/Bionic works. Whether every required operation can safely fall back without the native library remains unproven; the native-platform loader has native-library initialization paths.",
+      "references": [
+        ".github/workflows/gradle-source-build-candidate.yml:521-755",
+        ".github/workflows/gradle-source-build-candidate.yml:905-916",
+        "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40085820604"
+      ],
+      "smokeScope": "ARM64 Linux with glibc only; not Android/Bionic",
+      "packagePatchOrRemovalRecipePresent": false
+    },
+    {
+      "id": "EXISTING_82_PACKAGE_COHORT_MUST_REMAIN_UNCHANGED",
+      "evidence": "The existing signed test-only aggregate is locked to an 80-package base plus exactly two source-built companions and exact existing roots. Its builder enforces packageCount=82 and exactly those two new package identities. Gradle is not one of the locked 13 roots. Adding Gradle to that aggregate would violate its current package-set contract; the cohort remains unchanged.",
+      "references": [
+        "bootstrap-compatible-candidate-inputs.json#/requestedRoots",
+        "scripts/build-bootstrap-compatible-candidate.py:93-116",
+        ".github/workflows/bootstrap-compatibility-aggregate.yml:71-75"
+      ]
+    }
+  ],
+  "actionsNotTaken": {
+    "gradleDebBuilt": false,
+    "nativePlatformLibrariesRemovedFromPackage": false,
+    "gradleCandidateTestFeedCreatedOrSigned": false,
+    "gradleCandidateAptSimulationRun": false,
+    "gradlePackageInstalled": false,
+    "gradleAndroidDeviceTestsRun": false,
+    "productionFeedOrPagesPublished": false,
+    "existing82PackageCohortChanged": false,
+    "candidateOrProductionGateOpened": false
+  },
+  "gates": {
+    "candidateEligible": false,
+    "androidBionicRuntime": "NOT_VERIFIED",
+    "packageInstallOrDeviceTests": "NOT_RUN",
+    "qualified": false,
+    "productionAllowed": false
+  },
+  "requiredInputsBeforeReconsideration": [
+    "A pinned, source/licence-audited native-platform dependency with verified artifact hashes and either a source-built Bionic-compatible native implementation or a documented, tested Gradle runtime mode that does not require the native library.",
+    "A version-reconciled, reproducible Gradle package recipe that records every patch/removal, exact source and dependency inputs, payload paths, license notices, ELF/DT_NEEDED results, and package dependencies.",
+    "A separate test-only signed feed and exact APT simulation that preserve the existing 82-package cohort unchanged unless a specific dependency addition is justified.",
+    "ARM64 Android/Bionic device proof for native loading, file watching on/off, daemon/process lifecycle, and a real project build before any qualification claim."
+  ]
+}
