@@ -166,6 +166,69 @@ def verify_recipe_inputs(repo_root: pathlib.Path, manifest: dict[str, Any],
             and evidence.get("gates", {}).get("productionAllowed") is False,
             "GRADLE_SOURCE_BOOTSTRAP_MUST_REMAIN_BLOCKED")
 
+    assessment = read_json(repo_root / "docs/evidence/gradle-source-bootstrap-assessment.json",
+                           "GRADLE_SOURCE_BOOTSTRAP_ASSESSMENT_UNREADABLE")
+    require(profiles["gradle"].get("sourceBuildAssessment") == assessment,
+            "GRADLE_SOURCE_BOOTSTRAP_ASSESSMENT_EVIDENCE_MISMATCH")
+    bootstrap = assessment.get("bootstrapEnvironment", {})
+    guide = assessment.get("source", {})
+    wrapper = assessment.get("wrapper", {})
+    inputs = assessment.get("sourceBuildInputs", {})
+    runtime = assessment.get("targetRuntime", {})
+    decision = assessment.get("decision", {})
+    require(guide.get("gradleVersion") == "9.8.2"
+            and guide.get("sourceArchiveSha256") == gradle_source.get("sha256")
+            and guide.get("officialBuildGuideUrl")
+            == "https://raw.githubusercontent.com/gradle/gradle/v9.8.2/CONTRIBUTING.md"
+            and guide.get("officialBuildGuideSha256")
+            == "ecd3a59475130cf9376b0050408e47aacb7a78ab83182fd17c2ef0f362254751"
+            and guide.get("officialDistributionBuildCommand")
+            == "./gradlew :distributions-full:binDistributionZip"
+            and guide.get("officialBuildUsesCommittedWrapper") is True,
+            "GRADLE_OFFICIAL_SOURCE_BUILD_INSTRUCTIONS_MISMATCH")
+    require(wrapper.get("distributionUrl")
+            == "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip"
+            and wrapper.get("distributionSha256Sum") is None
+            and wrapper.get("executed") is False
+            and wrapper.get("binaryDistributionDownloaded") is False
+            and bootstrap.get("gradleExecutableOnPath") is False
+            and bootstrap.get("cachedGradleVersions") == ["8.14.3", "9.3.1"]
+            and bootstrap.get("cachedGradleProvenancePinned") is False
+            and bootstrap.get("cachedGradleVersionsUsed") is False
+            and bootstrap.get("configuredWrapperVersionCached") is False
+            and bootstrap.get("trustedPinnedBootstrapAvailable") is False
+            and bootstrap.get("sourceOnlyBootstrapPathFound") is False
+            and bootstrap.get("sourceBuildStarted") is False
+            and bootstrap.get("decision") == "BLOCKED_NO_TRUSTED_PINNED_BOOTSTRAP",
+            "GRADLE_BOOTSTRAP_ASSESSMENT_MUST_REMAIN_BLOCKED")
+    require(inputs.get("verificationMetadataPath")
+            == "gradle-9.8.2/gradle/verification-metadata.xml"
+            and inputs.get("verificationMetadataSha256")
+            == "d9f3cb20522e9a7186160464f818b6635111c71b68d78084527a36e5180fa67e"
+            and inputs.get("verifiedComponentCount") == 88
+            and inputs.get("verifiedArtifactCount") == 98
+            and inputs.get("sha256MetadataCount") == 94
+            and inputs.get("pgpMetadataCount") == 4
+            and inputs.get("repositoriesObservedInBuildSettings")
+            == ["mavenCentral()", "gradlePluginPortal()"]
+            and inputs.get("dependencyResolutionIsSelfContainedInSourceArchive") is False,
+            "GRADLE_SOURCE_BUILD_INPUTS_MISMATCH")
+    require(runtime.get("gradleJvmRange") == "17-27"
+            and runtime.get("bundledOpenJdk17VersionCheck") == "PASS_VERSION_RANGE_ONLY"
+            and runtime.get("activeGradlePlatformMatrixIncludesAndroidBionic") is False
+            and runtime.get("androidBionicArm64Runtime") == "NOT_VERIFIED"
+            and runtime.get("nativeLoaderAndNeededLibraries")
+            == "UNKNOWN_NO_BUILT_DISTRIBUTION_OR_ELF_TO_AUDIT"
+            and runtime.get("deviceProof") == "NOT_RUN"
+            and decision.get("result")
+            == "NO_REPRODUCIBLE_SOURCE_ONLY_BOOTSTRAP_IN_CURRENT_ENVIRONMENT"
+            and decision.get("sourceBuildComplete") is False
+            and decision.get("packageBuilt") is False
+            and decision.get("candidateEligible") is False
+            and decision.get("androidRuntimeQualified") is False
+            and decision.get("productionAllowed") is False,
+            "GRADLE_ANDROID_BIONIC_AND_PACKAGE_GATES_MUST_REMAIN_CLOSED")
+
 
 def verify_closure_inventories(repo_root: pathlib.Path, source_root: pathlib.Path,
                                manifest: dict[str, Any]) -> None:

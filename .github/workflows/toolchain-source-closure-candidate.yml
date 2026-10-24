@@ -19,6 +19,7 @@ on:
       - toolchain-candidate-source-closures/**
       - toolchain-source-readiness-inventory.json
       - docs/evidence/gradle-source-bootstrap-inspection.json
+      - docs/evidence/gradle-source-bootstrap-assessment.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
   pull_request:
     branches:
@@ -37,6 +38,7 @@ on:
       - toolchain-candidate-source-closures/**
       - toolchain-source-readiness-inventory.json
       - docs/evidence/gradle-source-bootstrap-inspection.json
+      - docs/evidence/gradle-source-bootstrap-assessment.json
       - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
 
 permissions:
@@ -133,6 +135,26 @@ jobs:
             cat "$report"
           } >> "$GITHUB_STEP_SUMMARY"
           rm -f -- "$archive" "$sidecar"
+      - name: Verify official Gradle source-build guide without fetching Gradle binaries
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          guide="$RUNNER_TEMP/gradle-9.8.2-CONTRIBUTING.md"
+          curl --fail --location --silent --show-error --retry 2 --retry-all-errors --max-time 60 \
+            --output "$guide" https://raw.githubusercontent.com/gradle/gradle/v9.8.2/CONTRIBUTING.md
+          printf '%s  %s\n' \
+            ecd3a59475130cf9376b0050408e47aacb7a78ab83182fd17c2ef0f362254751 "$guide" \
+            | sha256sum --check --status
+          grep -Fq './gradlew :distributions-full:binDistributionZip' "$guide"
+          grep -Fq '**version 25**' "$guide"
+          {
+            echo '## Official Gradle source-build instruction (pinned documentation only)'
+            echo
+            echo '- The v9.8.2 contributor guide hash and documented source-build command match the assessment.'
+            echo '- The documented command invokes the wrapper; this job did not run it or fetch any Gradle binary distribution.'
+            echo '- Source build, package, feed signing, Android/Bionic runtime, and qualification remain NOT RUN.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f -- "$guide"
       - name: Remove only this job's temporary source checkout
         if: always()
         shell: bash
