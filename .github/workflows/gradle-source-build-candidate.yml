@@ -493,3 +493,458 @@ jobs:
           path: ${{ runner.temp }}/gradle-source-build-candidate-artifact/
           if-no-files-found: error
           retention-days: 7
+
+  native-fallback-smoke-aarch64:
+    name: Gradle 9.8.2 ARM64 native fallback smoke (glibc only)
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019'
+    needs: source-build-host-only
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Download the verified source-built distribution artifact
+        id: download_distribution
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: gradle-source-build-host-only-${{ github.run_id }}
+          path: ${{ runner.temp }}/gradle-source-build-candidate-artifact
+
+      - name: Set up Eclipse Temurin JDK 17
+        id: setup_java17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+          check-latest: false
+
+      - name: Run isolated ARM64 native-fallback smoke and write evidence
+        id: native_fallback_smoke
+        if: always()
+        shell: bash
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_REF: ${{ github.ref }}
+          RUN_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import platform
+          import re
+          import shutil
+          import subprocess
+          import sys
+          import zipfile
+
+          runner_temp = pathlib.Path(os.environ["RUNNER_TEMP"])
+          input_dir = runner_temp / "gradle-source-build-candidate-artifact"
+          artifact_dir = runner_temp / "gradle-arm64-native-fallback-artifact"
+          logs_dir = artifact_dir / "logs"
+          work_dir = runner_temp / "gradle-arm64-native-fallback-work"
+          artifact_dir.mkdir(parents=True, exist_ok=True)
+          logs_dir.mkdir(parents=True, exist_ok=True)
+          failures = []
+          checks = {}
+          warnings = {}
+          mutation = None
+          source_evidence = None
+          archive = input_dir / "gradle-9.8.2-bin.zip"
+          evidence_path = artifact_dir / "gradle-arm64-native-fallback-evidence.json"
+          source_evidence_path = input_dir / "gradle-source-build-evidence.json"
+
+          def fail(message):
+              failures.append(str(message))
+              print("FAIL:", message, file=sys.stderr)
+
+          def sha256_file(path):
+              digest = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1024 * 1024), b""):
+                      digest.update(block)
+              return digest.hexdigest()
+
+          def sha256_bytes(data):
+              return hashlib.sha256(data).hexdigest()
+
+          def run(name, command, cwd=None, timeout=300):
+              log_path = logs_dir / (name + ".log")
+              try:
+                  with log_path.open("w", encoding="utf-8") as log:
+                      result = subprocess.run(
+                          command, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
+                          text=True, timeout=timeout, check=False,
+                      )
+                  rc = result.returncode
+              except Exception as exc:
+                  with log_path.open("a", encoding="utf-8") as log:
+                      log.write(f"\nExecution error: {type(exc).__name__}: {exc}\n")
+                  rc = 127
+              output = log_path.read_text(encoding="utf-8", errors="replace")
+              checks[name] = {"exitCode": rc, "log": f"logs/{log_path.name}"}
+              print(f"--- {name} (exit {rc}) ---")
+              print(output[-12000:])
+              if rc != 0:
+                  fail(f"{name} exited {rc}")
+              return rc, output
+
+          def skipped(name, reason):
+              checks[name] = {"exitCode": None, "skipped": reason, "log": None}
+
+          architecture = platform.machine()
+          linux_platform = platform.system() == "Linux"
+          if not linux_platform or architecture not in ("aarch64", "arm64"):
+              fail(f"Expected Linux ARM64 runner; got {platform.system()} {architecture}")
+          architecture_ok = linux_platform and architecture in ("aarch64", "arm64")
+
+          java_home = pathlib.Path(os.environ.get("JAVA_HOME", "/nonexistent"))
+          java_bin = java_home / "bin" / "java"
+          java_rc, java_output = run("java-17-version", [str(java_bin), "-version"])
+          java_ok = (
+              java_rc == 0
+              and bool(re.search(r'version "17(?:[.]|"|-)', java_output))
+              and "Temurin" in java_output
+          )
+          if not java_ok:
+              fail("Expected the configured Eclipse Temurin JDK 17")
+
+          ldd_rc, ldd_output = run("glibc-identification", ["ldd", "--version"])
+          glibc_identified = ldd_rc == 0 and any(marker in ldd_output for marker in ("GLIBC", "GNU libc", "GNU C Library"))
+          if not glibc_identified:
+              fail("Could not positively identify the runner's glibc runtime")
+
+          input_archive_sha = None
+          input_archive_size = None
+          input_ok = False
+          try:
+              if not archive.is_file() or not source_evidence_path.is_file():
+                  raise FileNotFoundError("downloaded source distribution or source evidence is missing")
+              source_evidence = json.loads(source_evidence_path.read_text(encoding="utf-8"))
+              if source_evidence.get("result") != "SOURCE_BUILD_SUCCESS_HOST_ONLY":
+                  raise ValueError("source-build evidence does not report successful host-only build")
+              if source_evidence.get("run", {}).get("commit") != os.environ.get("RUN_SHA"):
+                  raise ValueError("source-build evidence commit differs from this workflow run commit")
+              if source_evidence.get("outputDistribution", {}).get("hostOnly") is not True:
+                  raise ValueError("source-build evidence does not mark the distribution host-only")
+              input_archive_sha = sha256_file(archive)
+              input_archive_size = archive.stat().st_size
+              if input_archive_sha != source_evidence.get("outputDistribution", {}).get("sha256"):
+                  raise ValueError("downloaded archive SHA-256 differs from source-build evidence")
+              if input_archive_size != source_evidence.get("outputDistribution", {}).get("sizeBytes"):
+                  raise ValueError("downloaded archive size differs from source-build evidence")
+              with zipfile.ZipFile(archive) as bundle:
+                  bad_member = bundle.testzip()
+                  if bad_member is not None:
+                      raise ValueError(f"Gradle distribution ZIP CRC check failed at {bad_member}")
+                  names = bundle.namelist()
+                  if len(names) != len(set(names)):
+                      raise ValueError("Gradle distribution contains duplicate ZIP entries")
+                  for name in names:
+                      member = pathlib.PurePosixPath(name)
+                      if member.is_absolute() or ".." in member.parts:
+                          raise ValueError(f"unsafe distribution ZIP member: {name}")
+              shutil.copy2(source_evidence_path, artifact_dir / "gradle-source-build-evidence.json")
+              print(f"Verified input Gradle distribution SHA-256: {input_archive_sha} ({input_archive_size} bytes)")
+              input_ok = True
+          except Exception as exc:
+              fail(f"source distribution verification failed: {type(exc).__name__}: {exc}")
+
+          mutation_ok = False
+          work_root = work_dir / "original-extract"
+          copied_root = work_dir / "fallback-copy"
+          if input_ok:
+              try:
+                  if work_dir.exists():
+                      shutil.rmtree(work_dir)
+                  work_root.mkdir(parents=True)
+                  extract_rc, _ = run("distribution-extract", ["unzip", "-q", str(archive), "-d", str(work_root)])
+                  if extract_rc != 0:
+                      raise RuntimeError("could not extract the verified original distribution")
+                  original_dist = work_root / "gradle-9.8.2"
+                  original_launcher = original_dist / "bin" / "gradle"
+                  if not original_launcher.is_file() or not os.access(original_launcher, os.X_OK):
+                      raise ValueError("verified distribution has no executable gradle launcher")
+                  shutil.copytree(original_dist, copied_root)
+                  copied_launcher = copied_root / "bin" / "gradle"
+                  original_archive_sha_before = sha256_file(archive)
+                  source_jar_paths = sorted((original_dist / "lib").glob("native-platform-linux-aarch64-*.jar"))
+                  copied_jar_paths = sorted((copied_root / "lib").glob("native-platform-linux-aarch64-*.jar"))
+                  if not source_jar_paths or [p.name for p in source_jar_paths] != [p.name for p in copied_jar_paths]:
+                      raise ValueError("expected matching Linux ARM64 native-platform JARs under lib/")
+
+                  jar_records = []
+                  removed_entries = []
+                  for source_jar, copied_jar in zip(source_jar_paths, copied_jar_paths):
+                      with zipfile.ZipFile(source_jar) as before:
+                          infos = before.infolist()
+                          names_before = [info.filename for info in infos]
+                          if len(names_before) != len(set(names_before)):
+                              raise ValueError(f"duplicate entry in {source_jar.name}")
+                          before_hashes = {info.filename: sha256_bytes(before.read(info)) for info in infos}
+                          tmp_jar = copied_jar.with_suffix(copied_jar.suffix + ".tmp")
+                          removed_from_jar = []
+                          with zipfile.ZipFile(tmp_jar, "w") as after:
+                              after.comment = before.comment
+                              for info in infos:
+                                  payload = before.read(info)
+                                  if info.filename.endswith(".so"):
+                                      if "linux-aarch64" not in info.filename:
+                                          raise ValueError(f"refusing to remove non-ARM64 shared object {info.filename}")
+                                      removed_from_jar.append(info.filename)
+                                      removed_entries.append({
+                                          "jar": source_jar.name,
+                                          "entry": info.filename,
+                                          "sha256": sha256_bytes(payload),
+                                          "sizeBytes": len(payload),
+                                      })
+                                      continue
+                                  after.writestr(info, payload)
+                          tmp_jar.replace(copied_jar)
+                      with zipfile.ZipFile(copied_jar) as after:
+                          infos_after = after.infolist()
+                          after_hashes = {info.filename: sha256_bytes(after.read(info)) for info in infos_after}
+                      expected_names = set(before_hashes) - set(removed_from_jar)
+                      if set(after_hashes) != expected_names:
+                          raise ValueError(f"unexpected JAR entry change in {source_jar.name}")
+                      if any(before_hashes[name] != after_hashes[name] for name in expected_names):
+                          raise ValueError(f"retained JAR payload changed in {source_jar.name}")
+                      jar_records.append({
+                          "name": source_jar.name,
+                          "originalSha256": sha256_file(source_jar),
+                          "fallbackCopySha256": sha256_file(copied_jar),
+                          "originalEntryCount": len(before_hashes),
+                          "retainedEntryCount": len(after_hashes),
+                          "removedEntries": removed_from_jar,
+                          "retainedEntryPayloadsByteIdentical": True,
+                      })
+                  if not removed_entries:
+                      raise ValueError("no Linux ARM64 native .so entries were found to disable")
+
+                  original_files = {p.relative_to(original_dist).as_posix(): p for p in original_dist.rglob("*") if p.is_file()}
+                  copied_files = {p.relative_to(copied_root).as_posix(): p for p in copied_root.rglob("*") if p.is_file()}
+                  if set(original_files) != set(copied_files):
+                      raise ValueError("fallback copy has a different file inventory from the fresh extraction")
+                  changed_paths = []
+                  expected_changed = {p.relative_to(original_dist).as_posix() for p in source_jar_paths}
+                  for relative in sorted(original_files):
+                      if sha256_file(original_files[relative]) != sha256_file(copied_files[relative]):
+                          changed_paths.append(relative)
+                  if set(changed_paths) != expected_changed:
+                      raise ValueError(f"unexpected changed distribution files: {changed_paths}")
+                  original_archive_sha_after = sha256_file(archive)
+                  if original_archive_sha_before != input_archive_sha or original_archive_sha_after != input_archive_sha:
+                      raise ValueError("uploaded original distribution archive was modified")
+                  mutation = {
+                      "operation": "removed only Linux ARM64 native .so entries from copied native-platform JARs",
+                      "originalDistributionArchiveSha256": input_archive_sha,
+                      "originalDistributionArchiveSha256AfterMutation": original_archive_sha_after,
+                      "originalArchiveUnmodified": True,
+                      "targetJarCount": len(jar_records),
+                      "jars": jar_records,
+                      "removedNativeSharedObjects": removed_entries,
+                      "changedDistributionFiles": changed_paths,
+                      "onlyTargetJarsChanged": set(changed_paths) == expected_changed,
+                      "allRetainedJarEntryPayloadsByteIdentical": all(r["retainedEntryPayloadsByteIdentical"] for r in jar_records),
+                  }
+                  (artifact_dir / "native-jar-mutation-manifest.json").write_text(
+                      json.dumps(mutation, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+                  )
+                  mutation_ok = True
+                  print(f"Removed {len(removed_entries)} ARM64 Linux native .so entries from {len(jar_records)} copied JARs; original archive unchanged.")
+              except Exception as exc:
+                  fail(f"fallback-copy preparation or integrity check failed: {type(exc).__name__}: {exc}")
+          else:
+              skipped("distribution-extract", "source distribution verification failed")
+
+          network_probe_script = r'''set -Eeuo pipefail
+          if ip -4 route show default | grep -q .; then echo "Unexpected IPv4 default route" >&2; exit 90; fi
+          if ip -6 route show default | grep -q .; then echo "Unexpected IPv6 default route" >&2; exit 91; fi
+          links="$(ip -o link show | awk -F': ' '{print $2}' | sed 's/@.*//')"
+          if [ "$links" != "lo" ]; then echo "Unexpected network interfaces: $links" >&2; exit 92; fi
+          echo NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE'''
+          netns_probe_rc = None
+          if architecture_ok and java_ok and mutation_ok:
+              netns_probe_rc, _ = run("network-namespace-probe", [
+                  "sudo", "-n", "unshare", "--net", "--", "env",
+                  "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                  "bash", "-c", network_probe_script,
+              ])
+          else:
+              skipped("network-namespace-probe", "ARM64, JDK 17, or verified fallback-copy prerequisite failed")
+
+          command_names = ["gradle-version", "default-help", "default-smoke", "no-watch-fs-help", "no-watch-fs-smoke"]
+          if architecture_ok and java_ok and mutation_ok and netns_probe_rc == 0:
+              project_dir = work_dir / "smoke-project"
+              project_dir.mkdir(parents=True, exist_ok=True)
+              (project_dir / "settings.gradle").write_text("rootProject.name = 'gradle-arm64-native-fallback-smoke'\n", encoding="utf-8")
+              (project_dir / "build.gradle").write_text(
+                  "plugins { id 'base' }\n"
+                  "tasks.register('smoke') { doLast { println('NATIVE_FALLBACK_SMOKE_OK') } }\n",
+                  encoding="utf-8",
+              )
+              gradle_user_home = work_dir / "gradle-user-home"
+              gradle_user_home.mkdir(parents=True, exist_ok=True)
+              run_in_netns_script = r'''set -Eeuo pipefail
+          project_dir="$1"
+          gradle_bin="$2"
+          gradle_home="$3"
+          shift 3
+          if ip -4 route show default | grep -q . || ip -6 route show default | grep -q .; then
+            echo "Network namespace unexpectedly has a default route" >&2
+            exit 90
+          fi
+          links="$(ip -o link show | awk -F': ' '{print $2}' | sed 's/@.*//')"
+          if [ "$links" != "lo" ]; then echo "Network namespace has external interfaces: $links" >&2; exit 92; fi
+          echo NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE
+          cd "$project_dir"
+          export GRADLE_USER_HOME="$gradle_home"
+          export HTTP_PROXY= HTTPS_PROXY= ALL_PROXY= http_proxy= https_proxy= all_proxy=
+          exec "$gradle_bin" "$@"'''
+              java_bin_dir = str(java_home / "bin")
+              clean_path = java_bin_dir + ":/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              gradle_cmd_base = ["--no-daemon", "--offline", "--max-workers=1", "-Dorg.gradle.jvmargs=-Xmx512m"]
+              tests = [
+                  ("gradle-version", ["--version"]),
+                  ("default-help", gradle_cmd_base + ["help"]),
+                  ("default-smoke", gradle_cmd_base + ["smoke"]),
+                  ("no-watch-fs-help", ["--no-watch-fs"] + gradle_cmd_base + ["help"]),
+                  ("no-watch-fs-smoke", ["--no-watch-fs"] + gradle_cmd_base + ["smoke"]),
+              ]
+              for name, args in tests:
+                  command = [
+                      "sudo", "-n", "unshare", "--net", "--", "setpriv",
+                      f"--reuid={os.getuid()}", f"--regid={os.getgid()}", "--clear-groups", "env",
+                      f"JAVA_HOME={java_home}", f"GRADLE_USER_HOME={gradle_user_home}",
+                      f"HOME={os.environ.get('HOME', '/tmp')}", f"PATH={clean_path}",
+                      "bash", "-c", run_in_netns_script, "gradle-smoke",
+                      str(project_dir), str(copied_launcher), str(gradle_user_home), *args,
+                  ]
+                  run(name, command, timeout=300)
+          else:
+              reason = "required ARM64/JDK17/mutation/network-isolation prerequisite failed"
+              for name in command_names:
+                  skipped(name, reason)
+
+          warning_text = "There is no native integration with this operating environment"
+          default_logs = [
+              (logs_dir / "default-help.log"),
+              (logs_dir / "default-smoke.log"),
+          ]
+          warning_matches = [p.name for p in default_logs if p.is_file() and warning_text in p.read_text(encoding="utf-8", errors="replace")]
+          warnings["safeFallbackWarningObservedInDefaultFileWatching"] = bool(warning_matches)
+          warnings["safeFallbackWarningText"] = warning_text
+          warnings["logsContainingWarning"] = warning_matches
+          if netns_probe_rc == 0 and not warning_matches:
+              fail("expected Gradle's safe native-integration fallback warning was not observed in default-watch logs")
+
+          command_ok = all(checks.get(name, {}).get("exitCode") == 0 for name in command_names)
+          command_outputs = {
+              name: (logs_dir / (name + ".log")).read_text(encoding="utf-8", errors="replace")
+              if (logs_dir / (name + ".log")).is_file() else ""
+              for name in command_names
+          }
+          if checks.get("gradle-version", {}).get("exitCode") == 0 and not any(
+              line.strip() == "Gradle 9.8.2" for line in command_outputs["gradle-version"].splitlines()
+          ):
+              fail("ARM64 fallback-copy launcher did not report exactly Gradle 9.8.2")
+          for name in ("default-help", "no-watch-fs-help"):
+              if checks.get(name, {}).get("exitCode") == 0 and ("BUILD SUCCESSFUL" not in command_outputs[name] or ":help" not in command_outputs[name]):
+                  fail(f"{name} did not show successful help task execution")
+          for name in ("default-smoke", "no-watch-fs-smoke"):
+              if checks.get(name, {}).get("exitCode") == 0 and ("BUILD SUCCESSFUL" not in command_outputs[name] or "NATIVE_FALLBACK_SMOKE_OK" not in command_outputs[name]):
+                  fail(f"{name} did not show successful smoke task execution")
+
+          source_run = source_evidence.get("run", {}) if isinstance(source_evidence, dict) else {}
+          if not isinstance(source_run, dict):
+              source_run = {}
+          evidence = {
+              "schemaVersion": 1,
+              "result": "ARM64_NATIVE_FALLBACK_SMOKE_PASSED" if not failures and command_ok and mutation_ok else "ARM64_NATIVE_FALLBACK_SMOKE_FAILED_OR_NOT_VERIFIED",
+              "run": {
+                  "url": os.environ.get("RUN_URL"),
+                  "ref": os.environ.get("RUN_REF"),
+                  "commit": os.environ.get("RUN_SHA"),
+              },
+              "runner": {
+                  "image": "ubuntu-24.04-arm",
+                  "operatingSystem": platform.system(),
+                  "machineArchitecture": architecture,
+                  "glibcIdentified": glibc_identified,
+                  "glibcIdentificationLog": "logs/glibc-identification.log",
+                  "javaVersionOutput": java_output,
+                  "javaSetupExpected": "Eclipse Temurin JDK 17",
+                  "sourceBuildRunner": "ubuntu-24.04 x86_64; preserved existing host-build job",
+              },
+              "inputDistribution": {
+                  "producerRun": source_run.get("url"),
+                  "producerCommit": source_run.get("commit"),
+                  "filename": archive.name,
+                  "sha256": input_archive_sha,
+                  "sizeBytes": input_archive_size,
+                  "matchesProducerEvidence": input_ok,
+                  "originalArchiveUnmodified": mutation.get("originalArchiveUnmodified") if mutation else False,
+              },
+              "fallbackMutation": mutation,
+              "networkIsolation": {
+                  "mechanism": "Linux network namespace created with sudo unshare --net; no default routes and loopback-only interface required for probe and each Gradle invocation",
+                  "probeExitCode": netns_probe_rc,
+                  "verifiedForEveryGradleInvocation": all(
+                      checks.get(name, {}).get("exitCode") == 0
+                      and "NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE" in (logs_dir / (name + ".log")).read_text(encoding="utf-8", errors="replace")
+                      for name in command_names
+                      if (logs_dir / (name + ".log")).is_file()
+                  ) and command_ok,
+              },
+              "commands": checks,
+              "fallbackWarning": warnings,
+              "scope": {
+                  "runtimeTest": "Ubuntu Linux ARM64 with glibc; Gradle native Linux ARM64 .so entries removed only in a copied distribution",
+                  "androidBionicRuntime": "NOT_VERIFIED",
+                  "candidateEligible": False,
+                  "packageAptEligible": False,
+                  "feedEligible": False,
+                  "packageBuilt": False,
+                  "feedPublishedOrSigned": False,
+                  "productionAllowed": False,
+              },
+              "failures": failures,
+              "artifactFiles": [
+                  "gradle-arm64-native-fallback-evidence.json",
+                  "native-jar-mutation-manifest.json",
+                  "gradle-source-build-evidence.json",
+                  "logs/*.log",
+              ],
+          }
+          evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          summary_lines = [
+              "## Gradle 9.8.2 ARM64 native-fallback smoke — glibc only",
+              "",
+              f"**Result: {evidence['result']}**",
+              "",
+              f"- ARM64 runner: `{architecture}` on `ubuntu-24.04-arm`; JDK 17 check: `{java_ok}`.",
+              f"- Input distribution SHA-256: `{input_archive_sha}`; copied JAR entry integrity: `{bool(mutation and mutation.get('allRetainedJarEntryPayloadsByteIdentical'))}`.",
+              f"- Network namespace probe: `{netns_probe_rc}`; safe fallback warning observed: `{bool(warning_matches)}`.",
+              "- Android/Bionic runtime: **NOT VERIFIED**. Candidate, package, feed, and production eligibility remain false.",
+              f"- [Workflow run and artifacts]({os.environ.get('RUN_URL')})",
+              "",
+              "This test is Ubuntu/glibc ARM64 only; it does not validate Android Bionic.",
+              "",
+          ]
+          with summary.open("a", encoding="utf-8") as stream:
+              stream.write("\n".join(summary_lines))
+          if failures or not command_ok or not mutation_ok:
+              sys.exit(1)
+          PY
+
+      - name: Upload ARM64 native-fallback logs and evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gradle-arm64-native-fallback-${{ github.run_id }}
+          path: ${{ runner.temp }}/gradle-arm64-native-fallback-artifact/
+          if-no-files-found: error
+          retention-days: 7
