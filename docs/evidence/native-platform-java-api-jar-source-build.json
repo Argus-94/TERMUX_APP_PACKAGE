@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "assessment": "SOURCE_BUILD_PASSED_CONTENT_IDENTICAL_CONTAINER_METADATA_DIFFERS",
+  "workflow": {
+    "repository": "Argus-94/TERMUX_APP_PACKAGE",
+    "branch": "work/bootstrap-compatibility-20261019",
+    "codeCommit": "e1ec21afc0688b6e30761a39148fffd766c591e2",
+    "runId": "40090638892",
+    "runUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40090638892",
+    "workflowName": "native-platform Java API JAR provenance audit (not a package)",
+    "artifact": {
+      "name": "native-platform-java-jar-provenance-40090638892",
+      "sha256": "8a8d1717b75426e30e9405cb125e93678b775c7c9764e7741feb44528867a8b5",
+      "sizeBytes": 243436,
+      "zipCrc": "PASS",
+      "retentionDays": 3
+    }
+  },
+  "upstreamSource": {
+    "repository": "https://github.com/gradle/native-platform.git",
+    "tag": "0.22-milestone-29",
+    "commit": "e999afaf8692fb66e9016e0a3b0519a05981753e",
+    "tree": "5995e83b24d7dab4e712be7a1586e131e57bc301",
+    "commitAndTreeMatchedPins": true,
+    "cleanCheckoutBeforeBuild": true,
+    "license": "Apache-2.0",
+    "sourcePatchedByAudit": false
+  },
+  "build": {
+    "requestedTask": ":native-platform:jar",
+    "result": "SUCCESS",
+    "exitCode": 0,
+    "outputPath": "native-platform/build/libs/native-platform-0.22-milestone-29.jar",
+    "outputSha256": "a395d689da962827053f247f4737a9a64440da4d5c08fe8e1ffc5b341cec1773",
+    "outputSizeBytes": 127864,
+    "java": "Temurin 8.0.504",
+    "gradle": {
+      "version": "8.14.3",
+      "distributionUrl": "https://services.gradle.org/distributions/gradle-8.14.3-bin.zip",
+      "expectedAndActualSha256": "bd71102213493060956ec229d946beee57158dbd89d0e62b91bca0fa2c5f3531",
+      "sizeBytes": 137393837,
+      "sidecarMatched": true,
+      "explicitVerifiedBinaryUsed": true
+    },
+    "versionSelection": [
+      "-Pmilestone",
+      "-PnextMilestone=29"
+    ],
+    "dependencyVerification": {
+      "mode": "strict",
+      "enabled": true,
+      "upstreamMetadataUsed": true,
+      "metadataPath": "gradle/verification-metadata.xml",
+      "metadataSha256": "cda1e62b05217e9564093df522680446ef54fac4d2aa3384c6b076d51a8da185",
+      "verifiedArtifactCount": 28,
+      "verifyMetadata": false,
+      "verifySignatures": true,
+      "trustedNetRubygrapefruitGroupRule": true,
+      "nativePlatformExactComponentEntryPresent": false,
+      "disclosure": "The upstream verification policy was preserved without override. It trusts the net.rubygrapefruit group, verifies signatures, and does not verify metadata signatures; this is a source-policy caveat, not a locally weakened setting."
+    },
+    "wrapper": {
+      "distributionUrl": "https://services.gradle.org/distributions/gradle-8.14.3-bin.zip",
+      "distributionSha256SumDeclared": false,
+      "inspectedBeforeGradleExecution": true,
+      "executed": false
+    },
+    "releaseRepositoryConfiguration": {
+      "publishUserNameProperty": "",
+      "publishApiKeyProperty": "",
+      "actualCredentialsSupplied": false,
+      "purpose": "Satisfy the pinned release plugin's configuration-time null checks for the JAR-only task.",
+      "taskGraphPreflightExitCode": 0,
+      "plannedTaskCount": 12,
+      "publishOrUploadTasks": [],
+      "noPublishOrUploadTasks": true,
+      "publishTasksExecuted": false
+    }
+  },
+  "publishedArtifact": {
+    "coordinate": "net.rubygrapefruit:native-platform:0.22-milestone-29",
+    "repository": "https://repo.gradle.org/gradle/libs-releases/net/rubygrapefruit/native-platform/0.22-milestone-29",
+    "jarSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+    "jarSizeBytes": 127864,
+    "officialSha256SidecarMatched": true,
+    "pomSha256": "00023629ba3ae429ecf5cc6c8a2dc25cd3bb265763f7ffd9ba7d8cb7d16ab1fc",
+    "signature": {
+      "verification": "VALID_SIGNATURE_PINNED_OFFICIAL_KEY",
+      "gpgExitCode": 0,
+      "signatureCreatedUtc": "2025-09-04T13:41:25Z",
+      "keyId": "E2F38302C8075E3D",
+      "primaryFingerprint": "1BD97A6A154E7810EE0BC832E2F38302C8075E3D",
+      "keyRetiredDate": "2026-08-08",
+      "gpgReportsRevokedKey": true,
+      "officialKeyReference": "https://gradle.org/keys/",
+      "officialRetirementMeaning": "Superseded, not compromised; Gradle states signatures created while the key was active remain valid.",
+      "signaturePredatesRetirement": true
+    }
+  },
+  "previouslyVerifiedDistribution": {
+    "gradleVersion": "9.8.2",
+    "sourceBuildRunId": "40079300326",
+    "sourceBuildCommit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+    "archiveSha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+    "archiveSizeBytes": 151620051,
+    "archiveZipCrc": "PASS",
+    "embeddedJarPath": "gradle-9.8.2/lib/native-platform-0.22-milestone-29.jar",
+    "embeddedJarSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+    "embeddedJarSizeBytes": 127864,
+    "archivePinRetained": true,
+    "currentOfficialSameVersionRepublishEvidence": "docs/evidence/gradle-9.8.2-distribution-republication.json"
+  },
+  "comparisons": {
+    "sourceBuiltVsPublished": {
+      "byteIdentical": false,
+      "normalizedEntryContentIdentical": true,
+      "leftSha256": "a395d689da962827053f247f4737a9a64440da4d5c08fe8e1ffc5b341cec1773",
+      "rightSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "leftAndRightEntryCount": 143,
+      "contentDifferingEntries": 0,
+      "leftOnlyEntries": 0,
+      "rightOnlyEntries": 0,
+      "metadataDifferingEntries": 143,
+      "metadataOnlyContainerDifference": true
+    },
+    "sourceBuiltVsPreviouslyVerifiedDistributionEmbeddedJar": {
+      "directComparisonPerformed": true,
+      "byteIdentical": false,
+      "normalizedEntryContentIdentical": true,
+      "leftSha256": "a395d689da962827053f247f4737a9a64440da4d5c08fe8e1ffc5b341cec1773",
+      "rightSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "leftAndRightEntryCount": 143,
+      "contentDifferingEntries": 0,
+      "leftOnlyEntries": 0,
+      "rightOnlyEntries": 0,
+      "metadataDifferingEntries": 143,
+      "metadataOnlyContainerDifference": true
+    },
+    "publishedVsPreviouslyVerifiedDistributionEmbeddedJar": {
+      "directComparisonPerformed": true,
+      "byteIdentical": true,
+      "normalizedEntryContentIdentical": true,
+      "sha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "entryCount": 143,
+      "contentDifferingEntries": 0,
+      "metadataDifferingEntries": 0
+    }
+  },
+  "licenseAudit": {
+    "upstreamRootLicensePresent": true,
+    "spdx": "Apache-2.0",
+    "licenseSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "licenseOrNoticeEntriesInJars": {
+      "sourceBuilt": [],
+      "published": []
+    },
+    "noticeFilePresentAtSourceRoot": false,
+    "separateLicenseFileRequiredForAnyFuturePackaging": true
+  },
+  "scopeAndGates": {
+    "onlyJavaApiJarBuilt": true,
+    "debCreated": false,
+    "apkCreated": false,
+    "aptSimulationRun": false,
+    "feedCreated": false,
+    "androidBionicRuntimeVerified": false,
+    "deviceTestsRun": false,
+    "candidateEligibilityChanged": false,
+    "productionAllowed": false
+  }
+}
