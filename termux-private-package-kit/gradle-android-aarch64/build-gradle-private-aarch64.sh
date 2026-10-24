@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 readonly APP_ID='com.karat.aibuilder'
 readonly KIT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly ROOT="$(cd -- "$KIT_DIR/../../.." && pwd)"
+readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"
 readonly MIN_FREE_BYTES=$((3 * 1024 * 1024 * 1024))
 readonly REFERENCE_RECIPE_SHA='7daf2cfa39cc2340fb3efbb16099e9e14bb42f08d03db963b8420ce6fd6332bb'
 readonly PROPERTIES_SHA='238a19b2f29ef5eed5806a21bee8f5a51bc5031e7db3fcc393d831292300b725'
