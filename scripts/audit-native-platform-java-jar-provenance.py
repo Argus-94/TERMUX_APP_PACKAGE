@@ -149,6 +149,17 @@ def compare_jars(left: Path, right: Path) -> dict[str, Any]:
     }
 
 
+def parse_gradle_dry_run_tasks(output: str) -> list[str]:
+    output = re.sub(r"\x1b\[[0-9;]*m", "", output)
+    task_line = re.compile(r"^(?:> Task )?(:[^\s]+)(?:\s+(?:SKIPPED|NO-SOURCE|UP-TO-DATE|FROM-CACHE))?$")
+    tasks = []
+    for line in output.splitlines():
+        match = task_line.match(line.strip())
+        if match:
+            tasks.append(match.group(1))
+    return tasks
+
+
 class Audit:
     def __init__(self, output: Path, work: Path):
         self.output = output.resolve()
@@ -607,8 +618,7 @@ class Audit:
             cwd=source, env=env, timeout=3600, check=False,
         )
         graph_text = graph_log.read_text(encoding="utf-8", errors="replace")
-        graph_text = re.sub(r"\x1b\[[0-9;]*m", "", graph_text)
-        planned_tasks = re.findall(r"^> Task (:\S+)", graph_text, flags=re.MULTILINE)
+        planned_tasks = parse_gradle_dry_run_tasks(graph_text)
         publish_tasks = [
             task for task in planned_tasks
             if task.rsplit(":", 1)[-1].lower().startswith(("publish", "upload"))
