@@ -189,6 +189,14 @@ def read_jar(path: Path, code: str) -> tuple[dict[str, str], list[str]]:
         raise ValueError(code + "_INVALID_ZIP:" + str(exc)) from exc
 
 
+def verify_native_java_jar_layout(path: Path) -> tuple[dict[str, str], list[str]]:
+    content, names = read_jar(path, "NATIVE_JAVA_API_SOURCE_JAR")
+    need(len(content) == 143 and not any(name.lower().endswith((".so", ".dll", ".dylib", ".jnilib"))
+                                         for name in content),
+         "NATIVE_JAVA_API_SOURCE_JAR_LAYOUT_MISMATCH")
+    return content, names
+
+
 def readelf_report(path: Path) -> dict[str, Any]:
     header = subprocess.run(["readelf", "-h", str(path)], check=True, capture_output=True, text=True).stdout
     dynamic = subprocess.run(["readelf", "-d", str(path)], check=True, capture_output=True, text=True).stdout
@@ -352,9 +360,7 @@ def verify_inputs(lock: dict[str, Any], gradle_root: Path, java_root: Path, andr
     verify_native_java_artifact_evidence(je, jpin, gpin)
     source_jar = evidence_file(java_root, je["artifactFiles"]["sourceBuiltJar"],
                                jpin["sourceBuiltJarSha256"], "NATIVE_JAVA_API_SOURCE_JAR")
-    jar_content, jar_names = read_jar(source_jar, "NATIVE_JAVA_API_SOURCE_JAR")
-    need(len(jar_names) == 143 and not any(name.lower().endswith(".so") for name in jar_names),
-         "NATIVE_JAVA_API_SOURCE_JAR_LAYOUT_MISMATCH")
+    jar_content, _ = verify_native_java_jar_layout(source_jar)
     license_file = evidence_file(java_root, je["artifactFiles"]["upstreamLicense"],
                                  jpin["separateApacheLicenseSha256"], "NATIVE_PLATFORM_APACHE_LICENSE")
 

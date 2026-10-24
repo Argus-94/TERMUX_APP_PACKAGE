@@ -126,6 +126,22 @@ class GradleCandidateToolTests(unittest.TestCase):
             ASSEMBLER.verify_native_java_artifact_evidence(
                 dict(evidence, build=bad_build), pin, gradle_pin)
 
+    def test_native_java_jar_layout_counts_files_not_directory_entries(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-jar-layout-") as tmp:
+            jar = Path(tmp) / "native-platform.jar"
+            with zipfile.ZipFile(jar, "w") as archive:
+                for directory in range(10):
+                    archive.writestr(f"pkg{directory}/", b"")
+                for index in range(143):
+                    archive.writestr(f"pkg{index % 10}/entry{index}.class", b"class-bytes")
+            content, names = ASSEMBLER.verify_native_java_jar_layout(jar)
+            self.assertEqual(len(content), 143)
+            self.assertEqual(len(names), 153)
+            with zipfile.ZipFile(jar, "a") as archive:
+                archive.writestr("pkg0/libnative-platform.so", b"native")
+            with self.assertRaisesRegex(ValueError, "NATIVE_JAVA_API_SOURCE_JAR_LAYOUT_MISMATCH"):
+                ASSEMBLER.verify_native_java_jar_layout(jar)
+
     def test_all_archive_path_helpers_reject_traversal(self):
         for module, function_name in ((ASSEMBLER, "safe_rel"), (FEED, "safe_rel"),
                                       (STAGER, "safe_rel"), (BASE, "safe_relative")):
