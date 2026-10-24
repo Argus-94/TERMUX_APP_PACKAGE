@@ -32,7 +32,9 @@ jobs:
     timeout-minutes: 360
     permissions:
       actions: read
-      contents: read
+      # Draft release assets are intentionally private; GitHub requires push-level visibility.
+      # GH_TOKEN is explicitly exported only in metadata/download steps; no write API is called.
+      contents: write
     env:
       TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
       TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
@@ -85,7 +87,11 @@ jobs:
           assert (lock["base82Cohort"]["aggregateRunId"],lock["base82Cohort"]["archiveAssetId"],lock["base82Cohort"]["inventoryAssetId"]) == (39299572605,657029790,657029769)
           now=datetime.datetime.now(datetime.timezone.utc)
           def api(path):
-              return json.loads(subprocess.run(["gh","api",path],check=True,capture_output=True,text=True).stdout)
+              result=subprocess.run(["gh","api",path],capture_output=True,text=True)
+              if result.returncode:
+                  detail=" ".join(result.stderr.split())[:500]
+                  raise RuntimeError(f"GITHUB_API_FAILED path={path} rc={result.returncode} detail={detail}")
+              return json.loads(result.stdout)
           runs=[
               (lock["gradleSourceBuild"]["hostDistributionRunId"],lock["gradleSourceBuild"]["hostBuildCommit"],
                lock["gradleSourceBuild"]["hostDistributionArtifactId"],lock["gradleSourceBuild"]["hostDistributionArtifactName"],
