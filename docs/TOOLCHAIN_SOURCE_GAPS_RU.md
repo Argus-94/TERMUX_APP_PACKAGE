@@ -1,0 +1,35 @@
+# Почему полный Android toolchain пока не готов
+
+## Короткий итог
+
+Текущая подписанная 82-пакетная сборка остаётся test-only базой, а не полным Android build toolchain. В её runtime closure нет Gradle, Clang, SDK и NDK. Я закрепил recipe/source inputs и зависимости, но **не создавал** для этих компонентов `.deb`, signed feed или установочный пакет: существующие источники либо используют готовые host-binaries, либо пока не доказывают самосборку и запуск на Android/Bionic ARM64.
+
+Инвентарь сверяет три dependency closure с неизменённым Termux source commit `505e06ef0c8dbd7611abfb90e9eb60826dcd01d7`. Это reference-only source metadata — не разрешение брать stock Termux пакеты/feed. Все gates остаются закрытыми: build, signed candidate feed, APT simulation, Android install/runtime, проектная сборка и rollback — `NOT RUN`; qualification и production publication — `false`.
+
+## Clang: возможен отдельный source-build, но текущий sysroot блокирует кандидат
+
+Pinned upstream recipe содержит LLVM/Clang `21.1.8-3` и source archive `llvm-project-21.1.8.src.tar.xz` с SHA-256 `4633a236…6aa142`. Resolver строит reference closure из 15 пакетов и 19 dependency alternatives. Однако этот closure включает `ndk-sysroot`, а pinned recipe для него скачивает Google `android-ndk-r30-linux.zip` — готовый Linux-host distribution, не source-built Android/Bionic sysroot. Поэтому подписывать его как source-only Clang candidate сейчас нельзя. Для продолжения нужен независимо закреплённый разрешённый sysroot из исходников либо отдельное явное изменение границ задачи, затем полный build/package/ELF/license audit и только test-only signed APT simulation.
+
+LLVM upstream отдельно публикует source archive и Linux binary releases; Linux Arm64 archive — это Linux-host binary, не Android/Bionic executable. См. [LLVM 21.1.8 release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-21.1.8), [официальную документацию LLVM cross-build](https://llvm.org/docs/HowToCrossCompileLLVM.html) и закреплённые [Termux libllvm recipe](https://github.com/termux/termux-packages/blob/505e06ef0c8dbd7611abfb90e9eb60826dcd01d7/packages/libllvm/build.sh) и [clang split recipe](https://github.com/termux/termux-packages/blob/505e06ef0c8dbd7611abfb90e9eb60826dcd01d7/packages/libllvm/clang.subpackage.sh). Рецепты здесь использованы только для source metadata, не для скачивания готовых Termux `.deb`.
+
+## Gradle: официальный source archive найден, но сборка ещё не проверена
+
+Pinned Termux recipe `1:9.8.1` использует `gradle-9.8.1-bin.zip` — готовую binary distribution. Я записал отдельно официальный Gradle `9.8.2-src.zip` и его checksum sidecar SHA-256 `96c9aba0…1bab553`; это пока только research pin, не build input и не утверждение, что archive самодостаточен для пересборки. Не смешивать версии 9.8.1 и 9.8.2 без отдельного обновления recipe/lock.
+
+Для Gradle `9.8.2` документация требует JVM 17–27, поэтому имеющийся OpenJDK 17 candidate соответствует только минимальному номеру Java. Официальная таблица не перечисляет Android/Bionic как активно тестируемую платформу. Следующие шаги — проверить состав source archive, bootstrap без незафиксированной бинарной distribution, точную Java dependency, repeat-build provenance, затем тестировать daemon/filesystem и Gradle-команду в настоящем app-private Android runtime. См. [официальный checksum sidecar](https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256), [Gradle compatibility matrix](https://docs.gradle.org/current/userguide/compatibility.html) и [зафиксированный upstream recipe](https://github.com/termux/termux-packages/blob/505e06ef0c8dbd7611abfb90e9eb60826dcd01d7/packages/gradle/build.sh).
+
+## Android SDK/NDK: опубликованные host tools не подтверждают ARM64/Bionic
+
+В pinned source snapshot не найден отдельный recipe для Android SDK Command-Line Tools. Android docs описывают SDK как набор скачиваемых пакетов; один `sdkmanager`/Android CLI не закрывает platform/build-tools и прочие версии SDK. Документация Android Studio сообщает, что Linux с ARM CPU сейчас не поддерживается и требует glibc 2.31+ для Linux. Это не доказывает невозможность запуска каждого одиночного CLI-инструмента, но и не является поддержкой Android/Bionic.
+
+Для NDK r30 официальный download table перечисляет только Linux 64-bit (x86), Windows 64-bit и macOS; Android/ Linux ARM64 host archive не перечислен. У pinned Termux `ndk-sysroot` recipe указан Google NDK Linux archive и уже зафиксирован его SHA-256, но это не превращает host distribution в source recipe или Android/Bionic proof. Нельзя выводить совместимость из того, что целевой ABI приложения — `arm64-v8a`: NDK host ABI и ABI генерируемого APK — разные вещи. См. [Android NDK downloads](https://developer.android.com/ndk/downloads), [SDK package manager](https://developer.android.com/tools/sdkmanager), [Android Studio Linux requirements](https://developer.android.com/studio/install) и [зафиксированный ndk-sysroot recipe](https://github.com/termux/termux-packages/blob/505e06ef0c8dbd7611abfb90e9eb60826dcd01d7/packages/ndk-sysroot/build.sh).
+
+## Что должно пройти до заявления «можно собирать приложения локально»
+
+1. Зафиксировать каждый исходный archive/recipe/patch и builder image; собрать source-buildable Android/Bionic ARM64 host tools и допустимый sysroot. Не переупаковывать официальный Linux-x86 или stock Termux binary как будто он собран под Android.
+2. Доказать точные версии, прямые и транзитивные `Depends`/`Pre-Depends`, ABI, license notices, app-private payload paths и ELF loader/provider closure; для повторяемости сравнить независимые сборки.
+3. Создать только ephemeral-signed test feed, проверить его подпись и exact dependency closure через APT simulation без установки. Никаких Pages, production feed, production key или публичной release публикации.
+4. На ARM64 устройстве установить именно этот test-only feed во встроенный prefix, выполнить Gradle/Clang/SDK/NDK runtime checks и собрать реальный Android APK проектом пользователя; зафиксировать логи, hashes, exit codes и target SDK/ABI. Затем отдельно проверить upgrade и rollback.
+5. До получения всех относящихся к claim доказательств оставлять квалификацию и production publication закрытыми; CI source inventory или APT simulation не заменяют device proof.
+
+Полные pins, hashes, closure fingerprints и явно незакрытые gates записаны в [`toolchain-source-readiness-inventory.json`](../toolchain-source-readiness-inventory.json). Валидатор повторяет source-closure inventory и откажет при изменении pinned recipe, commit или попытке открыть qualification/publication gates.

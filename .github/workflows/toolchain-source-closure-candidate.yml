@@ -4,14 +4,19 @@ on:
   push:
     branches:
       - work/toolchain-source-closure-candidates-20261016
+      - work/bootstrap-compatibility-20261019
     paths:
       - .github/workflows/toolchain-source-closure-candidate.yml
       - scripts/resolve-pinned-termux-recipe-closure.py
       - scripts/test-pinned-termux-recipe-closure.sh
       - scripts/test-toolchain-candidate-source-closures.sh
+      - scripts/test-toolchain-source-readiness.sh
+      - scripts/verify-toolchain-source-readiness.py
       - termux-package-source-scope.json
       - toolchain-candidate-source-closure-locks.json
       - toolchain-candidate-source-closures/**
+      - toolchain-source-readiness-inventory.json
+      - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
   pull_request:
     branches:
       - main
@@ -20,9 +25,13 @@ on:
       - scripts/resolve-pinned-termux-recipe-closure.py
       - scripts/test-pinned-termux-recipe-closure.sh
       - scripts/test-toolchain-candidate-source-closures.sh
+      - scripts/test-toolchain-source-readiness.sh
+      - scripts/verify-toolchain-source-readiness.py
       - termux-package-source-scope.json
       - toolchain-candidate-source-closure-locks.json
       - toolchain-candidate-source-closures/**
+      - toolchain-source-readiness-inventory.json
+      - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
 
 permissions:
   contents: read
@@ -66,9 +75,10 @@ jobs:
           path = Path("scripts/resolve-pinned-termux-recipe-closure.py")
           compile(path.read_text(encoding="utf-8"), str(path), "exec")
           PY
-          bash -n scripts/test-pinned-termux-recipe-closure.sh scripts/test-toolchain-candidate-source-closures.sh
+          bash -n scripts/test-pinned-termux-recipe-closure.sh scripts/test-toolchain-candidate-source-closures.sh scripts/test-toolchain-source-readiness.sh
           bash scripts/test-pinned-termux-recipe-closure.sh
           bash scripts/test-toolchain-candidate-source-closures.sh "$RUNNER_TEMP/termux-packages"
+          bash scripts/test-toolchain-source-readiness.sh "$RUNNER_TEMP/termux-packages"
           {
             echo '## Toolchain source-closure inventory (metadata only)'
             echo
@@ -79,6 +89,14 @@ jobs:
           lock=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
           for name, profile in lock["profiles"].items():
               print(f"| `{name}` | {profile['packageCount']} | {profile['dependencyAlternativeCount']} |")
+          PY
+            echo
+            echo '## Missing toolchain readiness (not a package candidate)'
+            python3 - toolchain-source-readiness-inventory.json <<'PY'
+          import json, pathlib, sys
+          inventory=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          for name, profile in inventory["profiles"].items():
+              print(f"- `{name}`: candidate eligible = `{str(profile['candidateEligible']).lower()}`; status = {profile['status']}")
           PY
             echo
             echo 'Build / binary audit / signed APT / artifact / Android install / rollback: NOT RUN. Production publication and app-side installation remain blocked.'

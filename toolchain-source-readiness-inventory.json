@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "status": "inventory-only; not a build, package, install, signing, or publication authorization",
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "hostArchitecture": "aarch64",
+    "projectOutputAbi": "arm64-v8a",
+    "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr"
+  },
+  "gates": {
+    "packageBuild": "NOT_RUN",
+    "candidateDebs": "NOT_CREATED",
+    "signedCandidateFeed": "NOT_CREATED",
+    "aptSimulation": "NOT_RUN",
+    "androidInstall": "NOT_RUN",
+    "androidToolRuntime": "NOT_RUN",
+    "projectApkBuild": "NOT_RUN",
+    "upgradeRollback": "NOT_RUN",
+    "qualified": false,
+    "productionAllowed": false,
+    "publicationAllowed": false
+  },
+  "profiles": {
+    "clang": {
+      "status": "BLOCKED: pinned LLVM source recipe exists, but its runtime closure includes ndk-sysroot sourced from a prebuilt Google Linux-x86 NDK archive; no permitted source-built Android sysroot or device evidence is present.",
+      "candidateEligible": false,
+      "upstreamRecipe": {
+        "package": "libllvm",
+        "path": "packages/libllvm/build.sh",
+        "sha256": "55d48a1f31939fb7585ce8320110a6bbe523a28665cb668333eeb56a566e8877"
+      },
+      "clangSubpackage": {
+        "path": "packages/libllvm/clang.subpackage.sh",
+        "sha256": "8387a2314c0b2b0174dc6fbc7b1c4de64c62a165d285e72bde6ddbf8d0104b36"
+      },
+      "version": "21.1.8-3",
+      "sourceArchive": {
+        "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/llvm-project-21.1.8.src.tar.xz",
+        "sha256": "4633a23617fa31a3ea51242586ea7fb1da7140e426bd62fc164261fe036aa142",
+        "kind": "upstream source archive"
+      },
+      "sourceClosureInventory": {
+        "profile": "clang-source-reference",
+        "roots": ["clang"],
+        "packageCount": 15,
+        "dependencyAlternativeCount": 19,
+        "sha256": "e076553bd3b31761be6c61ba532cfdeac8c5dcf90b7e6e673cef23d56899450f"
+      },
+      "blockingDependency": {
+        "package": "ndk-sysroot",
+        "sourceArchiveKind": "Google NDK Linux host distribution; prebuilt input, not source-built",
+        "requiredNextStep": "replace with an independently pinned, permitted source-built Android/Bionic sysroot or obtain explicit scope change; keep candidate closed until then"
+      },
+      "remainingEvidence": [
+        "source-built sysroot and complete dependency closure",
+        "repeat source-build provenance and full package/license/payload/ELF audit",
+        "ephemeral signed test-only feed and exact APT simulation",
+        "execution and compile/link test inside the app-private Android runtime"
+      ]
+    },
+    "gradle": {
+      "status": "BLOCKED: the pinned Termux recipe packages a prebuilt -bin.zip. An official source archive is pinned as a research input, but its bootstrap/rebuild path and Android/Bionic runtime are not verified.",
+      "candidateEligible": false,
+      "upstreamRecipe": {
+        "path": "packages/gradle/build.sh",
+        "sha256": "7daf2cfa39cc2340fb3efbb16099e9e14bb42f08d03db963b8420ce6fd6332bb",
+        "recipeVersion": "1:9.8.1",
+        "recipeArchiveUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+        "recipeArchiveSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+        "recipeArchiveKind": "prebuilt Gradle binary distribution"
+      },
+      "sourceArchiveResearchPin": {
+        "version": "9.8.2",
+        "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+        "sha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+        "checksumSource": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256",
+        "kind": "official source archive; not yet built or inspected as a package input"
+      },
+      "sourceClosureInventory": {
+        "profile": "gradle-recipe-reference",
+        "roots": ["gradle"],
+        "packageCount": 39,
+        "dependencyAlternativeCount": 63,
+        "sha256": "529aa6a137d956cce1ab160d11a8871a50ac0dc0f800f80e0e1afd279a1f54b8"
+      },
+      "runtimeNotes": {
+        "gradleOfficialRuntimeJdkRange": "17-27 for Gradle 9.8.2",
+        "androidBionicHostStatus": "not listed as an actively tested Gradle platform",
+        "candidateJdk": "openjdk-17 is an existing test-only candidate root; no Gradle-on-device runtime proof exists"
+      },
+      "remainingEvidence": [
+        "inspect and lock the exact source archive contents, build inputs, and bootstrap method without silently using an unpinned binary distribution",
+        "record a source-build recipe/patch and exact runtime dependency choice",
+        "repeat build, static package audit, ephemeral signed feed and exact APT simulation",
+        "run Gradle and build a real Android project inside the app-private runtime"
+      ]
+    },
+    "android-sdk": {
+      "status": "BLOCKED: the pinned Termux source snapshot has no Android SDK command-line-tools recipe; official SDK tools are distributed as downloadable SDK packages, not a pinned-source build recipe in this candidate set.",
+      "candidateEligible": false,
+      "sourceRecipe": null,
+      "officialReferences": [
+        "https://developer.android.com/tools/sdkmanager",
+        "https://developer.android.com/studio/command-line",
+        "https://developer.android.com/studio/install"
+      ],
+      "hostCompatibilityEvidence": "Android Studio documentation says Linux machines with ARM-based CPUs are not currently supported and specifies glibc 2.31 or later for Linux; this does not prove every standalone CLI executable is impossible, but it is not evidence of Android/Bionic support.",
+      "remainingEvidence": [
+        "identify the exact SDK package subset needed by the target Builder project",
+        "obtain or create source-buildable Android/Bionic AArch64 tools and pin every input",
+        "audit licenses, dependencies, executable formats, and actual on-device execution"
+      ]
+    },
+    "android-ndk": {
+      "status": "BLOCKED: the pinned upstream ndk-sysroot recipe consumes Google's prebuilt Linux-x86 NDK distribution; it is not a pinned-source Android/Bionic AArch64 host build.",
+      "candidateEligible": false,
+      "upstreamRecipe": {
+        "package": "ndk-sysroot",
+        "path": "packages/ndk-sysroot/build.sh",
+        "sha256": "a5b6f7f77bd2fcbd6b809ba92b559940321a59e142504ec5e6bc5044b6a96221",
+        "version": "30",
+        "archiveUrl": "https://dl.google.com/android/repository/android-ndk-r30-linux.zip",
+        "archiveSha256": "753611f410d002cfcd3f3dc2ef49aad532089d3180b436c060a90bf0fcb64df2",
+        "archiveKind": "Google NDK Linux 64-bit x86 distribution"
+      },
+      "officialHostEvidence": "The official NDK r30 downloads table lists Linux 64-bit (x86), not Linux ARM64 or Android/Bionic host artifacts.",
+      "sourceClosureInventory": {
+        "profile": "ndk-sysroot-recipe-reference",
+        "roots": ["ndk-sysroot"],
+        "packageCount": 1,
+        "dependencyAlternativeCount": 0,
+        "sha256": "1291d60aa98453acf27f30b14adc5ec21d0d6434789bb8a2ce4529e0565b5bfb"
+      },
+      "remainingEvidence": [
+        "source-build or separately approved sysroot source provenance",
+        "Android/Bionic AArch64 host tools rather than Linux-x86 host executables",
+        "repeat build, package/license/payload/ELF audit and ephemeral signed APT simulation",
+        "real on-device NDK and project-build test"
+      ]
+    }
+  }
+}
