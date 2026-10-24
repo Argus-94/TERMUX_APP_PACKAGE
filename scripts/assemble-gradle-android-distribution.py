@@ -21,6 +21,14 @@ def need(ok: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def verify_optional_workflow_run_id(evidence: dict[str, Any], expected_run_id: Any, code: str) -> bool:
+    workflow = evidence.get("workflow")
+    if not isinstance(workflow, dict) or workflow.get("runId") is None:
+        return False
+    need(str(workflow["runId"]) == str(expected_run_id), code)
+    return True
+
+
 def sha_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as stream:
@@ -248,8 +256,10 @@ def verify_inputs(lock: dict[str, Any], gradle_root: Path, java_root: Path, andr
     jpin = lock["nativePlatformJavaApi"]
     jp, je = find_one(java_root, lambda obj: isinstance(obj.get("artifactFiles"), dict)
                       and "sourceBuiltJar" in obj.get("artifactFiles", {}), "NATIVE_JAVA_API_EVIDENCE")
-    need(str(je.get("workflow", {}).get("runId")) == str(jpin["sourceBuildRunId"]),
-         "NATIVE_JAVA_API_RUN_ID_MISMATCH")
+    # This producer's evidence.json does not embed GitHub run metadata. The workflow preflight
+    # verifies this locked run/artifact pair through the Actions API before the pinned download.
+    java_run_id_embedded = verify_optional_workflow_run_id(
+        je, jpin["sourceBuildRunId"], "NATIVE_JAVA_API_RUN_ID_MISMATCH")
     need(je.get("assessment") == "SOURCE_BUILD_PASSED_CONTENT_IDENTICAL_CONTAINER_METADATA_DIFFERS",
          "NATIVE_JAVA_API_ASSESSMENT_MISMATCH")
     need(je.get("upstreamSource", {}).get("commit") == jpin["sourceCommit"]
@@ -321,6 +331,9 @@ def verify_inputs(lock: dict[str, Any], gradle_root: Path, java_root: Path, andr
          "ANDROID_CORE_RUNTIME_OR_CURSES_SCOPE_MISMATCH")
     return {"gradleEvidencePath": str(gradle_evidence_path), "gradleZipPath": str(gradle_zip),
             "nativeJavaEvidencePath": str(jp), "sourceBuiltJavaJar": str(source_jar),
+            "nativeJavaRunIdEmbedded": java_run_id_embedded,
+            "nativeJavaProducerRunId": jpin["sourceBuildRunId"],
+            "nativeJavaProducerArtifactId": jpin["sourceBuildArtifactId"],
             "nativeAndroidEvidencePath": str(ap), "androidCoreLibrary": str(native_lib),
             "nativePlatformLicense": str(license_file), "bionicLicense": str(bionic_license),
             "prototypeReadmeSha256": sha_file(prototype_readme), "androidCoreElfAudit": elf_scan,
@@ -455,6 +468,9 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
             "gradleDistributionSourceSha256": lock["gradleSourceBuild"]["hostDistributionSha256"],
             "gradleDistributionZipSha256": sha_file(source_zip),
             "nativePlatformJavaSourceBuildRunId": lock["nativePlatformJavaApi"]["sourceBuildRunId"],
+            "nativePlatformJavaSourceBuildArtifactId": lock["nativePlatformJavaApi"]["sourceBuildArtifactId"],
+            "nativePlatformJavaRunIdEmbeddedInArtifactEvidence": inputs["nativeJavaRunIdEmbedded"],
+            "nativePlatformJavaProducerRunBinding": "LOCKED_GITHUB_ACTIONS_API_PREFLIGHT_AND_PINNED_DOWNLOAD",
             "nativePlatformJavaApiJarSha256": lock["nativePlatformJavaApi"]["sourceBuiltJarSha256"],
             "androidCorePrototypeRunId": lock["nativePlatformAndroidCore"]["prototypeRunId"],
             "androidCorePrototypeArtifactId": lock["nativePlatformAndroidCore"]["prototypeArtifactId"],

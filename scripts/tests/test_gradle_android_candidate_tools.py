@@ -32,6 +32,15 @@ AUDITOR = load("gradle_package_auditor", "audit-gradle-android-package.py")
 
 
 class GradleCandidateToolTests(unittest.TestCase):
+    def test_optional_source_artifact_run_id_metadata_is_checked_when_present(self):
+        expected = "40090638892"
+        self.assertFalse(ASSEMBLER.verify_optional_workflow_run_id({}, expected, "RUN_ID_MISMATCH"))
+        self.assertTrue(ASSEMBLER.verify_optional_workflow_run_id(
+            {"workflow": {"runId": 40090638892}}, expected, "RUN_ID_MISMATCH"))
+        with self.assertRaisesRegex(ValueError, "RUN_ID_MISMATCH"):
+            ASSEMBLER.verify_optional_workflow_run_id(
+                {"workflow": {"runId": "40000000000"}}, expected, "RUN_ID_MISMATCH")
+
     def test_all_archive_path_helpers_reject_traversal(self):
         for module, function_name in ((ASSEMBLER, "safe_rel"), (FEED, "safe_rel"),
                                       (STAGER, "safe_rel"), (BASE, "safe_relative")):
