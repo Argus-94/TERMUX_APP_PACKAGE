@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import tarfile
 import unittest
 import zipfile
 
@@ -38,6 +39,37 @@ class GradleCandidateToolTests(unittest.TestCase):
         text = builder.read_text(encoding="utf-8")
         self.assertEqual(builder.parent.joinpath("..", "..").resolve(), ROOT)
         self.assertIn('readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"', text)
+
+    def test_retention_feed_tar_preserves_colon_paths_and_package_name_is_escaped(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-feed-tar-") as tmp:
+            root = Path(tmp)
+            feed = root / "feed"
+            deb_rel = "pool/main/gradle/gradle_1:9.8.2_aarch64.deb"
+            deb_bytes = b"unchanged package bytes\n"
+            index_rel = "dists/stable/main/binary-aarch64/Packages"
+            index_bytes = ("Package: gradle\nVersion: 1:9.8.2\nFilename: " + deb_rel + "\n").encode()
+            (feed / deb_rel).parent.mkdir(parents=True)
+            (feed / deb_rel).write_bytes(deb_bytes)
+            (feed / index_rel).parent.mkdir(parents=True)
+            (feed / index_rel).write_bytes(index_bytes)
+            files = [feed / deb_rel, feed / index_rel]
+            archive = root / "signed-feed.tar"
+            duplicate = root / "signed-feed-copy.tar"
+            STAGER.write_feed_archive(feed, archive, files)
+            STAGER.write_feed_archive(feed, duplicate, files)
+            self.assertNotIn(":", archive.name)
+            self.assertEqual(hashlib.sha256(archive.read_bytes()).digest(),
+                             hashlib.sha256(duplicate.read_bytes()).digest())
+            with tarfile.open(archive, "r") as tar:
+                self.assertEqual(tar.getnames(), sorted([deb_rel, index_rel]))
+                self.assertEqual(tar.extractfile(deb_rel).read(), deb_bytes)
+                self.assertEqual(tar.extractfile(index_rel).read(), index_bytes)
+            self.assertEqual(STAGER.artifact_deb_name("gradle_1:9.8.2_aarch64.deb"),
+                             "gradle_1%3a9.8.2_aarch64.deb")
+            with self.assertRaisesRegex(ValueError, "UNSAFE_PACKAGE_ARTIFACT_FILENAME"):
+                STAGER.artifact_deb_name("../gradle_1:9.8.2_aarch64.deb")
+            with self.assertRaisesRegex(ValueError, "UNSAFE_PACKAGE_ARTIFACT_FILENAME"):
+                STAGER.artifact_deb_name("gradle_1:9.8.2|bad_aarch64.deb")
 
     def test_gradle_recipe_skips_recursive_build_dependencies_and_checks_binary_markers(self):
         builder = (ROOT / "termux-private-package-kit" / "gradle-android-aarch64" /

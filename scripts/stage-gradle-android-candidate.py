@@ -8,7 +8,9 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import shutil
+import stat
 import sys
+import tarfile
 from typing import Any
 
 
@@ -78,6 +80,39 @@ def files_under(root: Path) -> list[Path]:
     return sorted(result)
 
 
+def artifact_deb_name(name: str) -> str:
+    """Escape Debian's epoch colon in the standalone artifact filename."""
+    safe = name.replace(":", "%3a")
+    need(PurePosixPath(name).name == name and name.endswith(".deb") and "\\" not in name,
+         "UNSAFE_PACKAGE_ARTIFACT_FILENAME")
+    need(all(char.isascii() and (char.isalnum() or char in "._%+-~") for char in safe),
+         "UNSAFE_PACKAGE_ARTIFACT_FILENAME")
+    need(":" not in safe, "UNESCAPED_PACKAGE_ARTIFACT_EPOCH")
+    return safe
+
+
+def write_feed_archive(source: Path, destination: Path, files: list[Path]) -> None:
+    """Wrap the original feed paths/bytes in a portable outer tar filename."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(destination, mode="w", format=tarfile.PAX_FORMAT) as archive:
+        for path in sorted(files):
+            need(path.is_file() and not path.is_symlink(), "FEED_ARCHIVE_INPUT_NOT_REGULAR:" + str(path))
+            need(path.is_relative_to(source), "FEED_ARCHIVE_INPUT_OUTSIDE_ROOT:" + str(path))
+            rel = path.relative_to(source).as_posix()
+            safe_rel(rel)
+            mode = stat.S_IMODE(path.stat().st_mode)
+            need(mode & 0o7000 == 0, "FEED_ARCHIVE_INPUT_SPECIAL_MODE:" + rel)
+            info = tarfile.TarInfo(name=rel)
+            info.size = path.stat().st_size
+            info.mode = mode
+            info.mtime = 0
+            info.uid = info.gid = 0
+            info.uname = info.gname = ""
+            info.type = tarfile.REGTYPE
+            with path.open("rb") as stream:
+                archive.addfile(info, stream)
+
+
 def stage(args: argparse.Namespace) -> dict[str, Any]:
     need(not args.destination.exists(), "BUNDLE_DESTINATION_MUST_BE_NEW")
     args.destination.mkdir(parents=True)
@@ -137,14 +172,14 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
     need({p.relative_to(feed).as_posix() for p in all_feed_files} == expected_feed_files
          and len(pool_files) == 83 and all(p.suffix == ".deb" for p in pool_files),
          "SIGNED_FEED_FILE_SET_NOT_EXACTLY_83_DEBS_AND_METADATA")
-    for rel in ("Release", "dists/stable/Release", "dists/stable/InRelease", "dists/stable/Release.gpg",
-                "dists/stable/main/binary-aarch64/Packages", "dists/stable/main/binary-aarch64/Packages.gz"):
-        copy_regular(feed / rel, args.destination / "signed-feed" / rel)
     for path in pool_files:
         rel = path.relative_to(feed).as_posix()
         safe_rel(rel)
         need(path.suffix == ".deb", "SIGNED_FEED_POOL_NON_DEB:" + rel)
-        copy_regular(path, args.destination / "signed-feed" / rel)
+    feed_file_manifest = [{"path": path.relative_to(feed).as_posix(),
+                           "sizeBytes": path.stat().st_size, "sha256": sha_file(path)}
+                          for path in all_feed_files]
+    write_feed_archive(feed, args.destination / "signed-feed.tar", all_feed_files)
 
     key_manifest = args.signing_config_root / "keys/feed-signing.json"
     need(args.signing_config_root.is_dir() and not args.signing_config_root.is_symlink(),
@@ -181,7 +216,8 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
         copy_regular(src, args.destination / rel)
     copy_regular(args.assembled_zip, args.destination / "distribution/gradle-9.8.2-android-aarch64.zip")
     copy_regular(args.host_distribution_zip, args.destination / "distribution/gradle-9.8.2-bin-source-built-host.zip")
-    copy_regular(args.package_deb, args.destination / "candidate-package" / args.package_deb.name)
+    safe_package_filename = artifact_deb_name(args.package_deb.name)
+    copy_regular(args.package_deb, args.destination / "candidate-package" / safe_package_filename)
 
     for source, label in ((args.gradle_artifact_dir, "source-artifacts/gradle-host-build"),
                           (args.native_java_artifact_dir, "source-artifacts/native-platform-java"),
@@ -213,6 +249,9 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
         rel = path.relative_to(args.destination).as_posix().lower()
         need("gnupg" not in rel and "secring" not in rel and "private-key" not in rel
              and not rel.endswith((".pem", ".p12", ".pfx")), "PRIVATE_SIGNING_MATERIAL_PATH_IN_BUNDLE:" + rel)
+        original_rel = path.relative_to(args.destination).as_posix()
+        need(not any(char in original_rel for char in '\":<>|*?\r\n'),
+             "ARTIFACT_UPLOAD_UNSUPPORTED_PATH_CHARACTER:" + original_rel)
     entries = [{"path": path.relative_to(args.destination).as_posix(), "sizeBytes": path.stat().st_size,
                 "sha256": sha_file(path)} for path in staged]
     manifest = {
@@ -223,6 +262,19 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
         "applicationId": lock["applicationId"],
         "package": lock["package"],
         "feedPackageCount": 83,
+        "signedFeedArchive": {
+            "path": "signed-feed.tar",
+            "format": "PAX tar; original signed-feed file paths and bytes preserved",
+            "sha256": sha_file(args.destination / "signed-feed.tar"),
+            "fileCount": len(feed_file_manifest),
+            "files": feed_file_manifest,
+        },
+        "candidatePackageArtifact": {
+            "path": "candidate-package/" + safe_package_filename,
+            "originalDebFilename": args.package_deb.name,
+            "sha256": build["packageSha256"],
+            "filenameColonEscapedAs": "%3a",
+        },
         "base82Unchanged": True,
         "feedSignatureKey": "ephemeral; public key included; private key never retained",
         "androidDeviceRuntime": "NOT_RUN",
