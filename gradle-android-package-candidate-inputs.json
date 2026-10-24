@@ -95,6 +95,416 @@
     "terminalJni": "UNSUPPORTED_NOT_BUILT",
     "fileWatching": "NOT_DEVICE_VERIFIED"
   },
+  "nativeProviderSanitization": {
+    "schemaVersion": 1,
+    "policyId": "gradle-9.8.2-android-only-strip-pinned-nonbionic-native-resources-v1",
+    "sourceDistributionSha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+    "nativeExtensions": [
+      ".so",
+      ".dll",
+      ".dylib",
+      ".jnilib",
+      ".a",
+      ".o",
+      ".lib",
+      ".exe"
+    ],
+    "mode": "Remove only the exact hash-pinned native code/archive members listed for these four provider JARs; preserve every other JAR member and all Java classes.",
+    "runtimeStatus": "NOT_DEVICE_VERIFIED",
+    "providerJars": [
+      {
+        "jarPath": "lib/gradle-fileevents-0.2.8.jar",
+        "sourceJarSha256": "3c3bf574fb524f083d5f402e0765cf10022e1b5b8909668ef8cac55f10dd1fef",
+        "sourceJarSizeBytes": 1429694,
+        "sourceEntryCount": 61,
+        "signatureFiles": [],
+        "nativeEntries": [
+          {
+            "path": "net/rubygrapefruit/platform/x86_64-macos/libgradle-fileevents.dylib",
+            "sha256": "a30e7ccc6154473fc755642b32f84564588c35a5e8645c1f76264130b3fc2b3d",
+            "sizeBytes": 447852
+          },
+          {
+            "path": "net/rubygrapefruit/platform/x86_64-windows-gnu/gradle-fileevents.dll",
+            "sha256": "e33d64ef424cc386b7e26de8d0e617d0df0ddf0002f60e9644d0d22b3fb0553e",
+            "sizeBytes": 464384
+          },
+          {
+            "path": "net/rubygrapefruit/platform/aarch64-macos/libgradle-fileevents.dylib",
+            "sha256": "e98c89f3a9c19d3d8e7610a21c57c4e71e949140c8854cd19dc844ad1bd29774",
+            "sizeBytes": 534584
+          },
+          {
+            "path": "net/rubygrapefruit/platform/aarch64-windows-gnu/gradle-fileevents.dll",
+            "sha256": "380893edb50b4ed98ae47116d61660261c586bf92a469ef512868639d1a9a380",
+            "sizeBytes": 437248
+          },
+          {
+            "path": "net/rubygrapefruit/platform/aarch64-linux-gnu/libgradle-fileevents.so",
+            "sha256": "ea64a380cdddf4768127dd0dbdd5c5df15dd3595c2f2e915d62534c0f8597379",
+            "sizeBytes": 567416
+          },
+          {
+            "path": "net/rubygrapefruit/platform/x86_64-linux-musl/libgradle-fileevents.so",
+            "sha256": "df7cc55ca4eb6fcbf7d1755c697e923ca25aa9457deafe78c18e8b4b9b733f1d",
+            "sizeBytes": 571704
+          },
+          {
+            "path": "net/rubygrapefruit/platform/aarch64-linux-musl/libgradle-fileevents.so",
+            "sha256": "0598789a62d5d15ae6167a7cd2f4919777e06add6c8fc44fdd3bebab8175d25e",
+            "sizeBytes": 571008
+          },
+          {
+            "path": "net/rubygrapefruit/platform/x86_64-linux-gnu/libgradle-fileevents.so",
+            "sha256": "86e8530f244884619c543f70888ef6ac77a8b02279703e0b6cb15eb9a40bd8b8",
+            "sizeBytes": 569048
+          }
+        ]
+      },
+      {
+        "jarPath": "lib/jansi-2.4.2.jar",
+        "sourceJarSha256": "0b7b8b003a90ea491579b62f5118828e45112914c65589b00faa49d6ec785839",
+        "sourceJarSizeBytes": 256537,
+        "sourceEntryCount": 101,
+        "signatureFiles": [],
+        "nativeEntries": [
+          {
+            "path": "org/fusesource/jansi/internal/native/FreeBSD/x86/libjansi.so",
+            "sha256": "af40370e582dba5d1e81ae41ddc34cd7040e3d97eb3a8e8acaa1f22122afff2b",
+            "sizeBytes": 10196
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/FreeBSD/x86_64/libjansi.so",
+            "sha256": "ee1a719fc65d4e7830cfd3bd605fd1ea328cf84e6e76ac3a901c87d8ebd682bf",
+            "sizeBytes": 13228
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/arm/libjansi.so",
+            "sha256": "4a56efedfb60bf211d63cf1ad68bec5debb3147145b4decca93919a6367f8b90",
+            "sizeBytes": 22052
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/arm64/libjansi.so",
+            "sha256": "fff11e2c117f1325670587b654f07e663e80dc912cdbc81dc65af9edcee5684d",
+            "sizeBytes": 19544
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/armv6/libjansi.so",
+            "sha256": "e3b4d8e7c8559f18c3a3364ecf23267438e7e02acca7eee42fd1962d1df7640c",
+            "sizeBytes": 15088
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/armv7/libjansi.so",
+            "sha256": "d42832e4679f80ca7949013ff3c681b98b8fb85ae7e54f4679beb4e2ba6c92a6",
+            "sizeBytes": 14444
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/ppc64/libjansi.so",
+            "sha256": "5c84e6b6be45d799992d0bb64105f6656da9554ac52bdf22ad4318012d3a534b",
+            "sizeBytes": 73224
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/x86/libjansi.so",
+            "sha256": "96f650ecbb00059fc2f6fb629f8feadd5879032a58c70a7ac8f169775239ee5b",
+            "sizeBytes": 16988
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Linux/x86_64/libjansi.so",
+            "sha256": "249095f2a73e3d2ab348d9f1de659947d253c18cf6a2049f75296b5a0d6ee079",
+            "sizeBytes": 18976
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Mac/arm64/libjansi.jnilib",
+            "sha256": "56928bfe57da94d49490e237264e143a7e19713e68f6c653158f860f70de6dc8",
+            "sizeBytes": 53036
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Mac/x86/libjansi.jnilib",
+            "sha256": "13347f218b0888db403234b0f13b3ad5beb3809a0469b8213afd9fdd5c86cd90",
+            "sizeBytes": 14748
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Mac/x86_64/libjansi.jnilib",
+            "sha256": "65dd54cec4bc003d9623de13195845164cf607897b5287f8250209008d73c051",
+            "sizeBytes": 15612
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Windows/arm64/jansi.dll",
+            "sha256": "470e6dfc44b28d628e404d5d6bfbb14728c7973e2397d9149430c85171389a19",
+            "sizeBytes": 81408
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Windows/x86/jansi.dll",
+            "sha256": "9e6409c3264a6f33f5f97c58265c06e95bf91a896e8e179ebaeb8204c5d19ed3",
+            "sizeBytes": 115972
+          },
+          {
+            "path": "org/fusesource/jansi/internal/native/Windows/x86_64/jansi.dll",
+            "sha256": "7020260c8db5116042315ea73714ac36ad94acdc330852280e889212506085c0",
+            "sizeBytes": 130522
+          }
+        ]
+      },
+      {
+        "jarPath": "lib/kotlin-compiler-embeddable-2.4.10.jar",
+        "sourceJarSha256": "9309638a2ee03e6bde9ef4b7444055a94b84ab906563675d71ff9aecb64da913",
+        "sourceJarSizeBytes": 60352373,
+        "sourceEntryCount": 27994,
+        "signatureFiles": [],
+        "nativeEntries": [
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/linux/aarch64/liblz4-java.so",
+            "sha256": "a732552e3855c4f81d70f34a7468c26ffd4f3babcf20a06fa309082905ec4e81",
+            "sizeBytes": 77859
+          },
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/linux/amd64/liblz4-java.so",
+            "sha256": "108157738367c0a972c2228dead1af896bf5d5a7fc7f58fcbf855aa2b67049ea",
+            "sizeBytes": 203408
+          },
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/linux/i386/liblz4-java.so",
+            "sha256": "f72fff01f82b13bf54e945d1d9158a4b6c10caabca0a102fba5477c8d8baa8b4",
+            "sizeBytes": 68840
+          },
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/linux/ppc64le/liblz4-java.so",
+            "sha256": "c6dd51e13b98853688589828e6760f334088bec00a143197c05486bb94fd8495",
+            "sizeBytes": 209016
+          },
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/linux/s390x/liblz4-java.so",
+            "sha256": "9584dad637d5241fdb649f1db07835623a7c567c43f0c9450249c72a81657990",
+            "sizeBytes": 89200
+          },
+          {
+            "path": "org/jetbrains/kotlin/net/jpountz/util/win32/amd64/liblz4-java.so",
+            "sha256": "1ba944ded629f0ea2c7669c9cb4b3a39b2d773142a0b5f8fce8e11d6a50800fd",
+            "sizeBytes": 516677
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/FreeBSD/x86/libjansi.so",
+            "sha256": "71d4e610ba70854a344078512afd3ca42676107e48cd753ecd91e806abb45569",
+            "sizeBytes": 12100
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/FreeBSD/x86_64/libjansi.so",
+            "sha256": "8c56980e59f79e7a95b8edcbfe0a4f6b54bb6964aa9034efa7617725179d1d52",
+            "sizeBytes": 15308
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/arm/libjansi.so",
+            "sha256": "fc3bb7c1178369ae6d3b07e51b0590eb8a6bb6dd6acd90115afeb18c65d85ad6",
+            "sizeBytes": 22232
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/arm64/libjansi.so",
+            "sha256": "a807b7b420a15ee48e13c694f1e4d84b0d69c8857c2f0008c484328522bc69e5",
+            "sizeBytes": 15952
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/armv6/libjansi.so",
+            "sha256": "402a6ee45d724e95eacace01e4e17029e10869ddaa5f5f4b45e13eed33d016d7",
+            "sizeBytes": 15068
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/armv7/libjansi.so",
+            "sha256": "f01f068c1be78380c36868b4f47f8f24877a17a3e2269cc43c43615f9aee3ecb",
+            "sizeBytes": 12236
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/ppc64/libjansi.so",
+            "sha256": "8d97571bb654005984c4d7595062f94a7bdb8f11203abc9efe005c22571def43",
+            "sizeBytes": 18064
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/x86/libjansi.so",
+            "sha256": "8bdd29ef7e167116e848594760fe49546cd7a3e45f130bc30766ba1490193653",
+            "sizeBytes": 17580
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Linux/x86_64/libjansi.so",
+            "sha256": "4bf8600bdeee40175ee1f5978c76bc9caa5083c35d6a7844d5ede74a669fb234",
+            "sizeBytes": 15800
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Mac/arm64/libjansi.jnilib",
+            "sha256": "a2d8080e97424ddc0c21b6c16326eaa8b5e5c7a6aca0de2113da3ea1aa6726aa",
+            "sizeBytes": 53036
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Mac/x86/libjansi.jnilib",
+            "sha256": "ea7ceaf2b63f95ac34822fed2f4cdfd436599c682e04383fac3736dd4c4a41a6",
+            "sizeBytes": 14748
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Mac/x86_64/libjansi.jnilib",
+            "sha256": "537d38ad49b9d159eef64ed0a774c816e679606d9c37266776b74c2cd6074f3f",
+            "sizeBytes": 15612
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Windows/x86/jansi.dll",
+            "sha256": "1d6314da4b3a7a5e9dded6b0cc1b83f15f8f603897ae00cfe98ef171285620f3",
+            "sizeBytes": 113924
+          },
+          {
+            "path": "org/jetbrains/kotlin/org/fusesource/jansi/internal/native/Windows/x86_64/jansi.dll",
+            "sha256": "d23fc9293b68781d43314403048d6dc655fa4620b6b4db3dcd345c52c332a2f4",
+            "sizeBytes": 127010
+          }
+        ]
+      },
+      {
+        "jarPath": "lib/plugins/jna-5.17.0.jar",
+        "sourceJarSha256": "b3a9408e7c51e08ef0e3bfcc08f443f6ec0f6191ba8cd7c18d53d2b22e5bdbc0",
+        "sourceJarSizeBytes": 2002589,
+        "sourceEntryCount": 191,
+        "signatureFiles": [],
+        "nativeEntries": [
+          {
+            "path": "com/sun/jna/win32-x86/jnidispatch.dll",
+            "sha256": "752d597cee7e95cb517327146bf42f124c0d6c0bc48b3ecc3b1b3b0531a52f44",
+            "sizeBytes": 226304
+          },
+          {
+            "path": "com/sun/jna/aix-ppc/libjnidispatch.a",
+            "sha256": "f33d3b4c2ca35fac8befc502b408e5b5851f8850c397d59f0094459fe455d0c1",
+            "sizeBytes": 613721
+          },
+          {
+            "path": "com/sun/jna/aix-ppc64/libjnidispatch.a",
+            "sha256": "be8a1c6a282c637cf0ce217c331ee82a3643c59ef166fdbaabf1f27c3d7fd0dc",
+            "sizeBytes": 657335
+          },
+          {
+            "path": "com/sun/jna/darwin-x86-64/libjnidispatch.jnilib",
+            "sha256": "69cca8bbe2f0ff3fc412481e73333d5b49fc3a1ba2ff564a0af9495d7e6b531d",
+            "sizeBytes": 109824
+          },
+          {
+            "path": "com/sun/jna/darwin-aarch64/libjnidispatch.jnilib",
+            "sha256": "70c9af22ba3ce12128881b4654422ce69a6f96fc238333731cf718601b536245",
+            "sizeBytes": 159800
+          },
+          {
+            "path": "com/sun/jna/linux-x86/libjnidispatch.so",
+            "sha256": "546ec7cc6548de411cc52a1069295301308437080be014cda2346ccd0f99bf55",
+            "sizeBytes": 123384
+          },
+          {
+            "path": "com/sun/jna/linux-x86-64/libjnidispatch.so",
+            "sha256": "ca07953d595210082339753d9e818a1fdb40509a17a41914d9a2cb0d2df6b6af",
+            "sizeBytes": 134447
+          },
+          {
+            "path": "com/sun/jna/linux-arm/libjnidispatch.so",
+            "sha256": "b2a32135dea251fde4027f536345420001bc921e21baf82b2e01ce2753da2097",
+            "sizeBytes": 130788
+          },
+          {
+            "path": "com/sun/jna/linux-armel/libjnidispatch.so",
+            "sha256": "d9db010b0336cdbf643c38921c1c04519f811bee0f45824b6872661a25d64ed2",
+            "sizeBytes": 139472
+          },
+          {
+            "path": "com/sun/jna/linux-aarch64/libjnidispatch.so",
+            "sha256": "f18fa2c973b2b9ea2dfa6d36d397e0bb743aa2aa09876e2a3b8c87a5e67bf8b6",
+            "sizeBytes": 162288
+          },
+          {
+            "path": "com/sun/jna/linux-ppc/libjnidispatch.so",
+            "sha256": "fbde8c5b108934e75c7008562e95b209535bf4996b3bc246ec5e425a0757a903",
+            "sizeBytes": 127724
+          },
+          {
+            "path": "com/sun/jna/linux-ppc64le/libjnidispatch.so",
+            "sha256": "aaa31a2220e270f69259d930540c5682b1bd662a6d774918605e62cd562d5d11",
+            "sizeBytes": 145072
+          },
+          {
+            "path": "com/sun/jna/linux-mips64el/libjnidispatch.so",
+            "sha256": "0025cd4345faec5a7d9fc8c88f187016dbaf4a6ef411cd6c8907e199d952528d",
+            "sizeBytes": 144056
+          },
+          {
+            "path": "com/sun/jna/linux-loongarch64/libjnidispatch.so",
+            "sha256": "6c55d9ec3efaaee1843795648246b3fe52de09d3990984c5b8a580cc803c6bc9",
+            "sizeBytes": 341968
+          },
+          {
+            "path": "com/sun/jna/linux-s390x/libjnidispatch.so",
+            "sha256": "b31df7050aa22907e5caae2ef81db83e2900b7b6e683080f6f5681373a71e400",
+            "sizeBytes": 136976
+          },
+          {
+            "path": "com/sun/jna/linux-riscv64/libjnidispatch.so",
+            "sha256": "f817ac611184e31fd84ac2d223ff8f9312300fbc025adfb5cadbfefb8d1a2c13",
+            "sizeBytes": 100064
+          },
+          {
+            "path": "com/sun/jna/sunos-x86/libjnidispatch.so",
+            "sha256": "fdba3f2f4220fb407c7841b2f49efd4fe1c06dca26c9768513e13461ed1520c5",
+            "sizeBytes": 153152
+          },
+          {
+            "path": "com/sun/jna/sunos-x86-64/libjnidispatch.so",
+            "sha256": "4a0b0b11369d4f88437700e8ee3557cb518ec017bfe2df3bd49faf82e60e8f8e",
+            "sizeBytes": 169992
+          },
+          {
+            "path": "com/sun/jna/sunos-sparc/libjnidispatch.so",
+            "sha256": "5ae26c1d50dd6836d0bafb1af2a6c39eb4084be42f0a05da0645d31feed1efad",
+            "sizeBytes": 231108
+          },
+          {
+            "path": "com/sun/jna/sunos-sparcv9/libjnidispatch.so",
+            "sha256": "ccd720895968a885d423facf63615c7f16490f94d946ecb5fefdd4951c62297c",
+            "sizeBytes": 166976
+          },
+          {
+            "path": "com/sun/jna/dragonflybsd-x86-64/libjnidispatch.so",
+            "sha256": "c0c6e64b476d726d86e996af1397491bbff9ccadcba1e0c4639a8f1ae5454062",
+            "sizeBytes": 116880
+          },
+          {
+            "path": "com/sun/jna/freebsd-x86/libjnidispatch.so",
+            "sha256": "784b2a955b1504dec96fa8b87972bcb2815ecfa818fe5c2e57ed9073cab0592c",
+            "sizeBytes": 105372
+          },
+          {
+            "path": "com/sun/jna/freebsd-x86-64/libjnidispatch.so",
+            "sha256": "3c4d14c74bb6798c76b43cad4395b8bdaa9181a7991e160a376f87bb1ab13ced",
+            "sizeBytes": 121040
+          },
+          {
+            "path": "com/sun/jna/freebsd-aarch64/libjnidispatch.so",
+            "sha256": "bca4aece4b834fd04301d5896482f657d06d6860e2d03089c0cc78eea65dd492",
+            "sizeBytes": 116008
+          },
+          {
+            "path": "com/sun/jna/openbsd-x86/libjnidispatch.so",
+            "sha256": "c1837623157a7b51d586423b2500554634150d17a0b3f369ca9333af1189f9d4",
+            "sizeBytes": 108073
+          },
+          {
+            "path": "com/sun/jna/openbsd-x86-64/libjnidispatch.so",
+            "sha256": "d0eda029037f25c4b3d63923a3875345ecd1922de1e6e5df4162cc5631dc0deb",
+            "sizeBytes": 122942
+          },
+          {
+            "path": "com/sun/jna/win32-x86-64/jnidispatch.dll",
+            "sha256": "5a7ff949f6d93d86491eb5b26b1cfc60051168a60622650224b89995ac420023",
+            "sizeBytes": 273408
+          },
+          {
+            "path": "com/sun/jna/win32-aarch64/jnidispatch.dll",
+            "sha256": "b8f98be314234cf12b5b46c29652f70c0f6abb93ae19b63d3fe2692062aa699d",
+            "sizeBytes": 274432
+          }
+        ]
+      }
+    ]
+  },
   "base82Cohort": {
     "aggregateRunId": 39299572605,
     "aggregateProducerCommit": "6390c895642f16bfb3f12be95406ed138d625ca3",

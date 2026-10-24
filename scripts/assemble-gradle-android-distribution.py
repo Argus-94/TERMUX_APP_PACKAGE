@@ -15,6 +15,16 @@ import sys
 import zipfile
 from typing import Any
 
+NATIVE_CODE_SUFFIXES = (".so", ".dll", ".dylib", ".jnilib", ".a", ".o", ".lib", ".exe")
+JAR_SIGNATURE_SUFFIXES = (".sf", ".rsa", ".dsa", ".ec")
+EXPECTED_NATIVE_PROVIDER_JAR_PATHS = {
+    "lib/gradle-fileevents-0.2.8.jar",
+    "lib/jansi-2.4.2.jar",
+    "lib/kotlin-compiler-embeddable-2.4.10.jar",
+    "lib/plugins/jna-5.17.0.jar",
+}
+EXPECTED_NATIVE_PROVIDER_POLICY_ID = "gradle-9.8.2-android-only-strip-pinned-nonbionic-native-resources-v1"
+
 
 def need(ok: bool, message: str) -> None:
     if not ok:
@@ -180,7 +190,13 @@ def read_jar(path: Path, code: str) -> tuple[dict[str, str], list[str]]:
                 mode = (info.external_attr >> 16) & 0xFFFF
                 ftype = stat.S_IFMT(mode)
                 if info.is_dir():
-                    need(ftype in (0, stat.S_IFDIR), code + "_NONDIR_DIRECTORY_ENTRY")
+                    need(info.file_size == 0, code + "_NONEMPTY_DIRECTORY_ENTRY")
+                    # Several pinned Gradle dependency JARs use this empty DOS-directory attribute
+                    # with a trailing slash instead of a conventional Unix directory file type.
+                    legacy_empty_dos_directory = (info.create_system == 3
+                                                  and info.external_attr == 0xFFFF0010)
+                    need(ftype in (0, stat.S_IFDIR) or legacy_empty_dos_directory,
+                         code + "_NONDIR_DIRECTORY_ENTRY")
                     continue
                 need(ftype in (0, stat.S_IFREG), code + "_NONREGULAR_ENTRY:" + name)
                 content[info.filename] = hashlib.sha256(jar.read(info)).hexdigest()
@@ -189,9 +205,130 @@ def read_jar(path: Path, code: str) -> tuple[dict[str, str], list[str]]:
         raise ValueError(code + "_INVALID_ZIP:" + str(exc)) from exc
 
 
+def entry_content_digest(content: dict[str, str]) -> str:
+    canonical = json.dumps(sorted(content.items()), separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def strip_pinned_native_provider_jar(path: Path, provider: dict[str, Any],
+                                     native_extensions: tuple[str, ...]) -> dict[str, Any]:
+    need(path.is_file() and not path.is_symlink(), "NATIVE_PROVIDER_JAR_NOT_REGULAR:" + str(path))
+    need(sha_file(path) == provider.get("sourceJarSha256"),
+         "NATIVE_PROVIDER_SOURCE_JAR_SHA256_MISMATCH:" + str(path))
+    original_content, original_names = read_jar(path, "NATIVE_PROVIDER_SOURCE_JAR")
+    need(len(original_names) == provider.get("sourceEntryCount")
+         and path.stat().st_size == provider.get("sourceJarSizeBytes"),
+         "NATIVE_PROVIDER_SOURCE_JAR_LAYOUT_MISMATCH:" + str(path))
+    expected_entries: dict[str, tuple[str, int]] = {}
+    for record in provider.get("nativeEntries", []):
+        name = str(record.get("path", ""))
+        safe_rel(name)
+        need(name not in expected_entries, "NATIVE_PROVIDER_POLICY_DUPLICATE_ENTRY:" + name)
+        expected_entries[name] = (str(record.get("sha256", "")), int(record.get("sizeBytes", -1)))
+    need(bool(expected_entries), "NATIVE_PROVIDER_POLICY_EMPTY:" + str(path))
+
+    actual_entries: dict[str, tuple[str, int]] = {}
+    signatures: list[str] = []
+    with zipfile.ZipFile(path, "r") as source:
+        for info in source.infolist():
+            upper = info.filename.upper()
+            if upper.startswith("META-INF/") and upper.endswith(JAR_SIGNATURE_SUFFIXES):
+                signatures.append(info.filename)
+            if not info.is_dir() and info.filename.lower().endswith(native_extensions):
+                payload = source.read(info)
+                actual_entries[info.filename] = (hashlib.sha256(payload).hexdigest(), len(payload))
+    need(signatures == provider.get("signatureFiles") == [],
+         "NATIVE_PROVIDER_JAR_SIGNATURES_UNREVIEWED:" + str(path))
+    need(actual_entries == expected_entries,
+         "NATIVE_PROVIDER_NATIVE_ENTRY_SET_OR_HASH_MISMATCH:" + str(path))
+
+    retained_content = {name: digest for name, digest in original_content.items() if name not in expected_entries}
+    class_content = {name: digest for name, digest in retained_content.items() if name.lower().endswith(".class")}
+    temp = path.with_name(path.name + ".aib-native-strip.tmp")
+    need(not temp.exists(), "NATIVE_PROVIDER_TEMPORARY_ALREADY_EXISTS:" + str(temp))
+    original_mode = stat.S_IMODE(path.stat().st_mode)
+    try:
+        with zipfile.ZipFile(path, "r") as source, zipfile.ZipFile(
+                temp, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as target:
+            target.comment = source.comment
+            for info in source.infolist():
+                if info.filename in expected_entries:
+                    continue
+                copied = zipfile.ZipInfo(info.filename, date_time=info.date_time)
+                copied.compress_type = info.compress_type
+                copied.comment = info.comment
+                copied.extra = info.extra
+                copied.create_system = info.create_system
+                copied.create_version = info.create_version
+                copied.extract_version = info.extract_version
+                copied.flag_bits = info.flag_bits
+                copied.volume = info.volume
+                copied.internal_attr = info.internal_attr
+                copied.external_attr = info.external_attr
+                if info.is_dir():
+                    target.writestr(copied, b"")
+                else:
+                    with source.open(info, "r") as src, target.open(copied, "w") as dst:
+                        shutil.copyfileobj(src, dst, length=1024 * 1024)
+        temp.chmod(original_mode)
+        sanitized_content, sanitized_names = read_jar(temp, "NATIVE_PROVIDER_SANITIZED_JAR")
+        need(sanitized_content == retained_content,
+             "NATIVE_PROVIDER_NON_NATIVE_CONTENT_CHANGED:" + str(path))
+        expected_names = [name for name in original_names if name not in expected_entries]
+        need(sanitized_names == expected_names,
+             "NATIVE_PROVIDER_NON_NATIVE_MEMBER_SET_CHANGED:" + str(path))
+        need(not any(name.lower().endswith(native_extensions) for name in sanitized_content),
+             "NATIVE_PROVIDER_NATIVE_ENTRY_REMAINS:" + str(path))
+        os.replace(temp, path)
+    finally:
+        if temp.exists():
+            temp.unlink()
+
+    return {
+        "jarPath": provider["jarPath"],
+        "sourceJarSha256": provider["sourceJarSha256"],
+        "sanitizedJarSha256": sha_file(path),
+        "removedNativeEntryCount": len(expected_entries),
+        "removedNativeEntries": [
+            {"path": name, "sha256": digest, "sizeBytes": size}
+            for name, (digest, size) in sorted(expected_entries.items())
+        ],
+        "retainedRegularEntryCount": len(retained_content),
+        "retainedRegularEntryContentSha256": entry_content_digest(retained_content),
+        "javaClassEntryCount": len(class_content),
+        "javaClassContentsSha256": entry_content_digest(class_content),
+        "allNonNativeEntryContentsPreserved": True,
+        "signatureFilesPresentBefore": signatures,
+        "signatureFilesRemoved": False,
+        "result": "EXACT_PINNED_NATIVE_RESOURCES_REMOVED_JAVA_CONTENT_PRESERVED",
+        "runtimeStatus": "NOT_DEVICE_VERIFIED",
+    }
+
+
+def strip_pinned_native_provider_jars(root: Path, lock: dict[str, Any]) -> list[dict[str, Any]]:
+    policy = lock.get("nativeProviderSanitization", {})
+    gpin = lock.get("gradleSourceBuild", {})
+    need(policy.get("schemaVersion") == 1
+         and policy.get("policyId") == EXPECTED_NATIVE_PROVIDER_POLICY_ID
+         and policy.get("sourceDistributionSha256") == gpin.get("hostDistributionSha256")
+         and policy.get("runtimeStatus") == "NOT_DEVICE_VERIFIED",
+         "NATIVE_PROVIDER_POLICY_ID_OR_SOURCE_DISTRIBUTION_MISMATCH")
+    need(policy.get("nativeExtensions") == list(NATIVE_CODE_SUFFIXES),
+         "NATIVE_PROVIDER_POLICY_EXTENSION_SET_MISMATCH")
+    providers = policy.get("providerJars", [])
+    paths = [item.get("jarPath") for item in providers]
+    need(len(paths) == len(set(paths)) and set(paths) == EXPECTED_NATIVE_PROVIDER_JAR_PATHS,
+         "NATIVE_PROVIDER_POLICY_JAR_SET_MISMATCH")
+    results = []
+    for provider in sorted(providers, key=lambda item: item["jarPath"]):
+        rel = safe_rel(provider["jarPath"])
+        results.append(strip_pinned_native_provider_jar(root.joinpath(*rel.parts), provider, NATIVE_CODE_SUFFIXES))
+    return results
+
+
 def verify_native_java_jar_layout(path: Path) -> tuple[dict[str, str], list[str]]:
     content, names = read_jar(path, "NATIVE_JAVA_API_SOURCE_JAR")
-    need(len(content) == 143 and not any(name.lower().endswith((".so", ".dll", ".dylib", ".jnilib"))
+    need(len(content) == 143 and not any(name.lower().endswith(NATIVE_CODE_SUFFIXES)
                                          for name in content),
          "NATIVE_JAVA_API_SOURCE_JAR_LAYOUT_MISMATCH")
     return content, names
@@ -427,6 +564,7 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
     tree = work / "tree"
     dist = extract_distribution(source_zip, tree)
     root = Path(dist["root"])
+    stripped_native_provider_resources = strip_pinned_native_provider_jars(root, lock)
     native = lock["nativeResource"]
     api_jar = root / native["genericApiJar"]
     target_jar = root / native["platformJar"]
@@ -451,7 +589,7 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
 
     all_jars = sorted(root.rglob("*.jar"))
     unreviewed_native_providers: list[str] = []
-    native_extensions = (".so", ".dll", ".dylib", ".jnilib")
+    native_extensions = NATIVE_CODE_SUFFIXES
     for jar in all_jars:
         _, names = read_jar(jar, "GRADLE_DISTRIBUTION_JAR_" + jar.name)
         native_entries = [name for name in names if name.lower().endswith(native_extensions)]
@@ -508,6 +646,9 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
         "The native resource is bundled at net/rubygrapefruit/platform/linux-aarch64/libnative-platform.so.\n"
         "The platform-specific core variant is Bionic-built. Other native-platform platform variants, including\n"
         "the incompatible ncurses JNI variants, are removed from this Android-only distribution.\n"
+        f"Exactly {sum(item['removedNativeEntryCount'] for item in stripped_native_provider_resources)} pinned platform-native code/archive entries were removed from four dependency JARs; all non-native entries and Java class contents are preserved.\n"
+        "The runtime fallback behavior of Gradle fileevents, Jansi, JNA, and Kotlin LZ4 without their native\n"
+        "payloads is NOT DEVICE VERIFIED; related features may be unavailable or fail.\n"
         "Terminal/terminfo JNI is UNSUPPORTED: upstream TerminfoTerminal calls TerminfoFunctions and the\n"
         "separate native-platform-curses component is not built. File watching is NOT DEVICE VERIFIED.\n"
         "\n"
@@ -528,7 +669,7 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
         for name in names:
             if name.lower().endswith(".so"):
                 final_so_inventory.append({"jar": str(jar.relative_to(root)), "resource": name})
-            elif name.lower().endswith((".dll", ".dylib", ".jnilib")):
+            elif name.lower().endswith(NATIVE_CODE_SUFFIXES[1:]):
                 final_other_native_entries.append({"jar": str(jar.relative_to(root)), "resource": name})
     need(not final_other_native_entries,
          "FINAL_GRADLE_FOREIGN_NATIVE_RESOURCE_REMAINS:" + json.dumps(final_other_native_entries, sort_keys=True))
@@ -570,6 +711,8 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
                                "sharedLibrarySizeBytes": native_lib.stat().st_size,
                                "elfAudit": inputs["androidCoreElfAudit"]},
             "removedNativePlatformVariants": removed,
+            "strippedNonBionicNativeProviderResources": stripped_native_provider_resources,
+            "nativeProviderRuntimeFallback": "NOT_DEVICE_VERIFIED",
             "unreviewedNativeSoProviders": [],
             "rawSoFilesOutsideJars": [],
             "remainingSharedObjectResources": final_so_inventory,
@@ -586,7 +729,7 @@ def assemble(lock: dict[str, Any], inputs: dict[str, Any], work: Path, output: P
         "gates": {"distributionAssembled": True, "packageBuilt": False, "aptSimulation": "NOT_RUN",
                   "installPerformed": False, "androidDeviceRuntime": "NOT_RUN", "candidateEligible": False,
                   "qualified": False, "productionAllowed": False},
-        "warning": "The source JNI artifact is explicitly prototype-only; its own README says Bionic runtime and package use are not validated. It is included only as a test-candidate input under the authorized task scope.",
+        "warning": "The source JNI artifact is explicitly prototype-only; its own README says Bionic runtime and package use are not validated. Four dependency JARs have exact pinned platform-native resources stripped, but runtime fallback behavior is not device-verified. This output is a test-candidate input only; no Android compatibility is claimed.",
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -142,6 +142,136 @@ class GradleCandidateToolTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "NATIVE_JAVA_API_SOURCE_JAR_LAYOUT_MISMATCH"):
                 ASSEMBLER.verify_native_java_jar_layout(jar)
 
+    def test_read_jar_accepts_only_empty_legacy_dos_directory_encoding(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-jar-dir-encoding-") as tmp:
+            jar = Path(tmp) / "dependency.jar"
+            with zipfile.ZipFile(jar, "w") as archive:
+                directory = zipfile.ZipInfo("META-INF/maven/")
+                directory.create_system = 3
+                directory.external_attr = 0xFFFF0010
+                archive.writestr(directory, b"")
+                archive.writestr("META-INF/maven/pom.xml", b"<project/>")
+            content, names = ASSEMBLER.read_jar(jar, "TEST_JAR")
+            self.assertEqual(len(content), 1)
+            self.assertIn("META-INF/maven/", names)
+
+            bad_attr = Path(tmp) / "bad-directory-attribute.jar"
+            with zipfile.ZipFile(bad_attr, "w") as archive:
+                directory = zipfile.ZipInfo("META-INF/maven/")
+                directory.create_system = 3
+                directory.external_attr = 0xFFFF0000
+                archive.writestr(directory, b"")
+            with self.assertRaisesRegex(ValueError, "TEST_JAR_NONDIR_DIRECTORY_ENTRY"):
+                ASSEMBLER.read_jar(bad_attr, "TEST_JAR")
+
+            bad_file = Path(tmp) / "bad-file-attribute.jar"
+            with zipfile.ZipFile(bad_file, "w") as archive:
+                file = zipfile.ZipInfo("META-INF/file.bin")
+                file.create_system = 3
+                file.external_attr = 0xFFFF0010
+                archive.writestr(file, b"data")
+            with self.assertRaisesRegex(ValueError, "TEST_JAR_NONREGULAR_ENTRY"):
+                ASSEMBLER.read_jar(bad_file, "TEST_JAR")
+
+    def test_pinned_provider_strip_is_deterministic_and_preserves_all_java_content(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-native-strip-") as tmp:
+            root = Path(tmp)
+            template = root / "template.jar"
+            entries = {
+                "META-INF/MANIFEST.MF": b"Manifest-Version: 1.0\n\n",
+                "pkg/Runner.class": b"unchanged-java-class-bytes",
+                "pkg/data.txt": b"unchanged-resource-bytes",
+                "pkg/linux-aarch64/libhelper.so": b"native-so-payload",
+                "pkg/aix/libhelper.a": b"native-static-archive",
+            }
+            with zipfile.ZipFile(template, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("pkg/", b"")
+                for name, payload in entries.items():
+                    info = zipfile.ZipInfo(name, date_time=(2020, 1, 2, 3, 4, 6))
+                    info.compress_type = zipfile.ZIP_DEFLATED
+                    archive.writestr(info, payload)
+            before, before_names = ASSEMBLER.read_jar(template, "TEST_PROVIDER")
+            native_entries = []
+            with zipfile.ZipFile(template) as archive:
+                for info in archive.infolist():
+                    if not info.is_dir() and info.filename.lower().endswith(ASSEMBLER.NATIVE_CODE_SUFFIXES):
+                        payload = archive.read(info)
+                        native_entries.append({
+                            "path": info.filename,
+                            "sha256": hashlib.sha256(payload).hexdigest(),
+                            "sizeBytes": len(payload),
+                        })
+            provider = {
+                "jarPath": "lib/example-provider.jar",
+                "sourceJarSha256": ASSEMBLER.sha_file(template),
+                "sourceJarSizeBytes": template.stat().st_size,
+                "sourceEntryCount": len(before_names),
+                "signatureFiles": [],
+                "nativeEntries": native_entries,
+            }
+            outputs = []
+            for index in (1, 2):
+                jar = root / f"copy{index}" / "lib" / "example-provider.jar"
+                jar.parent.mkdir(parents=True)
+                shutil.copyfile(template, jar)
+                report = ASSEMBLER.strip_pinned_native_provider_jar(
+                    jar, provider, ASSEMBLER.NATIVE_CODE_SUFFIXES)
+                after, after_names = ASSEMBLER.read_jar(jar, "TEST_PROVIDER_SANITIZED")
+                expected = {name: digest for name, digest in before.items()
+                            if not name.lower().endswith(ASSEMBLER.NATIVE_CODE_SUFFIXES)}
+                self.assertEqual(after, expected)
+                self.assertEqual(after_names, [name for name in before_names
+                                               if not name.lower().endswith(ASSEMBLER.NATIVE_CODE_SUFFIXES)])
+                self.assertEqual(report["removedNativeEntryCount"], 2)
+                self.assertTrue(report["allNonNativeEntryContentsPreserved"])
+                self.assertEqual(report["javaClassEntryCount"], 1)
+                self.assertEqual(report["signatureFilesRemoved"], False)
+                outputs.append(jar.read_bytes())
+            self.assertEqual(outputs[0], outputs[1])
+
+    def test_pinned_provider_strip_rejects_changed_hashes_and_unlisted_native_entries(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-native-strip-reject-") as tmp:
+            jar = Path(tmp) / "provider.jar"
+            with zipfile.ZipFile(jar, "w") as archive:
+                archive.writestr("pkg/Runner.class", b"class")
+                archive.writestr("pkg/linux/lib.so", b"one")
+                archive.writestr("pkg/windows/lib.dll", b"two")
+            content, names = ASSEMBLER.read_jar(jar, "TEST_PROVIDER")
+            provider = {
+                "jarPath": "lib/example-provider.jar",
+                "sourceJarSha256": ASSEMBLER.sha_file(jar),
+                "sourceJarSizeBytes": jar.stat().st_size,
+                "sourceEntryCount": len(names),
+                "signatureFiles": [],
+                "nativeEntries": [{"path": "pkg/linux/lib.so", "sha256": content["pkg/linux/lib.so"],
+                                   "sizeBytes": 3}],
+            }
+            with self.assertRaisesRegex(ValueError, "NATIVE_PROVIDER_NATIVE_ENTRY_SET_OR_HASH_MISMATCH"):
+                ASSEMBLER.strip_pinned_native_provider_jar(
+                    jar, provider, ASSEMBLER.NATIVE_CODE_SUFFIXES)
+            provider["nativeEntries"].append({"path": "pkg/windows/lib.dll",
+                                              "sha256": content["pkg/windows/lib.dll"], "sizeBytes": 3})
+            provider["sourceJarSha256"] = "0" * 64
+            with self.assertRaisesRegex(ValueError, "NATIVE_PROVIDER_SOURCE_JAR_SHA256_MISMATCH"):
+                ASSEMBLER.strip_pinned_native_provider_jar(
+                    jar, provider, ASSEMBLER.NATIVE_CODE_SUFFIXES)
+
+    def test_native_provider_policy_requires_exact_pinned_provider_set(self):
+        lock = {
+            "gradleSourceBuild": {"hostDistributionSha256": "a" * 64},
+            "nativeProviderSanitization": {
+                "schemaVersion": 1,
+                "policyId": ASSEMBLER.EXPECTED_NATIVE_PROVIDER_POLICY_ID,
+                "sourceDistributionSha256": "a" * 64,
+                "runtimeStatus": "NOT_DEVICE_VERIFIED",
+                "nativeExtensions": list(ASSEMBLER.NATIVE_CODE_SUFFIXES),
+                "providerJars": [],
+            },
+        }
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-native-policy-") as tmp:
+            with self.assertRaisesRegex(ValueError, "NATIVE_PROVIDER_POLICY_JAR_SET_MISMATCH"):
+                ASSEMBLER.strip_pinned_native_provider_jars(Path(tmp), lock)
+
     def test_all_archive_path_helpers_reject_traversal(self):
         for module, function_name in ((ASSEMBLER, "safe_rel"), (FEED, "safe_rel"),
                                       (STAGER, "safe_rel"), (BASE, "safe_relative")):
