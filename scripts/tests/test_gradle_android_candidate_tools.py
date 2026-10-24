@@ -38,6 +38,18 @@ class GradleCandidateToolTests(unittest.TestCase):
         self.assertEqual(builder.parent.joinpath("..", "..").resolve(), ROOT)
         self.assertIn('readonly ROOT="$(cd -- "$KIT_DIR/../.." && pwd)"', text)
 
+    def test_gradle_recipe_skips_recursive_build_dependencies_and_checks_binary_markers(self):
+        builder = (ROOT / "termux-private-package-kit" / "gradle-android-aarch64" /
+                   "build-gradle-private-aarch64.sh").read_text(encoding="utf-8")
+        recipe = (ROOT / "termux-private-package-kit" / "gradle-android-aarch64" /
+                  "build.sh.in").read_text(encoding="utf-8")
+        self.assertIn("TERMUX_SKIP_DEPCHECK=true ./build-package.sh", builder)
+        self.assertIn('"buildTimeDependencyCheck":"TERMUX_SKIP_DEPCHECK=true; pure staged copy/install recipe"', builder)
+        self.assertIn('TERMUX_PKG_DEPENDS="openjdk-17"', recipe)
+        for marker in ("gradle-launcher-9.8.2.jar", "gradle-core-9.8.2.jar", "gradle-cli-9.8.2.jar"):
+            self.assertIn("./lib/" + marker, recipe)
+        self.assertNotIn("./version.txt", recipe)
+
     def test_optional_source_artifact_run_id_metadata_is_checked_when_present(self):
         expected = "40090638892"
         self.assertFalse(ASSEMBLER.verify_optional_workflow_run_id({}, expected, "RUN_ID_MISMATCH"))

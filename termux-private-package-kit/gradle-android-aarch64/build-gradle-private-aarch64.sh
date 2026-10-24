@@ -184,7 +184,8 @@ trap cleanup_container EXIT
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 (
   cd "$WORKTREE"
-  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; ./build-package.sh -a aarch64 -o /home/builder/termux-packages/output/.aib-private-gradle-debs gradle'
+  # This package only stages the hash-pinned distribution; its runtime dependency is checked by the later locked-feed APT simulation.
+  ./scripts/run-docker.sh bash -c 'set -Eeuo pipefail; cd /home/builder/termux-packages; TERMUX_SKIP_DEPCHECK=true ./build-package.sh -a aarch64 -o /home/builder/termux-packages/output/.aib-private-gradle-debs gradle'
 ) 2>&1 | tee -a "$OUTPUT_DIR/build.log"
 
 mapfile -t DEBS < <(find "$WORKTREE/output/.aib-private-gradle-debs" -maxdepth 1 -type f -name 'gradle_*_aarch64.deb' -print | sort)
@@ -197,7 +198,7 @@ python3 - "$OUTPUT_DIR/build-result.json" "$AIB_TERMUX_BUILDER_IMAGE_REF" "$PIN"
 import hashlib,json,pathlib,sys
 out=pathlib.Path(sys.argv[1]); image,revision,prefix,dist_sha,deb,recipe_sha=sys.argv[2:]
 p=pathlib.Path(deb)
-record={"schemaVersion":1,"status":"package-built-and-static-audits-passed-test-only","sourceCommit":revision,"builderImageRef":image,"referenceGradleRecipeSha256":recipe_sha,"androidDistributionSha256":dist_sha,"applicationId":"com.karat.aibuilder","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","packageFile":p.name,"packageSha256":hashlib.sha256(p.read_bytes()).hexdigest(),"installed":False,"aptSimulation":"NOT_RUN","deviceSmokeTest":"NOT RUN","candidateEligible":False,"qualified":False,"productionAllowed":False}
+record={"schemaVersion":1,"status":"package-built-and-static-audits-passed-test-only","sourceCommit":revision,"builderImageRef":image,"referenceGradleRecipeSha256":recipe_sha,"androidDistributionSha256":dist_sha,"applicationId":"com.karat.aibuilder","prefix":prefix,"prefixProvenance":"ci-model-only; device-observation-not-run","packageFile":p.name,"packageSha256":hashlib.sha256(p.read_bytes()).hexdigest(),"buildTimeDependencyCheck":"TERMUX_SKIP_DEPCHECK=true; pure staged copy/install recipe","runtimeDependency":"openjdk-17","installed":False,"aptSimulation":"NOT_RUN","deviceSmokeTest":"NOT RUN","candidateEligible":False,"qualified":False,"productionAllowed":False}
 out.write_text(json.dumps(record,indent=2,sort_keys=True)+"\n")
 PY
 printf 'AUDITED_PACKAGE_READY %s\n' "$OUTPUT_DIR/packages/$(basename "${DEBS[0]}")"

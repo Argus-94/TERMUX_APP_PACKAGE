@@ -13,7 +13,9 @@ TERMUX_PKG_PLATFORM_INDEPENDENT=false
 termux_step_make_install() {
 	set -Eeuo pipefail
 	test -x ./bin/gradle
-	test "$(cat ./version.txt)" = "9.8.2"
+	test -s ./lib/gradle-launcher-9.8.2.jar
+	test -s ./lib/gradle-core-9.8.2.jar
+	test -s ./lib/gradle-cli-9.8.2.jar
 	test -s ./LICENSE
 	test -s ./NOTICE
 	test -s ./LICENSE.native-platform.txt

@@ -268,6 +268,8 @@ jobs:
           assert audit["result"] == "GRADLE_AARCH64_DEB_STATIC_AUDIT_PASS_TEST_ONLY"
           assert audit["package"]["Package"] == "gradle" and audit["package"]["Version"] == "1:9.8.2"
           assert audit["package"]["Architecture"] == "aarch64" and audit["package"]["Depends"] == "openjdk-17"
+          assert result["buildTimeDependencyCheck"] == "TERMUX_SKIP_DEPCHECK=true; pure staged copy/install recipe"
+          assert result["runtimeDependency"] == audit["package"]["Depends"] == "openjdk-17"
           assert result["productionAllowed"] is False and audit["productionAllowed"] is False
           print("GRADLE_PACKAGE_BUILD_AND_STATIC_AUDIT_OK; installation/runtime not performed")
           PY
