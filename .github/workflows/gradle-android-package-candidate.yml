@@ -1,0 +1,512 @@
+name: Gradle 9.8.2 Android/Bionic package candidate (test only)
+
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .github/workflows/gradle-android-package-candidate.yml
+      - gradle-android-package-candidate-inputs.json
+      - scripts/assemble-gradle-android-distribution.py
+      - scripts/audit-gradle-android-package.py
+      - scripts/verify-gradle-android-base82-archive.py
+      - scripts/validate-gradle-android-candidate-feed.py
+      - scripts/stage-gradle-android-candidate.py
+      - scripts/tests/test_gradle_android_candidate_tools.py
+      - scripts/test-apt-candidate.sh
+      - termux-private-package-kit/gradle-android-aarch64/**
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: gradle-android-package-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-audit-sign-and-simulate:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+      APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+      TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+      PYTHONDONTWRITEBYTECODE: '1'
+
+    steps:
+      - name: Checkout authorized candidate branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Checkout exact public Termux source commit without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: termux/termux-packages
+          ref: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+          path: termux-packages
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install isolated signing, package-index and archive verification tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev xz-utils
+
+      - name: Verify authorized branch, pinned producer runs, artifacts and draft base release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REPOSITORY" = 'Argus-94/TERMUX_APP_PACKAGE'
+          test "$GITHUB_REF" = 'refs/heads/work/bootstrap-compatibility-20261019'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - "$GITHUB_WORKSPACE/gradle-android-package-candidate-inputs.json" <<'PY'
+          import datetime, json, pathlib, subprocess, sys
+          lock=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          repo=lock["repository"]
+          branch=lock["branch"]
+          assert repo == "Argus-94/TERMUX_APP_PACKAGE"
+          assert branch == "work/bootstrap-compatibility-20261019"
+          assert (lock["gradleSourceBuild"]["hostDistributionRunId"],lock["gradleSourceBuild"]["hostDistributionArtifactId"]) == (40079300326,12554961307)
+          assert (lock["nativePlatformJavaApi"]["sourceBuildRunId"],lock["nativePlatformJavaApi"]["sourceBuildArtifactId"]) == (40090638892,12558558656)
+          assert (lock["nativePlatformAndroidCore"]["prototypeRunId"],lock["nativePlatformAndroidCore"]["prototypeArtifactId"]) == (40088495707,12557333784)
+          assert (lock["base82Cohort"]["aggregateRunId"],lock["base82Cohort"]["archiveAssetId"],lock["base82Cohort"]["inventoryAssetId"]) == (39299572605,657029790,657029769)
+          now=datetime.datetime.now(datetime.timezone.utc)
+          def api(path):
+              return json.loads(subprocess.run(["gh","api",path],check=True,capture_output=True,text=True).stdout)
+          runs=[
+              (lock["gradleSourceBuild"]["hostDistributionRunId"],lock["gradleSourceBuild"]["hostBuildCommit"],
+               lock["gradleSourceBuild"]["hostDistributionArtifactId"],lock["gradleSourceBuild"]["hostDistributionArtifactName"],
+               lock["gradleSourceBuild"]["hostDistributionArtifactExpiresAt"]),
+              (lock["nativePlatformJavaApi"]["sourceBuildRunId"],None,
+               lock["nativePlatformJavaApi"]["sourceBuildArtifactId"],lock["nativePlatformJavaApi"]["sourceBuildArtifactName"],
+               lock["nativePlatformJavaApi"]["sourceBuildArtifactExpiresAt"]),
+              (lock["nativePlatformAndroidCore"]["prototypeRunId"],None,
+               lock["nativePlatformAndroidCore"]["prototypeArtifactId"],lock["nativePlatformAndroidCore"]["prototypeArtifactName"],
+               lock["nativePlatformAndroidCore"]["prototypeArtifactExpiresAt"]),
+              (lock["base82Cohort"]["aggregateRunId"],lock["base82Cohort"]["aggregateProducerCommit"],None,None,None),
+          ]
+          for run_id, expected_sha, artifact_id, artifact_name, expected_expiry in runs:
+              run=api(f"repos/{repo}/actions/runs/{run_id}")
+              assert run["head_branch"] == branch, (run_id,run.get("head_branch"))
+              assert run["status"] == "completed" and run["conclusion"] == "success", (run_id,run.get("status"),run.get("conclusion"))
+              if expected_sha:
+                  assert run["head_sha"] == expected_sha, (run_id,run.get("head_sha"))
+              if artifact_id is not None:
+                  artifacts=api(f"repos/{repo}/actions/runs/{run_id}/artifacts?per_page=100")["artifacts"]
+                  matches=[a for a in artifacts if a["id"] == artifact_id]
+                  assert len(matches)==1, (run_id,artifact_id)
+                  artifact=matches[0]
+                  assert artifact["name"] == artifact_name and artifact["expired"] is False, (artifact_id,artifact.get("name"),artifact.get("expired"))
+                  assert artifact["expires_at"] == expected_expiry, (artifact_id,artifact.get("expires_at"),expected_expiry)
+                  expiry=datetime.datetime.fromisoformat(artifact["expires_at"].replace("Z","+00:00"))
+                  assert expiry > now, (artifact_id,artifact["expires_at"])
+          cohort=lock["base82Cohort"]
+          release=api(f"repos/{repo}/releases/{cohort['releaseId']}")
+          assert release["id"] == cohort["releaseId"] and release["tag_name"] == cohort["releaseTag"]
+          assert release["draft"] is True and release["prerelease"] is True
+          assert release["target_commitish"] == cohort["aggregateProducerCommit"]
+          by_id={a["id"]:a for a in release["assets"]}
+          for asset_id,name,size in ((cohort["archiveAssetId"],cohort["archiveFilename"],cohort["archiveSizeBytes"]),
+                                     (cohort["inventoryAssetId"],cohort["inventoryFilename"],cohort["inventorySizeBytes"])):
+              assert asset_id in by_id
+              asset=by_id[asset_id]
+              assert asset["name"] == name and asset["size"] == size and asset["state"] == "uploaded"
+          print("LOCKED_PRODUCER_RUNS_AND_DRAFT_BASE_RELEASE_OK; no saved personal token or production signing material used")
+          PY
+
+      - name: Run syntax and fail-closed tooling tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/create-ephemeral-feed-signing-key.sh scripts/create-signed-feed-release.sh scripts/test-apt-candidate.sh \
+            termux-private-package-kit/gradle-android-aarch64/build-gradle-private-aarch64.sh
+          python3 -m py_compile scripts/assemble-gradle-android-distribution.py scripts/audit-gradle-android-package.py \
+            scripts/verify-gradle-android-base82-archive.py scripts/validate-gradle-android-candidate-feed.py \
+            scripts/stage-gradle-android-candidate.py
+          python3 scripts/tests/test_gradle_android_candidate_tools.py -v
+
+      - name: Download exact source-build artifacts by locked IDs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: '12554961307'
+          repository: Argus-94/TERMUX_APP_PACKAGE
+          run-id: 40079300326
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/aib-gradle-source-artifact
+
+      - name: Download exact source-built native-platform Java API artifact by locked ID
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: '12558558656'
+          repository: Argus-94/TERMUX_APP_PACKAGE
+          run-id: 40090638892
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/aib-native-platform-java-artifact
+
+      - name: Download exact Android Bionic prototype artifact by locked ID
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: '12557333784'
+          repository: Argus-94/TERMUX_APP_PACKAGE
+          run-id: 40088495707
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/aib-native-platform-android-artifact
+
+      - name: Download the exact draft 82-package archive and inventory assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          gh api repos/Argus-94/TERMUX_APP_PACKAGE/releases/assets/657029790 \
+            -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/aggregate82-bootstrap-compatible-evidence.tar.gz"
+          gh api repos/Argus-94/TERMUX_APP_PACKAGE/releases/assets/657029769 \
+            -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/aggregate-archive-inventory.json"
+
+      - name: Verify the unchanged signed 82-package base cohort
+        id: base82
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/verify-gradle-android-base82-archive.py \
+            --archive "$RUNNER_TEMP/aggregate82-bootstrap-compatible-evidence.tar.gz" \
+            --inventory "$RUNNER_TEMP/aggregate-archive-inventory.json" \
+            --input-lock gradle-android-package-candidate-inputs.json \
+            --cohort-lock bootstrap-compatible-candidate-inputs.json \
+            --destination "$RUNNER_TEMP/aib-gradle-base82-unpacked" \
+            --report "$RUNNER_TEMP/aib-gradle-base82-verification.json"
+
+      - name: Assemble the isolated Android/Bionic Gradle distribution
+        id: assemble
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/assemble-gradle-android-distribution.py \
+            --gradle-artifact-dir "$RUNNER_TEMP/aib-gradle-source-artifact" \
+            --native-java-artifact-dir "$RUNNER_TEMP/aib-native-platform-java-artifact" \
+            --android-core-artifact-dir "$RUNNER_TEMP/aib-native-platform-android-artifact" \
+            --input-lock gradle-android-package-candidate-inputs.json \
+            --work-dir "$RUNNER_TEMP/aib-gradle-android-assembly-work" \
+            --output-zip "$RUNNER_TEMP/gradle-9.8.2-android-aarch64.zip" \
+            --report "$RUNNER_TEMP/aib-gradle-android-assembly-report.json"
+
+      - name: Pull the digest-pinned official Termux package builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+
+      - name: Build and statically audit one AI Builder Gradle package
+        id: package
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-gradle-package-output"
+          raw_log="$RUNNER_TEMP/aib-gradle-package-raw.log"
+          mkdir -p "$output_dir"
+          set +e
+          AIB_TERMUX_APP_DATA_DIR="$APP_DATA_DIR" \
+          AIB_TERMUX_PREFIX="$TERMUX_PREFIX" \
+          AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF" \
+            "$GITHUB_WORKSPACE/termux-private-package-kit/gradle-android-aarch64/build-gradle-private-aarch64.sh" \
+              "$GITHUB_WORKSPACE/termux-packages" \
+              "$RUNNER_TEMP/gradle-9.8.2-android-aarch64.zip" \
+              "$RUNNER_TEMP/aib-gradle-android-assembly-report.json" \
+              "$GITHUB_WORKSPACE/gradle-android-package-candidate-inputs.json" \
+              "$output_dir" >"$raw_log" 2>&1
+          build_status=$?
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=Gradle candidate build or audit failed::Exit $build_status; sanitized log tail follows. No candidate binary will be retained."
+            python3 - "$raw_log" "$RUNNER_TEMP" "$GITHUB_WORKSPACE" <<'PY'
+          import pathlib,re,sys
+          text=pathlib.Path(sys.argv[1]).read_text(encoding="utf-8",errors="replace")
+          for value,replacement in ((sys.argv[2],"<RUNNER_TEMP>"),(sys.argv[3],"<WORKSPACE>"),
+                                    ("/home/builder/termux-packages","<BUILDER_SOURCE>"),
+                                    ("/data/user/0/com.karat.aibuilder/files/usr","<MODELED_PREFIX>"),
+                                    ("/data/user/0/com.karat.aibuilder","<MODELED_APP_DATA>"),
+                                    ("/data/data/com.karat.aibuilder","<MODELED_APP_DATA>")):
+              text=text.replace(value,replacement)
+          text=re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)","<REDACTED_SECRET>",text)
+          print("--- sanitized last 100 build-log lines ---")
+          for line in text.splitlines()[-100:]: print(line[:600])
+          PY
+            exit "$build_status"
+          fi
+          python3 - "$output_dir/build-result.json" "$output_dir/audit-report.json" <<'PY'
+          import json,pathlib,sys
+          result=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          audit=json.loads(pathlib.Path(sys.argv[2]).read_text())
+          assert result["status"] == "package-built-and-static-audits-passed-test-only"
+          assert result["installed"] is False and result["aptSimulation"] == "NOT_RUN"
+          assert result["applicationId"] == "com.karat.aibuilder"
+          assert result["sourceCommit"] == "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7"
+          assert audit["result"] == "GRADLE_AARCH64_DEB_STATIC_AUDIT_PASS_TEST_ONLY"
+          assert audit["package"]["Package"] == "gradle" and audit["package"]["Version"] == "1:9.8.2"
+          assert audit["package"]["Architecture"] == "aarch64" and audit["package"]["Depends"] == "openjdk-17"
+          assert result["productionAllowed"] is False and audit["productionAllowed"] is False
+          print("GRADLE_PACKAGE_BUILD_AND_STATIC_AUDIT_OK; installation/runtime not performed")
+          PY
+
+      - name: Build a separate 83-package ephemeral test feed and authenticate its index
+        id: feed
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 022
+          output_dir="$RUNNER_TEMP/aib-gradle-package-output"
+          base_feed="$RUNNER_TEMP/aib-gradle-base82-unpacked/aggregate/candidate-feed"
+          feed="$RUNNER_TEMP/aib-gradle-candidate-feed"
+          key_root="$RUNNER_TEMP/aib-gradle-ephemeral-signing-config"
+          mkdir -p "$feed/pool" "$feed/dists/stable/main/binary-aarch64"
+          cp -a "$base_feed/pool/." "$feed/pool/"
+          mapfile -t debs < <(find "$output_dir/packages" -maxdepth 1 -type f -name 'gradle_*_aarch64.deb' -print)
+          ((${#debs[@]} == 1)) || { echo 'ERROR:EXPECTED_EXACTLY_ONE_GRADLE_AARCH64_DEB' >&2; exit 2; }
+          mkdir -p "$feed/pool/main/gradle"
+          cp -- "${debs[0]}" "$feed/pool/main/gradle/"
+          (cd "$feed" && dpkg-scanpackages -m pool /dev/null > dists/stable/main/binary-aarch64/Packages)
+          gzip -n -9c "$feed/dists/stable/main/binary-aarch64/Packages" > "$feed/dists/stable/main/binary-aarch64/Packages.gz"
+          ./scripts/create-ephemeral-feed-signing-key.sh "$key_root" > "$RUNNER_TEMP/aib-gradle-key-generation.log" 2>&1
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key_root"
+          export GNUPGHOME="$key_root/gnupg"
+          ./scripts/create-signed-feed-release.sh "$feed" aarch64 >"$RUNNER_TEMP/aib-gradle-feed-signing.log" 2>&1 || {
+            echo 'ERROR:GRADLE_TEST_FEED_SIGNING_OR_INTEGRITY_CHECK_FAILED' >&2; exit 2;
+          }
+          python3 scripts/validate-gradle-android-candidate-feed.py \
+            --input-lock gradle-android-package-candidate-inputs.json \
+            --base-verification "$RUNNER_TEMP/aib-gradle-base82-verification.json" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json" \
+            --assembly-report "$RUNNER_TEMP/aib-gradle-android-assembly-report.json" \
+            --base-feed-root "$base_feed" \
+            --feed-root "$feed" \
+            --signing-config-root "$key_root" \
+            --report "$RUNNER_TEMP/aib-gradle-feed-validation.json"
+
+      - name: Verify signed APT metadata, download exact roots, and simulate install only
+        id: apt
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          feed="$RUNNER_TEMP/aib-gradle-candidate-feed"
+          key_root="$RUNNER_TEMP/aib-gradle-ephemeral-signing-config"
+          export AIB_TERMUX_FEED_SIGNING_CONFIG_ROOT="$key_root"
+          export GNUPGHOME="$key_root/gnupg"
+          export AIB_APT_SIMULATION_LOG_PATH="$RUNNER_TEMP/aib-gradle-apt-plan.log"
+          ./scripts/test-apt-candidate.sh "$feed" aarch64 gradle '1:9.8.2' 83 aarch64 openjdk-17=17.0.20 2>&1 \
+            | tee "$RUNNER_TEMP/aib-gradle-apt-simulation.log"
+          python3 - "$RUNNER_TEMP/aib-gradle-apt-simulation.log" \
+            "$RUNNER_TEMP/aib-gradle-feed-validation.json" "$RUNNER_TEMP/aib-gradle-apt-plan.log" \
+            "$RUNNER_TEMP/aib-gradle-candidate-feed" "$RUNNER_TEMP/aib-gradle-apt-proof.json" <<'PY'
+          import hashlib,json,pathlib,re,sys
+          apt_log,feed_report,plan_path,feed_root,proof_path=map(pathlib.Path,sys.argv[1:])
+          lines=apt_log.read_text(encoding="utf-8",errors="replace").splitlines()
+          marker="APT_CANDIDATE_DOWNLOAD_AND_SIMULATED_INSTALL_OK package=gradle version=1:9.8.2 arch=aarch64 roots=2 signed_by=1 install_performed=0 rollback_performed=0"
+          assert lines.count(marker)==1, lines[-10:]
+          feed=json.loads(feed_report.read_text(encoding="utf-8"))
+          assert feed["result"] == "GRADLE_SEPARATE_TEST_FEED_PASS_82_BASE_PACKAGES_UNCHANGED_PLUS_ONE"
+          assert feed["feedPackageCount"] == 83 and feed["gradlePackage"]["depends"] == "openjdk-17"
+          assert feed["reservedProductionSigningFingerprintNotUsed"] is True
+          plan=[]
+          for line in plan_path.read_text(encoding="utf-8",errors="replace").splitlines():
+              if line.startswith("Remv "): raise SystemExit("APT_SIMULATION_WOULD_REMOVE_PACKAGE")
+              if not line.startswith("Inst "): continue
+              match=re.match(r"^Inst ([A-Za-z0-9][A-Za-z0-9+.-]*)(?::[A-Za-z0-9-]+)? \((\S+)",line)
+              if not match: raise SystemExit("APT_SIMULATION_PLAN_RECORD_INVALID:"+line)
+              name,version=match.groups()
+              if any(item["name"]==name for item in plan): raise SystemExit("APT_SIMULATION_DUPLICATE_PLAN_PACKAGE:"+name)
+              plan.append({"name":name,"version":version})
+          assert plan, "APT_SIMULATION_PLAN_EMPTY"
+          assert { (item["name"],item["version"]) for item in plan } >= {("gradle","1:9.8.2"),("openjdk-17","17.0.20")}
+          paragraphs=feed_root.joinpath("dists/stable/main/binary-aarch64/Packages").read_text(encoding="utf-8").strip().split("\n\n")
+          package_records=[]
+          for paragraph in paragraphs:
+              fields={}
+              for line in paragraph.splitlines():
+                  if line[:1] in (" ","\t"): continue
+                  key,sep,value=line.partition(":")
+                  if sep: fields[key]=value.strip()
+              package_records.append(fields)
+          for item in plan:
+              matches=[row for row in package_records if row.get("Package")==item["name"] and row.get("Version")==item["version"] and row.get("Architecture") in ("aarch64","all")]
+              assert len(matches)==1, (item,matches)
+              item["architecture"]=matches[0]["Architecture"]
+          plan_sha=hashlib.sha256(plan_path.read_bytes()).hexdigest()
+          proof={"schemaVersion":1,"result":"APT_SIGNATURE_DOWNLOAD_SIMULATION_PASS_TEST_ONLY",
+                 "feedPackageCount":83,"base82PackagesUnchanged":True,
+                 "requestedRoots":["gradle=1:9.8.2","openjdk-17=17.0.20"],
+                 "requestedRootDownloadsVerified":2,"signedByOnlyEphemeralKey":True,
+                 "reservedProductionSigningKeyUsed":False,
+                 "simulatedInstallPlan":plan,"simulatedInstallPlanPackageCount":len(plan),
+                 "aptSimulationPlanSha256":plan_sha,
+                 "aptGetUpdateSignatureAndHashes":"PASS","aptGetSimulatedInstall":"PASS",
+                 "unauthenticatedAccessAllowed":False,"installPerformed":False,"rollbackPerformed":False,
+                 "androidDeviceRuntime":"NOT_RUN","candidateEligible":False,"qualified":False,"productionAllowed":False,
+                 "successMarker":marker}
+          proof_path.write_text(json.dumps(proof,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          feed["aptSimulation"]="PASS; simulated only; no install"
+          feed["aptProofSha256"]=hashlib.sha256(proof_path.read_bytes()).hexdigest()
+          feed["aptSimulationPlanSha256"]=plan_sha
+          feed["aptSimulationPlanPackageCount"]=len(plan)
+          feed_report.write_text(json.dumps(feed,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("APT_SIGNATURE_DOWNLOAD_SIMULATION_PROOF_RECORDED install=0 roots=2 production=false")
+          PY
+
+      - name: Stage only validated candidate evidence and public ephemeral key
+        id: retention
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          output_dir="$RUNNER_TEMP/aib-gradle-package-output"
+          base_root="$RUNNER_TEMP/aib-gradle-base82-unpacked"
+          base_feed="$base_root/aggregate/candidate-feed"
+          package_deb="$(find "$output_dir/packages" -maxdepth 1 -type f -name 'gradle_*_aarch64.deb' -print -quit)"
+          python3 scripts/stage-gradle-android-candidate.py \
+            --destination "$RUNNER_TEMP/aib-gradle-candidate-retention" \
+            --input-lock gradle-android-package-candidate-inputs.json \
+            --feed-root "$RUNNER_TEMP/aib-gradle-candidate-feed" \
+            --signing-config-root "$RUNNER_TEMP/aib-gradle-ephemeral-signing-config" \
+            --package-deb "$package_deb" \
+            --package-hashes "$output_dir/package-SHA256SUMS" \
+            --package-log "$output_dir/build.log" \
+            --recipe-patch "$output_dir/app-private-gradle-recipe.patch" \
+            --build-result "$output_dir/build-result.json" \
+            --audit-report "$output_dir/audit-report.json" \
+            --assembly-report "$RUNNER_TEMP/aib-gradle-android-assembly-report.json" \
+            --assembled-zip "$RUNNER_TEMP/gradle-9.8.2-android-aarch64.zip" \
+            --host-distribution-zip "$RUNNER_TEMP/aib-gradle-source-artifact/gradle-9.8.2-bin.zip" \
+            --base-verification "$RUNNER_TEMP/aib-gradle-base82-verification.json" \
+            --base-inventory "$RUNNER_TEMP/aggregate-archive-inventory.json" \
+            --upstream-base82-manifest "$base_feed/aggregate-manifest.json" \
+            --base-replay-summary "$base_root/aggregate/replay-summary.json" \
+            --base-feed-root "$base_feed" \
+            --feed-validation "$RUNNER_TEMP/aib-gradle-feed-validation.json" \
+            --apt-proof "$RUNNER_TEMP/aib-gradle-apt-proof.json" \
+            --apt-log "$RUNNER_TEMP/aib-gradle-apt-simulation.log" \
+            --apt-plan "$RUNNER_TEMP/aib-gradle-apt-plan.log" \
+            --gradle-artifact-dir "$RUNNER_TEMP/aib-gradle-source-artifact" \
+            --native-java-artifact-dir "$RUNNER_TEMP/aib-native-platform-java-artifact" \
+            --android-core-artifact-dir "$RUNNER_TEMP/aib-native-platform-android-artifact"
+
+      - name: Publish short-retention candidate artifact only (no Release, feed or Pages publication)
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gradle-android-aarch64-test-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-gradle-candidate-retention/
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+
+      - name: Record candidate results and closed gates
+        if: success()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - "$RUNNER_TEMP/aib-gradle-package-output/build-result.json" \
+            "$RUNNER_TEMP/aib-gradle-android-assembly-report.json" \
+            "$RUNNER_TEMP/aib-gradle-feed-validation.json" \
+            "$RUNNER_TEMP/aib-gradle-apt-proof.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,pathlib,sys
+          build,assembly,feed,apt=[json.loads(pathlib.Path(p).read_text()) for p in sys.argv[1:]]
+          print("## Gradle 9.8.2 Android/Bionic package candidate — test only\n")
+          print("| Gate | Result |\n|---|---|")
+          print("| Source-built Android-only distribution assembly | PASS; candidate only |")
+          print("| AArch64 package build and file/hash/path audit | PASS; not installed |")
+          print("| Test feed contents | PASS; 82 existing packages unchanged + Gradle |")
+          print("| APT signatures/download/simulated install | PASS; no install performed |")
+          print(f"| APT simulation plan | {apt['simulatedInstallPlanPackageCount']} packages; exact plan retained |")
+          print(f"| Package SHA-256 | `{build['packageSha256']}` |")
+          print(f"| Distribution ZIP SHA-256 | `{assembly['androidDistributionSha256'] if 'androidDistributionSha256' in assembly else assembly['distribution']['sha256']}` |")
+          print(f"| Ephemeral feed key | `{feed['ephemeralSigningFingerprint']}`; private key not retained |")
+          print("| Android device runtime / install / rollback | NOT RUN |")
+          print("| Qualification / candidate eligibility / production feed | CLOSED / FALSE |")
+          print(f"\nShort-retention CI evidence: `{__import__('os').environ['GITHUB_SERVER_URL']}/{__import__('os').environ['GITHUB_REPOSITORY']}/actions/runs/{__import__('os').environ['GITHUB_RUN_ID']}`")
+          PY
+
+      - name: Preserve sanitized failure diagnostics only (never a partial package/feed)
+        if: failure()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          out="$RUNNER_TEMP/aib-gradle-failure-evidence"
+          mkdir -p "$out"
+          python3 - "$out" "$RUNNER_TEMP" <<'PY'
+          import json,os,pathlib,re,sys
+          out=pathlib.Path(sys.argv[1]); temp=pathlib.Path(sys.argv[2])
+          safe_names=["aib-gradle-base82-verification.json","aib-gradle-android-assembly-report.json",
+                      "aib-gradle-feed-validation.json","aib-gradle-apt-proof.json"]
+          status={"schemaVersion":1,"result":"FAILED_OR_BLOCKED_FAIL_CLOSED","partialPackageRetained":False,
+                  "installPerformed":False,"androidDeviceRuntime":"NOT_RUN","candidateEligible":False,
+                  "qualified":False,"productionAllowed":False}
+          for name in safe_names:
+              p=temp/name
+              if p.is_file() and not p.is_symlink():
+                  try: status[name]=json.loads(p.read_text(encoding="utf-8"))
+                  except Exception: status[name]="present-but-not-valid-json"
+          for name in ["aib-gradle-package-raw.log","aib-gradle-feed-signing.log","aib-gradle-apt-simulation.log",
+                       "aib-gradle-apt-plan.log"]:
+              p=temp/name
+              if p.is_file() and not p.is_symlink():
+                  text=p.read_text(encoding="utf-8",errors="replace")
+                  text=text.replace(str(temp),"<RUNNER_TEMP>").replace(os.environ.get("GITHUB_WORKSPACE",""),"<WORKSPACE>")
+                  text=text.replace("/home/builder/termux-packages","<BUILDER_SOURCE>")
+                  text=re.sub(r"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]+|-----BEGIN [^-]*PRIVATE KEY-----|AIB_TERMUX_FEED_SIGNING_KEY|GITHUB_TOKEN|GH_TOKEN)","<REDACTED_SECRET>",text)
+                  (out/(name+".sanitized")).write_text("\n".join(line[:600] for line in text.splitlines()[-120:])+"\n")
+          (out/"failure-summary.json").write_text(json.dumps(status,indent=2,sort_keys=True)+"\n")
+          PY
+
+      - name: Upload short-retention diagnostics without candidate binaries
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gradle-android-aarch64-failure-${{ github.sha }}
+          path: ${{ runner.temp }}/aib-gradle-failure-evidence/
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 0
+
+      - name: Remove downloaded inputs, temporary candidate packages, feed and private signing home
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo rm -rf -- \
+            "$RUNNER_TEMP/aib-gradle-source-artifact" \
+            "$RUNNER_TEMP/aib-native-platform-java-artifact" \
+            "$RUNNER_TEMP/aib-native-platform-android-artifact" \
+            "$RUNNER_TEMP/aib-gradle-base82-unpacked" \
+            "$RUNNER_TEMP/aib-gradle-base82-verification.json" \
+            "$RUNNER_TEMP/aggregate82-bootstrap-compatible-evidence.tar.gz" \
+            "$RUNNER_TEMP/aggregate-archive-inventory.json" \
+            "$RUNNER_TEMP/aib-gradle-android-assembly-work" \
+            "$RUNNER_TEMP/gradle-9.8.2-android-aarch64.zip" \
+            "$RUNNER_TEMP/aib-gradle-android-assembly-report.json" \
+            "$RUNNER_TEMP/aib-gradle-package-output" \
+            "$RUNNER_TEMP/aib-gradle-package-raw.log" \
+            "$RUNNER_TEMP/aib-gradle-candidate-feed" \
+            "$RUNNER_TEMP/aib-gradle-ephemeral-signing-config" \
+            "$RUNNER_TEMP/aib-gradle-feed-validation.json" \
+            "$RUNNER_TEMP/aib-gradle-apt-proof.json" \
+            "$RUNNER_TEMP/aib-gradle-apt-simulation.log" \
+            "$RUNNER_TEMP/aib-gradle-apt-plan.log" \
+            "$RUNNER_TEMP/aib-gradle-feed-signing.log" \
+            "$RUNNER_TEMP/aib-gradle-key-generation.log" \
+            "$RUNNER_TEMP/aib-gradle-candidate-retention" \
+            "$RUNNER_TEMP/aib-gradle-failure-evidence" \
+            "$GITHUB_WORKSPACE/termux-packages"

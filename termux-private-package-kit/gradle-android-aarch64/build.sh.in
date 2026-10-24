@@ -1,0 +1,37 @@
+TERMUX_PKG_HOMEPAGE=https://gradle.org/
+TERMUX_PKG_DESCRIPTION="Gradle 9.8.2 source-built Android/Bionic test-only candidate for AI Builder; terminal JNI unsupported"
+TERMUX_PKG_LICENSE="Apache-2.0"
+TERMUX_PKG_MAINTAINER="AI Builder candidate"
+TERMUX_PKG_VERSION="1:9.8.2"
+TERMUX_PKG_SRCURL="file:///home/builder/termux-packages/gradle-9.8.2-android-aarch64.zip"
+TERMUX_PKG_SHA256="@AIB_GRADLE_PACKAGE_INPUT_SHA256@"
+TERMUX_PKG_AUTO_UPDATE=false
+TERMUX_PKG_DEPENDS="openjdk-17"
+TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_PLATFORM_INDEPENDENT=false
+
+termux_step_make_install() {
+	set -Eeuo pipefail
+	test -x ./bin/gradle
+	test "$(cat ./version.txt)" = "9.8.2"
+	test -s ./LICENSE
+	test -s ./NOTICE
+	test -s ./LICENSE.native-platform.txt
+	test -s ./ANDROID-CANDIDATE-STATUS.txt
+	install -d "$TERMUX_PREFIX/opt/gradle"
+	rm -rf "$TERMUX_PREFIX/opt/gradle"
+	install -d "$TERMUX_PREFIX/opt/gradle"
+	cp -a ./. "$TERMUX_PREFIX/opt/gradle/"
+	rm -f "$TERMUX_PREFIX/opt/gradle/bin/"*.bat
+	install -d "$TERMUX_PREFIX/share/doc/gradle"
+	install -m 0644 ./LICENSE "$TERMUX_PREFIX/share/doc/gradle/LICENSE"
+	install -m 0644 ./NOTICE "$TERMUX_PREFIX/share/doc/gradle/NOTICE"
+	install -m 0644 ./LICENSE.native-platform.txt "$TERMUX_PREFIX/share/doc/gradle/LICENSE.native-platform.txt"
+	install -m 0644 ./ANDROID-CANDIDATE-STATUS.txt "$TERMUX_PREFIX/share/doc/gradle/ANDROID-CANDIDATE-STATUS.txt"
+	for launcher in "$TERMUX_PREFIX/opt/gradle/bin/"*; do
+		if [ ! -f "$launcher" ]; then
+			continue
+		fi
+		ln -sfr "$launcher" "$TERMUX_PREFIX/bin/$(basename "$launcher")"
+	done
+}

@@ -111,6 +111,12 @@ grep -Fxq "Package: $PACKAGE" "$TMP/show.log" || fail 'APT_PACKAGE_NAME_MISMATCH
 grep -Fxq "Version: $VERSION" "$TMP/show.log" || fail 'APT_PACKAGE_VERSION_MISMATCH'
 grep -Fxq "Architecture: $EXPECTED_ROOT_ARCH" "$TMP/show.log" || fail 'APT_PACKAGE_ARCHITECTURE_MISMATCH'
 APT_CONFIG="$TMP/apt.conf" apt-get --simulate --no-install-recommends install "${INSTALL_SPECS[@]}" >"$TMP/simulate.log" 2>&1 || { cat "$TMP/simulate.log" >&2; fail 'APT_SIMULATED_INSTALL_REJECTED'; }
+if [[ -n "${AIB_APT_SIMULATION_LOG_PATH:-}" ]]; then
+  SIMULATION_LOG_PATH="$(realpath -m -- "$AIB_APT_SIMULATION_LOG_PATH")"
+  [[ "$SIMULATION_LOG_PATH" != "$TMP/simulate.log" ]] || fail 'APT_SIMULATION_LOG_PATH_COLLISION'
+  mkdir -p -- "$(dirname -- "$SIMULATION_LOG_PATH")"
+  install -m 0600 -- "$TMP/simulate.log" "$SIMULATION_LOG_PATH"
+fi
 if [[ "${AIB_APT_EXPECT_EXACT_SOURCE_CLOSURE:-0}" == 1 ]]; then
   python3 - "$TMP/simulate.log" "$FEED_ROOT/pool" <<'PY'
 import pathlib,re,subprocess,sys
@@ -136,7 +142,7 @@ fi
 )
 mapfile -t DOWNLOADED < <(find "$TMP/downloads" -maxdepth 1 -type f -name '*.deb' -print)
 mapfile -t SOURCE_DEBS < <(find "$FEED_ROOT/pool" -type f -name '*.deb' -print)
-((${#DOWNLOADED[@]} == ${#INSTALL_SPECS[@]} && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
+    ((${#DOWNLOADED[@]} == ${#INSTALL_SPECS[@]} && ${#SOURCE_DEBS[@]} == EXPECTED_SOURCE_DEB_COUNT)) || fail 'DOWNLOADED_OR_SOURCE_DEB_COUNT_MISMATCH'
 for spec in "${INSTALL_SPECS[@]}"; do
   requested_name="${spec%%=*}"; requested_version="${spec#*=}"
   requested_arch=''; source_root_matches=0
