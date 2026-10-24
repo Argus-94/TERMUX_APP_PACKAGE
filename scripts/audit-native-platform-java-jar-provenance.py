@@ -203,6 +203,21 @@ class Audit:
                 "dependencyVerificationMode": "strict",
                 "dependencyVerificationEnabled": True,
                 "dependencyVerificationMetadataUsed": True,
+                "publishConfiguration": {
+                    "publishUserName": "",
+                    "publishApiKey": "",
+                    "actualCredentialsSupplied": False,
+                    "upstreamSourceModified": False,
+                    "intent": "Satisfy configuration-time null checks only; no publish task is invoked.",
+                    "publishOrUploadTasksInvoked": False,
+                },
+                "taskGraphPreflight": {
+                    "command": None,
+                    "exitCode": None,
+                    "requestedTask": ":native-platform:jar",
+                    "plannedTasks": [],
+                    "noPublishOrUploadTasks": False,
+                },
                 "jarPath": None,
                 "jarSha256": None,
                 "jarSizeBytes": None,
@@ -248,6 +263,7 @@ class Audit:
                 "This workflow builds and audits only the upstream Java API JAR; it does not create a .deb, feed, app APK, or package candidate.",
                 "The explicit Gradle binary is used only after its official SHA-256 sidecar and pinned digest are checked; the upstream wrapper is inspected but never executed.",
                 "Strict Gradle dependency verification is requested; the exact upstream verification metadata policy and coverage are recorded without weakening it.",
+                "The pinned release plugin checks repository properties during configuration; only empty values are provided, a dry-run rejects any publish/upload task, no publication credentials are used, and upstream source is not patched.",
                 "The exact prior source-built Gradle 9.8.2 distribution JAR is linked by its verified SHA-256 to the signed published JAR; current same-version URL republish is documented separately and not substituted.",
                 "No Android/Bionic device test, package install, APT simulation, feed publication, or production qualification is performed.",
             ],
@@ -566,12 +582,14 @@ class Audit:
         env["GRADLE_USER_HOME"] = str(self.work / "gradle-user-home")
         env["JAVA_TOOL_OPTIONS"] = "-Dfile.encoding=UTF-8"
         Path(env["GRADLE_USER_HOME"]).mkdir(parents=True, exist_ok=True)
-        command = [
+        common_command = [
             str(gradle), "--no-daemon", "--no-parallel", "--max-workers=2", "--stacktrace",
             "--dependency-verification", "strict",
             "-Dorg.gradle.dependency.verification.console=verbose",
-            "-Pmilestone", "-PnextMilestone=29", ":native-platform:jar",
+            "-Pmilestone", "-PnextMilestone=29", "-PpublishUserName=", "-PpublishApiKey=",
         ]
+        task_graph_command = [*common_command, "--dry-run", ":native-platform:jar"]
+        command = [*common_command, ":native-platform:jar"]
         self.data["build"].update({
             "command": command,
             "workingDirectory": "exact pinned upstream source checkout",
@@ -579,6 +597,40 @@ class Audit:
             "wrapperExecuted": False,
             "versionSelection": "Pinned source build logic with -Pmilestone -PnextMilestone=29; root gradle.properties alone says nextMilestone=14.",
         })
+        self.data["build"]["publishConfiguration"].update({
+            "propertiesPassedEmpty": ["publishUserName", "publishApiKey"],
+            "valuesAreCredentials": False,
+        })
+        self.data["build"]["taskGraphPreflight"]["command"] = task_graph_command
+        graph_rc, graph_log = self.run(
+            "source_task_graph_preflight", task_graph_command,
+            cwd=source, env=env, timeout=3600, check=False,
+        )
+        graph_text = graph_log.read_text(encoding="utf-8", errors="replace")
+        graph_text = re.sub(r"\x1b\[[0-9;]*m", "", graph_text)
+        planned_tasks = re.findall(r"^> Task (:\S+)", graph_text, flags=re.MULTILINE)
+        publish_tasks = [
+            task for task in planned_tasks
+            if task.rsplit(":", 1)[-1].lower().startswith(("publish", "upload"))
+        ]
+        self.data["build"]["taskGraphPreflight"].update({
+            "exitCode": graph_rc,
+            "plannedTasks": planned_tasks,
+            "noPublishOrUploadTasks": not publish_tasks,
+            "publishOrUploadTasks": publish_tasks,
+        })
+        if graph_rc != 0:
+            if "No publish repository user name specified" in graph_text or "No publish repository API key specified" in graph_text:
+                raise AuditError("UPSTREAM_RELEASE_CREDENTIALS_REQUIRED_DURING_CONFIGURATION", "Pinned upstream rejected the empty non-secret release properties during the jar-only task graph preflight.")
+            if "Dependency verification failed" in graph_text or "verification failed" in graph_text.lower():
+                self.data["build"]["dependencyVerificationBehavior"] = "STRICT_MODE_BLOCKED_UNVERIFIED_OR_MISMATCHED_DEPENDENCY_DURING_TASK_GRAPH_PREFLIGHT"
+                raise AuditError("STRICT_DEPENDENCY_VERIFICATION_BLOCKED", "Task graph preflight failed under strict dependency verification; no verification checks were disabled or bypassed.")
+            raise AuditError("SOURCE_TASK_GRAPH_PREFLIGHT_FAILED", f"Pinned source task graph preflight failed with exit {graph_rc}; see logs/source_task_graph_preflight.log")
+        if ":native-platform:jar" not in planned_tasks:
+            raise AuditError("SOURCE_TASK_GRAPH_PREFLIGHT_MISSING_TARGET", "Dry-run task graph did not contain the requested :native-platform:jar task.")
+        if publish_tasks:
+            raise AuditError("UNEXPECTED_PUBLISH_TASK_IN_SOURCE_BUILD_GRAPH", f"Dry-run task graph unexpectedly contains publication tasks: {publish_tasks}")
+        self.phase("source_task_graph_preflight", "PASS", taskCount=len(planned_tasks), noPublishOrUploadTasks=True)
         self.phase("source_build", "RUNNING", dependencyVerification="strict", task=":native-platform:jar", javaMajor=8)
         rc, _ = self.run("source_build_native_platform_jar", command, cwd=source, env=env, timeout=3600, check=False)
         self.data["build"]["exitCode"] = rc
@@ -586,6 +638,8 @@ class Audit:
         if rc != 0:
             log = self.logs / "source_build_native_platform_jar.log"
             text = log.read_text(encoding="utf-8", errors="replace")
+            if "No publish repository user name specified" in text or "No publish repository API key specified" in text:
+                raise AuditError("UPSTREAM_RELEASE_CREDENTIALS_REQUIRED_DURING_CONFIGURATION", "Pinned upstream still requires a non-empty release credential for the jar-only build; no real credential was supplied.")
             if "Dependency verification failed" in text or "verification failed" in text.lower():
                 self.data["build"]["dependencyVerificationBehavior"] = "STRICT_MODE_BLOCKED_UNVERIFIED_OR_MISMATCHED_DEPENDENCY"
                 raise AuditError("STRICT_DEPENDENCY_VERIFICATION_BLOCKED", "The pinned upstream source build failed under strict dependency verification; no verification checks were disabled or bypassed.")
