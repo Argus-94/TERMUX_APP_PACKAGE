@@ -26,6 +26,16 @@ def termux_private_file_mode(source_mode: int) -> int:
     return 0o600 | (source_mode & stat.S_IXUSR)
 
 
+def termux_gradle_launcher_content(source: bytes, prefix: str) -> bytes:
+    """Mirror the pinned Termux massage rewrite for the one source-verified launcher."""
+    need(prefix.startswith("/"), "TERMUX_PREFIX_NOT_ABSOLUTE_FOR_SHEBANG")
+    safe_rel(prefix.lstrip("/"))
+    first_line, separator, remainder = source.partition(b"\n")
+    need(first_line == b"#!/bin/sh" and separator == b"\n",
+         "GRADLE_LAUNCHER_SOURCE_SHEBANG_MISMATCH")
+    return ("#!" + prefix + "/bin/sh").encode("utf-8") + separator + remainder
+
+
 def sha_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -77,7 +87,8 @@ def distribution_inventory(path: Path, expected_sha: str) -> tuple[dict[str, dic
             data = archive.read(info)
             package_rel = PurePosixPath("opt/gradle", *rel.parts[1:]).as_posix()
             files[package_rel] = {"sha256": sha_bytes(data), "mode": stat.S_IMODE(mode) or 0o644,
-                                  "sizeBytes": len(data), "sourcePath": raw}
+                                  "sizeBytes": len(data), "sourcePath": raw,
+                                  "hasShebang": data.startswith(b"#!")}
             if raw in ("gradle-9.8.2/LICENSE", "gradle-9.8.2/NOTICE",
                        "gradle-9.8.2/LICENSE.native-platform.txt",
                        "gradle-9.8.2/ANDROID-CANDIDATE-STATUS.txt"):
@@ -188,11 +199,31 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
     dist_files, docs = distribution_inventory(distribution_zip, expected_zip_sha)
     data, dir_count, directory_modes = data_inventory(deb, prefix)
     prefix_rel = prefix.lstrip("/")
+    shebang_files = sorted(rel for rel, record in dist_files.items() if record["hasShebang"])
+    launcher_rel = "opt/gradle/bin/gradle"
+    need(shebang_files == [launcher_rel],
+         "DISTRIBUTION_SHEBANG_FILE_SET_MISMATCH:" + repr(shebang_files))
+    with zipfile.ZipFile(distribution_zip, "r") as archive:
+        launcher_source = archive.read(dist_files[launcher_rel]["sourcePath"])
+    launcher_packaged = termux_gradle_launcher_content(launcher_source, prefix)
+    termux_shebang_rewrite = {
+        "packagePath": prefix_rel + "/" + launcher_rel,
+        "sourcePath": dist_files[launcher_rel]["sourcePath"],
+        "sourceSha256": dist_files[launcher_rel]["sha256"],
+        "packagedSha256": sha_bytes(launcher_packaged),
+        "sourceShebang": "#!/bin/sh",
+        "packagedShebang": "#!" + prefix + "/bin/sh",
+    }
     expected: dict[str, dict[str, Any]] = {}
     for rel, record in dist_files.items():
-        expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": record["sha256"],
+        content_sha = record["sha256"]
+        content_size = record["sizeBytes"]
+        if rel == launcher_rel:
+            content_sha = termux_shebang_rewrite["packagedSha256"]
+            content_size = len(launcher_packaged)
+        expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": content_sha,
                                              "mode": termux_private_file_mode(record["mode"]),
-                                             "sizeBytes": record["sizeBytes"],
+                                             "sizeBytes": content_size,
                                              "linkname": None}
     for rel, digest in docs.items():
         expected[prefix_rel + "/" + rel] = {"kind": "file", "sha256": digest,
@@ -257,6 +288,7 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
         "payloadFileHashesMatchSourceDistribution": True,
         "payloadFileModesMatchTermuxAppPrivatePolicy": True,
         "payloadDirectoryModesMatchTermuxAppPrivatePolicy": True,
+        "payloadFileHashesMatchSourceWithPinnedTermuxShebangRewrite": True,
         "termuxAppPrivateModePolicy": {
             "regularFiles": "0600, or 0700 when the source file has owner-execute set; group/other permissions removed by pinned Termux massage",
             "directories": "0700",
@@ -265,6 +297,7 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
             "packagePath": license_copyright_path,
             "linkTarget": "../../LICENSES/Apache-2.0.txt",
         },
+        "termuxShebangRewrite": termux_shebang_rewrite,
         "aptSimulation": "NOT_RUN",
         "installed": False,
         "androidDeviceRuntime": "NOT_RUN",

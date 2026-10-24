@@ -410,7 +410,7 @@ class GradleCandidateToolTests(unittest.TestCase):
                 FEED.index_records(index, feed)
 
     @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb is required")
-    def test_package_auditor_models_exact_termux_apache_copyright_symlink(self):
+    def test_package_auditor_models_termux_packaging_transforms_and_copyright_symlink(self):
         with tempfile.TemporaryDirectory(prefix="gradle-candidate-license-link-") as tmp:
             root = Path(tmp)
             prefix = "/data/user/0/com.karat.aibuilder/files/usr"
@@ -441,7 +441,8 @@ class GradleCandidateToolTests(unittest.TestCase):
             self.assertEqual(AUDITOR.termux_private_file_mode(0o755), 0o700)
 
             def build_deb(stem: str, copyright_target: str, private_modes: bool = True,
-                          directory_mode: int = 0o700, extra_directory: bool = False) -> Path:
+                          directory_mode: int = 0o700, extra_directory: bool = False,
+                          rewrite_launcher: bool = True) -> Path:
                 package_root = root / (stem + "-root")
                 control = package_root / "DEBIAN" / "control"
                 control.parent.mkdir(parents=True)
@@ -454,7 +455,9 @@ class GradleCandidateToolTests(unittest.TestCase):
                 for name, (content, mode) in payloads.items():
                     dest = prefix_root / "opt" / "gradle" / name
                     dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(content)
+                    packaged_content = (AUDITOR.termux_gradle_launcher_content(content, prefix)
+                                        if name == "bin/gradle" and rewrite_launcher else content)
+                    dest.write_bytes(packaged_content)
                     dest.chmod((0o600 | (mode & 0o100)) if private_modes else mode)
                 for name in ("LICENSE", "NOTICE", "LICENSE.native-platform.txt",
                              "ANDROID-CANDIDATE-STATUS.txt"):
@@ -487,8 +490,39 @@ class GradleCandidateToolTests(unittest.TestCase):
                 "packagePath": prefix.lstrip("/") + "/share/doc/gradle/copyright",
                 "linkTarget": "../../LICENSES/Apache-2.0.txt",
             })
+            self.assertEqual(report["termuxShebangRewrite"], {
+                "packagePath": prefix.lstrip("/") + "/opt/gradle/bin/gradle",
+                "sourcePath": "gradle-9.8.2/bin/gradle",
+                "sourceSha256": hashlib.sha256(payloads["bin/gradle"][0]).hexdigest(),
+                "packagedSha256": hashlib.sha256(
+                    AUDITOR.termux_gradle_launcher_content(payloads["bin/gradle"][0], prefix)
+                ).hexdigest(),
+                "sourceShebang": "#!/bin/sh",
+                "packagedShebang": "#!" + prefix + "/bin/sh",
+            })
             self.assertTrue(report["payloadFileModesMatchTermuxAppPrivatePolicy"])
             self.assertTrue(report["payloadDirectoryModesMatchTermuxAppPrivatePolicy"])
+
+            unexpected_shebang_zip = root / "unexpected-shebang.zip"
+            with zipfile.ZipFile(distribution_zip, "r") as source, \
+                    zipfile.ZipFile(unexpected_shebang_zip, "w") as target:
+                for info in source.infolist():
+                    target.writestr(info, source.read(info))
+                info = zipfile.ZipInfo("gradle-9.8.2/bin/extra-script", date_time=(2024, 1, 1, 0, 0, 0))
+                info.create_system = 3
+                info.external_attr = (0o100755 << 16)
+                target.writestr(info, b"#!/bin/sh\nexit 0\n")
+            original_distribution_sha = lock["_assemblyReport"]["distribution"]["sha256"]
+            lock["_assemblyReport"]["distribution"]["sha256"] = hashlib.sha256(
+                unexpected_shebang_zip.read_bytes()).hexdigest()
+            with self.assertRaisesRegex(ValueError, "DISTRIBUTION_SHEBANG_FILE_SET_MISMATCH"):
+                AUDITOR.audit(lock, unexpected_shebang_zip, valid_deb, prefix)
+            lock["_assemblyReport"]["distribution"]["sha256"] = original_distribution_sha
+
+            unrewritten_deb = build_deb("unrewritten-launcher", "../../LICENSES/Apache-2.0.txt",
+                                        rewrite_launcher=False)
+            with self.assertRaisesRegex(ValueError, "PACKAGE_FILE_CONTENT_MISMATCH"):
+                AUDITOR.audit(lock, distribution_zip, unrewritten_deb, prefix)
 
             public_mode_deb = build_deb("world-readable-payload", "../../LICENSES/Apache-2.0.txt",
                                         private_modes=False)
