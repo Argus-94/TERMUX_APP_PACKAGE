@@ -196,6 +196,11 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
             "kind": "symlink", "sha256": None, "mode": 0o777, "sizeBytes": None,
             "linkname": "../opt/gradle/bin/" + filename,
         }
+    license_copyright_path = prefix_rel + "/share/doc/gradle/copyright"
+    expected[license_copyright_path] = {
+        "kind": "symlink", "sha256": None, "mode": 0o777, "sizeBytes": None,
+        "linkname": "../../LICENSES/Apache-2.0.txt",
+    }
     need(set(data) == set(expected),
          "PACKAGE_DATA_PATH_SET_MISMATCH:missing=" + repr(sorted(set(expected) - set(data))[:20])
          + ";extra=" + repr(sorted(set(data) - set(expected))[:20]))
@@ -208,7 +213,7 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
             if wanted["sizeBytes"] is not None:
                 need(actual["sizeBytes"] == wanted["sizeBytes"], "PACKAGE_FILE_SIZE_MISMATCH:" + path)
         else:
-            need(actual["linkname"] == wanted["linkname"], "PACKAGE_LAUNCHER_SYMLINK_MISMATCH:" + path)
+            need(actual["linkname"] == wanted["linkname"], "PACKAGE_SYMLINK_TARGET_MISMATCH:" + path)
     return {
         "schemaVersion": 1,
         "result": "GRADLE_AARCH64_DEB_STATIC_AUDIT_PASS_TEST_ONLY",
@@ -224,6 +229,10 @@ def audit(lock: dict[str, Any], distribution_zip: Path, deb: Path, prefix: str) 
         "payloadSymlinkCount": sum(1 for item in data.values() if item["kind"] == "symlink"),
         "payloadDirectoryEntryCount": dir_count,
         "payloadPathSetMatchesSourceDistributionAndExpectedDocs": True,
+        "termuxGeneratedLicenseCopyrightSymlinkAudited": {
+            "packagePath": license_copyright_path,
+            "linkTarget": "../../LICENSES/Apache-2.0.txt",
+        },
         "payloadFileHashesAndModesMatchSourceDistribution": True,
         "aptSimulation": "NOT_RUN",
         "installed": False,

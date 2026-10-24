@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 import os
 from pathlib import Path
 import shutil
@@ -407,6 +408,77 @@ class GradleCandidateToolTests(unittest.TestCase):
             deb.write_bytes(deb.read_bytes() + b"tamper")
             with self.assertRaises(ValueError):
                 FEED.index_records(index, feed)
+
+    @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb is required")
+    def test_package_auditor_models_exact_termux_apache_copyright_symlink(self):
+        with tempfile.TemporaryDirectory(prefix="gradle-candidate-license-link-") as tmp:
+            root = Path(tmp)
+            prefix = "/data/user/0/com.karat.aibuilder/files/usr"
+            payloads = {
+                "bin/gradle": (b"#!/bin/sh\nexit 0\n", 0o755),
+                "LICENSE": (b"Apache license\n", 0o644),
+                "NOTICE": (b"Gradle notice\n", 0o644),
+                "LICENSE.native-platform.txt": (b"Native platform license\n", 0o644),
+                "ANDROID-CANDIDATE-STATUS.txt": (b"Test-only candidate\n", 0o644),
+            }
+            distribution_zip = root / "gradle-9.8.2-bin.zip"
+            with zipfile.ZipFile(distribution_zip, "w") as archive:
+                for name, (content, mode) in payloads.items():
+                    info = zipfile.ZipInfo("gradle-9.8.2/" + name, date_time=(2024, 1, 1, 0, 0, 0))
+                    info.create_system = 3
+                    info.external_attr = (0o100000 | mode) << 16
+                    archive.writestr(info, content)
+
+            lock = json.loads((ROOT / "gradle-android-package-candidate-inputs.json").read_text(encoding="utf-8"))
+            lock["_assemblyReport"] = {
+                "result": "ANDROID_GRADLE_DISTRIBUTION_ASSEMBLY_PASS_TEST_CANDIDATE_ONLY",
+                "gates": {"productionAllowed": False, "candidateEligible": False,
+                          "androidDeviceRuntime": "NOT_RUN"},
+                "distribution": {"sha256": hashlib.sha256(distribution_zip.read_bytes()).hexdigest()},
+            }
+
+            def build_deb(stem: str, copyright_target: str) -> Path:
+                package_root = root / (stem + "-root")
+                control = package_root / "DEBIAN" / "control"
+                control.parent.mkdir(parents=True)
+                control.write_text(
+                    "Package: gradle\nVersion: 1:9.8.2\nArchitecture: aarch64\n"
+                    "Depends: openjdk-17\nInstalled-Size: 1\nDescription: test fixture\n",
+                    encoding="utf-8",
+                )
+                prefix_root = package_root / prefix.lstrip("/")
+                for name, (content, mode) in payloads.items():
+                    dest = prefix_root / "opt" / "gradle" / name
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(content)
+                    dest.chmod(mode)
+                for name in ("LICENSE", "NOTICE", "LICENSE.native-platform.txt",
+                             "ANDROID-CANDIDATE-STATUS.txt"):
+                    dest = prefix_root / "share" / "doc" / "gradle" / name
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(payloads[name][0])
+                    dest.chmod(0o644)
+                launcher = prefix_root / "bin" / "gradle"
+                launcher.parent.mkdir(parents=True, exist_ok=True)
+                launcher.symlink_to("../opt/gradle/bin/gradle")
+                copyright_link = prefix_root / "share" / "doc" / "gradle" / "copyright"
+                copyright_link.symlink_to(copyright_target)
+                deb = root / (stem + ".deb")
+                subprocess.run(["dpkg-deb", "--build", "--root-owner-group", str(package_root), str(deb)],
+                               check=True, capture_output=True, text=True)
+                return deb
+
+            valid_deb = build_deb("valid-license-link", "../../LICENSES/Apache-2.0.txt")
+            report = AUDITOR.audit(lock, distribution_zip, valid_deb, prefix)
+            self.assertEqual(report["payloadSymlinkCount"], 2)
+            self.assertEqual(report["termuxGeneratedLicenseCopyrightSymlinkAudited"], {
+                "packagePath": prefix.lstrip("/") + "/share/doc/gradle/copyright",
+                "linkTarget": "../../LICENSES/Apache-2.0.txt",
+            })
+
+            invalid_deb = build_deb("invalid-license-link", "../../LICENSES/Other-License.txt")
+            with self.assertRaisesRegex(ValueError, "PACKAGE_SYMLINK_TARGET_MISMATCH"):
+                AUDITOR.audit(lock, distribution_zip, invalid_deb, prefix)
 
     @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb is required")
     def test_package_auditor_rejects_directories_outside_modeled_prefix(self):
