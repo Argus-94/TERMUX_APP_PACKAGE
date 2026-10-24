@@ -43,15 +43,15 @@ EXPECTED_HEADERS = [
     "native-platform/src/shared/headers/generic.h",
     "native-platform/src/shared/headers/win.h",
 ]
-JNI_HEADER_NAMES = [
-    "net_rubygrapefruit_platform_internal_jni_NativeLibraryFunctions.h",
-    "net_rubygrapefruit_platform_internal_jni_PosixFileFunctions.h",
-    "net_rubygrapefruit_platform_internal_jni_PosixFileSystemFunctions.h",
-    "net_rubygrapefruit_platform_internal_jni_PosixProcessFunctions.h",
-    "net_rubygrapefruit_platform_internal_jni_PosixTerminalFunctions.h",
-    "net_rubygrapefruit_platform_internal_jni_PosixTypeFunctions.h",
+JNI_JAVA_NAMES = [
+    "NativeLibraryFunctions",
+    "PosixFileFunctions",
+    "PosixFileSystemFunctions",
+    "PosixProcessFunctions",
+    "PosixTerminalFunctions",
+    "PosixTypeFunctions",
 ]
-JNI_JAVA_NAMES = [name.removesuffix(".h") for name in JNI_HEADER_NAMES]
+JNI_HEADER_NAMES = [f"net_rubygrapefruit_platform_internal_jni_{name}.h" for name in JNI_JAVA_NAMES]
 ALLOWED_NEEDED = {"libc.so", "libm.so", "libdl.so", "liblog.so", "libc++_shared.so"}
 
 
