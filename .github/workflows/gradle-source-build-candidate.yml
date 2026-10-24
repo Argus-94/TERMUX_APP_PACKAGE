@@ -760,11 +760,12 @@ jobs:
               skipped("distribution-extract", "source distribution verification failed")
 
           network_probe_script = r'''set -Eeuo pipefail
+          ip link set lo up
           if ip -4 route show default | grep -q .; then echo "Unexpected IPv4 default route" >&2; exit 90; fi
           if ip -6 route show default | grep -q .; then echo "Unexpected IPv6 default route" >&2; exit 91; fi
           links="$(ip -o link show | awk -F': ' '{print $2}' | sed 's/@.*//')"
           if [ "$links" != "lo" ]; then echo "Unexpected network interfaces: $links" >&2; exit 92; fi
-          echo NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE'''
+          echo NETWORK_NAMESPACE_LOOPBACK_ONLY_NO_EXTERNAL_ROUTE'''
           netns_probe_rc = None
           if architecture_ok and java_ok and mutation_ok:
               netns_probe_rc, _ = run("network-namespace-probe", [
@@ -788,21 +789,22 @@ jobs:
               gradle_user_home = work_dir / "gradle-user-home"
               gradle_user_home.mkdir(parents=True, exist_ok=True)
               run_in_netns_script = r'''set -Eeuo pipefail
-          project_dir="$1"
-          gradle_bin="$2"
-          gradle_home="$3"
-          shift 3
+          uid="$1"; gid="$2"; java_home="$3"; runner_home="$4"; clean_path="$5"
+          project_dir="$6"; gradle_bin="$7"; gradle_home="$8"
+          shift 8
+          ip link set lo up
           if ip -4 route show default | grep -q . || ip -6 route show default | grep -q .; then
             echo "Network namespace unexpectedly has a default route" >&2
             exit 90
           fi
           links="$(ip -o link show | awk -F': ' '{print $2}' | sed 's/@.*//')"
           if [ "$links" != "lo" ]; then echo "Network namespace has external interfaces: $links" >&2; exit 92; fi
-          echo NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE
-          cd "$project_dir"
-          export GRADLE_USER_HOME="$gradle_home"
-          export HTTP_PROXY= HTTPS_PROXY= ALL_PROXY= http_proxy= https_proxy= all_proxy=
-          exec "$gradle_bin" "$@"'''
+          echo NETWORK_NAMESPACE_LOOPBACK_ONLY_NO_EXTERNAL_ROUTE
+          exec setpriv --reuid="$uid" --regid="$gid" --clear-groups env \
+            JAVA_HOME="$java_home" GRADLE_USER_HOME="$gradle_home" HOME="$runner_home" PATH="$clean_path" \
+            HTTP_PROXY= HTTPS_PROXY= ALL_PROXY= http_proxy= https_proxy= all_proxy= \
+            bash -c 'set -Eeuo pipefail; project_dir="$1"; gradle_bin="$2"; shift 2; cd "$project_dir"; exec "$gradle_bin" "$@"' \
+            gradle-smoke "$project_dir" "$gradle_bin" "$@"'''
               java_bin_dir = str(java_home / "bin")
               clean_path = java_bin_dir + ":/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
               gradle_cmd_base = ["--no-daemon", "--offline", "--max-workers=1", "-Dorg.gradle.jvmargs=-Xmx512m"]
@@ -815,11 +817,10 @@ jobs:
               ]
               for name, args in tests:
                   command = [
-                      "sudo", "-n", "unshare", "--net", "--", "setpriv",
-                      f"--reuid={os.getuid()}", f"--regid={os.getgid()}", "--clear-groups", "env",
-                      f"JAVA_HOME={java_home}", f"GRADLE_USER_HOME={gradle_user_home}",
-                      f"HOME={os.environ.get('HOME', '/tmp')}", f"PATH={clean_path}",
-                      "bash", "-c", run_in_netns_script, "gradle-smoke",
+                      "sudo", "-n", "unshare", "--net", "--", "bash", "-c",
+                      run_in_netns_script, "gradle-netns",
+                      str(os.getuid()), str(os.getgid()), str(java_home),
+                      os.environ.get("HOME", "/tmp"), clean_path,
                       str(project_dir), str(copied_launcher), str(gradle_user_home), *args,
                   ]
                   run(name, command, timeout=300)
@@ -889,11 +890,11 @@ jobs:
               },
               "fallbackMutation": mutation,
               "networkIsolation": {
-                  "mechanism": "Linux network namespace created with sudo unshare --net; no default routes and loopback-only interface required for probe and each Gradle invocation",
+                  "mechanism": "Linux network namespace created with sudo unshare --net; loopback is enabled for Gradle's local IPC, with no external interfaces or default routes; Gradle runs unprivileged",
                   "probeExitCode": netns_probe_rc,
                   "verifiedForEveryGradleInvocation": all(
                       checks.get(name, {}).get("exitCode") == 0
-                      and "NETWORK_NAMESPACE_NO_EXTERNAL_ROUTE" in (logs_dir / (name + ".log")).read_text(encoding="utf-8", errors="replace")
+                      and "NETWORK_NAMESPACE_LOOPBACK_ONLY_NO_EXTERNAL_ROUTE" in (logs_dir / (name + ".log")).read_text(encoding="utf-8", errors="replace")
                       for name in command_names
                       if (logs_dir / (name + ".log")).is_file()
                   ) and command_ok,
