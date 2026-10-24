@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "assessment": "CURRENT_OFFICIAL_URL_CONTENT_DIFFERS_FROM_PREVIOUSLY_VERIFIED_SOURCE_BUILD_ARCHIVE",
+  "verifiedAtUtc": "2026-10-24T11:23:21Z",
+  "baseline": {
+    "sourceBuildRunId": "40079300326",
+    "sourceBuildRunUrl": "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326",
+    "sourceBuildCommit": "08d20e16227ace186f2384c36c79c62df3ebc0e8",
+    "archiveFilename": "gradle-9.8.2-bin.zip",
+    "archiveSha256": "9928e360dc0832a3ddc39d705ff1728bc75667c846fda5660d448ac85cb91814",
+    "archiveSizeBytes": 151620051,
+    "archiveSha256ReverifiedInCurrentTaskSandbox": true,
+    "archiveZipCrcPassed": true,
+    "archivePathInCurrentTaskSandbox": "/tmp/gradle-ci-40079300326/gradle-9.8.2-bin.zip",
+    "embeddedArtifact": {
+      "coordinate": "net.rubygrapefruit:native-platform:0.22-milestone-29",
+      "path": "gradle-9.8.2/lib/native-platform-0.22-milestone-29.jar",
+      "sha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "sizeBytes": 127864
+    }
+  },
+  "currentOfficialDistribution": {
+    "url": "https://services.gradle.org/distributions/gradle-9.8.2-bin.zip",
+    "sidecarUrl": "https://services.gradle.org/distributions/gradle-9.8.2-bin.zip.sha256",
+    "sidecarSha256": "21bd5da2de49b642904077f38c0efdc7778e92b3ed0889392dca61b97e389607",
+    "archiveSha256": "21bd5da2de49b642904077f38c0efdc7778e92b3ed0889392dca61b97e389607",
+    "archiveSizeBytes": 151620138,
+    "archiveZipCrcPassed": true,
+    "sidecarMatchesDownloadedArchive": true,
+    "entryCount": 716
+  },
+  "archiveEntryComparison": {
+    "sameEntryNames": true,
+    "baselineEntryCount": 716,
+    "currentEntryCount": 716,
+    "entriesWithDifferentContentOrSizeOrCrc": 4,
+    "changedEntries": [
+      {
+        "path": "gradle-9.8.2/bin/gradle",
+        "baselineSha256": "85d83391ed92d22b5c4908c045742ab5eb82d24fae74e0c9e90afae47b28cd00",
+        "baselineSizeBytes": 8705,
+        "currentSha256": "15279069ca69d8838eceb9d35a1630a825c1b87e0180612d0a08f003d93f0908",
+        "currentSizeBytes": 8736
+      },
+      {
+        "path": "gradle-9.8.2/lib/gradle-base-services-9.8.2.jar",
+        "baselineSha256": "0f03b1596055b457f2a7f5766bffb6df9ff2d744759c7fae0d5b2546afe70da7",
+        "baselineSizeBytes": 301970,
+        "currentSha256": "ae8eb406a7fef258b7017e1023a8096b8d3a8b590f0ab094738ff867144e6ba5",
+        "currentSizeBytes": 302018
+      },
+      {
+        "path": "gradle-9.8.2/lib/gradle-logging-9.8.2.jar",
+        "baselineSha256": "43a668e4345044f2af6d776ff7b580937d5a2ecba6a80e45e27205ffb72a86a8",
+        "baselineSizeBytes": 362303,
+        "currentSha256": "9277b72249b3e58a51c6f781c7c971c7df9e293634acff1cf8b234c407290295",
+        "currentSizeBytes": 362303
+      },
+      {
+        "path": "gradle-9.8.2/lib/jspecify-1.0.0-no-module-annotation.jar",
+        "baselineSha256": "7bfea5d73b6dc9f43ddd3802f4de5f39c528fc650dcfe8e690aa00a221997ef6",
+        "baselineSizeBytes": 3813,
+        "currentSha256": "5ac941c371f72e702052ed3f6dceb129f9e14cdcf939d63c358a0fc3a4e2d74b",
+        "currentSizeBytes": 3813
+      }
+    ],
+    "allOtherEntriesContentSizeAndCrcIdentical": true,
+    "embeddedNativePlatformJar": {
+      "baselineSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "currentSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "publishedSignedArtifactSha256": "e276d15c665280391f17720031680e16c42e0ae2ec1b57b1e89cca5ced10d12b",
+      "sizeBytes": 127864,
+      "baselineAndCurrentAndPublishedByteIdentical": true
+    }
+  },
+  "decision": {
+    "previouslyVerifiedArchivePinRetained": true,
+    "currentOfficialArchiveUsedAsThePreviousBuildComparisonTarget": false,
+    "currentSidecarUsedToReplacePreviousPin": false,
+    "reason": "The current sidecar matches a changed same-version archive, but four archive entries including the Gradle launcher and core service/logging JARs have changed. The target native-platform JAR remains byte-identical. Do not silently substitute the new archive for the exact previously source-built host distribution.",
+    "nextAuditMethod": "Build the pinned native-platform source with verified Gradle 8.14.3; compare its Java API JAR directly to the PGP-authenticated published JAR. The previous source-built distribution's embedded JAR is already verified byte-identical to that published JAR, so the exact reference is retained transitively and with explicit evidence."
+  },
+  "references": [
+    "https://services.gradle.org/distributions/gradle-9.8.2-bin.zip",
+    "https://services.gradle.org/distributions/gradle-9.8.2-bin.zip.sha256",
+    "https://repo.gradle.org/gradle/libs-releases/net/rubygrapefruit/native-platform/0.22-milestone-29/native-platform-0.22-milestone-29.jar",
+    "https://github.com/Argus-94/TERMUX_APP_PACKAGE/actions/runs/40079300326"
+  ]
+}
