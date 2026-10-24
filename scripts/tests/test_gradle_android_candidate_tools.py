@@ -41,6 +41,91 @@ class GradleCandidateToolTests(unittest.TestCase):
             ASSEMBLER.verify_optional_workflow_run_id(
                 {"workflow": {"runId": "40000000000"}}, expected, "RUN_ID_MISMATCH")
 
+    def test_native_java_evidence_validator_matches_raw_producer_schema(self):
+        source_sha, published_sha = "a" * 64, "b" * 64
+        distribution_sha, license_sha = "c" * 64, "d" * 64
+        pin = {
+            "sourceCommit": "source-commit", "sourceTree": "source-tree",
+            "sourceTag": "0.22-milestone-29",
+            "sourceRepository": "https://github.com/gradle/native-platform.git",
+            "sourceBuiltJarSha256": source_sha, "publishedSignedJarSha256": published_sha,
+            "separateApacheLicenseSha256": license_sha,
+        }
+        gradle_pin = {"hostDistributionRunId": 40079300326,
+                      "hostDistributionSha256": distribution_sha}
+        comparison = {
+            "sourceBuiltVsPreviouslyVerifiedGradleDistribution": {
+                "normalizedEntryContentIdentical": True,
+                "embeddedJarByteIdenticalToAuthenticatedPublishedJar": True,
+                "embeddedJarSha256": published_sha,
+                "previousDistributionArchiveSha256": distribution_sha,
+                "previousDistributionRunId": "40079300326",
+                "sourceBuiltVsPublishedComparison": {
+                    "contentDifferingEntries": [], "leftEntryCount": 143, "rightEntryCount": 143,
+                    "leftSha256": source_sha, "rightSha256": published_sha,
+                },
+            },
+            "sourceBuiltVsPublished": {
+                "byteIdentical": False, "contentDifferingEntries": [],
+                "leftEntryCount": 143, "rightEntryCount": 143,
+                "leftSha256": source_sha, "rightSha256": published_sha,
+            },
+        }
+        evidence = {
+            "schemaVersion": 1,
+            "experiment": "native-platform-java-api-jar-source-provenance-audit",
+            "outcome": "PASS_NORMALIZED_JAR_CONTENT_IDENTICAL_CONTAINER_METADATA_DIFFERS",
+            "classification": "ISOLATED_CI_EXPERIMENT_ONLY", "blocker": None,
+            "source": {
+                "actualCommit": pin["sourceCommit"], "expectedCommit": pin["sourceCommit"],
+                "actualTree": pin["sourceTree"], "expectedTree": pin["sourceTree"],
+                "tag": pin["sourceTag"], "repository": pin["sourceRepository"],
+                "cleanCheckoutBeforeBuild": True, "gitStatusBeforeBuild": "", "license": "Apache-2.0",
+            },
+            "build": {
+                "exitCode": 0, "jarSha256": source_sha, "dependencyVerificationEnabled": True,
+                "dependencyVerificationMode": "strict", "dependencyVerificationMetadataUsed": True,
+                "wrapperExecuted": False,
+                "taskGraphPreflight": {"exitCode": 0, "requestedTask": ":native-platform:jar",
+                                       "noPublishOrUploadTasks": True, "publishOrUploadTasks": []},
+                "publishConfiguration": {
+                    "actualCredentialsSupplied": False,
+                    "propertiesPassedEmpty": ["publishUserName", "publishApiKey"],
+                    "publishUserName": "", "publishApiKey": "",
+                    "publishOrUploadTasksInvoked": False, "upstreamSourceModified": False,
+                },
+            },
+            "publishedArtifact": {
+                "jarSha256Actual": published_sha,
+                "jarSha256ExpectedFromOfficialSidecarAndPinnedSignature": published_sha,
+                "jarSha256Sidecar": published_sha,
+                "jarSignature": {"verification": "VALID_SIGNATURE_PINNED_OFFICIAL_KEY", "gpgExitCode": 0,
+                                 "primaryFingerprintActual": "fingerprint",
+                                 "primaryFingerprintExpected": "fingerprint",
+                                 "signaturePredatesOfficialRetirement": True},
+            },
+            "comparison": comparison,
+            "licenseAudit": {
+                "upstreamRootLicensePresent": True,
+                "packageLicenseFileRequiredForAnyFuturePackaging": True,
+                "licenseCopiedSeparatelyToArtifact": "UPSTREAM-LICENSE-Apache-2.0.txt",
+                "licenseSha256": license_sha,
+            },
+            "gates": {"packageCreated": False, "feedCreated": False,
+                      "androidBionicRuntimeVerified": False, "deviceTestsRun": False,
+                      "productionAllowed": False, "candidateEligibilityChanged": False},
+        }
+        ASSEMBLER.verify_native_java_artifact_evidence(evidence, pin, gradle_pin)
+        bad_build = dict(evidence["build"], jarSha256="0" * 64)
+        with self.assertRaisesRegex(ValueError, "NATIVE_JAVA_API_BUILD_MISMATCH"):
+            ASSEMBLER.verify_native_java_artifact_evidence(
+                dict(evidence, build=bad_build), pin, gradle_pin)
+        bad_publish = dict(evidence["build"]["publishConfiguration"], actualCredentialsSupplied=True)
+        bad_build = dict(evidence["build"], publishConfiguration=bad_publish)
+        with self.assertRaisesRegex(ValueError, "NATIVE_JAVA_API_PUBLICATION_GUARD_MISMATCH"):
+            ASSEMBLER.verify_native_java_artifact_evidence(
+                dict(evidence, build=bad_build), pin, gradle_pin)
+
     def test_all_archive_path_helpers_reject_traversal(self):
         for module, function_name in ((ASSEMBLER, "safe_rel"), (FEED, "safe_rel"),
                                       (STAGER, "safe_rel"), (BASE, "safe_relative")):

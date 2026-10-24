@@ -29,6 +29,95 @@ def verify_optional_workflow_run_id(evidence: dict[str, Any], expected_run_id: A
     return True
 
 
+def verify_native_java_artifact_evidence(evidence: dict[str, Any], pin: dict[str, Any],
+                                         gradle_pin: dict[str, Any]) -> None:
+    need(evidence.get("schemaVersion") == 1
+         and evidence.get("experiment") == "native-platform-java-api-jar-source-provenance-audit",
+         "NATIVE_JAVA_API_EVIDENCE_SCHEMA_MISMATCH")
+    need(evidence.get("outcome") == "PASS_NORMALIZED_JAR_CONTENT_IDENTICAL_CONTAINER_METADATA_DIFFERS"
+         and evidence.get("classification") == "ISOLATED_CI_EXPERIMENT_ONLY"
+         and evidence.get("blocker") is None,
+         "NATIVE_JAVA_API_ASSESSMENT_MISMATCH")
+    source = evidence.get("source", {})
+    need(source.get("actualCommit") == pin["sourceCommit"]
+         and source.get("expectedCommit") == pin["sourceCommit"]
+         and source.get("actualTree") == pin["sourceTree"]
+         and source.get("expectedTree") == pin["sourceTree"]
+         and source.get("tag") == pin["sourceTag"]
+         and source.get("repository") == pin["sourceRepository"]
+         and source.get("cleanCheckoutBeforeBuild") is True
+         and source.get("gitStatusBeforeBuild") == ""
+         and source.get("license") == "Apache-2.0",
+         "NATIVE_JAVA_API_SOURCE_PIN_MISMATCH")
+
+    build = evidence.get("build", {})
+    need(build.get("exitCode") == 0 and build.get("jarSha256") == pin["sourceBuiltJarSha256"]
+         and build.get("dependencyVerificationEnabled") is True
+         and build.get("dependencyVerificationMode") == "strict"
+         and build.get("dependencyVerificationMetadataUsed") is True
+         and build.get("wrapperExecuted") is False,
+         "NATIVE_JAVA_API_BUILD_MISMATCH")
+    task_graph = build.get("taskGraphPreflight", {})
+    need(task_graph.get("exitCode") == 0 and task_graph.get("requestedTask") == ":native-platform:jar"
+         and task_graph.get("noPublishOrUploadTasks") is True
+         and task_graph.get("publishOrUploadTasks") == [],
+         "NATIVE_JAVA_API_TASK_GRAPH_MISMATCH")
+    publish = build.get("publishConfiguration", {})
+    need(publish.get("actualCredentialsSupplied") is False
+         and publish.get("propertiesPassedEmpty") == ["publishUserName", "publishApiKey"]
+         and publish.get("publishUserName") == "" and publish.get("publishApiKey") == ""
+         and publish.get("publishOrUploadTasksInvoked") is False
+         and publish.get("upstreamSourceModified") is False,
+         "NATIVE_JAVA_API_PUBLICATION_GUARD_MISMATCH")
+
+    published = evidence.get("publishedArtifact", {})
+    signature = published.get("jarSignature", {})
+    need(published.get("jarSha256Actual") == pin["publishedSignedJarSha256"]
+         and published.get("jarSha256ExpectedFromOfficialSidecarAndPinnedSignature") == pin["publishedSignedJarSha256"]
+         and published.get("jarSha256Sidecar") == pin["publishedSignedJarSha256"]
+         and signature.get("verification") == "VALID_SIGNATURE_PINNED_OFFICIAL_KEY"
+         and signature.get("gpgExitCode") == 0
+         and signature.get("primaryFingerprintActual") == signature.get("primaryFingerprintExpected")
+         and signature.get("signaturePredatesOfficialRetirement") is True,
+         "NATIVE_JAVA_API_PUBLISHED_SIGNATURE_MISMATCH")
+
+    comparison = evidence.get("comparison", {})
+    distribution = comparison.get("sourceBuiltVsPreviouslyVerifiedGradleDistribution", {})
+    source_vs_published = distribution.get("sourceBuiltVsPublishedComparison", {})
+    published_comparison = comparison.get("sourceBuiltVsPublished", {})
+    expected_entries = 143
+    need(distribution.get("normalizedEntryContentIdentical") is True
+         and distribution.get("embeddedJarByteIdenticalToAuthenticatedPublishedJar") is True
+         and distribution.get("embeddedJarSha256") == pin["publishedSignedJarSha256"]
+         and distribution.get("previousDistributionArchiveSha256") == gradle_pin["hostDistributionSha256"]
+         and str(distribution.get("previousDistributionRunId")) == str(gradle_pin["hostDistributionRunId"])
+         and source_vs_published.get("contentDifferingEntries") == []
+         and source_vs_published.get("leftEntryCount") == expected_entries
+         and source_vs_published.get("rightEntryCount") == expected_entries
+         and source_vs_published.get("leftSha256") == pin["sourceBuiltJarSha256"]
+         and source_vs_published.get("rightSha256") == pin["publishedSignedJarSha256"]
+         and published_comparison.get("byteIdentical") is False
+         and published_comparison.get("contentDifferingEntries") == []
+         and published_comparison.get("leftEntryCount") == expected_entries
+         and published_comparison.get("rightEntryCount") == expected_entries
+         and published_comparison.get("leftSha256") == pin["sourceBuiltJarSha256"]
+         and published_comparison.get("rightSha256") == pin["publishedSignedJarSha256"],
+         "NATIVE_JAVA_API_CONTENT_COMPARISON_MISMATCH")
+
+    license_audit = evidence.get("licenseAudit", {})
+    need(license_audit.get("upstreamRootLicensePresent") is True
+         and license_audit.get("packageLicenseFileRequiredForAnyFuturePackaging") is True
+         and license_audit.get("licenseCopiedSeparatelyToArtifact") == "UPSTREAM-LICENSE-Apache-2.0.txt"
+         and license_audit.get("licenseSha256") == pin["separateApacheLicenseSha256"],
+         "NATIVE_JAVA_API_LICENSE_AUDIT_MISMATCH")
+    gates = evidence.get("gates", {})
+    need(gates.get("packageCreated") is False and gates.get("feedCreated") is False
+         and gates.get("androidBionicRuntimeVerified") is False
+         and gates.get("deviceTestsRun") is False and gates.get("productionAllowed") is False
+         and gates.get("candidateEligibilityChanged") is False,
+         "NATIVE_JAVA_API_SCOPE_GATES_MISMATCH")
+
+
 def sha_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as stream:
@@ -260,25 +349,7 @@ def verify_inputs(lock: dict[str, Any], gradle_root: Path, java_root: Path, andr
     # verifies this locked run/artifact pair through the Actions API before the pinned download.
     java_run_id_embedded = verify_optional_workflow_run_id(
         je, jpin["sourceBuildRunId"], "NATIVE_JAVA_API_RUN_ID_MISMATCH")
-    need(je.get("assessment") == "SOURCE_BUILD_PASSED_CONTENT_IDENTICAL_CONTAINER_METADATA_DIFFERS",
-         "NATIVE_JAVA_API_ASSESSMENT_MISMATCH")
-    need(je.get("upstreamSource", {}).get("commit") == jpin["sourceCommit"]
-         and je.get("upstreamSource", {}).get("tree") == jpin["sourceTree"]
-         and je.get("upstreamSource", {}).get("cleanCheckoutBeforeBuild") is True
-         and je.get("upstreamSource", {}).get("sourcePatchedByAudit") is False,
-         "NATIVE_JAVA_API_SOURCE_PIN_MISMATCH")
-    need(je.get("build", {}).get("result") == "SUCCESS" and je.get("build", {}).get("exitCode") == 0
-         and je.get("build", {}).get("outputSha256") == jpin["sourceBuiltJarSha256"],
-         "NATIVE_JAVA_API_BUILD_MISMATCH")
-    comparison = je.get("comparisons", {}).get("sourceBuiltVsPreviouslyVerifiedDistributionEmbeddedJar", {})
-    need(comparison.get("normalizedEntryContentIdentical") is True and comparison.get("contentDifferingEntries") == 0
-         and comparison.get("leftAndRightEntryCount") == 143,
-         "NATIVE_JAVA_API_CONTENT_COMPARISON_MISMATCH")
-    license_audit = je.get("licenseAudit", {})
-    need(license_audit.get("upstreamRootLicensePresent") is True
-         and license_audit.get("separateLicenseFileRequiredForAnyFuturePackaging") is True
-         and license_audit.get("licenseSha256") == jpin["separateApacheLicenseSha256"],
-         "NATIVE_JAVA_API_LICENSE_AUDIT_MISMATCH")
+    verify_native_java_artifact_evidence(je, jpin, gpin)
     source_jar = evidence_file(java_root, je["artifactFiles"]["sourceBuiltJar"],
                                jpin["sourceBuiltJarSha256"], "NATIVE_JAVA_API_SOURCE_JAR")
     jar_content, jar_names = read_jar(source_jar, "NATIVE_JAVA_API_SOURCE_JAR")
