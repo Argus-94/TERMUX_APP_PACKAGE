@@ -1,0 +1,467 @@
+name: Build pinned Gradle source candidate (host-only)
+
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .github/workflows/gradle-source-build-candidate.yml
+      - scripts/inspect-gradle-source-archive.py
+      - scripts/tests/test_gradle_source_archive_inspection.py
+      - docs/evidence/gradle-source-bootstrap-*.json
+      - docs/ANDROID_EVIDENCE_RU.md
+      - docs/TOOLCHAIN_SOURCE_GAPS_RU.md
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gradle-source-build-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-build-host-only:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      SOURCE_URL: https://services.gradle.org/distributions/gradle-9.8.2-src.zip
+      SOURCE_SHA256: 96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553
+      BOOTSTRAP_URL: https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
+      BOOTSTRAP_SHA256: dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f
+    steps:
+      - name: Check out candidate branch without persisted credentials
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Adoptium Temurin JDK 25
+        id: setup_java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '25'
+          check-latest: false
+
+      - name: Record and verify the host JDK
+        id: host_jdk
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          status_dir="$RUNNER_TEMP/gradle-source-build-candidate-status"
+          artifact_dir="$RUNNER_TEMP/gradle-source-build-candidate-artifact"
+          mkdir -p "$status_dir" "$artifact_dir"
+          if java -version >"$status_dir/host-java-version.txt" 2>&1; then
+            printf '0\n' > "$status_dir/host-java-version.exit"
+          else
+            rc=$?
+            printf '%s\n' "$rc" > "$status_dir/host-java-version.exit"
+            cat "$status_dir/host-java-version.txt"
+            exit "$rc"
+          fi
+          cat "$status_dir/host-java-version.txt"
+          if grep -Eq 'version "25([.]|"|[-+])' "$status_dir/host-java-version.txt" \
+              && grep -qi 'Temurin' "$status_dir/host-java-version.txt"; then
+            printf '0\n' > "$status_dir/host-java-check.exit"
+          else
+            printf '1\n' > "$status_dir/host-java-check.exit"
+            echo 'Expected an Adoptium Temurin JDK 25 on the host.' >&2
+            exit 1
+          fi
+
+      - name: Verify source archive and trusted build-only bootstrap
+        id: prepare
+        env:
+          GRADLE_USER_HOME: ${{ runner.temp }}/gradle-user-home
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          status_dir="$RUNNER_TEMP/gradle-source-build-candidate-status"
+          artifact_dir="$RUNNER_TEMP/gradle-source-build-candidate-artifact"
+          mkdir -p "$status_dir" "$artifact_dir"
+
+          run_check() {
+            local name="$1"
+            shift
+            local log="$status_dir/${name}.log"
+            local rc
+            set +e
+            "$@" >"$log" 2>&1
+            rc=$?
+            set -e
+            printf '%s\n' "$rc" > "$status_dir/${name}.exit"
+            if [ "$rc" -ne 0 ]; then
+              cat "$log" >&2
+              return "$rc"
+            fi
+          }
+
+          source_archive="$RUNNER_TEMP/gradle-9.8.2-src.zip"
+          source_sidecar="$RUNNER_TEMP/gradle-9.8.2-src.zip.sha256"
+          source_report="$status_dir/source-inspection.json"
+          run_check source_download curl --fail --location --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 300 --output "$source_archive" "$SOURCE_URL"
+          run_check source_sidecar_download curl --fail --location --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 60 --output "$source_sidecar" "${SOURCE_URL}.sha256"
+          source_sidecar_digest="$(awk 'NF { print $1; exit }' "$source_sidecar")"
+          if [[ "$source_sidecar_digest" =~ ^[0-9a-f]{64}$ ]] && [ "$source_sidecar_digest" = "$SOURCE_SHA256" ]; then
+            printf '0\n' > "$status_dir/source_sidecar_check.exit"
+          else
+            printf '1\n' > "$status_dir/source_sidecar_check.exit"
+            echo 'Gradle source .sha256 sidecar differs from the fixed expected digest.' >&2
+            exit 1
+          fi
+          printf '%s  %s\n' "$SOURCE_SHA256" "$source_archive" > "$status_dir/source.expected.sha256"
+          run_check source_sha256 sha256sum --check --status "$status_dir/source.expected.sha256"
+          run_check source_zip_crc unzip -tqq "$source_archive"
+          run_check source_inspector env PYTHONDONTWRITEBYTECODE=1 python3 \
+            scripts/inspect-gradle-source-archive.py --archive "$source_archive" --output "$source_report"
+          run_check source_structure python3 -c '
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          archive = report["archive"]
+          assert archive["entryCount"] == 47569, archive
+          assert archive["duplicateEntryCount"] == 0, archive
+          assert archive["symlinkEntryCount"] == 0, archive
+          assert archive["crcCheck"] == "PASS", archive
+          assert archive["sha256"] == "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553", archive
+          assert report["wrapper"]["distributionUrl"] == "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip", report["wrapper"]
+          assert report["wrapper"]["distributionSha256Sum"] is None, report["wrapper"]
+          assert report["bootstrap"]["wrapperExecuted"] is False, report["bootstrap"]
+          ' "$source_report"
+
+          source_extract="$RUNNER_TEMP/gradle-source"
+          mkdir -p "$source_extract"
+          run_check source_extract unzip -q "$source_archive" -d "$source_extract"
+          source_root="$source_extract/gradle-9.8.2"
+          test -f "$source_root/gradle/verification-metadata.xml"
+
+          bootstrap_archive="$RUNNER_TEMP/gradle-9.8.1-bin.zip"
+          bootstrap_sidecar="$RUNNER_TEMP/gradle-9.8.1-bin.zip.sha256"
+          run_check bootstrap_download curl --fail --location --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 300 --output "$bootstrap_archive" "$BOOTSTRAP_URL"
+          run_check bootstrap_sidecar_download curl --fail --location --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 60 --output "$bootstrap_sidecar" "${BOOTSTRAP_URL}.sha256"
+          bootstrap_sidecar_digest="$(awk 'NF { print $1; exit }' "$bootstrap_sidecar")"
+          if [[ "$bootstrap_sidecar_digest" =~ ^[0-9a-f]{64}$ ]] && [ "$bootstrap_sidecar_digest" = "$BOOTSTRAP_SHA256" ]; then
+            printf '0\n' > "$status_dir/bootstrap_sidecar_check.exit"
+          else
+            printf '1\n' > "$status_dir/bootstrap_sidecar_check.exit"
+            echo 'Gradle bootstrap .sha256 sidecar differs from the fixed expected digest.' >&2
+            exit 1
+          fi
+          printf '%s  %s\n' "$BOOTSTRAP_SHA256" "$bootstrap_archive" > "$status_dir/bootstrap.expected.sha256"
+          run_check bootstrap_sha256 sha256sum --check --status "$status_dir/bootstrap.expected.sha256"
+          run_check bootstrap_zip_crc unzip -tqq "$bootstrap_archive"
+          bootstrap_extract="$RUNNER_TEMP/gradle-bootstrap"
+          mkdir -p "$bootstrap_extract"
+          run_check bootstrap_extract unzip -q "$bootstrap_archive" -d "$bootstrap_extract"
+          bootstrap_gradle="$bootstrap_extract/gradle-9.8.1/bin/gradle"
+          test -x "$bootstrap_gradle"
+          run_check bootstrap_version "$bootstrap_gradle" --version
+          cp "$status_dir/bootstrap_version.log" "$status_dir/bootstrap-version.txt"
+          if grep -Fxq 'Gradle 9.8.1' "$status_dir/bootstrap-version.txt"; then
+            printf '0\n' > "$status_dir/bootstrap_version_check.exit"
+          else
+            printf '1\n' > "$status_dir/bootstrap_version_check.exit"
+            echo 'Verified bootstrap executable did not report Gradle 9.8.1.' >&2
+            exit 1
+          fi
+
+      - name: Build the Gradle 9.8.2 binary distribution from verified sources
+        id: source_build
+        if: steps.prepare.outcome == 'success'
+        env:
+          GRADLE_USER_HOME: ${{ runner.temp }}/gradle-user-home
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          status_dir="$RUNNER_TEMP/gradle-source-build-candidate-status"
+          bootstrap_gradle="$RUNNER_TEMP/gradle-bootstrap/gradle-9.8.1/bin/gradle"
+          source_root="$RUNNER_TEMP/gradle-source/gradle-9.8.2"
+          build_log="$status_dir/source-build.log"
+          command=("$bootstrap_gradle" -p "$source_root" :distributions-full:binDistributionZip
+            --no-daemon --no-parallel --max-workers=2 --stacktrace
+            '-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8')
+          printf '%q ' "${command[@]}" > "$status_dir/source-build-command.txt"
+          printf '\n' >> "$status_dir/source-build-command.txt"
+          set +e
+          "${command[@]}" 2>&1 | tee "$build_log"
+          build_rc=${PIPESTATUS[0]}
+          set -e
+          printf '%s\n' "$build_rc" > "$status_dir/source_build.exit"
+          if [ "$build_rc" -ne 0 ]; then
+            exit "$build_rc"
+          fi
+
+      - name: Audit the generated host distribution
+        id: validate_distribution
+        if: steps.source_build.outcome == 'success'
+        env:
+          GRADLE_USER_HOME: ${{ runner.temp }}/gradle-user-home
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          status_dir="$RUNNER_TEMP/gradle-source-build-candidate-status"
+          artifact_dir="$RUNNER_TEMP/gradle-source-build-candidate-artifact"
+          source_root="$RUNNER_TEMP/gradle-source/gradle-9.8.2"
+          audit_root="$RUNNER_TEMP/gradle-distribution-audit"
+          matches_file="$status_dir/distribution-matches.txt"
+          find "$source_root" -type f -name 'gradle-9.8.2-bin.zip' -print | sort > "$matches_file"
+          mapfile -t distributions < "$matches_file"
+          if [ "${#distributions[@]}" -ne 1 ]; then
+            printf '1\n' > "$status_dir/distribution_locate.exit"
+            echo "Expected exactly one gradle-9.8.2-bin.zip; found ${#distributions[@]}." >&2
+            cat "$matches_file" >&2
+            exit 1
+          fi
+          printf '0\n' > "$status_dir/distribution_locate.exit"
+          distribution="${distributions[0]}"
+          unzip -tqq "$distribution"
+          printf '0\n' > "$status_dir/distribution_zip_crc.exit"
+          mkdir -p "$audit_root"
+          unzip -q "$distribution" -d "$audit_root"
+          printf '0\n' > "$status_dir/distribution_extract.exit"
+          generated_gradle="$audit_root/gradle-9.8.2/bin/gradle"
+          test -x "$generated_gradle"
+          if "$generated_gradle" --version > "$status_dir/distribution-version.txt" 2>&1; then
+            printf '0\n' > "$status_dir/distribution_version.exit"
+          else
+            rc=$?
+            printf '%s\n' "$rc" > "$status_dir/distribution_version.exit"
+            cat "$status_dir/distribution-version.txt" >&2
+            exit "$rc"
+          fi
+          if grep -Fxq 'Gradle 9.8.2' "$status_dir/distribution-version.txt"; then
+            printf '0\n' > "$status_dir/distribution_version_check.exit"
+          else
+            printf '1\n' > "$status_dir/distribution_version_check.exit"
+            cat "$status_dir/distribution-version.txt" >&2
+            echo 'Generated distribution did not report Gradle 9.8.2.' >&2
+            exit 1
+          fi
+          cp "$distribution" "$artifact_dir/gradle-9.8.2-bin.zip"
+          cp "$status_dir/distribution-version.txt" "$artifact_dir/distribution-version.txt"
+
+      - name: Write evidence and summarize the result
+        id: evidence
+        if: always() && steps.checkout.outcome == 'success'
+        shell: bash
+        env:
+          PREPARE_OUTCOME: ${{ steps.prepare.outcome }}
+          BUILD_OUTCOME: ${{ steps.source_build.outcome }}
+          DISTRIBUTION_OUTCOME: ${{ steps.validate_distribution.outcome }}
+          HOST_JDK_OUTCOME: ${{ steps.host_jdk.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_REF: ${{ github.ref }}
+          RUN_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+          import shutil
+
+          temp = pathlib.Path(os.environ["RUNNER_TEMP"])
+          status = temp / "gradle-source-build-candidate-status"
+          artifact = temp / "gradle-source-build-candidate-artifact"
+          artifact.mkdir(parents=True, exist_ok=True)
+          source_archive = temp / "gradle-9.8.2-src.zip"
+          source_sidecar = temp / "gradle-9.8.2-src.zip.sha256"
+          bootstrap_archive = temp / "gradle-9.8.1-bin.zip"
+          bootstrap_sidecar = temp / "gradle-9.8.1-bin.zip.sha256"
+          source_report_path = status / "source-inspection.json"
+          output_archive = artifact / "gradle-9.8.2-bin.zip"
+          build_log = status / "source-build.log"
+
+          def sha256(path):
+              if not path.is_file():
+                  return None
+              digest = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for block in iter(lambda: stream.read(1024 * 1024), b""):
+                      digest.update(block)
+              return digest.hexdigest()
+
+          def sidecar_digest(path):
+              if not path.is_file():
+                  return None
+              for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+                  fields = line.split()
+                  if fields:
+                      return fields[0]
+              return None
+
+          def exit_code(name):
+              path = status / (name + ".exit")
+              if not path.is_file():
+                  return None
+              try:
+                  return int(path.read_text(encoding="utf-8").strip())
+              except ValueError:
+                  return None
+
+          def text(path):
+              return path.read_text(encoding="utf-8", errors="replace") if path.is_file() else None
+
+          source_report = None
+          if source_report_path.is_file():
+              try:
+                  source_report = json.loads(source_report_path.read_text(encoding="utf-8"))
+              except (OSError, json.JSONDecodeError):
+                  source_report = None
+              shutil.copy2(source_report_path, artifact / "source-inspection.json")
+          for name in ("source-build.log", "bootstrap-version.txt", "distribution-version.txt",
+                       "host-java-version.txt", "source-build-command.txt", "distribution-matches.txt"):
+              path = status / name
+              if path.is_file():
+                  shutil.copy2(path, artifact / name)
+
+          raw_log = text(build_log) or ""
+          first_error = None
+          lines = raw_log.splitlines()
+          for index, line in enumerate(lines):
+              if line.strip() == "* What went wrong:":
+                  first_error = "\n".join(lines[index:index + 12]).rstrip()
+                  break
+          if first_error is None:
+              markers = re.compile(r"(?:^e: |^\* What went wrong:|^Execution failed for task |^Could not resolve |^Could not find |^FAILURE:|^Error:|^error:)")
+              for line in lines:
+                  if markers.search(line):
+                      first_error = line
+                      break
+
+          checks = {
+              name: exit_code(name)
+              for name in (
+                  "host-java-version", "host-java-check", "source_download", "source_sidecar_download",
+                  "source_sidecar_check", "source_sha256", "source_zip_crc", "source_inspector",
+                  "source_structure", "source_extract", "bootstrap_download", "bootstrap_sidecar_download",
+                  "bootstrap_sidecar_check", "bootstrap_sha256", "bootstrap_zip_crc", "bootstrap_extract",
+                  "bootstrap_version", "bootstrap_version_check", "source_build", "distribution_locate",
+                  "distribution_zip_crc", "distribution_extract", "distribution_version",
+                  "distribution_version_check",
+              )
+          }
+          output_ok = exit_code("distribution_version_check") == 0 and output_archive.is_file()
+          source_details = {
+              "url": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip",
+              "sha256SidecarUrl": "https://services.gradle.org/distributions/gradle-9.8.2-src.zip.sha256",
+              "expectedSha256": "96c9aba0564daa2998f578b589eba9ae1f6656e368fde85f7132e05321bab553",
+              "sidecarSha256": sidecar_digest(source_sidecar),
+              "actualSha256": sha256(source_archive),
+              "inspectionScope": "archive-only checks performed before bootstrap download and source build; inspector bootstrap fields are local to that inspection",
+              "inspection": source_report,
+          }
+          bootstrap_details = {
+              "url": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip",
+              "sha256SidecarUrl": "https://services.gradle.org/distributions/gradle-9.8.1-bin.zip.sha256",
+              "expectedSha256": "dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f",
+              "sidecarSha256": sidecar_digest(bootstrap_sidecar),
+              "actualSha256": sha256(bootstrap_archive),
+              "role": "verified build-only host bootstrap; never included in an app payload or feed",
+              "versionOutput": text(status / "bootstrap-version.txt"),
+          }
+          build_command = [
+              str(temp / "gradle-bootstrap/gradle-9.8.1/bin/gradle"),
+              "-p", str(temp / "gradle-source/gradle-9.8.2"),
+              ":distributions-full:binDistributionZip", "--no-daemon", "--no-parallel",
+              "--max-workers=2", "--stacktrace",
+              "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8",
+          ]
+          evidence = {
+              "schemaVersion": 1,
+              "result": "SOURCE_BUILD_SUCCESS_HOST_ONLY" if output_ok else "SOURCE_BUILD_NOT_VERIFIED_OR_FAILED",
+              "run": {
+                  "url": os.environ.get("RUN_URL"),
+                  "ref": os.environ.get("RUN_REF"),
+                  "commit": os.environ.get("RUN_SHA"),
+              },
+              "actions": {
+                  "checkout": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "setupJava": "actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961",
+                  "uploadArtifact": "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              },
+              "runner": {
+                  "image": "ubuntu-24.04",
+                  "javaVersionOutput": text(status / "host-java-version.txt"),
+                  "prepareStep": os.environ.get("PREPARE_OUTCOME"),
+                  "hostJdkStep": os.environ.get("HOST_JDK_OUTCOME"),
+                  "sourceBuildStep": os.environ.get("BUILD_OUTCOME"),
+                  "distributionAuditStep": os.environ.get("DISTRIBUTION_OUTCOME"),
+              },
+              "source": source_details,
+              "bootstrap": bootstrap_details,
+              "build": {
+                  "commandArgv": build_command,
+                  "commandExitCode": exit_code("source_build"),
+                  "firstError": first_error,
+                  "logPathInArtifact": "source-build.log" if build_log.is_file() else None,
+              },
+              "checksExitCodes": checks,
+              "outputDistribution": {
+                  "filename": "gradle-9.8.2-bin.zip" if output_ok else None,
+                  "sha256": sha256(output_archive) if output_ok else None,
+                  "sizeBytes": output_archive.stat().st_size if output_ok else None,
+                  "integrityCheckExitCode": exit_code("distribution_zip_crc"),
+                  "generatedVersionOutput": text(status / "distribution-version.txt"),
+                  "hostOnly": True,
+              },
+              "scope": {
+                  "buildTarget": "host binary distribution only",
+                  "androidBionicRuntime": "NOT_VERIFIED",
+                  "packageBuilt": False,
+                  "feedPublishedOrSigned": False,
+                  "candidateOrProductionGateEnabled": False,
+                  "productionAllowed": False,
+              },
+          }
+          evidence_path = artifact / "gradle-source-build-evidence.json"
+          evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          lines_out = ["## Gradle 9.8.2 source build candidate — host-only", ""]
+          if output_ok:
+              lines_out += [
+                  "**Result: source build and host distribution audit passed.**",
+                  "",
+                  f"- Output SHA-256: `{sha256(output_archive)}`",
+                  f"- Output size: `{output_archive.stat().st_size}` bytes",
+                  "- Source and bootstrap archives: fixed checksum, sidecar, ZIP integrity, and structural checks passed.",
+                  "- Generated `gradle --version`: verified as Gradle 9.8.2 on the host JDK.",
+                  "- Android/Bionic runtime: **NOT VERIFIED**. Package/feed/production gates remain false.",
+                  f"- [Workflow run and artifact listing]({os.environ.get('RUN_URL')})",
+              ]
+          else:
+              lines_out += [
+                  "**Result: source build candidate did not pass all checks; no qualified distribution is claimed.**",
+                  "",
+                  f"- Prepare step: `{os.environ.get('PREPARE_OUTCOME')}`; source build step: `{os.environ.get('BUILD_OUTCOME')}`; distribution audit: `{os.environ.get('DISTRIBUTION_OUTCOME')}`.",
+                  f"- Evidence JSON: `gradle-source-build-evidence.json` in the uploaded run artifact (when upload succeeds).",
+                  f"- [Workflow run and failure logs]({os.environ.get('RUN_URL')})",
+              ]
+              if first_error:
+                  lines_out += ["", "### First Gradle build error (verbatim)", "", "```text", first_error, "```"]
+              elif os.environ.get("BUILD_OUTCOME") == "failure":
+                  lines_out += ["", "Gradle returned a non-zero exit but no recognized error marker was extracted; inspect the preserved `source-build.log` in the run artifact."]
+          lines_out += ["", "This host build is not an Android/Bionic compatibility result and does not enable package, feed, signing, readiness, or production gates.", ""]
+          with summary.open("a", encoding="utf-8") as stream:
+              stream.write("\n".join(lines_out))
+          PY
+
+      - name: Upload evidence and host-only build output
+        if: always() && steps.checkout.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gradle-source-build-host-only-${{ github.run_id }}
+          path: ${{ runner.temp }}/gradle-source-build-candidate-artifact/
+          if-no-files-found: error
+          retention-days: 7
