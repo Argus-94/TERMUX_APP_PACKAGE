@@ -4,16 +4,91 @@ import importlib.util
 import json
 import os
 import shutil
+import stat
 import subprocess
 import tarfile
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 SCRIPT=Path(__file__).parents[1]/"verify-retained-candidate-bundle.py"
 spec=importlib.util.spec_from_file_location("verify_retained",SCRIPT)
 verify=importlib.util.module_from_spec(spec); spec.loader.exec_module(verify)
+zip_spec=importlib.util.spec_from_file_location("verify_gradle_candidate_zip",Path(__file__).parents[1]/"verify-gradle-android-candidate-zip.py")
+zip_verify=importlib.util.module_from_spec(zip_spec); zip_spec.loader.exec_module(zip_verify)
+stage_spec=importlib.util.spec_from_file_location("stage_gradle_candidate",Path(__file__).parents[1]/"stage-gradle-android-candidate.py")
+stage_candidate=importlib.util.module_from_spec(stage_spec); stage_spec.loader.exec_module(stage_candidate)
+
+class CandidateZipArchiveSafetyTests(unittest.TestCase):
+    def archive(self, entries):
+        td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup); path=Path(td.name)/"candidate.zip"
+        with zipfile.ZipFile(path,"w",compression=zipfile.ZIP_STORED) as archive:
+            for entry in entries:
+                if isinstance(entry,tuple):
+                    info,payload=entry; archive.writestr(info,payload)
+                else:
+                    name,payload=entry; archive.writestr(name,payload)
+        return path
+    def rejected(self, entries):
+        with self.assertRaises(zip_verify.Invalid): zip_verify.inspect_zip(self.archive(entries))
+    def test_regular_zip(self):
+        self.assertEqual(zip_verify.inspect_zip(self.archive([("reports/a.json",b"{}")])),{"reports/a.json":b"{}"})
+    def test_traversal(self): self.rejected([("../escape",b"x")])
+    def test_absolute(self): self.rejected([("/escape",b"x")])
+    def test_duplicate_path(self): self.rejected([("a",b"1"),("a",b"2")])
+    def test_ancestor_file_collision(self): self.rejected([("a",b"x"),("a/b",b"y")])
+    def test_symlink(self):
+        info=zipfile.ZipInfo("link"); info.create_system=3; info.external_attr=(stat.S_IFLNK|0o777)<<16
+        self.rejected([(info,b"target")])
+    def test_strict_verifier_dispatches_zip_to_candidate_contract(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            with self.assertRaisesRegex(Exception,"required candidate evidence is missing"):
+                verify.verify(self.archive([("reports/a.json",b"{}")]),"Argus-94/TERMUX_APP_PACKAGE",
+                              "a"*40,"12","A"*40,root,root/"out",root/"report.json")
+
+class CandidatePaxArchiveSafetyTests(unittest.TestCase):
+    def test_pax_feed_archive(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/"feed.tar"
+            with tarfile.open(path,"w",format=tarfile.PAX_FORMAT) as archive:
+                info=tarfile.TarInfo("dists/stable/Release"); info.size=8
+                archive.addfile(info,__import__('io').BytesIO(b"Suite: x"))
+            self.assertEqual(zip_verify.inspect_pax_tar(path.read_bytes()),{"dists/stable/Release":b"Suite: x"})
+
+class CandidateSignedEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
+        root=Path(self.temp.name); self.home=root/"gnupg"; self.home.mkdir(mode=0o700)
+        subprocess.run(["gpg","--batch","--homedir",str(self.home),"--passphrase","",
+                        "--quick-generate-key","candidate verifier test","rsa2048","sign","0"],
+                       check=True,capture_output=True,text=True,timeout=60)
+        listing=subprocess.run(["gpg","--batch","--homedir",str(self.home),"--with-colons",
+                               "--list-secret-keys"],check=True,capture_output=True,text=True).stdout
+        self.fingerprint=next(line.split(":")[9] for line in listing.splitlines() if line.startswith("fpr:"))
+        self.keyring=root/"public-keyring.gpg"
+        subprocess.run(["gpg","--batch","--homedir",str(self.home),"--output",str(self.keyring),
+                        "--export",self.fingerprint],check=True,capture_output=True)
+    def sign(self, content):
+        temp=Path(self.temp.name)
+        path=temp/"signed-evidence.txt"; path.write_bytes(content)
+        signature=temp/"signed-evidence.txt.asc"
+        stage_candidate.sign_detached(self.home,self.fingerprint,path,signature)
+        return signature.read_bytes()
+    def test_signed_checksum_and_provenance_use_exact_ephemeral_key(self):
+        body=b"candidate evidence\n"; signature=self.sign(body)
+        zip_verify.verify_gpg(body,self.keyring,self.fingerprint,signature=signature)
+        with self.assertRaises(zip_verify.Invalid):
+            zip_verify.verify_gpg(body+b"tampered",self.keyring,self.fingerprint,signature=signature)
+    def test_sha256_inventory_requires_exact_coverage(self):
+        members={"a":b"one","b":b"two"}
+        good="".join(f"{zip_verify.sha(v)}  {k}\n" for k,v in sorted(members.items())).encode()
+        zip_verify.sha256_sums(good,members,set(members))
+        with self.assertRaises(zip_verify.Invalid): zip_verify.sha256_sums(good,members,{"a"})
+        bad=good.replace(zip_verify.sha(b"one").encode(),b"0"*64)
+        with self.assertRaises(zip_verify.Invalid): zip_verify.sha256_sums(bad,members,set(members))
 
 class ArchiveSafetyTests(unittest.TestCase):
     def archive(self, entries):

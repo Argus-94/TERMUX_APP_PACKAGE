@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Strictly verify retained candidate evidence (offline, non-production qualification only)."""
-import argparse, io, gzip, hashlib, json, os, re, shutil, subprocess, tarfile, tempfile
+import argparse, io, gzip, hashlib, importlib.util, json, os, re, shutil, subprocess, tarfile, tempfile, zipfile
 from pathlib import Path, PurePosixPath
 MAX_MEMBERS=20000
 MAX_TOTAL=2*1024**3
@@ -74,6 +74,12 @@ def parse_packages(raw):
  return records
 
 def verify(archive,repository,commit,run_id,fingerprint,repo_root,outdir,report):
+ if zipfile.is_zipfile(archive):
+  helper=Path(__file__).with_name("verify-gradle-android-candidate-zip.py")
+  spec=importlib.util.spec_from_file_location("verify_gradle_android_candidate_zip",helper)
+  if spec is None or spec.loader is None: raise Invalid("cannot load Gradle candidate ZIP verifier")
+  module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+  return module.verify_candidate_zip(archive,repository,commit,str(run_id),fingerprint,repo_root,outdir,report)
  need(repository=="Argus-94/TERMUX_APP_PACKAGE","repository mismatch")
  need(re.fullmatch(r"[0-9a-f]{40}",commit or "") and re.fullmatch(r"[0-9]+",str(run_id)),"invalid commit/run id")
  need(re.fullmatch(r"[0-9A-F]{40,64}",fingerprint or ""),"external fingerprint must be uppercase hex")

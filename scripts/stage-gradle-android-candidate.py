@@ -6,9 +6,11 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import stat
+import subprocess
 import sys
 import tarfile
 from typing import Any
@@ -113,8 +115,19 @@ def write_feed_archive(source: Path, destination: Path, files: list[Path]) -> No
                 archive.addfile(info, stream)
 
 
+def sign_detached(home: Path, fingerprint: str, source: Path, destination: Path) -> None:
+    subprocess.run([
+        "gpg", "--batch", "--yes", "--homedir", str(home), "--local-user", fingerprint + "!",
+        "--armor", "--detach-sign", "--output", str(destination), str(source),
+    ], check=True, capture_output=True, text=True, timeout=60)
+
+
 def stage(args: argparse.Namespace) -> dict[str, Any]:
     need(not args.destination.exists(), "BUNDLE_DESTINATION_MUST_BE_NEW")
+    need(re.fullmatch(r"[0-9a-f]{40}", args.repository_commit) is not None,
+         "REPOSITORY_COMMIT_INVALID")
+    need(re.fullmatch(r"[0-9]+", args.workflow_run_id) is not None,
+         "WORKFLOW_RUN_ID_INVALID")
     args.destination.mkdir(parents=True)
     lock = json.loads(args.input_lock.read_text(encoding="utf-8"))
     build = json.loads(args.build_result.read_text(encoding="utf-8"))
@@ -185,6 +198,9 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
     need(args.signing_config_root.is_dir() and not args.signing_config_root.is_symlink(),
          "EPHEMERAL_SIGNING_ROOT_NOT_REGULAR_DIRECTORY")
     manifest_obj = json.loads(key_manifest.read_text(encoding="utf-8"))
+    fingerprint = str(manifest_obj.get("fingerprint", "")).replace(" ", "").upper()
+    need(re.fullmatch(r"[0-9A-F]{40,64}", fingerprint) is not None,
+         "EPHEMERAL_SIGNING_FINGERPRINT_INVALID")
     key_rel = safe_rel(str(manifest_obj.get("publicKeyring", "")))
     public_key = args.signing_config_root.joinpath(*key_rel.parts)
     need(public_key.is_file() and not public_key.is_symlink(), "EPHEMERAL_PUBLIC_KEYRING_MISSING")
@@ -255,10 +271,14 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
     entries = [{"path": path.relative_to(args.destination).as_posix(), "sizeBytes": path.stat().st_size,
                 "sha256": sha_file(path)} for path in staged]
     manifest = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "classification": "SHORT_RETENTION_TEST_ONLY_CANDIDATE_EVIDENCE",
         "repository": lock["repository"],
         "branch": lock["branch"],
+        "repositoryCommit": args.repository_commit,
+        "workflowRunId": args.workflow_run_id,
+        "feedSigningFingerprint": fingerprint,
+        "inputLockSha256": sha_file(args.input_lock),
         "applicationId": lock["applicationId"],
         "package": lock["package"],
         "feedPackageCount": 83,
@@ -289,13 +309,50 @@ def stage(args: argparse.Namespace) -> dict[str, Any]:
     }
     manifest_path = args.destination / "bundle-manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    provenance = {
+        "schemaVersion": 1,
+        "classification": "SHORT_RETENTION_TEST_ONLY_CANDIDATE_EVIDENCE",
+        "repository": lock["repository"],
+        "branch": lock["branch"],
+        "repositoryCommit": args.repository_commit,
+        "workflowRunId": args.workflow_run_id,
+        "manifest": "bundle-manifest.json",
+        "manifestSha256": sha_file(manifest_path),
+        "inputLock": "metadata/gradle-android-package-candidate-inputs.json",
+        "inputLockSha256": sha_file(args.input_lock),
+        "sourceCommit": build["sourceCommit"],
+        "builderImageDigest": build["builderImageRef"],
+        "package": lock["package"],
+        "packageSha256": build["packageSha256"],
+        "feedSigningFingerprint": fingerprint,
+        "packageCount": manifest["feedPackageCount"],
+        "aptSimulation": "PASS; simulated only; no install",
+        "installed": False,
+        "androidDeviceRuntime": "NOT_RUN",
+        "candidateEligible": False,
+        "qualified": False,
+        "productionAllowed": False,
+    }
+    provenance_path = args.destination / "provenance.json"
+    provenance_path.write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    signing_home = args.signing_config_root / "gnupg"
+    sign_detached(signing_home, fingerprint, provenance_path, args.destination / "provenance.json.asc")
+
+    sums_path = args.destination / "SHA256SUMS"
+    sum_entries = [path for path in files_under(args.destination)
+                   if path.name not in {"SHA256SUMS", "SHA256SUMS.asc"}]
+    sums_path.write_text("".join(f"{sha_file(path)}  {path.relative_to(args.destination).as_posix()}\n"
+                                  for path in sum_entries), encoding="utf-8")
+    sign_detached(signing_home, fingerprint, sums_path, args.destination / "SHA256SUMS.asc")
     return manifest
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     specs = {
-        "destination": (Path, True), "input-lock": (Path, True), "feed-root": (Path, True),
+        "destination": (Path, True), "input-lock": (Path, True), "repository-commit": (str, True),
+        "workflow-run-id": (str, True), "feed-root": (Path, True),
         "signing-config-root": (Path, True), "package-deb": (Path, True), "package-hashes": (Path, True),
         "package-log": (Path, True), "recipe-patch": (Path, True), "build-result": (Path, True),
         "audit-report": (Path, True), "assembly-report": (Path, True), "assembled-zip": (Path, True),
