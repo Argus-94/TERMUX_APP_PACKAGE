@@ -1,0 +1,197 @@
+name: AIB v499 one-time encrypted ARM64 debug/test build
+
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .ci/aib-v499-one-time/**
+      - .github/workflows/aibuilder-v499-once.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aib-v499-one-time-arm64
+  cancel-in-progress: false
+
+jobs:
+  build-debug-arm64:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019' && contains(github.event.head_commit.message, '[AIB-V499-ONE-TIME]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+    env:
+      AIB_SOURCE_SHA256: 1f66bdd4019d4c98cca6995376ba321c17d1c1c6acace59eee3802343dc8ab65
+      AIB_CIPHERTEXT_SHA256: 07a54fa5486fd3544c1b9782aa7e6efdb8f43e175df68decad0a3ea1eb071fab
+    steps:
+      - name: Check out the authorized branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Validate the one-time source payload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REPOSITORY" = 'Argus-94/TERMUX_APP_PACKAGE'
+          test "$GITHUB_REF" = 'refs/heads/work/bootstrap-compatibility-20261019'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          payload="$GITHUB_WORKSPACE/.ci/aib-v499-one-time"
+          test -f "$payload/decrypt.mjs"
+          cat "$payload"/source.enc.* > "$RUNNER_TEMP/aib-v499-source.zip.enc"
+          printf '%s  %s\n' "$AIB_CIPHERTEXT_SHA256" "$RUNNER_TEMP/aib-v499-source.zip.enc" | sha256sum --check --status
+          echo 'AIB_V499_CIPHERTEXT_HASH_OK'
+
+      - name: Decrypt and verify the source archive
+        shell: bash
+        env:
+          AIB_V499_DECRYPT_KEY_HEX: ${{ secrets.AIB_V499_DECRYPT_KEY_HEX }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$AIB_V499_DECRYPT_KEY_HEX"
+          node "$GITHUB_WORKSPACE/.ci/aib-v499-one-time/decrypt.mjs" \
+            "$RUNNER_TEMP/aib-v499-source.zip.enc" \
+            "$RUNNER_TEMP/AIBuilder-Expo-v499-source.zip"
+          printf '%s  %s\n' "$AIB_SOURCE_SHA256" "$RUNNER_TEMP/AIBuilder-Expo-v499-source.zip" | sha256sum --check --status
+          unzip -tq "$RUNNER_TEMP/AIBuilder-Expo-v499-source.zip" >/dev/null
+          mkdir -p "$RUNNER_TEMP/aib-v499-src"
+          unzip -q "$RUNNER_TEMP/AIBuilder-Expo-v499-source.zip" -d "$RUNNER_TEMP/aib-v499-src"
+          test -f "$RUNNER_TEMP/aib-v499-src/AIBuilder-Expo-v499/package.json"
+          echo "AIB_APP_DIR=$RUNNER_TEMP/aib-v499-src/AIBuilder-Expo-v499" >> "$GITHUB_ENV"
+          echo 'AIB_V499_SOURCE_HASH_AND_ARCHIVE_OK'
+
+      - name: Set up Temurin JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+          check-latest: false
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          check-latest: false
+
+      - name: Set up pinned pnpm 9.15.0
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+          test "$(pnpm --version)" = '9.15.0'
+
+      - name: Prepare Android SDK 36
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk_root"
+          if command -v sdkmanager >/dev/null 2>&1; then
+            sdkmanager_bin="$(command -v sdkmanager)"
+          else
+            sdkmanager_bin="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          test -x "$sdkmanager_bin"
+          set +o pipefail
+          yes | "$sdkmanager_bin" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_bin" --install 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Install locked dependencies and generate the native Android project
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v499-src/AIBuilder-Expo-v499
+        run: |
+          set -Eeuo pipefail
+          pnpm install --frozen-lockfile --network-concurrency=8 --child-concurrency=1
+          node scripts/aib-native-source-preflight.mjs
+          test -x android/gradlew
+
+      - name: Build the ARM64 debug/test APK
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v499-src/AIBuilder-Expo-v499/android
+        run: |
+          set -Eeuo pipefail
+          ./gradlew :app:assembleDebug \
+            --no-daemon \
+            --max-workers=2 \
+            --no-parallel \
+            --console=plain \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.workers.max=2 \
+            '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=128m -Dfile.encoding=UTF-8'
+
+      - name: Verify APK identity, ABI, signature, and hash
+        id: verify_apk
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v499-src/AIBuilder-Expo-v499
+        run: |
+          set -Eeuo pipefail
+          shopt -s nullglob
+          candidates=(android/app/build/outputs/apk/debug/*.apk)
+          test "${#candidates[@]}" -eq 1
+          apk="${candidates[0]}"
+          test -s "$apk"
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          aapt="$sdk_root/build-tools/36.0.0/aapt"
+          apksigner="$sdk_root/build-tools/36.0.0/apksigner"
+          test -x "$aapt"
+          test -x "$apksigner"
+          badging="$("$aapt" dump badging "$apk")"
+          grep -F "package: name='com.karat.aibuilder' versionCode='499' versionName='1.10.99'" <<< "$badging"
+          mapfile -t abis < <(unzip -Z1 "$apk" | awk -F/ '$1 == "lib" && NF > 2 { print $2 }' | sort -u)
+          test "${#abis[@]}" -eq 1
+          test "${abis[0]}" = 'arm64-v8a'
+          mkdir -p "$RUNNER_TEMP/aib-v499-artifacts"
+          cp "$apk" "$RUNNER_TEMP/aib-v499-artifacts/AIBuilder-Expo-v499-debug-arm64.apk"
+          "$apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/aib-v499-artifacts/signature-verification.txt"
+          sha256sum "$RUNNER_TEMP/aib-v499-artifacts/AIBuilder-Expo-v499-debug-arm64.apk" > "$RUNNER_TEMP/aib-v499-artifacts/SHA256SUMS.txt"
+          {
+            echo 'build=debug/test'
+            echo 'applicationId=com.karat.aibuilder'
+            echo 'versionName=1.10.99'
+            echo 'versionCode=499'
+            echo 'abi=arm64-v8a'
+            echo "sourceArchiveSha256=$AIB_SOURCE_SHA256"
+            echo "sourceCommit=$GITHUB_SHA"
+            echo 'gradleTask=:app:assembleDebug'
+            echo 'androidDeviceTest=not-performed'
+          } > "$RUNNER_TEMP/aib-v499-artifacts/build-metadata.txt"
+          {
+            echo '## AI Builder v499 ARM64 debug/test build'
+            echo
+            echo '- Build: `:app:assembleDebug`'
+            echo '- Application ID: `com.karat.aibuilder`'
+            echo '- Version: `1.10.99` (code `499`)'
+            echo '- Packaged native ABI: `arm64-v8a` only'
+            echo '- Signing: verified debug/test APK signature'
+            echo '- Android device installation/runtime test: not performed'
+            echo '- APK SHA-256:'
+            echo '```text'
+            sha256sum "$RUNNER_TEMP/aib-v499-artifacts/AIBuilder-Expo-v499-debug-arm64.apk"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'AIB_V499_APK_VERIFICATION_OK'
+
+      - name: Upload the verified debug/test APK and build metadata (one-day retention)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aibuilder-v499-debug-arm64-test-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v499-artifacts/
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Remove decrypted source and temporary files
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          rm -rf "$RUNNER_TEMP/aib-v499-src" "$RUNNER_TEMP/aib-v499-artifacts"
+          rm -f "$RUNNER_TEMP/aib-v499-source.zip" "$RUNNER_TEMP/aib-v499-source.zip.enc"
+          rm -rf "$GITHUB_WORKSPACE/.ci/aib-v499-one-time"
+          echo 'AIB_V499_RUNNER_CLEANUP_COMPLETE'
