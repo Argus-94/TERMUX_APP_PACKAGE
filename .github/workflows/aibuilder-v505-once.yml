@@ -1,0 +1,274 @@
+name: AIB v505 one-time encrypted ARM64 debug/test build
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .ci/aib-v505-one-time/**
+      - .github/workflows/aibuilder-v505-once.yml
+permissions:
+  contents: read
+concurrency:
+  group: aib-v505-one-time-arm64
+  cancel-in-progress: false
+jobs:
+  build-debug-arm64:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019' && contains(github.event.head_commit.message, '[AIB-V505-ONE-TIME]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+    env:
+      AIB_SOURCE_SHA256: cb9e77343f318fbb16e65ede266b959351256249d9c48bd5b5af14c44b6b5a73
+      AIB_CIPHERTEXT_SHA256: 48ae35e40f8a45ebb0a589576e0b35526f6a2ddc5f1ebd6e022d30fdbb9a2f9b
+      AIB_ANDROID_LLAMA_SHA256: a5f446b06739760f91ac522e96c5e36192a594da10c8ef4fcd8379e2858f601c
+      AIB_IOS_LLAMA_SHA256: e50527bd0b9e6e0917f2604698269b1b2aa41fccd6da8ee04efb25134f38f342
+    steps:
+      - name: Check out the authorized branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate the one-time encrypted source payload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REPOSITORY" = 'Argus-94/TERMUX_APP_PACKAGE'
+          test "$GITHUB_REF" = 'refs/heads/work/bootstrap-compatibility-20261019'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          payload="$GITHUB_WORKSPACE/.ci/aib-v505-one-time"
+          test -f "$payload/decrypt.mjs"
+          shopt -s nullglob
+          chunks=("$payload"/source.enc.[0-9][0-9][0-9])
+          test "${#chunks[@]}" -eq 14
+          for i in "${!chunks[@]}"; do
+            expected="$(printf '%03d' "$i")"
+            actual="${chunks[$i]##*.}"
+            test "$actual" = "$expected"
+          done
+          cat "${chunks[@]}" > "$RUNNER_TEMP/aib-v505-source.tar.gz.enc"
+          printf '%s  %s\n' "$AIB_CIPHERTEXT_SHA256" "$RUNNER_TEMP/aib-v505-source.tar.gz.enc" | sha256sum --check --status
+          echo 'AIB_V505_CIPHERTEXT_HASH_OK'
+      - name: Decrypt and verify the exact source archive
+        shell: bash
+        env:
+          AIB_V505_DECRYPT_KEY_HEX: ${{ secrets.AIB_V505_DECRYPT_KEY_HEX }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$AIB_V505_DECRYPT_KEY_HEX"
+          node "$GITHUB_WORKSPACE/.ci/aib-v505-one-time/decrypt.mjs" \
+            "$RUNNER_TEMP/aib-v505-source.tar.gz.enc" \
+            "$RUNNER_TEMP/AIBuilder-Expo-v505-source.tar.gz"
+          printf '%s  %s\n' "$AIB_SOURCE_SHA256" "$RUNNER_TEMP/AIBuilder-Expo-v505-source.tar.gz" | sha256sum --check --status
+          tar -tzf "$RUNNER_TEMP/AIBuilder-Expo-v505-source.tar.gz" >/dev/null
+          mkdir -p "$RUNNER_TEMP/aib-v505-src"
+          tar -xzf "$RUNNER_TEMP/AIBuilder-Expo-v505-source.tar.gz" -C "$RUNNER_TEMP/aib-v505-src" --no-same-owner
+          app_dir="$RUNNER_TEMP/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105"
+          test -f "$app_dir/package.json"
+          test -f "$app_dir/scripts/aib-native-source-preflight.mjs"
+          test -f "$app_dir/DEVICE_SMOKE.md"
+          node - "$app_dir/package.json" <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (p.version !== '1.10.105' || p.packageManager !== 'pnpm@9.15.0') process.exit(2);
+          NODE
+          grep -Fq 'versionCode: 505' "$app_dir/app.config.ts"
+          grep -Fq '1.10.105' "$app_dir/core/runtime/RuntimeIdentity.ts"
+          echo "AIB_APP_DIR=$app_dir" >> "$GITHUB_ENV"
+          echo 'AIB_V505_SOURCE_HASH_AND_ARCHIVE_OK'
+      - name: Set up Temurin JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+          check-latest: false
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          check-latest: false
+      - name: Set up pinned pnpm 9.15.0
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+          test "$(pnpm --version)" = '9.15.0'
+      - name: Run full source pre-release audit
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          set -Eeuo pipefail
+          pnpm test:pre-release
+      - name: Prepare Android SDK 36
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk_root"
+          if command -v sdkmanager >/dev/null 2>&1; then
+            sdkmanager_bin="$(command -v sdkmanager)"
+          else
+            sdkmanager_bin="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          test -x "$sdkmanager_bin"
+          set +o pipefail
+          yes | "$sdkmanager_bin" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_bin" --install 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Install locked dependencies and generate Android project
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
+        env:
+          RNLLAMA_SKIP_POSTINSTALL: '1'
+        run: |
+          set -Eeuo pipefail
+          pnpm install --frozen-lockfile --network-concurrency=8 --child-concurrency=1
+          test -f node_modules/llama.rn/install/native-artifacts.json
+          test -x android/gradlew
+      - name: Install only the checksum-verified Android llama.rn artifact
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { spawnSync } = require('node:child_process');
+          const EXPECTED_ANDROID = process.env.AIB_ANDROID_LLAMA_SHA256;
+          const EXPECTED_IOS = process.env.AIB_IOS_LLAMA_SHA256;
+          const packageRoot = fs.realpathSync(path.join(process.cwd(), 'node_modules/llama.rn'));
+          const packageJson = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+          if (packageJson.version !== '0.12.0') throw new Error('Unexpected llama.rn version');
+          const manifestPath = path.join(packageRoot, 'install/native-artifacts.json');
+          const original = fs.readFileSync(manifestPath);
+          const manifest = JSON.parse(original.toString('utf8'));
+          const android = (manifest.artifacts || []).filter((x) => x.name === 'android-jni-libs');
+          const ios = (manifest.artifacts || []).filter((x) => x.name === 'ios-xcframework');
+          if (android.length !== 1 || ios.length !== 1 || manifest.artifacts.length !== 2) throw new Error('Unexpected llama.rn artifact manifest');
+          const a = android[0];
+          const i = ios[0];
+          if (a.assetName !== 'llama-rn-android-jni-libs.tar.gz' || a.relativePath !== 'android/src/main/jniLibs' || a.markerPath !== 'android/src/main/jniLibs/.llama-rn.sha256' || a.legacyMarkerPath !== 'android/src/main/.llama-rn-android-jni-libs.sha256' || a.sha256 !== EXPECTED_ANDROID) throw new Error('Android artifact metadata/hash mismatch');
+          if (i.assetName !== 'llama-rn-ios-xcframework.tar.gz' || i.relativePath !== 'ios/rnllama.xcframework' || i.sha256 !== EXPECTED_IOS) throw new Error('iOS artifact manifest/hash mismatch');
+          fs.writeFileSync(manifestPath, JSON.stringify({ ...manifest, artifacts: [a] }, null, 2) + '\n');
+          try {
+            const script = path.join(packageRoot, 'install/download-native-artifacts.js');
+            const childEnv = { ...process.env };
+            delete childEnv.RNLLAMA_SKIP_POSTINSTALL;
+            let success = false;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              const result = spawnSync(process.execPath, [script], { stdio: 'inherit', env: childEnv });
+              if (result.error) throw result.error;
+              if (result.status === 0) { success = true; break; }
+              if (attempt < 3) {
+                console.log(`Android artifact download failed; retry ${attempt + 1}/3`);
+                Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2000 * attempt);
+              }
+            }
+            if (!success) throw new Error('Android artifact download failed after three attempts');
+            const markerPath = path.join(packageRoot, a.markerPath);
+            if (fs.readFileSync(markerPath, 'utf8').trim().toLowerCase() !== EXPECTED_ANDROID) throw new Error('Installed Android artifact marker mismatch');
+            const libRoot = path.join(packageRoot, a.relativePath);
+            let soCount = 0;
+            const walk = (dir) => { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) { const full = path.join(dir, entry.name); if (entry.isDirectory()) walk(full); else if (entry.isFile() && entry.name.endsWith('.so')) soCount++; } };
+            walk(libRoot);
+            if (soCount < 1) throw new Error('Android native artifact contains no shared libraries');
+            console.log(`AIB_LLAMA_ANDROID_ARTIFACT_OK shared_libraries=${soCount} sha256=${EXPECTED_ANDROID}`);
+          } finally {
+            fs.writeFileSync(manifestPath, original);
+          }
+          NODE
+          node scripts/aib-native-source-preflight.mjs
+          test -x android/gradlew
+      - name: Build the ARM64 debug/test APK
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105/android
+        run: |
+          set -Eeuo pipefail
+          ./gradlew :app:assembleDebug \
+            --no-daemon \
+            --max-workers=2 \
+            --no-parallel \
+            --console=plain \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.workers.max=2 \
+            '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=128m -Dfile.encoding=UTF-8'
+      - name: Verify APK identity, ARM64-only ABI, CRC, signature, and hash
+        id: verify_apk
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
+        run: |
+          set -Eeuo pipefail
+          shopt -s nullglob
+          candidates=(android/app/build/outputs/apk/debug/*.apk)
+          test "${#candidates[@]}" -eq 1
+          apk="${candidates[0]}"
+          test -s "$apk"
+          unzip -tq "$apk" >/dev/null
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          aapt="$sdk_root/build-tools/36.0.0/aapt"
+          apksigner="$sdk_root/build-tools/36.0.0/apksigner"
+          test -x "$aapt"
+          test -x "$apksigner"
+          badging="$("$aapt" dump badging "$apk")"
+          grep -F "package: name='com.karat.aibuilder' versionCode='505' versionName='1.10.105'" <<< "$badging"
+          mapfile -t abis < <(unzip -Z1 "$apk" | awk -F/ '$1 == "lib" && NF > 2 { print $2 }' | sort -u)
+          test "${#abis[@]}" -eq 1
+          test "${abis[0]}" = 'arm64-v8a'
+          mkdir -p "$RUNNER_TEMP/aib-v505-artifacts"
+          cp "$apk" "$RUNNER_TEMP/aib-v505-artifacts/AIBuilder-Expo-v505-debug-arm64.apk"
+          printf '%s\n' "$badging" > "$RUNNER_TEMP/aib-v505-artifacts/apk-badging.txt"
+          "$apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/aib-v505-artifacts/signature-verification.txt"
+          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' "$RUNNER_TEMP/aib-v505-artifacts/signature-verification.txt"
+          grep -Fq 'Signer #1 certificate DN:' "$RUNNER_TEMP/aib-v505-artifacts/signature-verification.txt"
+          cd "$RUNNER_TEMP/aib-v505-artifacts"
+          sha256sum AIBuilder-Expo-v505-debug-arm64.apk > SHA256SUMS.txt
+          {
+            echo 'build=debug/test'
+            echo 'applicationId=com.karat.aibuilder'
+            echo 'versionName=1.10.105'
+            echo 'versionCode=505'
+            echo 'abi=arm64-v8a'
+            echo "sourceArchiveSha256=$AIB_SOURCE_SHA256"
+            echo "sourceCommit=$GITHUB_SHA"
+            echo 'gradleTask=:app:assembleDebug'
+            echo 'apkCrc=verified'
+            echo 'apkSignature=v2-verified'
+            echo 'androidDeviceTest=not-performed'
+          } > build-metadata.txt
+          {
+            echo '## AI Builder v505 ARM64 debug/test build'
+            echo
+            echo '- Build: `:app:assembleDebug`'
+            echo '- Application ID: `com.karat.aibuilder`'
+            echo '- Version: `1.10.105` (code `505`)'
+            echo '- Packaged native ABI: `arm64-v8a` only'
+            echo '- APK CRC (`unzip -t`) and v2 debug/test signature: verified'
+            echo '- Android device installation/runtime test: not performed'
+            echo '- APK SHA-256:'
+            echo '```text'
+            cat SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'AIB_V505_APK_VERIFICATION_OK'
+      - name: Upload verified debug/test APK and metadata (one-day retention)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aibuilder-v505-debug-arm64-test-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v505-artifacts/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove decrypted source and temporary runner files
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          rm -rf "$RUNNER_TEMP/aib-v505-src" "$RUNNER_TEMP/aib-v505-artifacts"
+          rm -f "$RUNNER_TEMP/AIBuilder-Expo-v505-source.tar.gz" "$RUNNER_TEMP/aib-v505-source.tar.gz.enc"
+          rm -rf "$GITHUB_WORKSPACE/.ci/aib-v505-one-time"
+          rm -f "$GITHUB_WORKSPACE/.github/workflows/aibuilder-v505-once.yml"
+          echo 'AIB_V505_RUNNER_CLEANUP_COMPLETE'
