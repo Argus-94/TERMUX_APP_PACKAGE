@@ -77,7 +77,7 @@ jobs:
           echo "AIB_APP_DIR=$app_dir" >> "$GITHUB_ENV"
           echo 'AIB_V505_SOURCE_HASH_AND_ARCHIVE_OK'
       - name: Set up Temurin JDK 17
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffbf961
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
           distribution: temurin
           java-version: '17'
