@@ -19,8 +19,8 @@ jobs:
     permissions:
       contents: read
     env:
-      AIB_SOURCE_SHA256: cb9e77343f318fbb16e65ede266b959351256249d9c48bd5b5af14c44b6b5a73
-      AIB_CIPHERTEXT_SHA256: 48ae35e40f8a45ebb0a589576e0b35526f6a2ddc5f1ebd6e022d30fdbb9a2f9b
+      AIB_SOURCE_SHA256: 984c98dd6026448a68fad0d9758fd3cfa7358583ac451ddfb5b404ea31e16e19
+      AIB_CIPHERTEXT_SHA256: d71a1e49b376d1e3eabbe0386574e1354cd82d953a6c1ffa24ef5851414a0c99
       AIB_ANDROID_LLAMA_SHA256: a5f446b06739760f91ac522e96c5e36192a594da10c8ef4fcd8379e2858f601c
       AIB_IOS_LLAMA_SHA256: e50527bd0b9e6e0917f2604698269b1b2aa41fccd6da8ee04efb25134f38f342
     steps:
@@ -94,14 +94,6 @@ jobs:
           corepack enable
           corepack prepare pnpm@9.15.0 --activate
           test "$(pnpm --version)" = '9.15.0'
-      - name: Run full source pre-release audit
-        shell: bash
-        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
-        env:
-          TMPDIR: ${{ runner.temp }}
-        run: |
-          set -Eeuo pipefail
-          pnpm test:pre-release
       - name: Prepare Android SDK 36
         shell: bash
         run: |
@@ -182,6 +174,33 @@ jobs:
           NODE
           node scripts/aib-native-source-preflight.mjs
           test -x android/gradlew
+      - name: Warm Kotlin compiler cache for host JVM audit
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105/android
+        run: |
+          set -Eeuo pipefail
+          ./gradlew :app:compileDebugKotlin \
+            --no-daemon \
+            --max-workers=2 \
+            --no-parallel \
+            --console=plain \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.workers.max=2 \
+            '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=128m -Dfile.encoding=UTF-8'
+          gradle_home="${GRADLE_USER_HOME:-$HOME/.gradle}"
+          cache="$gradle_home/caches/modules-2/files-2.1"
+          test -n "$(find "$cache/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.1.20" -name '*.jar' -type f -print -quit)"
+          test -n "$(find "$cache/org.jetbrains.kotlin/kotlin-stdlib/2.1.20" -name '*.jar' -type f -print -quit)"
+      - name: Run full source pre-release audit
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          set -Eeuo pipefail
+          pnpm test:pre-release
       - name: Build the ARM64 debug/test APK
         shell: bash
         working-directory: ${{ runner.temp }}/aib-v505-src/AIBuilder-Expo-v505-source-1.10.105/android
