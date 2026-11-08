@@ -1,0 +1,199 @@
+name: AIB v504 one-time encrypted ARM64 debug/test build
+on:
+  push:
+    branches:
+      - work/bootstrap-compatibility-20261019
+    paths:
+      - .ci/aib-v504-one-time/**
+      - .github/workflows/aibuilder-v504-once.yml
+permissions:
+  contents: read
+concurrency:
+  group: aib-v504-one-time-arm64
+  cancel-in-progress: false
+jobs:
+  build-debug-arm64:
+    if: github.ref == 'refs/heads/work/bootstrap-compatibility-20261019' && contains(github.event.head_commit.message, '[AIB-V504-ONE-TIME]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+    env:
+      AIB_SOURCE_SHA256: 83c8f8338d094c1468e101992795499a5c5daf1a85d2a41daec8511521fd4757
+      AIB_CIPHERTEXT_SHA256: 27f08fa110a822079752e07dc4fb2479d9fa06bfe4a269d0bb654a5a9f3a069a
+    steps:
+      - name: Check out the authorized branch without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate the one-time encrypted source payload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REPOSITORY" = 'Argus-94/TERMUX_APP_PACKAGE'
+          test "$GITHUB_REF" = 'refs/heads/work/bootstrap-compatibility-20261019'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          payload="$GITHUB_WORKSPACE/.ci/aib-v504-one-time"
+          test -f "$payload/decrypt.mjs"
+          compgen -G "$payload/source.enc.[0-9][0-9][0-9]" >/dev/null
+          cat "$payload"/source.enc.[0-9][0-9][0-9] > "$RUNNER_TEMP/aib-v504-source.tar.gz.enc"
+          printf '%s  %s\n' "$AIB_CIPHERTEXT_SHA256" "$RUNNER_TEMP/aib-v504-source.tar.gz.enc" | sha256sum --check --status
+          echo 'AIB_V504_CIPHERTEXT_HASH_OK'
+      - name: Decrypt and verify the source archive
+        shell: bash
+        env:
+          AIB_V504_DECRYPT_KEY_HEX: ${{ secrets.AIB_V504_DECRYPT_KEY_HEX }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$AIB_V504_DECRYPT_KEY_HEX"
+          node "$GITHUB_WORKSPACE/.ci/aib-v504-one-time/decrypt.mjs" \
+            "$RUNNER_TEMP/aib-v504-source.tar.gz.enc" \
+            "$RUNNER_TEMP/AIBuilder-Expo-v504-source.tar.gz"
+          printf '%s  %s\n' "$AIB_SOURCE_SHA256" "$RUNNER_TEMP/AIBuilder-Expo-v504-source.tar.gz" | sha256sum --check --status
+          tar -tzf "$RUNNER_TEMP/AIBuilder-Expo-v504-source.tar.gz" >/dev/null
+          mkdir -p "$RUNNER_TEMP/aib-v504-src"
+          tar -xzf "$RUNNER_TEMP/AIBuilder-Expo-v504-source.tar.gz" -C "$RUNNER_TEMP/aib-v504-src" --no-same-owner
+          app_dir="$RUNNER_TEMP/aib-v504-src/AIBuilder-Expo-v504-source-1.10.104"
+          test -f "$app_dir/package.json"
+          test -f "$app_dir/scripts/aib-native-source-preflight.mjs"
+          test -f "$app_dir/DEVICE_SMOKE.md"
+          node - "$app_dir/package.json" <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (p.version !== '1.10.104' || p.packageManager !== 'pnpm@9.15.0') process.exit(2);
+          NODE
+          echo "AIB_APP_DIR=$app_dir" >> "$GITHUB_ENV"
+          echo 'AIB_V504_SOURCE_HASH_AND_ARCHIVE_OK'
+      - name: Set up Temurin JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+          check-latest: false
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          check-latest: false
+      - name: Set up pinned pnpm 9.15.0
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
+          test "$(pnpm --version)" = '9.15.0'
+      - name: Prepare Android SDK 36
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk_root"
+          if command -v sdkmanager >/dev/null 2>&1; then
+            sdkmanager_bin="$(command -v sdkmanager)"
+          else
+            sdkmanager_bin="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          test -x "$sdkmanager_bin"
+          set +o pipefail
+          yes | "$sdkmanager_bin" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_bin" --install 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Install locked dependencies and generate the native Android project
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v504-src/AIBuilder-Expo-v504-source-1.10.104
+        run: |
+          set -Eeuo pipefail
+          pnpm install --frozen-lockfile --network-concurrency=8 --child-concurrency=1
+          node scripts/aib-native-source-preflight.mjs
+          test -x android/gradlew
+      - name: Build the ARM64 debug/test APK
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v504-src/AIBuilder-Expo-v504-source-1.10.104/android
+        run: |
+          set -Eeuo pipefail
+          ./gradlew :app:assembleDebug \
+            --no-daemon \
+            --max-workers=2 \
+            --no-parallel \
+            --console=plain \
+            -PreactNativeArchitectures=arm64-v8a \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.workers.max=2 \
+            '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=128m -Dfile.encoding=UTF-8'
+      - name: Verify APK identity, ARM64-only ABI, CRC, signature, and hash
+        id: verify_apk
+        shell: bash
+        working-directory: ${{ runner.temp }}/aib-v504-src/AIBuilder-Expo-v504-source-1.10.104
+        run: |
+          set -Eeuo pipefail
+          shopt -s nullglob
+          candidates=(android/app/build/outputs/apk/debug/*.apk)
+          test "${#candidates[@]}" -eq 1
+          apk="${candidates[0]}"
+          test -s "$apk"
+          unzip -tq "$apk" >/dev/null
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          aapt="$sdk_root/build-tools/36.0.0/aapt"
+          apksigner="$sdk_root/build-tools/36.0.0/apksigner"
+          test -x "$aapt"
+          test -x "$apksigner"
+          badging="$("$aapt" dump badging "$apk")"
+          grep -F "package: name='com.karat.aibuilder' versionCode='504' versionName='1.10.104'" <<< "$badging"
+          mapfile -t abis < <(unzip -Z1 "$apk" | awk -F/ '$1 == "lib" && NF > 2 { print $2 }' | sort -u)
+          test "${#abis[@]}" -eq 1
+          test "${abis[0]}" = 'arm64-v8a'
+          mkdir -p "$RUNNER_TEMP/aib-v504-artifacts"
+          cp "$apk" "$RUNNER_TEMP/aib-v504-artifacts/AIBuilder-Expo-v504-debug-arm64.apk"
+          printf '%s\n' "$badging" > "$RUNNER_TEMP/aib-v504-artifacts/apk-badging.txt"
+          "$apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/aib-v504-artifacts/signature-verification.txt"
+          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' "$RUNNER_TEMP/aib-v504-artifacts/signature-verification.txt"
+          grep -Fq 'Signer #1 certificate DN:' "$RUNNER_TEMP/aib-v504-artifacts/signature-verification.txt"
+          cd "$RUNNER_TEMP/aib-v504-artifacts"
+          sha256sum AIBuilder-Expo-v504-debug-arm64.apk > SHA256SUMS.txt
+          {
+            echo 'build=debug/test'
+            echo 'applicationId=com.karat.aibuilder'
+            echo 'versionName=1.10.104'
+            echo 'versionCode=504'
+            echo 'abi=arm64-v8a'
+            echo "sourceArchiveSha256=$AIB_SOURCE_SHA256"
+            echo "sourceCommit=$GITHUB_SHA"
+            echo 'gradleTask=:app:assembleDebug'
+            echo 'apkCrc=verified'
+            echo 'apkSignature=v2-verified'
+            echo 'androidDeviceTest=not-performed'
+          } > build-metadata.txt
+          {
+            echo '## AI Builder v504 ARM64 debug/test build'
+            echo
+            echo '- Build: `:app:assembleDebug`'
+            echo '- Application ID: `com.karat.aibuilder`'
+            echo '- Version: `1.10.104` (code `504`)'
+            echo '- Packaged native ABI: `arm64-v8a` only'
+            echo '- APK CRC (`unzip -t`) and v2 debug/test signature: verified'
+            echo '- Android device installation/runtime test: not performed'
+            echo '- APK SHA-256:'
+            echo '```text'
+            cat SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'AIB_V504_APK_VERIFICATION_OK'
+      - name: Upload verified debug/test APK and metadata (one-day retention)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: aibuilder-v504-debug-arm64-test-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v504-artifacts/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove decrypted source and temporary runner files
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          rm -rf "$RUNNER_TEMP/aib-v504-src" "$RUNNER_TEMP/aib-v504-artifacts"
+          rm -f "$RUNNER_TEMP/AIBuilder-Expo-v504-source.tar.gz" "$RUNNER_TEMP/aib-v504-source.tar.gz.enc"
+          rm -rf "$GITHUB_WORKSPACE/.ci/aib-v504-one-time"
+          rm -f "$GITHUB_WORKSPACE/.github/workflows/aibuilder-v504-once.yml"
+          echo 'AIB_V504_RUNNER_CLEANUP_COMPLETE'
