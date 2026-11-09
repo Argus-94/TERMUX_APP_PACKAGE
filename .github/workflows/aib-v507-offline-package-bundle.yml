@@ -65,14 +65,19 @@ jobs:
           ./scripts/test-aib-v507-offline-apt.sh \
             "$RUNNER_TEMP/aib-v507-unsigned-output/feed" \
             "$RUNNER_TEMP/aib-v507-unsigned-output/bootstrap-status"
+      - name: Pack unsigned feed into a single path-safe transfer archive
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          archive="$RUNNER_TEMP/aibuilder-v507-unsigned-karat-feed.tar.gz"
+          tar -C "$RUNNER_TEMP/aib-v507-unsigned-output" -cf - feed manifest.json | gzip -n -1 > "$archive"
+          test -s "$archive"
       - name: Upload only unsigned feed and manifest (one-day retention)
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: aibuilder-v507-unsigned-karat-feed
-          path: |
-            ${{ runner.temp }}/aib-v507-unsigned-output/feed/**
-            ${{ runner.temp }}/aib-v507-unsigned-output/manifest.json
+          path: ${{ runner.temp }}/aibuilder-v507-unsigned-karat-feed.tar.gz
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
@@ -83,4 +88,5 @@ jobs:
           set -Eeuo pipefail
           rm -rf -- \
             "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aibuilder-v507-unsigned-karat-feed.tar.gz" \
             "$RUNNER_TEMP/aib-v507-unsigned-output"
