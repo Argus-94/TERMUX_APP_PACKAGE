@@ -49,5 +49,11 @@ PY
 )
 ((${#NAMES[@]} > 0)) || fail 'EMPTY_PACKAGE_NAME_SET'
 apt-get -c "$TMP/apt.conf" -o Debug::NoLocking=1 --simulate --no-download --no-install-recommends --no-remove install "${NAMES[@]}" >"$TMP/simulate.log" 2>&1 || { tail -80 "$TMP/simulate.log" >&2; fail 'LOCAL_NO_DOWNLOAD_SIMULATION_FAILED'; }
-if grep -Eiq '(^|[[:space:]])(Remv|Remove)[[:space:]]' "$TMP/simulate.log"; then fail 'APT_PLANNED_REMOVAL'; fi
+if grep -Eiq '(^|[[:space:]])(Remv|Remove)[[:space:]]' "$TMP/simulate.log"; then
+  printf 'AIB_V507_APT_PLAN_REMOVALS_BEGIN\n' >&2
+  grep -Ein '(^|[[:space:]])(Remv|Remove)[[:space:]]' "$TMP/simulate.log" >&2 || true
+  printf 'AIB_V507_APT_PLAN_TAIL_BEGIN\n' >&2
+  tail -80 "$TMP/simulate.log" >&2
+  fail 'APT_PLANNED_REMOVAL'
+fi
 printf 'AIB_V507_LOCAL_APT_UPDATE_AND_SIMULATION_OK names=%s download=NO install=NO remove=NO recommends=NO network_sources=NONE arch=aarch64 manifest_hashes=verified\n' "${#NAMES[@]}"
