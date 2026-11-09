@@ -48,10 +48,15 @@ for n in sorted({b.splitlines()[0].partition(':')[2].strip() for b in text.split
 PY
 )
 ((${#NAMES[@]} > 0)) || fail 'EMPTY_PACKAGE_NAME_SET'
+REMOVE_PATTERN='(^[[:space:]]*(Remv|Remove)[[:space:]]|^[[:space:]]*[0-9]+(:[0-9]+)? upgraded, [0-9]+ newly installed, [1-9][0-9]* to remove([[:space:]]|$)|^[[:space:]]*The following packages will be REMOVED:)'
+# Regression fixtures: APT's harmless "0 to remove" summary must not look like an action.
+if printf '%s\n' '36:25 upgraded, 106 newly installed, 0 to remove and 0 not upgraded.' | grep -Eiq "$REMOVE_PATTERN"; then fail 'REMOVAL_PARSER_FALSE_POSITIVE'; fi
+printf '%s\n' 'Remv old-package [1.0] [2.0]' | grep -Eiq "$REMOVE_PATTERN" || fail 'REMOVAL_PARSER_MISSED_ACTION'
+printf '%s\n' '1 upgraded, 0 newly installed, 1 to remove and 0 not upgraded.' | grep -Eiq "$REMOVE_PATTERN" || fail 'REMOVAL_PARSER_MISSED_NONZERO_SUMMARY'
 apt-get -c "$TMP/apt.conf" -o Debug::NoLocking=1 --simulate --no-download --no-install-recommends --no-remove install "${NAMES[@]}" >"$TMP/simulate.log" 2>&1 || { tail -80 "$TMP/simulate.log" >&2; fail 'LOCAL_NO_DOWNLOAD_SIMULATION_FAILED'; }
-if grep -Eiq '(^|[[:space:]])(Remv|Remove)[[:space:]]' "$TMP/simulate.log"; then
+if grep -Eiq "$REMOVE_PATTERN" "$TMP/simulate.log"; then
   printf 'AIB_V507_APT_PLAN_REMOVALS_BEGIN\n' >&2
-  grep -Ein '(^|[[:space:]])(Remv|Remove)[[:space:]]' "$TMP/simulate.log" >&2 || true
+  grep -Ein "$REMOVE_PATTERN" "$TMP/simulate.log" >&2 || true
   printf 'AIB_V507_APT_PLAN_TAIL_BEGIN\n' >&2
   tail -80 "$TMP/simulate.log" >&2
   fail 'APT_PLANNED_REMOVAL'
