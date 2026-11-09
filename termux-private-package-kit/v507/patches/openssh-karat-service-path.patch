@@ -1,0 +1,5 @@
+--- a/packages/openssh/sv/ssh-agent.run.in
++++ b/packages/openssh/sv/ssh-agent.run.in
+@@ -12 +12 @@
+-	#   unix_listener: cannot bind to path /data/data/com.termux/files/usr/var/run/ssh-agent.socket: Address already in use
++	#   unix_listener: cannot bind to path @TERMUX_PREFIX@/var/run/ssh-agent.socket: Address already in use

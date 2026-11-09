@@ -1,0 +1,86 @@
+name: Build AI Builder v507 unsigned Karat package feed
+on:
+  push:
+    branches:
+      - work/aib-v507-offline-package-release
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aib-v507-unsigned-package-feed-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-and-gate-unsigned-feed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+      TERMUX_SOURCE_URL: https://github.com/termux/termux-packages.git
+      TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+    steps:
+      - name: Checkout reviewed package source without persisted credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Run v507 static tests and shell checks
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/prepare-aib-v507-offline-feed.sh scripts/test-aib-v507-offline-apt.sh
+          python3 -m py_compile scripts/validate-aib-v507-offline-bundle.py termux-private-package-kit/v507/tests/test_offline_bundle.py
+          python3 -m unittest discover -s termux-private-package-kit/v507/tests -p 'test_*.py' -v
+      - name: Fetch only the pinned official Termux package source commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init -q
+          git -C "$source_dir" remote add origin "$TERMUX_SOURCE_URL"
+          git -C "$source_dir" fetch --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+      - name: Pull exact digest-pinned Termux builder image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+      - name: Build and audit base plus six fresh pinned packages
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./scripts/prepare-aib-v507-offline-feed.sh \
+            "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aib-v507-unsigned-output"
+      - name: Isolated local-file APT update and no-download simulation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ./scripts/test-aib-v507-offline-apt.sh \
+            "$RUNNER_TEMP/aib-v507-unsigned-output/feed" \
+            "$RUNNER_TEMP/aib-v507-unsigned-output/bootstrap-status"
+      - name: Upload only unsigned feed and manifest (one-day retention)
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: aibuilder-v507-unsigned-karat-feed
+          path: |
+            ${{ runner.temp }}/aib-v507-unsigned-output/feed/**
+            ${{ runner.temp }}/aib-v507-unsigned-output/manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary source, packages and build workspace
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          rm -rf -- \
+            "$RUNNER_TEMP/termux-packages" \
+            "$RUNNER_TEMP/aib-v507-unsigned-output"
