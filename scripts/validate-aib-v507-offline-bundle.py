@@ -193,7 +193,7 @@ def package_manifest(feed: pathlib.Path) -> list[dict[str,Any]]:
         meta=check_deb(f,True); need((meta["Package"],meta["Version"],meta["Architecture"])==(r["Package"],r["Version"],r["Architecture"]),"INDEX_PACKAGE_METADATA_MISMATCH")
         for key in ("Depends","Pre-Depends"):
             need(" ".join(meta.get(key," ").split())==" ".join(r.get(key," ").split()),"INDEX_DEPENDENCY_METADATA_MISMATCH:"+r["Package"]+":"+key)
-        result.append({"name":r["Package"],"version":r["Version"],"architecture":r["Architecture"],"filename":rel.as_posix(),"sizeBytes":int(r["Size"]),"sha256":r["SHA256"],"depends":dependency_strings(meta)})
+        result.append({"name":r["Package"],"version":r["Version"],"architecture":r["Architecture"],"filename":"feed/"+rel.as_posix(),"sizeBytes":int(r["Size"]),"sha256":r["SHA256"],"depends":dependency_strings(meta)})
     return result
 def write_unsigned_release(feed: pathlib.Path) -> None:
     dist=feed/"dists/stable"; idx=dist/"main/binary-aarch64/Packages"; gz=idx.with_name("Packages.gz")

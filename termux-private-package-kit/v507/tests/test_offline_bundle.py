@@ -99,6 +99,7 @@ class OfflineFeedTests(unittest.TestCase):
         self.assertEqual(m["signatureAlgorithm"], "SHA256withRSA")
         self.assertEqual(m["signerCertificateSha256"], gate.CERT_SHA256)
         self.assertEqual(m["packages"][0]["depends"], ["Depends: libc (>= 1)", "Pre-Depends: ca-certificates"])
+        self.assertEqual(m["packages"][0]["filename"], "feed/pool/main/demo/demo_1_aarch64.deb")
         self.assertTrue(all(set(row) == {"name", "version", "architecture", "filename", "sizeBytes", "sha256", "depends"} for row in m["packages"]))
         dist = feed / "dists/stable"
         self.assertTrue((dist / "Release").is_file())
@@ -136,6 +137,14 @@ class OfflineFeedTests(unittest.TestCase):
         index.write_text(index.read_text().replace("Depends: libc (>= 1)", "Depends: other-lib"))
         with self.assertRaises(gate.GateError):
             gate.package_manifest(feed)
+
+    def test_arch_independent_package_uses_full_zip_member_filename(self):
+        feed = self.tmp / "feed"
+        deb = self.make_deb(name="data", arch="all")
+        self.make_index(feed, [deb])
+        package = gate.package_manifest(feed)[0]
+        self.assertEqual(package["architecture"], "all")
+        self.assertEqual(package["filename"], "feed/pool/main/data/data_1_all.deb")
 
     def test_manifest_cannot_claim_closure_before_gate_or_invalid_commit(self):
         with self.assertRaises(gate.GateError):
