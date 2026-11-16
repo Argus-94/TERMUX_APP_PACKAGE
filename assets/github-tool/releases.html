@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
+    <title>Релизы</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/releases.css">
+<link rel="stylesheet" href="css/builder-theme.css">
+</head>
+<body>
+<div id="page">
+    <div id="noRepo" class="connect hidden">
+        <div class="card">
+            <h2>Выберите репозиторий</h2>
+            <p id="noRepoTxt">Релизы создаются внутри репозитория. Откройте список репозиториев и выберите нужный.</p>
+            <button class="btn primary block" id="noRepoBtn">Открыть список репозиториев</button>
+        </div>
+    </div>
+
+    <div id="main" class="hidden">
+        <div class="head">
+            <div style="flex:1;min-width:0">
+                <h1>Релизы</h1>
+                <div class="sub" id="repoLine"></div>
+            </div>
+            <button class="ibtn" id="btnSwitch" aria-label="Сменить репозиторий" title="Сменить репозиторий"></button>
+            <button class="ibtn" id="btnRefresh" aria-label="Обновить" title="Обновить"></button>
+        </div>
+        <div class="search"><span id="searchIco"></span><input type="text" id="q" placeholder="Поиск по тегу и названию" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+        <div class="chips" id="filters"></div>
+        <div id="list"></div>
+    </div>
+</div>
+<button class="fab hidden" id="fab"></button>
+
+<!-- Создание / редактирование релиза -->
+<div id="composer" class="cmp hidden">
+    <div class="cmp-head">
+        <button class="ibtn" id="cmpClose" aria-label="Закрыть"></button>
+        <h2 id="cmpTitle">Новый релиз</h2>
+    </div>
+    <div class="cmp-body">
+        <div class="fld">
+            <label for="cTag">Тег (версия)</label>
+            <input type="text" id="cTag" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="v1.0.0">
+            <div class="hint">Например v1.0.0. Если такого тега ещё нет — он будет создан.</div>
+        </div>
+        <div class="fld">
+            <label for="cName">Название (необязательно)</label>
+            <input type="text" id="cName" autocomplete="off" placeholder="По умолчанию — тег">
+        </div>
+        <div class="fld">
+            <label for="cBody">Описание</label>
+            <textarea id="cBody" placeholder="Что нового в этой версии…"></textarea>
+        </div>
+        <div class="fld chk" id="cAutoBox">
+            <input type="checkbox" id="cAuto">
+            <div>
+                <label for="cAuto">Заполнить описание автоматически</label>
+                <div class="hint">GitHub соберёт список изменений из коммитов и pull request'ов (работает, если поле описания пустое).</div>
+            </div>
+        </div>
+        <div class="fld" id="cTargetBox">
+            <label for="cTarget">Ветка для нового тега</label>
+            <select id="cTarget"></select>
+        </div>
+        <div id="cFilesBox">
+            <div class="section">Файлы релиза</div>
+            <div id="cFiles"></div>
+            <button class="btn block" id="cPick"></button>
+            <div class="hint" style="margin:6px 4px 12px">Подойдёт любой формат: APK, ZIP, PDF, изображения и т. д. До 2 ГБ на файл. Файлы загружаются прямо с телефона.</div>
+        </div>
+        <div class="fld chk">
+            <input type="checkbox" id="cPre">
+            <div>
+                <label for="cPre">Пре-релиз</label>
+                <div class="hint">Пометить как нестабильную версию (бета, тестовая сборка).</div>
+            </div>
+        </div>
+        <div class="fld chk">
+            <input type="checkbox" id="cDraft">
+            <div>
+                <label for="cDraft">Черновик</label>
+                <div class="hint">Не публиковать сейчас — увидите только вы. Опубликовать можно позже.</div>
+            </div>
+        </div>
+    </div>
+    <div class="cmp-foot">
+        <button class="btn ghost" id="cCancel">Отмена</button>
+        <button class="btn primary" id="cSubmit">Опубликовать</button>
+    </div>
+</div>
+
+<!-- Прогресс загрузки файлов -->
+<input id="ugFileInput" type="file" multiple class="hidden" style="display:none">
+<div id="upl" class="hidden">
+    <div class="ucard">
+        <h3 id="uplTitle">Загрузка файлов</h3>
+        <div id="uplList"></div>
+        <div class="mbtns">
+            <button class="mb danger" id="uplCancel">Отменить</button>
+            <button class="mb primary hidden" id="uplClose">Готово</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalWrap" class="hidden"></div>
+<div id="sheetWrap" class="hidden"></div>
+<div id="busy" class="hidden"><div class="bx"><div class="spin"></div><span id="busyTxt">Подождите…</span></div></div>
+<div id="toast" class="hidden"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/common.js"></script>
+<script src="js/releases.js"></script>
+</body>
+</html>

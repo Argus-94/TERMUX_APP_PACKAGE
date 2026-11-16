@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
+    <title>Файлы</title>
+    <link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/files.css">
+<link rel="stylesheet" href="css/builder-theme.css">
+</head>
+<body>
+<div id="app">
+    <div id="topbar">
+        <button id="repoLabel" title="К списку репозиториев">Репозиторий</button>
+        <select id="branchSel" aria-label="Ветка"></select>
+        <button class="tb-btn" id="btnSearch" title="Поиск" aria-label="Поиск" data-i="search"></button>
+        <button class="tb-btn" id="btnRefresh" title="Обновить" aria-label="Обновить" data-i="refresh"></button>
+        <button class="tb-btn" id="btnSettings" title="Репозиторий и токен" aria-label="Настройки" data-i="settings"></button>
+    </div>
+
+    <div id="panes">
+        <section class="pane active" id="pane0">
+            <div class="crumbs" id="crumbs0"></div>
+            <div class="plist" id="plist0"></div>
+        </section>
+        <section class="pane" id="pane1">
+            <div class="crumbs" id="crumbs1"></div>
+            <div class="plist" id="plist1"></div>
+        </section>
+    </div>
+
+    <div id="status"></div>
+    <div id="bottombar">
+        <button class="bb" id="bbUpload"><span data-i="upload"></span><span>Загрузить</span></button>
+        <button class="bb" id="bbDownload"><span data-i="download"></span><span>Скачать</span></button>
+        <button class="bb" id="bbNew"><span data-i="add"></span><span>Создать</span></button>
+        <button class="bb" id="bbCopy"><span data-i="copy"></span><span>Копия</span></button>
+        <button class="bb" id="bbMove"><span data-i="move"></span><span>Перенос</span></button>
+        <button class="bb danger" id="bbDelete"><span data-i="del"></span><span>Удалить</span></button>
+        <button class="bb" id="bbMore"><span data-i="more"></span><span>Ещё</span></button>
+    </div>
+</div>
+<input type="file" id="upInput" multiple class="hidden">
+
+<!-- Редактор -->
+<div id="editor" class="overlay hidden">
+    <div class="ov-top">
+        <button class="tb-btn" data-i="back" id="edBack" aria-label="Назад"></button>
+        <div class="ttl"><div class="t1"><span id="edName"></span><span id="edDirty" class="hidden">●</span></div><div class="t2" id="edPath"></div></div>
+        <button class="tb-btn" data-i="undo" id="edUndo" aria-label="Отменить"></button>
+        <button class="tb-btn" data-i="redo" id="edRedo" aria-label="Повторить"></button>
+        <button class="tb-btn" data-i="search" id="edFind" aria-label="Поиск в файле"></button>
+        <button class="btn-save" id="edSave">Сохранить</button>
+        <button class="tb-btn" data-i="morevert" id="edMore" aria-label="Меню"></button>
+    </div>
+    <div id="findBar" class="hidden">
+        <div class="frow">
+            <input type="text" id="fInput" placeholder="Найти" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <span id="fCount">0/0</span>
+            <button class="fbtn" id="fPrev" aria-label="Предыдущее">▲</button>
+            <button class="fbtn" id="fNext" aria-label="Следующее">▼</button>
+            <button class="fbtn" id="fClose" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="frow">
+            <input type="text" id="rInput" placeholder="Заменить на" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <button class="fbtn" id="fCase" title="Учитывать регистр">Aa</button>
+            <button class="fbtn" id="fRegex" title="Регулярное выражение">.*</button>
+            <button class="fbtn" id="fRep">Замен.</button>
+            <button class="fbtn" id="fRepAll">Все</button>
+        </div>
+    </div>
+    <div id="edBody">
+        <div id="gutter"><pre id="gutterInner"></pre></div>
+        <div id="edStack">
+            <pre class="code layer" id="layerMarks"></pre>
+            <pre class="code layer" id="layerHl"></pre>
+            <textarea id="edTa" wrap="off" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        </div>
+        <div id="edMedia" class="hidden"></div>
+    </div>
+    <div id="keysRow">
+        <button data-k="tab">Tab</button>
+        <button data-k="outdent">⇤</button>
+        <button data-ins="{">{</button><button data-ins="}">}</button>
+        <button data-ins="(">(</button><button data-ins=")">)</button>
+        <button data-ins="[">[</button><button data-ins="]">]</button>
+        <button data-ins="<">&lt;</button><button data-ins=">">&gt;</button>
+        <button data-ins="&quot;">"</button><button data-ins="'">'</button>
+        <button data-ins=";">;</button><button data-ins=":">:</button>
+        <button data-ins="=">=</button><button data-ins="/">/</button>
+        <button data-ins="\">\</button><button data-ins="|">|</button>
+        <button data-ins="&amp;">&amp;</button><button data-ins="!">!</button>
+        <button data-ins="#">#</button><button data-ins="$">$</button>
+        <button data-ins="_">_</button><button data-ins="-">-</button>
+        <button data-ins="+">+</button><button data-ins="*">*</button>
+    </div>
+    <div id="edStatus"></div>
+</div>
+
+<!-- Поиск по репозиторию -->
+<div id="search" class="overlay hidden">
+    <div class="ov-top">
+        <button class="tb-btn" data-i="back" id="sBack" aria-label="Назад"></button>
+        <input type="text" id="sInput" placeholder="Поиск по репозиторию" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button class="tb-btn" data-i="search" id="sGo" aria-label="Искать"></button>
+    </div>
+    <div class="chips">
+        <button class="chip on" id="sModeName">По имени</button>
+        <button class="chip" id="sModeText">Внутри файлов</button>
+        <button class="chip on" id="sScopeAll">Весь репозиторий</button>
+        <button class="chip" id="sScopeDir">Текущая папка</button>
+    </div>
+    <div id="sBar"><div></div></div>
+    <div id="sInfo">Введите запрос</div>
+    <div id="sList"></div>
+</div>
+
+<!-- Подключение -->
+<div id="setup" class="hidden">
+    <div class="scard">
+        <h2>Файлы репозитория</h2>
+        <p>Укажите репозиторий и токен — те же, что и на главном экране (значения общие).</p>
+        <label for="suUser">Имя пользователя GitHub</label>
+        <input type="text" id="suUser" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="octocat">
+        <label for="suRepo">Репозиторий</label>
+        <input type="text" id="suRepo" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="myrepo или myrepo/folder">
+        <label for="suToken">Токен (repo / Contents: Read and Write)</label>
+        <input type="password" id="suToken" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… или github_pat_…">
+        <div id="setupHist"></div>
+        <div class="err hidden" id="setupErr"></div>
+        <button class="mb primary" id="suOk">Подключиться</button>
+        <button class="mb ghost" id="suRepos">Выбрать из списка репозиториев</button>
+        <button class="mb ghost" id="suCancel">Отмена</button>
+    </div>
+</div>
+
+<div id="modalWrap" class="hidden"></div>
+<div id="sheetWrap" class="hidden"></div>
+<div id="busy" class="hidden"><div class="bx"><div class="spin"></div><span id="busyTxt">Подождите…</span></div></div>
+<div id="toast" class="hidden"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/common.js"></script>
+<script src="js/jszip.min.js"></script>
+<script src="js/highlight.js"></script>
+<script src="js/files.js"></script>
+</body>
+</html>

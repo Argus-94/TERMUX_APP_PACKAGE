@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const recovery = fs.readFileSync(path.join(root, 'lib/fleet-audit-recovery.ts'), 'utf8');
+const policy = fs.readFileSync(path.join(root, 'lib/fleet-policy-manager.ts'), 'utf8');
+const hook = fs.readFileSync(path.join(root, 'hooks/useLLM.ts'), 'utf8');
+const ui = fs.readFileSync(path.join(root, 'app/runtime.tsx'), 'utf8');
+for (const token of ['verifyFleetAuditChain','listSecureFleetAudit','createFleetRecoverySnapshot','restoreFleetRecoverySnapshot','exportFleetAuditBundle','fleet-audit-chain.jsonl','RECOVERY_SNAPSHOT_TAMPERED','SNAPSHOT_FILE_HASH_MISMATCH']) if (!recovery.includes(token)) throw new Error(`RECOVERY_TOKEN_MISSING_${token}`);
+for (const token of ['prevHash','sha256sum','fleet-audit-chain.jsonl']) if (!policy.includes(token)) throw new Error(`CHAIN_TOKEN_MISSING_${token}`);
+for (const token of ['runAIVerifyFleetAudit','runAISecureFleetAudit','runAICreateFleetSnapshot','runAIRestoreFleetSnapshot','runAIExportFleetAuditBundle']) if (!hook.includes(token)) throw new Error(`HOOK_TOKEN_MISSING_${token}`);
+const runtimeI18n = fs.readFileSync(path.join(root, 'lib/runtime-i18n.ts'), 'utf8');
+for (const token of ['secureAudit','exportAudit','createSnapshot','restoreSnapshot']) if (!runtimeI18n.includes(`${token}:`) || !ui.includes(`rt("${token}")`)) throw new Error(`UI_TOKEN_MISSING_${token}`);
+console.log('AIB_PHASE18_FLEET_AUDIT_RECOVERY_SELFTEST_OK');

@@ -1,0 +1,15 @@
+import type { InterceptorRule } from "./types";
+
+export type InterceptorPresetId = "premium" | "success" | "error500" | "slowApi" | "blockAnalytics";
+export const INTERCEPTOR_PRESETS: readonly Readonly<{ id: InterceptorPresetId; nameRu: string; nameEn: string; descriptionRu: string; descriptionEn: string; rule: Omit<InterceptorRule, "id" | "createdAt" | "updatedAt"> }>[] = Object.freeze([
+  { id: "premium", nameRu: "Эмулировать премиум", nameEn: "Emulate premium", descriptionRu: "В JSON-ответах с premium=false заменяет значение на true.", descriptionEn: "Changes premium=false to true in matching JSON responses.", rule: { name: "Эмулировать premium", enabled: true, priority: 50, conditions: [{ type: "urlContains", value: "/api/user" }], actions: [{ type: "modifyBody", find: "", replace: "true", jsonPath: "$.premium" }], source: "preset" } },
+  { id: "success", nameRu: "Успешный ответ", nameEn: "Successful response", descriptionRu: "Возвращает тестовый JSON 200 для указанного URL.", descriptionEn: "Returns a test JSON 200 response for a matching URL.", rule: { name: "Успешный ответ", enabled: true, priority: 40, conditions: [{ type: "urlContains", value: "/api/" }], actions: [{ type: "mockResponse", status: 200, headers: { "content-type": "application/json" }, body: "{\"ok\":true,\"mocked\":true}" }], source: "preset" } },
+  { id: "error500", nameRu: "Эмулировать ошибку 500", nameEn: "Emulate 500 error", descriptionRu: "Полезно для проверки обработки ошибок.", descriptionEn: "Useful for testing error handling.", rule: { name: "Эмулировать ошибку 500", enabled: true, priority: 40, conditions: [{ type: "urlContains", value: "/api/" }], actions: [{ type: "mockResponse", status: 500, headers: { "content-type": "application/json" }, body: "{\"error\":\"simulated\"}" }], source: "preset" } },
+  { id: "slowApi", nameRu: "Замедлить API", nameEn: "Slow down API", descriptionRu: "Добавляет задержку до 1 секунды.", descriptionEn: "Adds a delay of up to one second.", rule: { name: "Замедлить API", enabled: true, priority: 10, conditions: [{ type: "urlContains", value: "/api/" }], actions: [{ type: "delay", ms: 1000 }], source: "preset" } },
+  { id: "blockAnalytics", nameRu: "Блокировать аналитику", nameEn: "Block analytics", descriptionRu: "Блокирует запросы Google Analytics.", descriptionEn: "Blocks Google Analytics requests.", rule: { name: "Блокировать аналитику", enabled: true, priority: 100, conditions: [{ type: "urlContains", value: "google-analytics" }], actions: [{ type: "block" }], source: "preset" } },
+]);
+export function createPreset(id: InterceptorPresetId, now = Date.now()): InterceptorRule {
+  const preset = INTERCEPTOR_PRESETS.find((item) => item.id === id); if (!preset) throw new Error("INTERCEPTOR_PRESET_NOT_FOUND");
+  return { ...preset.rule, id: `rule-${id}-${now.toString(36)}`, createdAt: now, updatedAt: now };
+}
+export function createRuleId(now = Date.now()): string { return `rule-user-${now.toString(36)}-${Math.random().toString(36).slice(2, 7)}`; }

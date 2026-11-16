@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <!-- Adaptive foreground - simplified for small sizes -->
+
+  <!-- Terminal window -->
+  <rect x="14" y="12" width="80" height="62" rx="10" fill="#1A237E"/>
+  
+  <!-- Title bar -->
+  <rect x="14" y="12" width="80" height="14" rx="10" fill="#283593"/>
+  <rect x="14" y="19" width="80" height="7" fill="#283593"/>
+
+  <!-- Dots -->
+  <circle cx="22" cy="19" r="3" fill="#EF5350"/>
+  <circle cx="30" cy="19" r="3" fill="#FFCA28"/>
+  <circle cx="38" cy="19" r="3" fill="#66BB6A"/>
+
+  <!-- Code lines -->
+  <g fill="#4FC3F7">
+    <rect x="22" y="34" width="28" height="3.5" rx="1.5"/>
+    <rect x="22" y="42" width="42" height="3.5" rx="1.5"/>
+    <rect x="22" y="50" width="22" height="3.5" rx="1.5"/>
+    <rect x="22" y="58" width="35" height="3.5" rx="1.5"/>
+  </g>
+
+  <!-- AI circle -->
+  <circle cx="72" cy="52" r="16" fill="none" stroke="#00E5FF" stroke-width="2.5"/>
+  <circle cx="72" cy="52" r="5" fill="#00E5FF"/>
+  <circle cx="66" cy="46" r="2.5" fill="#00E5FF"/>
+  <circle cx="78" cy="46" r="2.5" fill="#00E5FF"/>
+  <circle cx="66" cy="58" r="2.5" fill="#00E5FF"/>
+  <circle cx="78" cy="58" r="2.5" fill="#00E5FF"/>
+
+  <!-- Lock -->
+  <rect x="28" y="82" width="14" height="12" rx="2.5" fill="#FFFFFF"/>
+  <path d="M31 82 V77 A4 4 0 0 1 39 77 V82" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Small shield -->
+  <path d="M52 78 C58 78 62 81 63 86 C64 91 61 95 56 98 C54 99 53 100 52 100
+           C51 100 50 99 48 98 C43 95 40 91 41 86 C42 81 46 78 52 78 Z" fill="#FFFFFF"/>
+  <path d="M48 88 L51 92 L57 84" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round"/>
+</svg>

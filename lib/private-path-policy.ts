@@ -1,0 +1,11 @@
+/** Shared storage is for user projects/artifacts; this shell root is app-private. */
+export const PRIVATE_BUILD_PATHS_INIT_SH = [
+  'AIB_ROOT="${AIB_SHARED_ROOT:-/storage/emulated/0/AIBuilderTermux}"',
+  'AIB_PRIVATE_ROOT="${AIB_PRIVATE_ROOT:-$HOME/.aibuilder}"',
+  'AIB_WORK="$AIB_PRIVATE_ROOT/work"; AIB_CACHE="$AIB_PRIVATE_ROOT/cache"; AIB_TMP="$AIB_PRIVATE_ROOT/tmp"; AIB_KEYS="$AIB_PRIVATE_ROOT/keys"; AIB_GRADLE="$HOME/.aibuilder-gradle"',
+  'mkdir -p "$AIB_PRIVATE_ROOT" "$AIB_WORK" "$AIB_CACHE" "$AIB_TMP" "$AIB_KEYS" "$AIB_GRADLE"',
+  'chmod 700 "$AIB_PRIVATE_ROOT" "$AIB_KEYS" 2>/dev/null || { echo PRIVATE_BUILD_ROOT_UNAVAILABLE >&2; exit 40; }',
+  'LEGACY_AIB_WORK="$AIB_ROOT/.aibuilder/work"; for MARKER in build_path proj_path src_path project_root project_kind expo_flag; do LEGACY_MARKER="$LEGACY_AIB_WORK/$MARKER"; PRIVATE_MARKER="$AIB_WORK/$MARKER"; MARKER_STAGE="$AIB_WORK/.$MARKER.migrate.$$"; if [ ! -e "$PRIVATE_MARKER" ] && [ -f "$LEGACY_MARKER" ]; then if cp -p -- "$LEGACY_MARKER" "$MARKER_STAGE" 2>/dev/null && cmp -s -- "$LEGACY_MARKER" "$MARKER_STAGE"; then ln "$MARKER_STAGE" "$PRIVATE_MARKER" 2>/dev/null || true; fi; rm -f -- "$MARKER_STAGE" 2>/dev/null || true; fi; done',
+  'LEGACY_WRAPPER="$AIB_ROOT/.aibuilder/cache/gradle-wrapper.jar"; PRIVATE_WRAPPER="$AIB_CACHE/gradle-wrapper.jar"; if [ ! -s "$PRIVATE_WRAPPER" ] && [ -s "$LEGACY_WRAPPER" ]; then WRAPPER_STAGE="$AIB_CACHE/.gradle-wrapper.migrate.$$"; if cp -- "$LEGACY_WRAPPER" "$WRAPPER_STAGE" 2>/dev/null && cmp -s -- "$LEGACY_WRAPPER" "$WRAPPER_STAGE"; then ln "$WRAPPER_STAGE" "$PRIVATE_WRAPPER" 2>/dev/null || true; fi; rm -f -- "$WRAPPER_STAGE" 2>/dev/null || true; fi',
+  'if [ ! -s "$AIB_KEYS/aib-debug.keystore" ]; then for LEGACY_KEY in "$AIB_ROOT/.aibuilder/keys/aib-debug.keystore" "$AIB_ROOT/.aibuilder/work/aib-debug.keystore" "$HOME/aibuilder_work/aib-debug.keystore"; do if [ -s "$LEGACY_KEY" ]; then KEY_STAGE="$AIB_KEYS/.aib-debug.keystore.migrate.$$"; if cp -p -- "$LEGACY_KEY" "$KEY_STAGE" 2>/dev/null && chmod 600 "$KEY_STAGE" && cmp -s -- "$LEGACY_KEY" "$KEY_STAGE"; then ln "$KEY_STAGE" "$AIB_KEYS/aib-debug.keystore" 2>/dev/null || true; fi; rm -f -- "$KEY_STAGE" 2>/dev/null || true; [ -s "$AIB_KEYS/aib-debug.keystore" ] && break; fi; done; fi',
+].join("; ");

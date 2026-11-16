@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const src = readFileSync(path.join(root, 'core/workspace/AIProjectGenerator.ts'), 'utf8');
+assert.match(src, /export class AIProjectGenerator/);
+assert.match(src, /PROJECT_FILE_PATH_INVALID/);
+assert.match(src, /MAX_FILES/);
+assert.match(src, /MAX_TOTAL_BYTES/);
+assert.match(src, /templateFiles/);
+assert.match(src, /WorkspaceBuildResult/);
+assert.ok(existsSync(path.join(root, 'core/workspace/AIWorkspaceBuilder.ts')));
+const facade = readFileSync(path.join(root, 'core/RuntimeFacade.ts'), 'utf8');
+assert.match(facade, /generateAIProject/);
+assert.match(facade, /createAIProjectGenerator/);
+console.log('AIB_PHASE29_PROJECT_GENERATOR_SELFTEST_OK');

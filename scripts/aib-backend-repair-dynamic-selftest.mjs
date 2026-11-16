@@ -1,0 +1,10 @@
+import fs from "node:fs";
+const repair = fs.readFileSync("lib/repair-script-runner.ts", "utf8");
+const engine = fs.readFileSync("lib/agent-engine.ts", "utf8");
+const agent = fs.readFileSync("lib/termux-agent.ts", "utf8");
+if (!repair.includes('hostTermux: id === "proot-distro-pkg"')) throw new Error("host-only proot repair is not forced to Termux host");
+if (!engine.includes('$PROJECT_ROOT/file.java')) throw new Error("agent fs example still assumes fixed project root");
+if (!engine.includes('cd $PROJECT_ROOT && bash gradlew')) throw new Error("agent build example still assumes fixed project root");
+if (agent.includes('ls -la /storage/emulated/0/AIBuilderTermux')) throw new Error("agent prompt still contains fixed project listing example");
+if (agent.includes('TERMUX_DONE:\\n/storage/emulated/0/AIBuilderTermux/...')) throw new Error("agent prompt still contains fixed APK result example");
+console.log("AIB_BACKEND_REPAIR_DYNAMIC_SELFTEST_OK host_repair=termux dynamic_examples=1");

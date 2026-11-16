@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+const pol = fs.readFileSync(path.join(root, "core/runtime/SupervisorPolicy.ts"), "utf8");
+assert.match(pol, /DEFAULT_SUPERVISOR_POLICY/);
+assert.match(pol, /RestartBudget/);
+assert.match(pol, /computeBackoffMs/);
+const sup = fs.readFileSync(path.join(root, "core/runtime/RuntimeSupervisor.ts"), "utf8");
+assert.match(sup, /RestartBudget/);
+assert.match(sup, /quarantined/);
+assert.match(sup, /clearQuarantine/);
+const fg = fs.readFileSync(path.join(root, "lib/foreground-task.ts"), "utf8");
+assert.match(fg, /notifyFg|notifyLongTask/);
+const notif = fs.readFileSync(path.join(root, "lib/app-notifications.ts"), "utf8");
+assert.match(notif, /notifyLongTask/);
+assert.match(notif, /clearTaskSticky/);
+console.log("AIB_SUPERVISOR_POLICY_SELFTEST_OK");

@@ -1,0 +1,25 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const native = readFileSync(new URL("../plugins/withTermuxBridge.js", import.meta.url), "utf8");
+const ts = readFileSync(new URL("../lib/termux-bridge.ts", import.meta.url), "utf8");
+const start = native.indexOf("fun runEmbeddedCandidateFullTransaction(");
+const end = native.indexOf("/** Reports whether the app-private bootstrap", start);
+assert(start >= 0 && end > start, "candidate native function found");
+const candidate = native.slice(start, end);
+assert.match(candidate, /packages\.size\(\) > 82/);
+assert.match(candidate, /action !in setOf\("verify", "check", "install", "reinstall", "remove"\)/);
+assert.doesNotMatch(candidate, /AIB_FULL_CANDIDATE_BOOTSTRAP_INCOMPATIBLE/);
+assert.match(candidate, /packages\.getType\(it\) == com\.facebook\.react\.bridge\.ReadableType\.String/);
+assert.match(candidate, /names\.size == names\.toSet\(\)\.size/);
+assert.match(candidate, /names\.all \{ it\.matches\(Regex\("\^\[a-z0-9\]/);
+assert.match(candidate, /names\.all \{[^\n]*allowed\.contains\(it\)/);
+assert.match(candidate, /"verify", "check" -> require\(names\.isEmpty\(\)\)/);
+assert.match(candidate, /"install", "reinstall" -> require\(names\.size == allowed\.size && names\.toSet\(\) == allowed\)/);
+assert.match(candidate, /"remove" -> require\(names\.isNotEmpty\(\) && names\.size < allowed\.size\)/);
+assert.match(candidate, /reserveAibEmbeddedRequest\(requestId\)[\s\S]*?AibCandidateFullFeed\.stage\([\s\S]*?runEmbeddedTermuxCommandInternal\(command, null, 900000\.0, requestId, promise, 900000L, true\)/);
+assert.match(native, /fun runEmbeddedTermuxCommand\([^\n]+\) \{\s*if \(isPrivatePackageMutationCommand\(command\)\) \{\s*promise\.reject\(\s*"AIB_PRIVATE_PACKAGE_FEED_NOT_QUALIFIED",\s*"Package mutations require the independently qualified signed AI Builder feed",\s*null\s*\)\s*return\s*\}\s*runEmbeddedTermuxCommandInternal\(command, workdir, timeoutMs, requestId, promise, 120000L\)/);
+assert.match(native, /coerceIn\(1000L, hardTimeoutCapMs\)/);
+assert.match(ts, /packages\.length > 82/);
+assert.match(ts, /runWithEmbeddedAbort\(signal/);
+console.log("candidate native boundary: PASS (static source assertions; Android execution not run)");

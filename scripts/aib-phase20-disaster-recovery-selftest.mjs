@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(new URL('..', import.meta.url).pathname);
+const moduleText = fs.readFileSync(path.join(root,'lib','fleet-disaster-recovery-drill.ts'),'utf8');
+const hook = fs.readFileSync(path.join(root,'hooks','useLLM.ts'),'utf8');
+const ui = fs.readFileSync(path.join(root,'app','runtime.tsx'),'utf8');
+for (const token of ['runFleetRecoveryDrill','backup_integrity','snapshot_manifest','snapshot_files','DRILL-RESULT.json']) if (!moduleText.includes(token)) throw new Error(`MODULE_TOKEN_MISSING_${token}`);
+if (!hook.includes('runAIFleetRecoveryDrill')) throw new Error('HOOK_TOKEN_MISSING');
+const runtimeI18n = fs.readFileSync(path.join(root,'lib/runtime-i18n.ts'),'utf8');
+if (!ui.includes('rt("disasterRecovery")') || !runtimeI18n.includes('disasterRecovery:')) throw new Error('UI_TOKEN_MISSING');
+console.log('AIB_PHASE20_DISASTER_RECOVERY_SELFTEST_OK');

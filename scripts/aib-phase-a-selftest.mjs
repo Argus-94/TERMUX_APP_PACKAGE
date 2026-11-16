@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+const probes = fs.readFileSync(path.join(root, "core/diagnostics/LiveProbes.ts"), "utf8");
+assert.match(probes, /probeTermuxSession/);
+assert.match(probes, /probeDiskFree/);
+const rules = fs.readFileSync(path.join(root, "core/diagnostics/rules/BuiltinRules.ts"), "utf8");
+assert.match(rules, /createTermuxSessionRule/);
+assert.match(rules, /runtime\.termux-session/);
+assert.match(rules, /createDiskFreeRule/);
+const facade = fs.readFileSync(path.join(root, "core/RuntimeFacade.ts"), "utf8");
+assert.match(facade, /createTermuxSessionRule/);
+assert.match(facade, /createDiskFreeRule/);
+const fg = fs.readFileSync(path.join(root, "lib/foreground-task.ts"), "utf8");
+assert.match(fg, /bootstrap/);
+const distro = fs.readFileSync(path.join(root, "lib/ubuntu-distro.ts"), "utf8");
+assert.match(distro, /withForegroundTask\("bootstrap"/);
+const ui = fs.readFileSync(path.join(root, "app/runtime.tsx"), "utf8");
+assert.match(ui, /listForegroundTasks/);
+assert.match(ui, /Фоновые задачи|Background tasks/);
+console.log("AIB_PHASE_A_SELFTEST_OK");

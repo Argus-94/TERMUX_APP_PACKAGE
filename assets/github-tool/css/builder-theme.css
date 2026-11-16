@@ -1,0 +1,104 @@
+/* AI Builder host: keep UnzipGit palette (no teal override) */
+:root {
+  --bg: #101418;
+  --card: #181C20;
+  --card2: #1F242A;
+  --card3: #262C33;
+  --border: #3A4148;
+  --divider: #2A3036;
+  --accent: #B8C5CE;
+  --on-accent: #FFFFFF;
+  --pc: #2F4F4F;
+  --on-pc: #FFFFFF;
+  --text: #E2E2E6;
+  --sec: #9AA3AC;
+  --danger: #FFB4AB;
+  --on-danger: #690005;
+  --success: #8FD69A;
+  --warn: var(--gold);
+  --surface: #181C20;
+  --surface2: #1F242A;
+  --bright: #F0F1F3;
+  --muted: #9AA3AC;
+  --accent-dim: rgba(159, 203, 255, 0.14);
+  --line: #3A4148;
+  color-scheme: dark;
+}
+html, body { background: var(--bg) !important; color: var(--text) !important; }
+/* Dialogs / sheets / modals */
+.modal, .sheet, .dialog, .confirm, .busy, #upl, #busy, .composer-inner {
+  background: var(--card) !important;
+  border-color: var(--divider) !important;
+  color: var(--text) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45) !important;
+  border-radius: 16px !important;
+}
+.modal .title, .sheet .title, .dialog h2, .confirm h3 { color: var(--bright) !important; }
+.btn.primary, button.primary, .fab {
+  background: #2F4F4F !important;
+  color: var(--on-accent) !important;
+  border-color: var(--accent) !important;
+}
+.btn.danger, button.danger { color: var(--danger) !important; }
+input, textarea, select {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(159, 203, 255, 0.18) !important;
+}
+.chip.on, .chip.active, .chip.selected { background: var(--pc) !important; color: var(--on-pc) !important; border-color: var(--pc) !important; }
+::-webkit-scrollbar-thumb { background: var(--border) !important; border-radius: 8px; }
+
+/* AIB_DSG_FORCE — solid buttons only DarkSlateGray, white label */
+.btn.primary, button.primary, .btn-primary, button.btn-primary,
+.fab, .fab.primary, a.fab,
+.chip.on, .chip.active, .chip.selected,
+.mb.primary, .btn-save, .fbtn.on,
+button.btn.primary {
+  background: #2F4F4F !important;
+  background-color: #2F4F4F !important;
+  color: #FFFFFF !important;
+  border-color: #2F4F4F !important;
+}
+.btn.primary span, .fab span, .chip.on, .chip.on span {
+  color: #FFFFFF !important;
+}
+.btn.primary:hover, .btn-primary:hover, .fab:hover {
+  background: #3D6363 !important;
+  background-color: #3D6363 !important;
+}
+
+
+/* Editor: never force opaque bg / colors that hide code */
+#edTa,
+textarea#edTa {
+  background: transparent !important;
+  color: #E6EDF3 !important;
+  -webkit-text-fill-color: #E6EDF3 !important;
+  caret-color: #58A6FF !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#layerHl { opacity: 0 !important; }
+
+/* AIB_DANGER_BTN_V414 — кнопка опасного действия в диалогах (например «Удалить»):
+   раньше `button.danger { color: var(--danger) !important }` красил текст в тот же цвет,
+   что и фон кнопки, и надпись становилась невидимой. */
+.mb.danger, button.mb.danger {
+  background: var(--danger) !important;
+  background-color: var(--danger) !important;
+  color: var(--on-danger) !important;
+  -webkit-text-fill-color: var(--on-danger) !important;
+  border-color: var(--danger) !important;
+}
+.mb.danger[disabled], button.mb.danger[disabled] { opacity: .5; }
+
+/* AIB_SAFE_BOTTOM_V414 — нижние панели/модальные окна не должны уходить под системные кнопки */
+#modalWrap { padding-bottom: calc(16px + var(--sab, 0px)) !important; }
+#upl { padding-bottom: calc(16px + var(--sab, 0px)) !important; }
+.cmp-foot { padding-bottom: calc(12px + var(--sab, 0px)) !important; }

@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import { createAgentTrajectory, appendAgentTrajectoryStep, finalizeAgentTrajectory, sanitizeAgentTrajectory, buildTrajectoryWriteCommand, AGENT_SESSION_ROOT } from "../lib/agent-trajectory.ts";
+const privateTask = "remember api-token=sk_test_secret-value in /storage/emulated/0/PrivateApp";
+const t = createAgentTrajectory({ task: privateTask, goalKind: "dir_mkdir", backend: "termux", projectPath: "/storage/emulated/0/PrivateApp" , startedAt: 100 });
+appendAgentTrajectoryStep(t, { kind: "shell", action: "playbook.dir_mkdir_shared", operationClass: "write-shared", resultMarker: "PLAYBOOK_OK", fingerprintKey: "fp-1234abcd", status: "pass", backend: "termux", exitCode: 0, durationMs: 12, path: "/storage/emulated/0/PrivateApp" });
+finalizeAgentTrajectory(t, "pass", 240, null);
+const safe = sanitizeAgentTrajectory(t);
+assert.ok(safe);
+const serialized = JSON.stringify(safe);
+for (const secret of [privateTask, "sk_test_secret-value", "/storage/emulated/0/PrivateApp"]) assert.equal(serialized.includes(secret), false);
+assert.equal(safe.outcome, "pass");
+assert.equal(safe.steps.length, 1);
+assert.equal(safe.steps[0].kind, "shell");
+assert.equal(safe.steps[0].exitCode, 0);
+assert.equal(safe.steps[0].operationClass, "write-shared");
+assert.equal(safe.steps[0].resultMarker, "PLAYBOOK_OK");
+assert.equal(safe.steps[0].fingerprintKey, "fp-1234abcd");
+assert.equal(safe.usage.steps, 1);
+assert.equal(safe.usage.durationMs, 140);
+assert.equal(safe.usage.tokens, null);
+const write = buildTrajectoryWriteCommand(t);
+assert.ok(write.includes(AGENT_SESSION_ROOT));
+assert.ok(write.includes("AIB_TRAJECTORY_SAVED"));
+assert.equal(write.includes("sk_test_secret-value"), false);
+assert.equal(write.includes("/PrivateApp"), false);
+console.log("AIB_TRAJECTORY_SELFTEST_OK events=1 privacy=redacted path=root-only tokens=null");

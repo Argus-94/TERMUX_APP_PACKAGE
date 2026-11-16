@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(new URL('..', import.meta.url).pathname);
+const required = ['lib/fleet-alert-escalation.ts','hooks/useLLM.ts','app/runtime.tsx'];
+for (const f of required) if (!fs.existsSync(path.join(root,f))) throw new Error(`MISSING:${f}`);
+const lib = fs.readFileSync(path.join(root,'lib/fleet-alert-escalation.ts'),'utf8');
+for (const x of ['deriveFleetAlerts','escalateFleetAlerts','acknowledgeFleetEscalatedAlert','resolveFleetEscalatedAlert','getFleetNotificationOutbox','criticalAfterConsecutiveFailures']) if (!lib.includes(x)) throw new Error(`CONTRACT_MISSING:${x}`);
+if (!lib.includes('fleet-notification-outbox.jsonl') || !lib.includes('fleet-escalation-audit.jsonl')) throw new Error('OUTBOX_AUDIT_MISSING');
+const hook = fs.readFileSync(path.join(root,'hooks/useLLM.ts'),'utf8');
+for (const x of ['runAIFleetAlertEscalation','acknowledgeAIFleetEscalatedAlert','resolveAIFleetEscalatedAlert','runAIFleetNotificationOutbox']) if (!hook.includes(x)) throw new Error(`HOOK_MISSING:${x}`);
+const ui = fs.readFileSync(path.join(root,'app/runtime.tsx'),'utf8');
+const runtimeI18n = fs.readFileSync(path.join(root,'lib/runtime-i18n.ts'),'utf8');
+if (!ui.includes('rt("fleetEscalation")') || !runtimeI18n.includes('fleetEscalation:')) throw new Error('UI_BUTTON_MISSING');
+console.log('AIB_PHASE23_ALERT_ESCALATION_SELFTEST_OK');

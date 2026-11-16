@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "files": {
+    "candidate-command.sh": {
+      "size": 19212,
+      "sha256": "42f16fb3acfaaf87130619df9e32678a2a8491559d85c86dcaa93784eccfc86e"
+    },
+    "packages.tsv": {
+      "size": 11422,
+      "sha256": "a87d42704eb98af6c991a1280cffc84356d883a3cd8005c1b45c165734310ee7"
+    },
+    "payloads.tsv": {
+      "size": 2161186,
+      "sha256": "68da804630593a841dfc76dbf2fc9be8390c07cdc9be770fc38eae71e5b04802"
+    },
+    "bootstrap-baseline.tsv": {
+      "size": 402128,
+      "sha256": "8763929414672f223eff0b867e29b22651b5696ed3ae7d8fecfcbd4cdcc3c9b5"
+    }
+  }
+}

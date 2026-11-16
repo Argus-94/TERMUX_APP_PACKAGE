@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const backup = fs.readFileSync(path.join(root, 'lib/fleet-backup-recovery.ts'), 'utf8');
+const hook = fs.readFileSync(path.join(root, 'hooks/useLLM.ts'), 'utf8');
+const ui = fs.readFileSync(path.join(root, 'app/runtime.tsx'), 'utf8');
+for (const token of ['createFleetEncryptedBackup','verifyFleetEncryptedBackup','restoreFleetEncryptedBackup','listFleetBackups','pruneFleetBackups','aes-256-cbc','-pbkdf2','HMAC-SHA256','BACKUP_SHA256_MISMATCH','BACKUP_SIGNATURE_MISMATCH','validateFleetRecoverySnapshot','BACKUP_RESTORE_INCOMPLETE','recoveryIndexUpdated']) if (!backup.includes(token)) throw new Error(`BACKUP_TOKEN_MISSING_${token}`);
+for (const token of ['runAICreateFleetBackup','runAIVerifyFleetBackup','runAIRestoreFleetBackup','runAIListFleetBackups','pre-production-rollout','backupSecret']) if (!hook.includes(token)) throw new Error(`HOOK_TOKEN_MISSING_${token}`);
+const runtimeI18n = fs.readFileSync(path.join(root, 'lib/runtime-i18n.ts'), 'utf8');
+for (const token of ['fleetBackup','verifyBackup','restoreBackup','backupSecret']) if (!runtimeI18n.includes(`${token}:`) || !ui.includes(`rt("${token}")`)) throw new Error(`UI_TOKEN_MISSING_${token}`);
+console.log('AIB_PHASE19_FLEET_BACKUP_RECOVERY_SELFTEST_OK');

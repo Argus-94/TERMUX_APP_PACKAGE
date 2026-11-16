@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const read = p => fs.readFileSync(p, 'utf8');
+const readJson = p => JSON.parse(read(p));
+const pkg = readJson('package.json');
+const readme = read('README.md');
+const version = String(pkg.dependencies?.['llama.rn'] || pkg.devDependencies?.['llama.rn'] || '');
+if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('AIB_V262_LLAMA_VERSION_NOT_PINNED');
+if (/llama\.rn@latest|pnpm\s+add\s+llama\.rn@latest/i.test(readme)) throw new Error('AIB_V262_LLAMA_LATEST_GUIDANCE_PRESENT');
+if (!readme.includes(`llama.rn@${version}`)) throw new Error('AIB_V262_LLAMA_PINNED_GUIDANCE_MISSING');
+console.log(`AIB_V262_REGRESSION_SELFTEST_OK llama.rn=${version} latest_guidance=blocked`);

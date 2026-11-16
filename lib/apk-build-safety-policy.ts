@@ -1,0 +1,11 @@
+/**
+ * Single authoritative policy injected into APK build, autonomy, recovery, and
+ * escalation prompts. Keep policy text here rather than duplicating commands.
+ *
+ * v389: the earlier "fail-closed" wording (no sdkmanager, no SDK/NDK downloads,
+ * no licence acceptance, no wrapper repair, stop on the second identical cause)
+ * is replaced by an autonomous policy. The export name is kept so every prompt
+ * keeps consuming one shared source.
+ */
+export const APK_BUILD_SAFETY_POLICY =
+  "AUTONOMOUS BUILD POLICY. Work entirely inside the selected backend (Termux host or Ubuntu guest); never probe or build in the other one. The generated build-apk-<project>.sh already contains the self-healing aib-autobuild engine: it installs a missing JDK 17+, Android cmdline-tools, SDK platforms, build-tools, CMake and NDK with sdkmanager, accepts SDK licenses, writes local.properties and user-level gradle.properties (heap size, aapt2 override on ARM, native=false), restores a missing Gradle wrapper jar from the project's own distributionUrl, installs node/pnpm/npm dependencies, and rebuilds up to 10 times. When it returns AIB_AUTOBUILD_NEEDS_LLM=1, read AIB_AUTOBUILD_FIRST_ERROR and the history log, fix the real cause (source code, missing dependency, wrong path) and write the next revision of the script, then run it again with bash <path>. You may install anything the fix needs with the backend package manager (pkg or apt-get), sdkmanager, curl/wget downloads from official hosts, or npm, and you may run any shell command the fix needs, delete caches and build outputs, and rewrite build scripts. Keep the project's sources, application identity, compilation settings (compileSdk/targetSdk, AGP and Gradle versions, signing config) and dependency lockfiles as the user wrote them unless a source error proves a change is required; put machine-specific settings in user-level files (~/.gradle/gradle.properties, local.properties). Do not delete the user's projects or shared storage, and do not wipe a rootfs unless its login is unrecoverable. Never stop at the first error: read the log, change the approach, retry. Stop only on a verified blocker (no network after repeated waits, shared-storage permission denied) and then report the exact evidence.";

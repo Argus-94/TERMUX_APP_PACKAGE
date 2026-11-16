@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2196F3"/>
+      <stop offset="100%" stop-color="#1565C0"/>
+    </linearGradient>
+    <linearGradient id="window" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1A237E"/>
+      <stop offset="100%" stop-color="#0D47A1"/>
+    </linearGradient>
+    <linearGradient id="brainGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#00B0FF"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="round">
+      <rect width="512" height="512" rx="108" ry="108"/>
+    </clipPath>
+  </defs>
+
+  <!-- App background -->
+  <rect width="512" height="512" fill="url(#bg)" clip-path="url(#round)"/>
+
+  <!-- Terminal window -->
+  <rect x="76" y="70" width="360" height="300" rx="28" fill="url(#window)"/>
+  
+  <!-- Window top bar -->
+  <rect x="76" y="70" width="360" height="48" rx="28" fill="#283593"/>
+  <rect x="76" y="94" width="360" height="24" fill="#283593"/>
+
+  <!-- Traffic lights -->
+  <circle cx="110" cy="94" r="11" fill="#EF5350"/>
+  <circle cx="142" cy="94" r="11" fill="#FFCA28"/>
+  <circle cx="174" cy="94" r="11" fill="#66BB6A"/>
+
+  <!-- Terminal prompt symbol -->
+  <text x="400" y="102" font-family="monospace" font-size="22" font-weight="bold" fill="#80D8FF">&gt;_</text>
+
+  <!-- Code lines -->
+  <g fill="#4FC3F7" opacity="0.9">
+    <rect x="110" y="145" width="140" height="12" rx="6"/>
+    <rect x="110" y="175" width="200" height="12" rx="6"/>
+    <rect x="110" y="205" width="110" height="12" rx="6"/>
+    <rect x="110" y="235" width="170" height="12" rx="6"/>
+    <rect x="110" y="265" width="90" height="12" rx="6"/>
+  </g>
+
+  <!-- AI Brain / Neural circle -->
+  <g filter="url(#softGlow)" transform="translate(320, 230)">
+    <!-- Outer glow circle -->
+    <circle cx="0" cy="0" r="68" fill="none" stroke="#00E5FF" stroke-width="5" opacity="0.9"/>
+    <circle cx="0" cy="0" r="58" fill="#0D47A1" opacity="0.6"/>
+    
+    <!-- Simplified brain / circuit shape -->
+    <path d="M-28,-20 
+             C-35,-5 -35,15 -25,28
+             C-10,40 10,40 25,28
+             C35,15 35,-5 28,-20
+             C20,-32 5,-38 -5,-35
+             C-15,-38 -25,-32 -28,-20 Z"
+          fill="none" stroke="#00E5FF" stroke-width="4"/>
+    
+    <!-- Neural nodes -->
+    <circle cx="-18" cy="-12" r="5" fill="#00E5FF"/>
+    <circle cx="0" cy="-22" r="5" fill="#00E5FF"/>
+    <circle cx="18" cy="-12" r="5" fill="#00E5FF"/>
+    <circle cx="-22" cy="10" r="5" fill="#00E5FF"/>
+    <circle cx="0" cy="18" r="5" fill="#00E5FF"/>
+    <circle cx="22" cy="10" r="5" fill="#00E5FF"/>
+    <circle cx="0" cy="0" r="7" fill="#FFFFFF"/>
+    
+    <!-- Connections -->
+    <g stroke="#00E5FF" stroke-width="2.5" opacity="0.8">
+      <line x1="-18" y1="-12" x2="0" y2="0"/>
+      <line x1="0" y1="-22" x2="0" y2="0"/>
+      <line x1="18" y1="-12" x2="0" y2="0"/>
+      <line x1="-22" y1="10" x2="0" y2="0"/>
+      <line x1="0" y1="18" x2="0" y2="0"/>
+      <line x1="22" y1="10" x2="0" y2="0"/>
+    </g>
+  </g>
+
+  <!-- Lock + Shield (security) -->
+  <g transform="translate(130, 400)">
+    <!-- Shield -->
+    <path d="M0,-28 
+             C22,-28 38,-18 42,-2
+             C46,18 38,36 18,48
+             C8,54 2,58 0,60
+             C-2,58 -8,54 -18,48
+             C-38,36 -46,18 -42,-2
+             C-38,-18 -22,-28 0,-28 Z"
+          fill="#FFFFFF"/>
+    <!-- Checkmark -->
+    <path d="M-14 2 L-4 14 L18 -12" fill="none" stroke="#1565C0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Lock body next to shield -->
+  <g transform="translate(200, 405)">
+    <rect x="-18" y="-8" width="36" height="32" rx="6" fill="#FFFFFF"/>
+    <path d="M-11 -8 V-22 A11 11 0 0 1 11 -22 V-8" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+    <circle cx="0" cy="8" r="5" fill="#1565C0"/>
+  </g>
+</svg>

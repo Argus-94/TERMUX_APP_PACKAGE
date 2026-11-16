@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const repair = fs.readFileSync("lib/repair-script-runner.ts", "utf8");
+const recipes = fs.readFileSync("core/recovery/DeterministicRepair.ts", "utf8");
+const hints = fs.readFileSync("lib/agent-repair-hints.ts", "utf8");
+const backend = fs.readFileSync("lib/agent-shell-backend.ts", "utf8");
+const recovery = fs.readFileSync("lib/agent-recovery.ts", "utf8");
+const policy = fs.readFileSync("lib/apk-build-safety-policy.ts", "utf8");
+const standaloneWrapper = fs.readFileSync("scripts/repair/gradle-pkg.sh", "utf8");
+
+const depsStart = repair.indexOf('"expo-deps": (');
+const expoStart = repair.indexOf('"expo-cli": (', depsStart);
+const signingStart = repair.indexOf('"signing-tools": (', expoStart);
+assert.ok(depsStart >= 0 && expoStart > depsStart && signingStart > expoStart, "Expo repair recipes found");
+const deps = repair.slice(depsStart, expoStart);
+const expo = repair.slice(expoStart, signingStart);
+
+assert.match(deps, /EMBEDDED_SIGNED_FEED_REQUIRED/);
+assert.doesNotMatch(deps, /pkg install|pnpm install|yarn install|npm install/);
+assert.match(repair, /id === "expo-deps"[\s\S]*?EMBEDDED_SIGNED_FEED_REQUIRED/);
+assert.match(repair, /no external or stock feeds used/);
+assert.match(expo, /EXPO_ANDROID_ALREADY_COMPLETE/);
+assert.match(expo, /BACKUP_DIR=\$\(mktemp -d \"\$ROOT\/\.aib-expo-rollback/);
+assert.match(expo, /mv android \"\$BACKUP_DIR\/android\"/);
+assert.match(expo, /rollback_expo\(\)/);
+assert.match(expo, /mv \"\$BACKUP_DIR\/android\" \"\$ROOT\/android\"/);
+assert.match(expo, /trap rollback_expo EXIT/);
+assert.ok(expo.indexOf("trap rollback_expo EXIT") < expo.indexOf("mv android"), "rollback is installed before the destructive move");
+assert.match(expo, /EXPO_PREBUILD_FAILED/);
+assert.match(expo, /EXPO_PREBUILD_OUTPUT_INVALID/);
+assert.doesNotMatch(recipes, /rm -rf android; npx expo prebuild/);
+
+assert.match(recipes, /EMBEDDED_SIGNED_FEED_REQUIRED/);
+assert.doesNotMatch(recipes, /pkg install -y openjdk|apt-get install -y openjdk/);
+assert.match(repair, /backend !== "termux" && id === "gradle-pkg"/);
+assert.match(repair, /NO_VERIFIED_PROJECT_GRADLE_LAUNCHER/);
+assert.match(repair, /AAPT2_MISSING_VERIFIED_SDK_ONLY/);
+assert.doesNotMatch(repair, /sdkmanager[^\n]*install|pkg install -y gradle/);
+assert.match(repair, /const backendJavaScript = selectedScript/);
+assert.doesNotMatch(repair, /apt-get update|apt-get install|pkg install/);
+assert.match(repair, /Java is checked on every backend[\s\S]*?never fall back to apt, pkg, or a stock\/external feed/);
+assert.match(repair, /REPAIR_OK:nodejs-existing-only/);
+assert.match(repair, /REPAIR_OK:android-tools-existing-only/);
+assert.match(repair, /AIB_TOOLPACK_WRAPPER_JAR/);
+assert.doesNotMatch(repair, /find "\$PREFIX"[^\n]*gradle-wrapper\.jar/);
+assert.match(repair, /PROJECT_OUTSIDE_ALLOWED_ROOT/);
+assert.match(standaloneWrapper, /PROJECT_OUTSIDE_ALLOWED_ROOT/);
+assert.match(standaloneWrapper, /WRAPPER_JAR_ALREADY_PRESENT/);
+assert.doesNotMatch(standaloneWrapper, /pkg install|find .*gradle-wrapper\.jar|cp -f|rm -rf|gradle-wrapper\.properties[^\n]*>/);
+assert.doesNotMatch(repair, /pkg install -y openjdk|apt-get install -y openjdk/);
+assert.doesNotMatch(repair, /pkg install -y openjdk|apt-get install -y openjdk/);
+assert.match(repair, /installation is unavailable until a compatible signed embedded-private feed is configured/);
+assert.match(repair, /proot-distro installation is unavailable/);
+assert.match(recovery, /APK_BUILD_SAFETY_POLICY/);
+assert.match(policy, /AUTONOMOUS BUILD POLICY/);
+assert.match(policy, /sdkmanager/);
+assert.match(policy, /AIB_AUTOBUILD_NEEDS_LLM=1/);
+assert.match(policy, /Never stop at the first error/);
+assert.match(hints, /recipeForBackend\(id: string, backend: AgentShellBackend\)/);
+assert.match(hints, /termuxHint: "java-install"/);
+assert.doesNotMatch(hints, /apt-get install -y openjdk-17-jdk/);
+assert.match(hints, /backend=\$\{getBuildBackend\(\)\}/);
+assert.match(hints, /id === "gradle-pkg"/);
+assert.match(hints, /termuxHint: "gradle-wrapper"/);
+assert.match(hints, /selected Linux proot backend/);
+assert.match(backend, /agentAutonomyPromptBlock/);
+
+console.log("AIB_BUILD_RECOVERY_HARDENING_SELFTEST_OK expo=rollback deps=fail-closed java=existing-only backend=embedded-only");

@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const repair=fs.readFileSync(new URL('../lib/repair-script-runner.ts', import.meta.url),'utf8');
+const agent=fs.readFileSync(new URL('../lib/termux-agent.ts', import.meta.url),'utf8');
+const template=fs.readFileSync(new URL('../lib/script-templates.ts', import.meta.url),'utf8');
+const auto=fs.readFileSync(new URL('./aib-auto-prebuild.mjs', import.meta.url),'utf8');
+if (!auto.includes('pnpmVersion') || !auto.includes('["exec", "expo", "prebuild"') || !auto.includes('local Expo CLI')) throw new Error('AUTO_PREBUILD_NOT_PINNED');
+if (!repair.includes('PNPM_PRIMARY_UNAVAILABLE') || !repair.includes('pnpm install --frozen-lockfile') || !repair.includes('NPM_FALLBACK_START')) throw new Error('REPAIR_PNPM_NPM_FALLBACK_NOT_SAFE');
+if (!repair.includes('MAVEN_DEPS_FAIL') || !repair.includes('FLUTTER_PUB_FAIL')) throw new Error('RECOVERY_FAIL_OPEN');
+if (agent.includes('APKSIGNER_MISSING: deliver unsigned APK')) throw new Error('UNSIGNED_FASTPATH');
+if (!agent.includes('SIGNING_TOOLS_MISSING: release APK cannot be produced')) throw new Error('SIGNING_FAIL_OPEN');
+if (!template.includes('SIGNING_TOOLS_MISSING') || !template.includes('SIGNED_V1_V2_V3_OK')) throw new Error('BUILTIN_TEMPLATE_UNSIGNED');
+if (!agent.includes('V1_VERIFY_FAIL') || !agent.includes('V2_VERIFY_FAIL') || !agent.includes('V3_VERIFY_FAIL')) throw new Error('SIGNATURE_VERIFY_NOT_FAIL_CLOSED');
+console.log('AIB_V168_BUILD_RECOVERY_SELFTEST_OK unsigned=blocked pnpm=frozen-pinned recovery=fail-closed');

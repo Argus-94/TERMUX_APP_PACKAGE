@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const src = readFileSync(path.join(root, 'core/workspace/AIWorkspaceBuilder.ts'), 'utf8');
+assert.match(src, /export class AIWorkspaceBuilder/);
+assert.match(src, /MAX_TOTAL_TIMEOUT_MS/);
+assert.match(src, /cwd: \"\/workspace\"/);
+assert.match(src, /pnpm/);
+assert.match(src, /python3/);
+assert.ok(existsSync(path.join(root, 'core/container/ProotContainerManager.ts')));
+const facade = readFileSync(path.join(root, 'core/RuntimeFacade.ts'), 'utf8');
+assert.match(facade, /runAIWorkspaceBuild/);
+assert.match(facade, /createAIWorkspaceBuilder/);
+console.log('AIB_PHASE28_WORKSPACE_BUILDER_SELFTEST_OK');

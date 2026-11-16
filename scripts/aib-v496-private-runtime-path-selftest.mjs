@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const { isSamePrivateRuntimePath } = createRequire(import.meta.url)('../lib/private-runtime-path.js');
+const user = '/data/user/0/com.karat.aibuilder/files';
+const data = '/data/data/com.karat.aibuilder/files';
+assert.equal(isSamePrivateRuntimePath(user, `${user}/usr`), true, 'canonical filesDir/prefix passes');
+assert.equal(isSamePrivateRuntimePath(data, `${data}/usr`), true, 'legacy data alias passes');
+assert.equal(isSamePrivateRuntimePath(user, `${data}/usr`), true, 'Android /data/data and /data/user/0 aliases compare as same private prefix');
+assert.equal(isSamePrivateRuntimePath(data, `${user}/usr`), true, 'reverse Android alias also compares');
+assert.equal(isSamePrivateRuntimePath('/data/user/0/com.evil/files', '/data/user/0/com.evil/files/usr'), false, 'other package denied');
+assert.equal(isSamePrivateRuntimePath(user, '/data/user/0/com.karat.aibuilder/cache/usr'), false, 'different prefix denied');
+assert.equal(isSamePrivateRuntimePath(user, '/data/data/com.termux/files/usr'), false, 'external Termux denied');
+console.log('aib-v496-private-runtime-path-selftest: PASS alias-normalization=PASS package-scope=PASS exact-prefix=PASS external-runtime-denied=PASS');

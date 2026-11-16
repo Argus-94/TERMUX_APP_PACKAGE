@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+const { BootstrapDiagnostics, probeInternetConnectivity, sanitizeDiagnosticText } = await import("../core/enhancements/onboarding/BootstrapDiagnostics.ts");
+const { recommendSmartDefaults, summarizeProviderConfiguration } = await import("../core/enhancements/onboarding/SmartDefaults.ts");
+const statuses = { termux: "ok", proot: "ok", rootfs: "wrong-rootfs", permissions: "denied", network: "offline", storage: "ok" };
+const timeline = [];
+const adapters = Object.fromEntries(Object.entries(statuses).map(([name, status]) => [name, { async inspect() {
+  if (name === "storage") throw new Error("private-path /storage/emulated/0 SECRET");
+  return { status, detail: name === "network" ? "offline API_TOKEN=abc123 password:secret42 Bearer very.secret.token" : `${name} probe` };
+} }]));
+const report = await new BootstrapDiagnostics(adapters, { record(event) { timeline.push(event); } }).collect();
+assert.equal(report.overall, "blocked");
+assert.equal(report.entries.find((entry) => entry.name === "permissions")?.status, "denied");
+assert.equal(report.entries.find((entry) => entry.name === "network")?.status, "offline");
+assert.equal(report.entries.find((entry) => entry.name === "rootfs")?.status, "wrong-rootfs");
+assert.equal(report.entries.find((entry) => entry.name === "storage")?.status, "error");
+assert.equal(timeline.length, 6);
+assert.doesNotMatch(report.json, /abc123|secret42|very\.secret\.token|SECRET/);
+assert.doesNotMatch(report.humanReadable, /abc123|secret42|very\.secret\.token/);
+assert.equal(sanitizeDiagnosticText("APP_SETTING=value").includes("value"), false);
+
+const allOk = Object.fromEntries(Object.keys(statuses).map((name) => [name, { async inspect() { return { status: "ok", detail: "pass" }; } }]));
+assert.equal((await new BootstrapDiagnostics(allOk).collect()).overall, "ready");
+const fallback = recommendSmartDefaults({ backends: [{ id: "termux-native", healthy: true, capabilities: [] }, { id: "proot-distro", healthy: true, capabilities: ["rootfs"] }], online: false, onlineProviderConfigured: false });
+assert.equal(fallback.backend, "proot-distro", "no feature-detect means no Termux claim");
+assert.equal(fallback.security, "strict");
+assert.equal(fallback.preset, "minimal");
+assert.equal(fallback.models.online, "optional-unconfigured");
+assert.equal(fallback.models.offline, "not-probed");
+assert.match(fallback.hints[0], /Offline/);
+const modelReady = recommendSmartDefaults({ backends: [], online: true, onlineProviderConfigured: true, offlineModelAvailable: true });
+assert.deepEqual(modelReady.models, { online: "configured-provider", offline: "local-model-available" });
+assert.equal(modelReady.backend, "unavailable", "no healthy backend must not be recommended as available");
+assert.equal(recommendSmartDefaults({ backends: [], online: false, onlineProviderConfigured: true }).models.online, "configured-but-offline");
+const providerUnknown = recommendSmartDefaults({ backends: [], online: true });
+assert.equal(providerUnknown.models.online, "provider-configuration-unknown", "unprobed provider configuration is not mislabeled as absent");
+assert.match(providerUnknown.hints.join(" "), /setup status is unknown/);
+assert.equal(summarizeProviderConfiguration([false, false]), false);
+assert.equal(summarizeProviderConfiguration([false, "unknown"]), "unknown", "SecureStore failures remain unknown unless a configured provider is positively found");
+assert.equal(summarizeProviderConfiguration(["unknown", true]), true, "one positively configured provider wins over unrelated failed probes");
+const degraded = recommendSmartDefaults({ backends: [{ id: "proot-distro", healthy: false, capabilities: ["rootfs"] }], online: "unknown" });
+assert.equal(degraded.backend, "unavailable", "present-but-degraded rootfs is not a usable backend");
+assert.deepEqual(degraded.detectedCapabilities, []);
+
+let requestUrl = "";
+let requestInit;
+const online = await probeInternetConnectivity(async (url, init) => { requestUrl = url; requestInit = init; return { status: 204, body: null }; });
+assert.equal(online.status, "ok");
+assert.equal(requestUrl, "https://connectivitycheck.gstatic.com/generate_204");
+assert.equal(requestInit.method, "GET");
+assert.equal(requestInit.body, undefined, "connectivity check sends no user data or credentials");
+assert.equal(requestInit.redirect, "manual");
+assert.equal((await probeInternetConnectivity(async () => ({ status: 200, body: null }))).status, "offline", "captive portals/non-204 responses are not treated as internet access");
+const timedOut = await probeInternetConnectivity((_url, init) => new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(new Error("timeout")))), 500);
+assert.equal(timedOut.status, "offline");
+assert.equal((await probeInternetConnectivity(null)).status, "unknown", "missing fetch capability is explicit");
+console.log("AIB_BOOTSTRAP_DIAGNOSTICS_SELFTEST_OK connectivity=204/offline/timeout/no-payload first-run-smart-defaults=verified");

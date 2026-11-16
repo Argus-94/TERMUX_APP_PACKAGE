@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import { parseLocalSkill, skillContentHash, checkSkillPin, parseSkillPins, serializeSkillPins, LOCAL_SKILLS_ROOT } from "../lib/agent-skill-registry.ts";
+const body = "---\nname: offline-check\nversion: 1.2.3\ndescription: Local only\n---\nRun local checks.";
+const skill = parseLocalSkill("offline-check", body);
+assert.ok(skill);
+assert.equal(skill.version, "1.2.3");
+assert.ok(skill.path.startsWith(`${LOCAL_SKILLS_ROOT}/`));
+const pin = { version: skill.version, hash: skill.hash, updatedAt: 1 };
+assert.equal(checkSkillPin(skill, { "offline-check": pin }).ok, true);
+const updated = parseLocalSkill("offline-check", body.replace("1.2.3", "1.2.4"));
+assert.ok(updated);
+assert.equal(checkSkillPin(updated, { "offline-check": pin }).ok, false);
+assert.equal(checkSkillPin(updated, { "offline-check": pin }).warning, "SKILL_PIN_MISMATCH");
+assert.equal(checkSkillPin(updated, {}).warning, "SKILL_UNPINNED");
+const parsed = parseSkillPins(serializeSkillPins({ "offline-check": pin }));
+assert.equal(parsed["offline-check"].version, "1.2.3");
+assert.notEqual(skillContentHash(body), skillContentHash(body + "\nchanged"));
+assert.equal(parseLocalSkill("../escape", body), null);
+console.log("AIB_SKILL_PIN_SELFTEST_OK registry=local-only drift=mismatch unpinned=warn");

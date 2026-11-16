@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
+    <title>Репозитории</title>
+    <link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/builder-theme.css">
+</head>
+<body>
+<div id="page">
+    <div id="connect" class="connect hidden">
+        <div class="card">
+            <h2>Подключение к GitHub</h2>
+            <p>Вставьте токен доступа — приложение само определит ваше имя пользователя и покажет ваши репозитории.</p>
+            <div class="fld">
+                <label for="cnToken">Токен доступа</label>
+                <input type="password" id="cnToken" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… или github_pat_…">
+                <div class="hint">Нужны права: repo (классический токен) или Contents / Administration (точечный). Для удаления репозиториев — ещё delete_repo.</div>
+            </div>
+            <div id="cnErr" class="hint hidden" style="color:var(--danger);margin-bottom:10px"></div>
+            <button class="btn primary block" id="cnOk">Подключиться</button>
+            <button class="btn ghost block" id="cnNew" style="margin-top:8px">Создать токен на сайте GitHub</button>
+        </div>
+    </div>
+
+    <div id="main" class="hidden">
+        <div class="head">
+            <div style="flex:1;min-width:0">
+                <h1>Репозитории</h1>
+                <div class="sub" id="acct"></div>
+            </div>
+            <button class="ibtn" id="btnRefresh" aria-label="Обновить" title="Обновить"></button>
+        </div>
+        <div class="search"><span id="searchIco"></span><input type="text" id="q" placeholder="Поиск репозитория" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+        <div class="chips" id="filters"></div>
+        <div id="list"></div>
+    </div>
+</div>
+<button class="fab hidden" id="fab"></button>
+
+<div id="modalWrap" class="hidden"></div>
+<div id="sheetWrap" class="hidden"></div>
+<div id="busy" class="hidden"><div class="bx"><div class="spin"></div><span id="busyTxt">Подождите…</span></div></div>
+<div id="toast" class="hidden"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/common.js"></script>
+<script src="js/repos.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const src = fs.readFileSync('lib/agent-shell-backend.ts','utf8');
+if (!src.includes('hostHome = "/data/data/com.termux/files/home"')) throw new Error('HOST_HOME_MAPPING_MISSING');
+if (!src.includes('guestHome = "/termux-home"')) throw new Error('GUEST_HOME_MAPPING_MISSING');
+if (!src.includes('translateHostPaths(inner)')) throw new Error('COMMAND_PATH_TRANSLATION_MISSING');
+if (!src.includes('const requestedCwd = cwd == null || String(cwd).trim() === ""')) throw new Error('CWD_NORMALIZATION_MISSING');
+if (!src.includes('translateHostPaths(requestedCwd)')) throw new Error('CWD_PATH_TRANSLATION_MISSING');
+if (!src.includes('if (!isWithinSharedAppRoot(requestedCwd))')) throw new Error('CWD_SHARED_ROOT_GUARD_MISSING');
+if (!src.includes('`${AI_BUILDER_SHARED_ROOT}/workspace`')) throw new Error('DEFAULT_APP_WORKSPACE_MISSING');
+if (!src.includes('--bind /data/data/com.termux/files/home:/termux-home')) throw new Error('HOME_BIND_MISSING');
+console.log('AIB_PROOT_HOME_PATH_SELFTEST_OK host_home=bound guest_home=translated command_and_cwd=translated');

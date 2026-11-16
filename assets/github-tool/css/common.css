@@ -1,0 +1,223 @@
+:root {
+    /* AIB_SAFE_BOTTOM_V414: нижний отступ под системные кнопки Android. env() в WebView часто = 0,
+       поэтому берём максимум из env() и реальных insets, которые передаёт React Native (--aib-sab). */
+    --sab: max(env(safe-area-inset-bottom, 0px), var(--aib-sab, 0px));
+    --gold: #C9A227; --gold-light: #E7D28A; --gold-deep: #8B6914; --gold-dim: rgba(201, 162, 39, .14);
+    --bg: #101418; --card: #181C20; --card2: #1F242A; --card3: #262C33;
+    --border: #3A4148; --divider: #2A3036;
+    --accent: #B8C5CE; --on-accent: #FFFFFF; --pc: #2F4F4F; --on-pc: #FFFFFF;
+    --text: #E2E2E6; --sec: #9AA3AC;
+    --danger: #FFB4AB; --on-danger: #690005; --success: #8FD69A; --warn: var(--gold);
+    color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.hidden { display: none !important; }
+.mi { display: block; flex: none; }
+
+#page { max-width: 640px; margin: 0 auto; padding: 12px 12px 96px; }
+.head { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; }
+.head h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 600; }
+.head .sub { font-size: 12px; color: var(--sec); }
+.ibtn { width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.ibtn:active { background: var(--card3); }
+.ibtn.sm { width: 34px; height: 34px; border-radius: 17px; }
+.ibtn.danger { color: var(--danger); }
+.ibtn.acc { color: var(--accent); }
+
+.search { display: flex; align-items: center; gap: 8px; background: var(--card2); border: 1px solid var(--border); border-radius: 24px; padding: 0 14px; height: 46px; color: var(--sec); }
+.search input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--text); font-size: 15px; }
+.search:focus-within { border-color: var(--accent); }
+.chips { display: flex; gap: 8px; overflow-x: auto; margin: 10px 0; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; padding: 7px 14px; border-radius: 16px; border: 1px solid var(--border); font-size: 13px; color: var(--sec); background: var(--card); }
+.chip.on { background: var(--pc); color: var(--on-pc); border-color: var(--pc); }
+
+.card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
+.card.active { border-color: var(--accent); }
+.card .top { display: flex; align-items: flex-start; gap: 12px; }
+.avatar { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--pc); color: var(--on-pc); display: flex; align-items: center; justify-content: center; }
+.meta { flex: 1; min-width: 0; }
+.nm { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.desc { font-size: 13px; color: var(--sec); margin-top: 2px; word-break: break-word; }
+.info { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--sec); align-items: center; }
+.info span { display: inline-flex; align-items: center; gap: 4px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--card3); color: var(--sec); }
+.badge.on { background: var(--pc); color: var(--on-pc); }
+.badge.ok { background: #1E3A26; color: var(--success); }
+.actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 38px; padding: 0 16px; border-radius: 20px; font-size: 14px; font-weight: 600; background: var(--card3); border: 1px solid var(--border); }
+.btn:active { opacity: .8; }
+.btn.primary { background: #2F4F4F; color: var(--on-accent); border-color: var(--accent); }
+.btn.danger { background: transparent; color: var(--danger); border-color: var(--border); }
+.btn.ghost { background: transparent; color: var(--sec); }
+.btn.block { width: 100%; height: 46px; }
+.btn[disabled] { opacity: .5; }
+
+.fab { position: fixed; right: 16px; bottom: 88px; z-index: 20; height: 56px; padding: 0 20px 0 16px; border-radius: 18px; background: #2F4F4F; color: var(--on-accent);
+    display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(0, 0, 0, .55); }
+.fab:active { opacity: .85; }
+
+.empty { text-align: center; color: var(--sec); padding: 40px 16px; font-size: 14px; }
+.empty .mi { margin: 0 auto 10px; opacity: .6; }
+.note { background: var(--card2); border: 1px solid var(--divider); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; color: var(--sec); line-height: 1.45; margin: 0 0 12px; }
+.note b { color: var(--text); }
+.section { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--sec); margin: 16px 4px 8px; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+.secret { margin-top: 6px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; color: var(--text); }
+
+.tabs { display: flex; background: var(--card); border: 1px solid var(--divider); border-radius: 22px; padding: 3px; margin-bottom: 12px; }
+.tab { flex: 1; text-align: center; padding: 9px 4px; border-radius: 19px; font-size: 13px; font-weight: 600; color: var(--sec); }
+.tab.on { background: var(--pc); color: var(--on-pc); }
+
+.connect { max-width: 480px; margin: 24px auto 0; }
+.connect h2 { margin: 0 0 6px; color: var(--accent); font-size: 20px; }
+.connect p { margin: 0 0 10px; color: var(--sec); font-size: 14px; line-height: 1.45; }
+
+/* поля формы */
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: 13px; color: var(--sec); margin-bottom: 5px; }
+.fld input[type=text], .fld input[type=password], .fld textarea, .fld select {
+    width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-size: 15px; font-family: inherit; }
+.fld textarea { min-height: 96px; resize: vertical; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+.fld input:focus, .fld textarea:focus, .fld select:focus { outline: none; border-color: var(--accent); }
+.fld .hint { font-size: 12px; color: var(--sec); margin-top: 4px; }
+.fld.chk { display: flex; gap: 12px; align-items: flex-start; background: var(--card2); border-radius: 12px; padding: 10px 12px; }
+.fld.chk input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accent); flex: none; }
+.fld.chk label { margin: 0; color: var(--text); }
+
+/* диалоги */
+#modalWrap { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, .65); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.mcard { width: 100%; max-width: 440px; max-height: 92%; overflow: auto; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; }
+.mcard h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.mcard p { margin: 0 0 14px; color: var(--sec); font-size: 14px; white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+.mbtns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 6px; }
+.mb { padding: 10px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; background: var(--card3); border: 1px solid var(--border); }
+.mb.primary { background: #2F4F4F; color: var(--on-accent); border-color: var(--accent); }
+.mb.danger { background: var(--danger); color: var(--on-danger); border-color: var(--danger); }
+.mb.ghost { background: transparent; color: var(--sec); border-color: transparent; }
+.mb[disabled] { opacity: .45; }
+#sheetWrap { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, .55); display: flex; align-items: flex-end; }
+.sheet { width: 100%; background: var(--card); border-radius: 24px 24px 0 0; padding: 8px 0 max(56px, calc(14px + var(--sab, 0px))); max-height: 82%; overflow: auto; }
+.sheet::before { content: ''; display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 4px auto 6px; }
+.sheet .sh-t { padding: 8px 20px 6px; font-size: 13px; color: var(--sec); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet button { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 20px; font-size: 15px; text-align: left; }
+.sheet button:active { background: var(--card3); }
+.sheet button.danger { color: var(--danger); }
+#busy { position: fixed; inset: 0; z-index: 95; background: rgba(0, 0, 0, .5); display: flex; align-items: center; justify-content: center; }
+#busy .bx { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 20px; display: flex; gap: 12px; align-items: center; font-size: 14px; }
+.spin { width: 18px; height: 18px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: sp .8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+#toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 120; background: var(--card3); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 18px; border-radius: 22px; font-size: 13px; max-width: 90%; text-align: center; box-shadow: 0 4px 16px rgba(0, 0, 0, .5); }
+
+/* ---- AI Builder GitHub shell: top bar + bottom dock (parity with UnzipGit native chrome) ---- */
+#aib-topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  min-height: 52px; padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+  background: var(--card); border-bottom: 1px solid var(--divider);
+}
+#aib-topbar .tb-title { flex: 1; min-width: 0; font-size: 18px; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#aib-topbar .tb-btn {
+  flex: none; width: 40px; height: 40px; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--accent); border: none;
+}
+#aib-topbar .tb-btn:active { background: var(--card3); }
+
+#aib-dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; align-items: stretch; justify-content: space-around;
+  min-height: 52px; padding: 2px 2px calc(2px + var(--sab, 0px));
+  background: var(--card); border-top: 1px solid var(--divider);
+  box-shadow: 0 -4px 18px rgba(0,0,0,.35);
+}
+#aib-dock a {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 6px 2px; text-decoration: none; color: var(--sec);
+  font-size: 11px; font-weight: 600; min-width: 0;
+}
+#aib-dock a svg { width: 22px; height: 22px; opacity: .85; }
+#aib-dock a.on { color: var(--accent); }
+#aib-dock a.on svg { opacity: 1; }
+#aib-dock a:active { opacity: .7; }
+
+body.has-aib-shell { padding-bottom: calc(56px + var(--sab, 0px)); }
+body.has-aib-shell .fab { bottom: calc(88px + var(--sab, 0px)); }
+body.has-aib-shell #toast { bottom: calc(96px + var(--sab, 0px)); }
+/* Hide duplicate in-page H1 when shell topbar shows the same title */
+body.has-aib-shell #main > .head > div > h1 { display: none; }
+body.has-aib-shell #main > .head { padding-top: 4px; }
+body.has-aib-shell .container > h1 { display: none; }
+body.has-aib-shell .container > .subtitle { margin-top: 4px; }
+
+/* Files manager has its own #topbar */
+body.has-native-topbar.has-aib-shell #topbar {
+  padding-top: calc(6px + env(safe-area-inset-top, 0px));
+}
+body.has-aib-shell #app {
+  padding-bottom: calc(72px + var(--sab, 0px));
+}
+
+/* File manager: action bar must sit above global aib-dock */
+body.has-aib-shell #app {
+  /* Dock ~52px + system inset — minimize gap under action bar */
+  height: calc(100% - 52px - var(--sab, 0px)) !important;
+  max-height: calc(100dvh - 52px - var(--sab, 0px)) !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box;
+}
+/* The file page already reserves the dock with #app height; don't reserve it twice on body. */
+body.has-native-topbar.has-aib-shell { padding-bottom: 0 !important; }
+body.has-aib-shell #toast {
+  bottom: calc(148px + var(--sab, 0px)) !important;
+}
+body.has-aib-shell .overlay {
+  bottom: calc(64px + var(--sab, 0px));
+}
+body.has-aib-shell #setup {
+  bottom: calc(64px + var(--sab, 0px));
+  height: auto;
+}
+
+/* AI Builder: no duplicate tool topbar — only system/RN chrome + bottom dock */
+body.aib-no-tool-topbar #aib-topbar { display: none !important; height: 0 !important; overflow: hidden !important; }
+body.aib-no-tool-topbar #page { padding-top: 8px; }
+/* Primary buttons DarkSlateGray */
+.btn.primary, button.btn.primary, .btn-primary, button.btn-primary {
+  background: #2F4F4F !important;
+  color: #FFFFFF !important;
+  border-color: #2F4F4F !important;
+}
+.btn.primary:active, button.btn-primary:active { opacity: 0.85; }
+
+/* AIB_DSG_FORCE — solid buttons only DarkSlateGray, white label */
+.btn.primary, button.primary, .btn-primary, button.btn-primary,
+.fab, .fab.primary, a.fab,
+.chip.on, .chip.active, .chip.selected,
+.mb.primary, .btn-save, .fbtn.on,
+button.btn.primary {
+  background: #2F4F4F !important;
+  background-color: #2F4F4F !important;
+  color: #FFFFFF !important;
+  border-color: #2F4F4F !important;
+}
+.btn.primary span, .fab span, .chip.on, .chip.on span {
+  color: #FFFFFF !important;
+}
+.btn.primary:hover, .btn-primary:hover, .fab:hover {
+  background: #3D6363 !important;
+  background-color: #3D6363 !important;
+}
+
+/* AIB_ONE_HEADER — no second title bar from UnzipGit pages */
+body.has-aib-shell #main > .head > div > h1,
+body.has-aib-shell .head h1,
+body.has-aib-shell #aib-topbar,
+body.aib-no-tool-topbar #aib-topbar {
+  display: none !important;
+}

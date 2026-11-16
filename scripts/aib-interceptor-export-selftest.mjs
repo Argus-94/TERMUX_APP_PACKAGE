@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { loadTs, request } from "./aib-interceptor-test-helper.mjs";
+const { InterceptorCapture } = loadTs("core/enhancements/interceptor/InterceptorCapture.ts");
+const { copyAsCurl, copyAsFetch, copyAsHttpie, exportSession } = loadTs("core/enhancements/interceptor/InterceptorExport.ts");
+const capture = new InterceptorCapture();
+const item = capture.record({ request: { ...request("e-1", "https://example.test/api?q=1&token=SECRET_VALUE", "POST", "{\"password\":\"SECRET_VALUE\"}"), requestHeaders: { authorization: "Bearer SECRET_VALUE", "content-type": "application/json" } }, response: { status: 200, headers: { "content-type": "application/json", "set-cookie": "SECRET_VALUE" }, body: "{\"apiKey\":\"SECRET_VALUE\",\"ok\":true}" }, timing: { start: 1, end: 5, totalMs: 4 }, matchedRules: ["safe"], modified: true });
+for (const output of [copyAsCurl(item), copyAsFetch(item), copyAsHttpie(item), exportSession([item], "json"), exportSession([item], "har")]) assert.doesNotMatch(output, /SECRET_VALUE/);
+const har = JSON.parse(exportSession([item], "har"));
+assert.equal(har.log.version, "1.2");
+assert.equal(har.log.entries.length, 1);
+assert.equal(har.log.entries[0].response.status, 200);
+const data = JSON.parse(exportSession([item], "json"));
+assert.equal(data.records[0].modified, true);
+console.log("aib-interceptor-export-selftest: PASS");

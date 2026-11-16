@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "label": "v476",
+    "appVersion": "1.10.76",
+    "androidVersionCode": 476,
+    "basedOn": "v475 / 1.10.75 / 475",
+    "date": "2026-10-14"
+  },
+  "status": {
+    "kind": "source-plan-only",
+    "binaryPackagesCreated": false,
+    "packageFeedCreated": false,
+    "packageFeedSigningKeyCreated": false,
+    "installCapabilityEnabled": false,
+    "appCompatibilityVerified": false,
+    "androidSdkNdkGradleDeviceBuildVerified": false,
+    "byteReproducibleBuildVerified": false,
+    "sourceChecksumsIndependentlyRecomputed": false
+  },
+  "target": {
+    "applicationId": "com.karat.aibuilder",
+    "runtime": "AI Builder embedded app-private Android/Bionic runtime",
+    "architecture": "aarch64",
+    "androidAbi": "arm64-v8a",
+    "prefixPolicy": "Must match the prefix returned by the installed AI Builder runtime; supply explicitly to the forked package-builder properties. Do not guess or hardcode a Termux path.",
+    "persistentProjectRoot": "/storage/emulated/0/AIBuilderTermux",
+    "externalRuntimeTarget": false,
+    "standardComTermuxFeedAllowed": false,
+    "pocketForgeDebAllowed": false
+  },
+  "upstreamRecipeSource": {
+    "repository": "https://github.com/termux/termux-packages.git",
+    "revision": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+    "revisionVerification": "Unsigned upstream commit; pinning identifies source but is not a repository-signature trust decision.",
+    "usage": "Use recipes as source references only. No upstream binary package, Termux apt feed, or PocketForge artifact is used."
+  },
+  "packageBuilderEnvironment": {
+    "hostImage": "Ubuntu 26.04 from the pinned revision Dockerfile; currently a mutable tag, not an immutable image digest",
+    "hostImageDigestPinned": false,
+    "hostAptSnapshotPinned": false,
+    "hostLLVM": "21",
+    "hostJava": "17",
+    "androidSdkRevision": "9123335",
+    "androidBuildTools": "37.0.0",
+    "androidNdk": "30",
+    "source": "scripts/properties.sh and scripts/Dockerfile at upstreamRecipeSource.revision",
+    "note": "These are upstream package-builder inputs, not a verified runtime Android SDK/NDK for AI Builder."
+  },
+  "candidatePackageRoots": [
+    {
+      "name": "nodejs-lts",
+      "version": "24.18.0-1",
+      "sourceUrl": "https://nodejs.org/dist/v24.18.0/node-v24.18.0.tar.xz",
+      "recipeSha256": "e94afde24db08e0c564ee7110a2d5aab51ee0059382c9fd8233c54eec47b28f9",
+      "license": "MIT",
+      "purpose": "JavaScript runtime for React Native/Expo tooling",
+      "auxiliaryBuildInputs": [
+        {
+          "name": "icu4c-host",
+          "version": "78.3",
+          "sourceUrl": "https://github.com/unicode-org/icu/releases/download/release-78.3/icu4c-78.3-sources.tgz",
+          "recipeSha256": "3a2e7a47604ba702f345878308e6fefeca612ee895cf4a5f222e7955fabfe0c0"
+        },
+        {
+          "name": "v8-host-llvm",
+          "version": "llvmorg-21-init-5118-g52cd27e6-5",
+          "sourceUrl": "https://commondatastorage.googleapis.com/chromium-browser-clang/Linux_x64/clang-llvmorg-21-init-5118-g52cd27e6-5.tar.xz",
+          "recipeSha256": "790fcc5b04e96882e8227ba7994161ab945c0e096057fc165a0f71e32a7cb061"
+        }
+      ],
+      "notes": "Upstream recipe builds for Android/Bionic and ARM64. It separates npm from nodejs-lts beginning with 24.13.0; recipe also downloads pinned ICU and a host LLVM archive. A source comment says one-architecture build can take about two hours."
+    },
+    {
+      "name": "npm",
+      "version": "11.20.0",
+      "sourceUrl": "git+https://github.com/npm/cli.git",
+      "recipeSha256": "a7bba8c40e179d3be92176026f6c29caf6a8c7b0fcae4eb71951a9e103ac6f9e",
+      "license": "Artistic-2.0",
+      "purpose": "Package manager required separately by the pinned nodejs-lts recipe",
+      "notes": "Recipe declares nodejs | nodejs-lts dependency; the upstream recipe value is retained as declared, not independently rehashed here."
+    },
+    {
+      "name": "openjdk-17",
+      "version": "17.0.20",
+      "sourceUrl": "https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-17.0.20-ga.tar.gz",
+      "recipeSha256": "ba3ac4b9d7f2c050f46ddcec39b4258660a3f09836f5a71617fd3f7311d06c0b",
+      "license": "GPL-2.0",
+      "purpose": "Java runtime/compiler candidate for Gradle/Android builds",
+      "notes": "Recipe links against Bionic-specific libraries and embeds prefix-dependent RPATH and JAVA_HOME paths. Package compatibility requires rebuilding with the exact app prefix and auditing every path and maintainer script."
+    },
+    {
+      "name": "python",
+      "version": "3.14.6-1",
+      "sourceUrls": [
+        "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz",
+        "https://salsa.debian.org/cpython-team/python3-defaults/-/archive/f358ab52bf2932ad55b1a72a29c9762169e6ac47/python3-defaults-f358ab52bf2932ad55b1a72a29c9762169e6ac47.tar.gz"
+      ],
+      "recipeSha256": [
+        "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63",
+        "3b7a76c144d39f5c4a2c7789fd4beb3266980c2e667ad36167e1e7a357c684b0"
+      ],
+      "license": "custom (upstream recipe notes PSF-2.0)",
+      "purpose": "Python for native-module build helpers such as node-gyp",
+      "notes": "Both source inputs and checksums are taken from the pinned recipe."
+    },
+    {
+      "name": "cmake",
+      "version": "4.4.4",
+      "sourceUrl": "https://www.cmake.org/files/v4.4/cmake-4.4.4.tar.gz",
+      "recipeSha256": "bd24c30d80a7744ae84b845ff080cc8453b06c622ef01066564108e9cefc44cf",
+      "license": "BSD-3-Clause",
+      "purpose": "Native module and NDK project builds"
+    },
+    {
+      "name": "ninja",
+      "version": "1.13.2",
+      "sourceUrl": "https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz",
+      "recipeSha256": "974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17",
+      "license": "Apache-2.0",
+      "purpose": "Native build backend"
+    },
+    {
+      "name": "git",
+      "version": "2.56.0",
+      "sourceUrl": "https://mirrors.kernel.org/pub/software/scm/git/git-2.56.0.tar.xz",
+      "recipeSha256": "26c56c296b38c0695b26fa95f475f1d01704d2d38e73465ca30b0b2f5dc789d3",
+      "license": "GPL-2.0",
+      "purpose": "Fetch Git-based project dependencies when required"
+    },
+    {
+      "name": "make",
+      "version": "4.4.1-1",
+      "sourceUrl": "https://mirrors.kernel.org/gnu/make/make-4.4.1.tar.gz",
+      "recipeSha256": "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3",
+      "license": "GPL-3.0",
+      "purpose": "Native build helper"
+    },
+    {
+      "name": "pkg-config",
+      "version": "0.29.2-3",
+      "sourceUrl": "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz",
+      "recipeSha256": "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591",
+      "license": "GPL-2.0",
+      "purpose": "Native library discovery for node-gyp/CMake projects"
+    }
+  ],
+  "candidateStatus": "These are pinned candidate roots, not a proven minimal dependency closure and not installable artifacts. Dependencies must be resolved from the same source revision and then captured in a generated lock with hashes. Exact app-prefix compatibility remains untested.",
+  "androidBuildSupport": {
+    "reactNative": "0.81.5",
+    "expo": "~54.0.29",
+    "reactNativeMinimumNode": "20.19.4 (v24.18.0 is a candidate satisfying this numeric minimum)",
+    "recommendedJdk": "17",
+    "officialReactNativeGuidePlatform": "Android API 35 / Build Tools 36.0.0",
+    "historicalAiBuilderHostBuild": {
+      "gradle": "8.14.3",
+      "androidSdkPlatform": 36,
+      "ndk": "27.1.12297006",
+      "scope": "Historical Linux-host build evidence in project history only; not v475 or on-device evidence. Keep each project's checked-in wrapper/settings as source of truth."
+    },
+    "androidArmBionicHostStatus": "UNVERIFIED. Official Android Studio Linux requirements do not establish support for ARM64/Bionic as a command-line SDK/AGP host. Do not claim an APK build path until sdkmanager, Gradle, AGP, aapt2, D8, apksigner, and NDK tools are executed on the actual AI Builder device."
+  },
+  "provisioningDesign": {
+    "distribution": "Local/offline signed repository only after package and target-device validation",
+    "initialInstall": "Separate, explicitly reviewed bootstrap step; runtime.packages remains read-only in v476",
+    "feedUrl": null,
+    "signingKey": null,
+    "redistributeGoogleSdk": false,
+    "offlineRequirements": [
+      "Android SDK platform/build-tools/NDK archives separately provisioned under their licenses",
+      "project Gradle wrapper distribution and checksum",
+      "Maven/Google Maven artifacts required by each project",
+      "npm/pnpm dependency tarballs and any Git-based dependencies",
+      "native-module-specific toolchains and caches"
+    ],
+    "projectDataRule": "Keep projects persistent only at /storage/emulated/0/AIBuilderTermux; never copy project files into the private package prefix."
+  }
+}

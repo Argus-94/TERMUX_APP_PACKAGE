@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
+    <title>Распаковка</title>
+    <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/builder-theme.css">
+</head>
+<body>
+    <div id="onboarding" class="onboarding hidden">
+        <div class="onboarding-card">
+            <h2>Добро пожаловать</h2>
+            <ol class="onboarding-steps">
+                <li><strong>Токен</strong> — classic с правом <code>repo</code> или fine-grained (Contents: Read/Write)</li>
+                <li><strong>Репозиторий</strong> — владелец и имя (можно с папкой: <code>repo/folder</code>)</li>
+                <li><strong>ZIP</strong> — с устройства или путь к архиву уже в репозитории</li>
+            </ol>
+            <p class="onboarding-note">Всё выполняется на устройстве через GitHub API. Токен хранится только локально.</p>
+            <button type="button" id="onboardingOk" class="btn-primary">Понятно</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Распаковка</h1>
+        <p class="subtitle">Распакуйте ZIP-архив прямо в GitHub-репозиторий</p>
+
+        <div class="card">
+            <label for="username">Имя пользователя GitHub</label>
+            <input type="text" id="username" placeholder="например, octocat" autocomplete="off" list="repoHistoryList">
+
+            <label for="repo">Репозиторий / папка</label>
+            <input type="text" id="repo" placeholder="например, myrepo или myrepo/folder" autocomplete="off" list="repoHistoryList">
+            <datalist id="repoHistoryList"></datalist>
+            <div id="repoHistoryChips" class="chips hidden"></div>
+            <button type="button" id="pickRepoBtn" class="btn-link">Выбрать из списка репозиториев</button>
+
+            <label for="token">Токен доступа (scope: repo)</label>
+            <div class="token-row">
+                <input type="password" id="token" placeholder="ghp_… или github_pat_…" autocomplete="off">
+                <button type="button" id="toggleTokenBtn" class="btn-icon" title="Показать токен" aria-label="Показать токен">👁</button>
+            </div>
+            <button type="button" id="manageTokensBtn" class="btn-link">Управление токенами</button>
+            <p class="hint">Classic: право <code>repo</code>. Fine-grained: Contents Read and Write на нужный репозиторий.</p>
+
+            <label for="branch">Ветка (опционально, по умолчанию main)</label>
+            <input type="text" id="branch" placeholder="только имя ветки: main (не URL!)" autocomplete="off">
+
+            <label for="archivePath">Путь к архиву в репозитории (опционально)</label>
+            <input type="text" id="archivePath" placeholder="относительный путь: file.zip (не URL github.com/...)" autocomplete="off">
+
+            <label>Или загрузите ZIP с устройства</label>
+            <div class="file-row">
+                <input type="file" id="fileInput" accept=".zip,application/zip,application/x-zip-compressed" class="file-input-native">
+                <button type="button" id="filePickBtn" class="btn-file">Выберите файл</button>
+                <span class="file-name" id="fileNameLabel">Файл не выбран</span>
+            </div>
+            <div class="file-info hidden" id="fileInfo"></div>
+
+            <label class="check-label">
+                <input type="checkbox" id="dryRunCheck">
+                <span>Только проверка (dry-run) — без записи в GitHub</span>
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="singleCommitCheck" checked>
+                <span>Один коммит на весь архив (Git Tree API)</span>
+            </label>
+
+            <button id="unzipBtn" class="btn-primary">Распаковать в GitHub</button>
+            <button id="clearBtn" class="btn-secondary hidden">Очистить</button>
+            <button id="retryBtn" class="btn-secondary hidden">Повторить неудачные файлы</button>
+            <button id="openRepoBtn" class="btn-secondary hidden">Открыть на GitHub</button>
+            <button id="exportLogBtn" class="btn-secondary hidden">Экспорт лога</button>
+            <button id="forgetTokenBtn" class="btn-secondary hidden">Забыть сохранённый токен</button>
+
+            <div id="phase" class="phase hidden"></div>
+            <div id="progress" class="progress hidden">
+                <div class="progress-bar"></div>
+            </div>
+            <div id="eta" class="eta hidden"></div>
+            <div id="stats" class="stats hidden"></div>
+            <pre id="log" class="log"></pre>
+        </div>
+
+        <div class="info">
+            <p>Все действия выполняются на стороне клиента с помощью GitHub API и библиотеки JSZip.</p>
+            <p>Если нужно распаковать архив в определенную папку, укажите ее через слэш: <code>репозиторий/папка</code>.</p>
+            <p class="version">AI Builder · GitHub Tool</p>
+        </div>
+    </div>
+
+
+<div id="modalWrap" class="hidden"></div>
+<div id="sheetWrap" class="hidden"></div>
+<div id="busy" class="hidden"><div class="bx"><div class="spin"></div><span id="busyTxt">Подождите…</span></div></div>
+<div id="toast" class="hidden"></div>
+
+    <script src="js/jszip.min.js"></script>
+    <script src="js/icons.js"></script>
+<script src="js/common.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

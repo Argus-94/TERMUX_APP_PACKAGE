@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "com.karat.aibuilder",
+  "architecture": "aarch64",
+  "bootstrapVersion": "1.10.61-custom-fb44d31",
+  "archiveFile": "termux-bootstrap-aarch64.zip",
+  "archiveSha256": "08a447f60c06783f33561583553149cf992ac7d9779071c71b8aaeeb452451b4",
+  "sourceRepository": "/dev/shm/aib-termux-bootstrap/termux-packages",
+  "sourceRepositoryUrl": "https://github.com/termux/termux-packages.git",
+  "sourceBranch": "detached",
+  "sourceCommit": "fb44d31f3445d7efd2cee6dada47aa19401c1329",
+  "builtAtUtc": "2026-10-12T20:40:43Z",
+  "archiveStructureVerified": true,
+  "buildMode": "direct-host-no-docker",
+  "hostBuildPatchSha256": "2d40c172c3cd1dfc27edf47e38d956e806938a8186fb53260c06c09a229a252d",
+  "termuxToolsDebSha256": "a65476c5048561365315d0e09596f0ef116928d028f78968bba2b917ff4c1600",
+  "termuxToolsConfigureNamespaceExports": true,
+  "runtimeForeignPrefixAudit": "passed for scanned runtime payload entries",
+  "defaultAptRepository": "disabled-until-app-compatible-feed",
+  "runtimeVerified": false,
+  "apkIntegrated": false
+}

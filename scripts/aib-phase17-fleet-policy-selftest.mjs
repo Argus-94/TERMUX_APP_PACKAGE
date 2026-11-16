@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = process.cwd();
+const policy = fs.readFileSync(path.join(root, 'lib/fleet-policy-manager.ts'), 'utf8');
+const hook = fs.readFileSync(path.join(root, 'hooks/useLLM.ts'), 'utf8');
+const ui = fs.readFileSync(path.join(root, 'app/runtime.tsx'), 'utf8');
+for (const token of ['FleetRole','viewer','operator','release-manager','admin','PRODUCTION_CONFIRMATION_REQUIRED','fleet-audit.jsonl']) if (!policy.includes(token)) throw new Error(`POLICY_TOKEN_MISSING_${token}`);
+for (const token of ['getFleetPolicy','setFleetPolicy','authorizeFleetAction','listFleetAudit']) if (!hook.includes(token)) throw new Error(`HOOK_TOKEN_MISSING_${token}`);
+const runtimeI18n = fs.readFileSync(path.join(root, 'lib/runtime-i18n.ts'), 'utf8');
+for (const token of ['fleetPolicy','fleetRole','productionPhrase','audit']) if (!runtimeI18n.includes(`${token}:`)) throw new Error(`UI_TOKEN_MISSING_${token}`);
+if (!ui.includes('rt("fleetPolicy")') || !ui.includes('rt("fleetRole")') || !ui.includes('rt("productionPhrase")') || !ui.includes('rt("audit")')) throw new Error('UI_I18N_WIRING_MISSING');
+console.log('AIB_PHASE17_FLEET_POLICY_SELFTEST_OK');

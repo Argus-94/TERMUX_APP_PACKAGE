@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+const lm = fs.readFileSync(path.join(root, "lib/local-model.ts"), "utf8");
+assert.match(lm, /parseGgufDisplayName/);
+assert.match(lm, /fileNameFromUri/);
+assert.match(lm, /qMatch/);
+assert.match(lm, /stagedFileHasGgufMagic\(staged\)/, "every staged import validates GGUF magic before replacement");
+assert.match(lm, /if \(!\(await stagedFileHasGgufMagic\(staged\)\)\)/);
+assert.ok(lm.indexOf("stagedFileHasGgufMagic(staged)") < lm.indexOf("return { file: staged, bytes };"), "invalid content is rejected before a staged file is returned to commit callers");
+const agent = fs.readFileSync(path.join(root, "lib/termux-agent.ts"), "utf8");
+assert.match(agent, /Repair recipe intercept/);
+assert.match(agent, /runRepairRecipe/);
+const hints = fs.readFileSync(path.join(root, "lib/agent-repair-hints.ts"), "utf8");
+assert.match(hints, /Do NOT paste recipe=id/);
+const us = fs.readFileSync(path.join(root, "hooks/useAppSettings.ts"), "utf8");
+assert.match(us, /refreshActiveMetaFromDisk/);
+console.log("AIB_OFFLINE_MODEL_IMPORT_SELFTEST_OK");

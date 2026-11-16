@@ -1,0 +1,5 @@
+# Karat offline bundle signing source
+
+`KaratManifestSigner.java` signs the exact raw UTF-8 `manifest.json` bytes with JCA `SHA256withRSA` (PKCS#1 v1.5) using alias `karat` directly from the supplied JKS. It validates the embedded SHA-256 certificate pin before accessing/signing with the private key; it never exports the key. The signature is a raw detached 128-byte file (`manifest.sig`), not an APT signature, OpenPGP object, or Release signature. No password is accepted as a CLI argument or written to disk; set `AIB_KARAT_STORE_PASSWORD` and `AIB_KARAT_KEY_PASSWORD` in the process environment, then invoke `sign <JKS> <manifest.json> <manifest.sig>`.
+
+The `karat` certificate is legacy RSA-1024 with `SHA1withRSA` for APK identity. That certificate identity is preserved; this utility uses its RSA public key only for SHA256withRSA manifest signatures. The signer self-test uses fresh ephemeral keys and does not access the production JKS or credentials. Run `./tools/offline-bundle/test.sh`.
