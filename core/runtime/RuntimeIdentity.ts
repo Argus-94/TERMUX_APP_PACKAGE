@@ -8,7 +8,7 @@ export type RuntimeIdentity = Readonly<{
 }>;
 
 export const CURRENT_RUNTIME_IDENTITY: RuntimeIdentity = {
-  appVersion: "1.10.112",
+  appVersion: "1.10.113",
   runtimeVersion: "1",
   rootfsVersion: "1",
   toolchainVersion: "1",

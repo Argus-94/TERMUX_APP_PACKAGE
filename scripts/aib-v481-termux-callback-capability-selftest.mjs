@@ -13,8 +13,8 @@ const bridge = read("lib/termux-bridge.ts");
 const nativePlugin = read("plugins/withTermuxBridge.js");
 const context = read("components/TermuxContext.tsx");
 
-assert.equal(pkg.version, "1.10.112", "current source release is v512");
-assert.match(appConfig, /versionCode:\s*512/);
+assert.equal(pkg.version, "1.10.113", "current source release is v513");
+assert.match(appConfig, /versionCode:\s*513/);
 // Capability and readiness are intrinsic to embedded runtime; no package-version gate or external probe.
 assert.match(bridge, /runEmbeddedTermuxCommand/);
 assert.match(bridge, /EMBEDDED_EXEC_UNAVAILABLE/);

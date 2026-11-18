@@ -43,7 +43,7 @@ export default ({ config }: ConfigContext): AIBuilderExpoConfig => ({
     // gesture/navigation buttons on devices with non-zero navigation insets.
     edgeToEdgeEnabled: false,
     package: "com.karat.aibuilder",
-    versionCode: 512,
+    versionCode: 513,
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon-fg.png",
       backgroundImage: "./assets/images/adaptive-icon-bg.png"

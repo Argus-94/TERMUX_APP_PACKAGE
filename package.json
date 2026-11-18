@@ -1,6 +1,6 @@
 {
   "name": "ai-builder",
-  "version": "1.10.112",
+  "version": "1.10.113",
   "main": "expo-router/entry",
   "private": true,
   "packageManager": "pnpm@9.15.0",

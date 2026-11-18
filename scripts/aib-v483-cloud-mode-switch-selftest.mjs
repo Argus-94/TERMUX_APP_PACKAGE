@@ -105,8 +105,8 @@ assert.match(settings, /<ScrollView[^>]*keyboardShouldPersistTaps="handled"/);
 assert.match(settings, /<ManusProviderCard[^>]*mode=\{mode\} setMode=\{setMode\}/);
 const config = fs.readFileSync("app.config.ts", "utf8");
 assert.match(config, /package: "com\.karat\.aibuilder"/);
-assert.match(config, /versionCode: 512/);
-assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).version, "1.10.112");
+assert.match(config, /versionCode: 513/);
+assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).version, "1.10.113");
 console.log("AIB_V483_CLOUD_MODE_SWITCH_SELFTEST_OK runtime=mock-hook+TSX on=all-providers off=local guards=loading+missing-key+checking verified-key=selectable api-on-selection=none normalization=all-modes NO_ANDROID_DEVICE_PROOF");
 
 // The shared component retains role/state and the mode explanation for screen readers.

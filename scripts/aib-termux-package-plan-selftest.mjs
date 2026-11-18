@@ -12,7 +12,7 @@ const plan = fs.readFileSync(planPath, "utf8");
 const sources = fs.readFileSync(sourcesPath, "utf8");
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
-assert.equal(pkg.version, "1.10.112", "current app source release is v512");
+assert.equal(pkg.version, "1.10.113", "current app source release is v513");
 assert.equal(manifest.release.label, "v476");
 assert.equal(manifest.release.appVersion, "1.10.76", "v476 package plan remains historical");
 assert.equal(manifest.release.androidVersionCode, 476);

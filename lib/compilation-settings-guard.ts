@@ -13,7 +13,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
 export const COMPILATION_GUARD_VERSION = "4";
-export const BASELINE_SOURCE_VERSION = "1.10.112";
+export const BASELINE_SOURCE_VERSION = "1.10.113";
 export const BASELINE_ANDROID_APPLICATION_ID = "com.karat.aibuilder";
 export const BASELINE_IOS_BUNDLE_IDENTIFIER = "com.karat.aibuilder";
 
@@ -30,10 +30,10 @@ export type ProtectedFile = {
 
 /** Files whose contents are part of the immutable compilation baseline. */
 export const PROTECTED_FILES: readonly ProtectedFile[] = [
-  { path: "app.config.ts", sha256: "218759345ea9e6410b335e7626123e7b70bb300fae5f9a6e4cd0610b795c9ac8" },
+  { path: "app.config.ts", sha256: "fbd5606bc6311b25e9ec3b2371983721018ca6c1a68dca6c1afd485cfce1bccc" },
   { path: "AI_BUILDER_ANDROID_IDENTITY.json", sha256: "35e62198b3b18f06d471c7ef0827cc06a43778b6316720784dc7076a9a58e1b3" },
   { path: "gradle.properties", sha256: "fd048ca701127912fae07cc1116c79301032c8c25fc6c520f3709de5470b6074" },
-  { path: "package.json", sha256: "50f15fe7e0c40c39987e839b8a7b7175ae19c7493557b12a4fedc97e2106531b" },
+  { path: "package.json", sha256: "6e0573e6f116d6285c2c43a94e9b0e40f81725e1162cfbefdf3bbf51d3cbed51" },
   { path: "pnpm-lock.yaml", sha256: "53db6fc4b7ccf03b0d0140a250c2d87305fd3e4217d3c694fa0d70ba8a38a250" },
   { path: "eas.json", sha256: "b89c0cc62bc73ed611f34733a209f2705f78293927b05c4e12fff802e09eeee5" },
   { path: "plugins/withFixGradleProperties.js", sha256: "b83237f274442c11a9a4749db5e8dcac8d2443cad63490d7cf506cf231c692d2" },

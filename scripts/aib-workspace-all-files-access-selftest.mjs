@@ -15,8 +15,8 @@ const workspaceList = read("lib/agent-tools/workspace-list.ts");
 const workspaceRead = read("lib/agent-tools/workspace-read.ts");
 const prompt = read("lib/termux-agent.ts");
 
-assert.equal(pkg.version, "1.10.112", "current package identity is v512");
-assert.match(config, /versionCode:\s*512/);
+assert.equal(pkg.version, "1.10.113", "current package identity is v513");
+assert.match(config, /versionCode:\s*513/);
 assert.match(config, /android\.permission\.MANAGE_EXTERNAL_STORAGE/);
 assert.match(config, /restricted Android 11\+ special access/i);
 assert.match(bridgeNative, /Environment\.isExternalStorageManager\(\)/);

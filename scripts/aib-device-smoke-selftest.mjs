@@ -5,8 +5,8 @@ const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const errors = [];
 const smoke = fs.readFileSync(path.join(root, "DEVICE_SMOKE.md"), "utf8");
 for (const token of [
-  "AI Builder v512",
-  "APK v512 **не собран и не подписан**",
+  "AI Builder v513",
+  "APK v513 **не собирался и не подписывался**",
   "Android device smoke: **NOT RUN**",
   "emulator smoke также не запускался",
 ]) {

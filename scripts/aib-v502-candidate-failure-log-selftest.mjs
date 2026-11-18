@@ -147,6 +147,6 @@ assert.match(ordinaryLogExport, /redactLogText\(content\)/,
 
 const releaseGate = read("scripts/aib-pre-release.mjs");
 assert.match(releaseGate, /aib-v502-candidate-failure-log-selftest\.mjs/);
-assert.equal(JSON.parse(read("package.json")).version, "1.10.112");
-assert.match(read("app.config.ts"), /versionCode: 512/);
+assert.equal(JSON.parse(read("package.json")).version, "1.10.113");
+assert.match(read("app.config.ts"), /versionCode: 513/);
 console.log("aib-v502-candidate-failure-log-selftest: PASS (exact transaction only, 64-KiB native bound, APT and post-APT stage classification, secret/path-free persistent summary, no share UI, no feed/device/APT actions)");
