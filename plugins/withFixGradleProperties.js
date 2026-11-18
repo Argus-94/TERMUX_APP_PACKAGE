@@ -7,6 +7,10 @@ const REQUIRED_PROPERTIES = {
   "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m",
   "android.useAndroidX": "true",
   "android.enableJetifier": "false",
+  // React Native native dependencies (including Hermes) read this root-project
+  // property when configuring CMake ABI variants. App abiFilters alone only
+  // constrains APK packaging and does not prevent unnecessary native builds.
+  "reactNativeArchitectures": "arm64-v8a",
   // Глобальный (на весь проект, а не только на модуль app) флаг AGP,
   // включающий генерацию BuildConfig везде, где она нужна — это и есть
   // официально задокументированное решение ошибки "Unresolved reference
