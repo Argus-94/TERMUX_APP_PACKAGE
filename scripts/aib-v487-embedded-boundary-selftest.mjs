@@ -26,7 +26,7 @@ const protectedHashes = {
   'gradle.properties': 'fd048ca701127912fae07cc1116c79301032c8c25fc6c520f3709de5470b6074',
   'eas.json': 'b89c0cc62bc73ed611f34733a209f2705f78293927b05c4e12fff802e09eeee5',
   'plugins/withEmbeddedTermuxLibraries.js': '7779ff6815e1f7ce1c6b21d923904cbbaa0e7203dbac766fdc2f8bf9c6205c78',
-  'plugins/withFixGradleProperties.js': '84da07199a42e0fa9eecfb237b626d6b2bd4b480acf375449451b36b7dbf9790',
+  'plugins/withFixGradleProperties.js': 'b83237f274442c11a9a4749db5e8dcac8d2443cad63490d7cf506cf231c692d2',
   'plugins/withEnsureBuildConfig.js': 'c042dd812b78491c509dcbb07d34550a72d6959b61f800a0145e827718550ef8',
   'plugins/withLlamaRnProguard.js': '4f5eb7051880f634fc99197a097c84d6d9e0a9d4d492ad0315dc5df845da7b4a',
   'plugins/withAndroidReleaseSigning.js': '2aa97ad9330268d2bc3ce911b65ae980f1e8daede2f3189818d8c69acac57e0c',

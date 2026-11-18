@@ -33,10 +33,10 @@ export const PROTECTED_FILES: readonly ProtectedFile[] = [
   { path: "app.config.ts", sha256: "218759345ea9e6410b335e7626123e7b70bb300fae5f9a6e4cd0610b795c9ac8" },
   { path: "AI_BUILDER_ANDROID_IDENTITY.json", sha256: "35e62198b3b18f06d471c7ef0827cc06a43778b6316720784dc7076a9a58e1b3" },
   { path: "gradle.properties", sha256: "fd048ca701127912fae07cc1116c79301032c8c25fc6c520f3709de5470b6074" },
-  { path: "package.json", sha256: "cd86cffba60681a30e3a3bc4b7f679efacde47a953c6b26f31d610b197af76bb" },
+  { path: "package.json", sha256: "50f15fe7e0c40c39987e839b8a7b7175ae19c7493557b12a4fedc97e2106531b" },
   { path: "pnpm-lock.yaml", sha256: "53db6fc4b7ccf03b0d0140a250c2d87305fd3e4217d3c694fa0d70ba8a38a250" },
   { path: "eas.json", sha256: "b89c0cc62bc73ed611f34733a209f2705f78293927b05c4e12fff802e09eeee5" },
-  { path: "plugins/withFixGradleProperties.js", sha256: "84da07199a42e0fa9eecfb237b626d6b2bd4b480acf375449451b36b7dbf9790" },
+  { path: "plugins/withFixGradleProperties.js", sha256: "b83237f274442c11a9a4749db5e8dcac8d2443cad63490d7cf506cf231c692d2" },
   { path: "plugins/withEnsureBuildConfig.js", sha256: "c042dd812b78491c509dcbb07d34550a72d6959b61f800a0145e827718550ef8" },
   { path: "plugins/withLlamaRnProguard.js", sha256: "4f5eb7051880f634fc99197a097c84d6d9e0a9d4d492ad0315dc5df845da7b4a" },
   // v512: pinned after adding bounded native cancellation and fail-closed stage cleanup.
