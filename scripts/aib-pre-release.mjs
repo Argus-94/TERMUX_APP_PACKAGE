@@ -93,6 +93,7 @@ const checks = [
   ["Android MANAGE_EXTERNAL_STORAGE explicit Settings flow and exact-root workspace gate", ["scripts/aib-workspace-all-files-access-selftest.mjs"]],
   ["storage permission merge and restricted-permission policy disclosure", ["scripts/aib-storage-permission-selftest.mjs"]],
   ["v501 generated TerminalView private-layout/session-ID guards and Android bridge Kotlin template", ["scripts/aib-termux-bridge-kotlin-template-selftest.mjs", "scripts/aib-embedded-terminal-view-selftest.mjs"]],
+  ["v512 clean Expo prebuild and Kotlin APT-plan AWK string-literal escaping", ["scripts/aib-v512-termux-awkscript-kotlin-prebuild-selftest.mjs"]],
   ["embedded command I/O, stdin EOF and background output persistence", ["--experimental-transform-types", "scripts/aib-v478-termux-command-execution-selftest.mjs"]],
   ["v480 Termux result-wait status is honest after 30 seconds", ["--experimental-strip-types", "scripts/aib-v480-termux-command-wait-selftest.mjs"]],
   ["embedded readiness smoke, no external version floor and diagnostic privacy", ["--experimental-strip-types", "scripts/aib-v481-termux-callback-capability-selftest.mjs"]],

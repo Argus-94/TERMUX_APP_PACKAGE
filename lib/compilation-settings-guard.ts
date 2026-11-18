@@ -39,8 +39,8 @@ export const PROTECTED_FILES: readonly ProtectedFile[] = [
   { path: "plugins/withFixGradleProperties.js", sha256: "b83237f274442c11a9a4749db5e8dcac8d2443cad63490d7cf506cf231c692d2" },
   { path: "plugins/withEnsureBuildConfig.js", sha256: "c042dd812b78491c509dcbb07d34550a72d6959b61f800a0145e827718550ef8" },
   { path: "plugins/withLlamaRnProguard.js", sha256: "4f5eb7051880f634fc99197a097c84d6d9e0a9d4d492ad0315dc5df845da7b4a" },
-  // v512: pinned after adding bounded native cancellation and fail-closed stage cleanup.
-  { path: "plugins/withTermuxBridge.js", sha256: "ad038af6a2594b24f4513a6ef0344ef9ef004aae31949d954764e913fa55e5e3" },
+  // v512: pinned after bounded native cancellation, stage cleanup, and Kotlin AWK string escaping.
+  { path: "plugins/withTermuxBridge.js", sha256: "afec0c942a5baeb8086809b6926af0efa41d3b4371a6e12240623470c995e6ca" },
   { path: "plugins/privatePackageShellPolicy.js", sha256: "58ccd510bc04ca4b93c47cbad98c1f75655b17df2be6c273797e20ce0d889f19" },
   { path: "plugins/termuxBootstrapInstallerKotlin.js", sha256: "6b8bac9d89810053be8d5e84c0a0dd31e699035126353a7da5b6b066a5525379" },
   { path: "plugins/withAndroidReleaseSigning.js", sha256: "2aa97ad9330268d2bc3ce911b65ae980f1e8daede2f3189818d8c69acac57e0c" },

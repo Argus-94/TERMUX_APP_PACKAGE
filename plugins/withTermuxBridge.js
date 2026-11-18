@@ -1171,7 +1171,7 @@ class TermuxBridgeModule(reactContext: ReactApplicationContext) :
         val actualPlan = q(File(planDir, "plan-actual-" + nonce + ".txt").absolutePath)
         val expectedPlan = q(File(planDir, "plan-expected-" + nonce + ".txt").absolutePath)
         val awkScript = "/^Remv / || /^Purg / { bad=1 }\\n" +
-            "/^Inst / { tail=\$0; sub(/^Inst /, \"\", tail); name=tail; sub(/ .*/, \"\", name); open=index(\$0, \"(\"); if (open < 1) { bad=1; next }; version=substr(\$0, open+1); sub(/[[:space:]].*$/, \"\", version); sub(/\\)$/, \"\", version); if (name == \"\" || version == \"\") { bad=1; next }; print name \"@\" version; count++ }\\n" +
+            "/^Inst / { tail=\$0; sub(/^Inst /, \\"\\", tail); name=tail; sub(/ .*/, \\"\\", name); open=index(\$0, \\"(\\"); if (open < 1) { bad=1; next }; version=substr(\$0, open+1); sub(/[[:space:]].*$/, \\"\\", version); sub(/\\\\)$/, \\"\\", version); if (name == \\"\\" || version == \\"\\") { bad=1; next }; print name \\"@\\" version; count++ }\\n" +
             "END { if (bad || count < 1) exit 1 }"
         val extractActual = "awk " + q(awkScript) + " " + simulationOutput + " > " + actualPlan + " && LC_ALL=C sort -o " + actualPlan + " " + actualPlan
         val expectedRows = packages.map { it.name + "@" + it.version }.sorted()
