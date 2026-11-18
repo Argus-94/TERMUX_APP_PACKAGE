@@ -1,6 +1,7 @@
 import { Directory, File, Paths, type FileHandle } from "expo-file-system";
 import { createDownloadResumable, type DownloadResumable } from "expo-file-system/legacy";
 import { extractSelectedZipEntriesToSink, type ZipByteSource } from "./archive-utils";
+import { buildGitHubReleaseAssetUrl, isAllowedGitHubReleaseAssetResponse } from "./github-release-asset-transport";
 import { withOnlineFeedRequestDeadline, withOnlineFeedTransferDeadline } from "./online-feed-timeouts";
 import {
   getOfflineBundleFileSha256,
@@ -11,8 +12,8 @@ import {
   type OfflinePackageBundleStageResult,
 } from "./termux-bridge";
 
-/** This release slot is intentionally empty until an independently qualified feed is approved and published. */
-export const ONLINE_PACKAGE_RELEASE_BASE_URL = "https://github.com/Argus-94/TERMUX_APP_PACKAGE/releases/download/aib-feed-v1/";
+/** No production release has been selected or published; stay blocked until an approved release is configured. */
+export const ONLINE_PACKAGE_RELEASE_BASE_URL: string | null = null;
 export const ONLINE_PACKAGE_CATALOG_ASSET = "online-catalog.json";
 export const ONLINE_PACKAGE_SIGNATURE_ASSET = "online-catalog.sig";
 export const ONLINE_PACKAGE_BUNDLE_ASSET = "online-feed-bundle.zip";
@@ -23,7 +24,6 @@ const MAX_FILE_BYTES = 100 * 1024 * 1024;
 const MAX_PACKAGE_BYTES = 190 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 200 * 1024 * 1024;
 const MAX_FEED_OPERATION_MS = 45 * 60 * 1000;
-const ALLOWED_RESPONSE_HOSTS = new Set(["github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"]);
 const REQUEST_ID = /^[A-Za-z0-9._-]{1,96}$/;
 const STAGE_ID = /^[A-Za-z0-9_-]{16,128}$/;
 
@@ -153,22 +153,10 @@ function stageId(): string {
   return Array.from(bytes, value => value.toString(16).padStart(2, "0")).join("");
 }
 
-function checkedUrl(requestedUrl: string, response: FetchResponse): boolean {
-  try {
-    const requested = new URL(requestedUrl);
-    const actual = new URL(response.url || requestedUrl);
-    if (requested.protocol !== "https:" || requested.hostname !== "github.com" ||
-        !requested.pathname.startsWith("/Argus-94/TERMUX_APP_PACKAGE/releases/download/aib-feed-v1/") ||
-        actual.protocol !== "https:" || !ALLOWED_RESPONSE_HOSTS.has(actual.hostname)) return false;
-    if (actual.hostname === "github.com" && (actual.hostname !== requested.hostname || actual.pathname !== requested.pathname)) return false;
-    return true;
-  } catch { return false; }
-}
-
 async function getBytes(url: string, signal: AbortSignal, maxBytes: number, fetcher: FetchLike): Promise<Uint8Array> {
   return withOnlineFeedRequestDeadline(async requestSignal => {
     const response = await fetcher(url, { signal: requestSignal });
-    if (!checkedUrl(url, response)) throw new Error("AIB_ONLINE_PACKAGE_REDIRECT_REJECTED");
+    if (!isAllowedGitHubReleaseAssetResponse(url, response.url)) throw new Error("AIB_ONLINE_PACKAGE_REDIRECT_REJECTED");
     if (!response.ok || response.status !== 200) throw new Error(response.status === 404 ? "AIB_ONLINE_PACKAGE_FEED_NOT_PUBLISHED" : "AIB_ONLINE_PACKAGE_HTTP_FAILED");
     const declaredLength = response.headers?.get("content-length");
     if (!declaredLength || !/^(0|[1-9][0-9]*)$/.test(declaredLength)) throw new Error("AIB_ONLINE_PACKAGE_CONTENT_LENGTH_INVALID");
@@ -188,9 +176,9 @@ async function getAssetLength(
   maxBytes: number,
   expectedSize: number | null = null,
   missingAllowed = false,
-): Promise<number | null> {
+): Promise<{ url: string; sizeBytes: number } | null> {
   const head = await withOnlineFeedRequestDeadline(requestSignal => fetcher(url, { signal: requestSignal, method: "HEAD" }), signal);
-  if (!checkedUrl(url, head)) throw new Error("AIB_ONLINE_PACKAGE_REDIRECT_REJECTED");
+  if (!isAllowedGitHubReleaseAssetResponse(url, head.url)) throw new Error("AIB_ONLINE_PACKAGE_REDIRECT_REJECTED");
   if (head.status === 404 && missingAllowed) return null;
   if (!head.ok || head.status !== 200) throw new Error(head.status === 404 ? "AIB_ONLINE_PACKAGE_ASSET_MISSING" : "AIB_ONLINE_PACKAGE_HTTP_FAILED");
   const declaredLength = head.headers?.get("content-length");
@@ -198,10 +186,10 @@ async function getAssetLength(
   const declaredBytes = Number(declaredLength);
   if (!Number.isSafeInteger(declaredBytes) || declaredBytes < 1 || declaredBytes > maxBytes ||
       (expectedSize !== null && declaredBytes !== expectedSize)) throw new Error("AIB_ONLINE_PACKAGE_ASSET_SIZE_MISMATCH");
-  return declaredBytes;
+  return { url: head.url!, sizeBytes: declaredBytes };
 }
 
-async function downloadPackageAsset(
+export async function downloadPackageAsset(
   url: string,
   destination: File,
   expectedSize: number,
@@ -211,9 +199,13 @@ async function downloadPackageAsset(
   signal: AbortSignal,
   fetcher: FetchLike,
   onProgress: (writtenBytes: number) => void,
+  prevalidatedAsset: { url: string; sizeBytes: number } | null = null,
 ): Promise<void> {
   if (signal.aborted) throw new Error("AIB_ONLINE_PACKAGE_CANCELLED");
-  await getAssetLength(url, signal, fetcher, maxBytes, expectedSize);
+  const asset = prevalidatedAsset ?? await getAssetLength(url, signal, fetcher, maxBytes, expectedSize);
+  if (!asset) throw new Error("AIB_ONLINE_PACKAGE_ASSET_SIZE_MISMATCH");
+  if (!isAllowedGitHubReleaseAssetResponse(url, asset.url)) throw new Error("AIB_ONLINE_PACKAGE_REDIRECT_REJECTED");
+  if (asset.sizeBytes !== expectedSize) throw new Error("AIB_ONLINE_PACKAGE_ASSET_SIZE_MISMATCH");
 
   let downloader: DownloadResumable | null = null;
   let cancelled = false;
@@ -224,7 +216,7 @@ async function downloadPackageAsset(
     cancelled = true;
     void downloader?.cancelAsync().catch(() => undefined);
   };
-  downloader = createDownloadResumable(url, destination.uri, {}, progress => {
+  downloader = createDownloadResumable(asset.url, destination.uri, {}, progress => {
     if (progress.totalBytesWritten > maxBytes || progress.totalBytesExpectedToWrite > maxBytes) cancel();
     const written = Math.max(0, Math.min(expectedSize, progress.totalBytesWritten));
     if (written > lastWritten) { lastWritten = written; transferActivity?.(); }
@@ -351,8 +343,20 @@ export async function fetchAndStageOnlinePackageCatalog(
   requestId: string,
   onProgress: OnlineFeedProgress = () => undefined,
   fetcher: FetchLike = (url, init) => fetch(url, { signal: init.signal, method: init.method }) as unknown as Promise<FetchResponse>,
+  releaseBaseUrl: string | null = ONLINE_PACKAGE_RELEASE_BASE_URL,
 ): Promise<OnlinePackageFeedStageResult> {
   if (!REQUEST_ID.test(requestId)) return { status: "rejected", code: "AIB_OFFLINE_BUNDLE_REQUEST_ID_INVALID" };
+  if (releaseBaseUrl === null) return { status: "blocked", code: "AIB_ONLINE_PACKAGE_RELEASE_NOT_CONFIGURED" };
+  let catalogUrl: string;
+  let signatureUrl: string;
+  let bundleUrl: string;
+  try {
+    catalogUrl = buildGitHubReleaseAssetUrl(releaseBaseUrl, ONLINE_PACKAGE_CATALOG_ASSET);
+    signatureUrl = buildGitHubReleaseAssetUrl(releaseBaseUrl, ONLINE_PACKAGE_SIGNATURE_ASSET);
+    bundleUrl = buildGitHubReleaseAssetUrl(releaseBaseUrl, ONLINE_PACKAGE_BUNDLE_ASSET);
+  } catch {
+    return { status: "blocked", code: "AIB_ONLINE_PACKAGE_RELEASE_CONFIG_INVALID" };
+  }
   const controller = new AbortController();
   const id = stageId();
   const prior = activeRequests.get(requestId);
@@ -366,8 +370,8 @@ export async function fetchAndStageOnlinePackageCatalog(
   let nativeCancelUnconfirmed = false;
   try {
     onProgress("catalog", 2);
-    const rawManifest = await getBytes(ONLINE_PACKAGE_RELEASE_BASE_URL + ONLINE_PACKAGE_CATALOG_ASSET, controller.signal, MAX_MANIFEST_BYTES, fetcher);
-    const signature = await getBytes(ONLINE_PACKAGE_RELEASE_BASE_URL + ONLINE_PACKAGE_SIGNATURE_ASSET, controller.signal, MAX_SIGNATURE_BYTES, fetcher);
+    const rawManifest = await getBytes(catalogUrl, controller.signal, MAX_MANIFEST_BYTES, fetcher);
+    const signature = await getBytes(signatureUrl, controller.signal, MAX_SIGNATURE_BYTES, fetcher);
     if (signature.length !== MAX_SIGNATURE_BYTES || !await verifyOnlinePackageCatalog(rawManifest, signature)) {
       return { status: "rejected", code: "AIB_ONLINE_PACKAGE_CATALOG_SIGNATURE_OR_FRESHNESS_INVALID" };
     }
@@ -386,13 +390,12 @@ export async function fetchAndStageOnlinePackageCatalog(
     let feedRoot = new Directory(root, "feed");
     feedRoot.create({ intermediates: true });
     const totalBytes = catalog.files.reduce((sum, file) => sum + file.sizeBytes, 0);
-    const bundleUrl = ONLINE_PACKAGE_RELEASE_BASE_URL + encodeURIComponent(ONLINE_PACKAGE_BUNDLE_ASSET);
-    const bundleSize = await getAssetLength(bundleUrl, controller.signal, fetcher, MAX_TOTAL_BYTES, null, true);
-    if (bundleSize !== null) {
+    const bundleAsset = await getAssetLength(bundleUrl, controller.signal, fetcher, MAX_TOTAL_BYTES, null, true);
+    if (bundleAsset !== null) {
       const bundle = new File(root, ONLINE_PACKAGE_BUNDLE_ASSET);
       // The archive container itself is not trusted; every extracted file is checked against the Karat-signed catalog.
-      await downloadPackageAsset(bundleUrl, bundle, bundleSize, null, MAX_TOTAL_BYTES, requestId, controller.signal, fetcher,
-        writtenBytes => onProgress("downloading", 8 + Math.floor(writtenBytes / Math.max(bundleSize, 1) * 78)));
+      await downloadPackageAsset(bundleUrl, bundle, bundleAsset.sizeBytes, null, MAX_TOTAL_BYTES, requestId, controller.signal, fetcher,
+        writtenBytes => onProgress("downloading", 8 + Math.floor(writtenBytes / Math.max(bundleAsset.sizeBytes, 1) * 78)), bundleAsset);
       try {
         await extractGitHubFeedArchive(bundle, feedRoot, catalog, controller.signal, onProgress);
       } finally {
@@ -411,7 +414,7 @@ export async function fetchAndStageOnlinePackageCatalog(
         }
         const asset = safeAssetName(row.path);
         if (!asset) throw new Error("AIB_ONLINE_PACKAGE_ASSET_PATH_INVALID");
-        const url = ONLINE_PACKAGE_RELEASE_BASE_URL + encodeURIComponent(asset);
+        const url = buildGitHubReleaseAssetUrl(releaseBaseUrl, asset);
         const destination = new File(parent, relative[relative.length - 1]);
         if (row.sizeBytes > MAX_FILE_BYTES) throw new Error("AIB_ONLINE_PACKAGE_ASSET_SIZE_INVALID");
         await downloadPackageAsset(url, destination, row.sizeBytes, row.sha256, MAX_FILE_BYTES, requestId, controller.signal, fetcher,

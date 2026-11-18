@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = relative => fs.readFileSync(path.join(root, relative), "utf8");
 const bridge = read("plugins/withTermuxBridge.js");
 const feed = read("lib/online-package-feed.ts");
+const transport = read("lib/github-release-asset-transport.ts");
 const stageBridge = read("lib/termux-bridge.ts");
 const offlineBundle = read("lib/offline-package-bundle.ts");
 
@@ -55,14 +56,17 @@ const assetCheckEnd = feed.indexOf("async function downloadPackageAsset(", asset
 assert.ok(assetCheckStart >= 0 && assetCheckEnd > assetCheckStart, "bounded GitHub asset HEAD checker must exist");
 const assetCheck = feed.slice(assetCheckStart, assetCheckEnd);
 assert.match(assetCheck, /method: "HEAD"/, "asset size and redirect host must be checked before download");
-assert.match(assetCheck, /checkedUrl\(url, head\)/, "asset redirects must remain restricted to GitHub/CDN hosts");
+assert.match(assetCheck, /isAllowedGitHubReleaseAssetResponse\(url, head\.url\)/, "the final HEAD URL must be restricted to GitHub/CDN hosts");
 
-const downloaderStart = feed.indexOf("async function downloadPackageAsset(");
+const downloaderStart = feed.indexOf("export async function downloadPackageAsset(");
 const downloaderEnd = feed.indexOf("function writeBytes(", downloaderStart);
 assert.ok(downloaderStart >= 0 && downloaderEnd > downloaderStart, "streamed package downloader must exist");
 const downloader = feed.slice(downloaderStart, downloaderEnd);
 assert.match(assetCheck, /expectedSize !== null.*declaredBytes !== expectedSize/, "asset content length must exactly match the signed catalog");
 assert.match(downloader, /createDownloadResumable\(/, "package bodies must be streamed by the native file downloader");
+assert.match(downloader, /createDownloadResumable\(asset\.url/, "the body must be fetched directly from the already-validated response URL");
+assert.match(downloader, /prevalidatedAsset \?\? await getAssetLength/, "an existing validated HEAD target may be reused for the archive body");
+assert.match(downloader, /isAllowedGitHubReleaseAssetResponse\(url, asset\.url\)/, "both fresh and reused targets must pass the same allowlist guard");
 assert.match(downloader, /totalBytesWritten > maxBytes/, "stream progress must cancel an over-limit transfer");
 assert.match(downloader, /cancelAsync\(\)/, "the native file transfer must be cancellable");
 assert.match(downloader, /destination\.size !== expectedSize/, "downloaded file size must be rechecked before staging");
@@ -71,6 +75,11 @@ assert.doesNotMatch(downloader, /arrayBuffer\(/, "package assets must never be b
 assert.match(feed, /withOnlineFeedRequestDeadline\(/, "metadata fetches must be deadline-bound");
 assert.match(feed, /withOnlineFeedTransferDeadline\(/, "native transfers must have an idle and total deadline");
 assert.match(feed, /ONLINE_PACKAGE_BUNDLE_ASSET/, "a single GitHub Release archive must be supported");
+assert.match(feed, /ONLINE_PACKAGE_RELEASE_BASE_URL: string \| null = null/, "no unpublished production release may be selected by default");
+assert.match(feed, /releaseBaseUrl === null[\s\S]*AIB_ONLINE_PACKAGE_RELEASE_NOT_CONFIGURED/, "the feed must fail closed before network access until a release is selected");
+assert.match(transport, /TERMUX_APP_PACKAGE/, "direct asset URLs must be scoped to the approved GitHub repository");
+assert.match(transport, /isCanonicalReleaseAssetPath/, "only one exact tag/asset pair may be requested");
+assert.match(transport, /release-assets\.githubusercontent\.com[\s\S]*objects\.githubusercontent\.com/, "only the known GitHub release CDN hosts may receive redirected asset requests");
 assert.match(feed, /if \(downloader\) await downloader\.cancelAsync\(\)/, "UI cancellation must reach the active native transfer");
 assert.match(feed, /controller\.signal\.aborted \? "AIB_ONLINE_PACKAGE_CANCELLED"/, "native transfer aborts must produce a stable cancellation result instead of generic fetch failure");
 assert.match(bridge, /stopAibEmbeddedProcess\(current, root, tracked\)/, "native feed cancellation must stop the running APT process, not only mark a flag");

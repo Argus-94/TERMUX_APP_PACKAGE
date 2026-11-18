@@ -13,7 +13,7 @@ const checks = [
   ["v507 Karat-signed offline package archive validation, bounded extraction and explicit install flow", ["scripts/aib-offline-package-bundle-selftest.mjs"]],
   ["v507 native Karat verification, exact dependency/index match and app-private local APT transaction boundaries", ["scripts/aib-offline-package-native-boundary-selftest.mjs"]],
   ["v511 online feed anti-replay concurrency, aligned limits, streamed download, size/hash checks and cancellation", ["scripts/aib-online-package-feed-hardening-selftest.mjs"]],
-  ["v512 GitHub Release single-archive/per-package feed transport and no-hang timeout recovery", ["scripts/aib-online-package-feed-runtime-selftest.mjs"]],
+  ["v512 direct GitHub Release asset URLs, redirect constraints, streaming/cancellation and timeout recovery", ["scripts/aib-online-package-feed-runtime-selftest.mjs"]],
   ["v506 PDF native extractor source pin, drift guard and resource limits", ["scripts/aib-apply-pdf-extractor-patch-selftest.mjs"]],
   ["v506 production signing, release-only R8/resource hardening and pinned signer/hook policy use local credentials and leave debug unchanged", ["scripts/aib-android-release-signing-selftest.mjs"]],
   ["v511 V1 API18-23, legacy V2 API24-27 and current V3 API28-36 with pinned lineage", ["scripts/aib-release-lineage-signing-selftest.mjs"]],
