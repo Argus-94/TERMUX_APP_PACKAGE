@@ -4,6 +4,7 @@ import fs from "node:fs";
 import Module from "node:module";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { zipSync } from "fflate";
 import { typescript } from "./test-helpers/load-typescript.mjs";
@@ -49,10 +50,37 @@ async function main() {
   assert.match(feedSource, /ONLINE_PACKAGE_BUNDLE_ASSET/, "single-archive GitHub Release asset must be supported");
 
   const { byteArrayZipSource, extractSelectedZipEntriesToSink } = loadTs(path.join(root, "lib/archive-utils.ts"));
-  const archiveBytes = zipSync({
-    "feed/dists/stable/main/binary-aarch64/Packages": new TextEncoder().encode("Package: zlib\nVersion: 1.0\nArchitecture: aarch64\n\n"),
-    "feed/pool/main/z/zlib.deb": new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
-  });
+  const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
+  const packagePath = "feed/pool/main/z/zlib_1.0_aarch64.deb";
+  const packageBytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
+  const packageSha256 = sha256(packageBytes);
+  const indexBytes = new TextEncoder().encode(`Package: zlib\nVersion: 1.0\nArchitecture: aarch64\nFilename: pool/main/z/zlib_1.0_aarch64.deb\nSize: ${packageBytes.length}\nSHA256: ${packageSha256}\n\n`);
+  const indexPath = "feed/dists/stable/main/binary-aarch64/Packages";
+  const now = Date.now();
+  const candidateCatalog = {
+    format: "aibuilder-online-package-catalog",
+    schemaVersion: 3,
+    appId: "com.karat.aibuilder",
+    architecture: "aarch64",
+    catalogState: "candidate",
+    catalogCommit: "a".repeat(40),
+    catalogSha256: sha256(indexBytes),
+    dependencyClosureComplete: true,
+    signatureAlgorithm: "SHA256withRSA",
+    signerCertificateSha256: "661e5c868dbb38f8fe57d380e5c9b35e594e79bedb72d9ad2ad0113665c80418",
+    feedRoot: "feed",
+    sequence: 1,
+    issuedAtMs: now,
+    expiresAtMs: now + 60 * 60 * 1000,
+    files: [
+      { path: indexPath, sizeBytes: indexBytes.length, sha256: sha256(indexBytes) },
+      { path: packagePath, sizeBytes: packageBytes.length, sha256: packageSha256 },
+    ],
+    packages: [{ name: "zlib", version: "1.0", architecture: "aarch64", filename: packagePath,
+      sizeBytes: packageBytes.length, sha256: packageSha256, depends: [] }],
+  };
+  assert.equal(candidateCatalog.catalogState, "candidate", "the test fixture must never promote candidate bytes to production-qualified");
+  const archiveBytes = zipSync({ [indexPath]: indexBytes, [packagePath]: packageBytes });
   const extracted = new Map();
   const sink = {
     begin(name) { extracted.set(name, []); },
@@ -63,7 +91,7 @@ async function main() {
     { maxEntries: 2, maxEntryBytes: 1024, maxTotalBytes: 2048 }, sink);
   assert.equal(zipResult.ok, true, "single archive streams through the bounded ZIP parser");
   assert.equal(zipResult.names.length, 2, "only the exact archive entries are exposed");
-  assert.equal(extracted.get("feed/pool/main/z/zlib.deb").sizeBytes, 7, "streamed entry size is checked");
+  assert.equal(extracted.get(packagePath).sizeBytes, 7, "streamed candidate entry size is checked");
 
   const malformed = archiveBytes.slice();
   malformed[0] = 0;
@@ -116,15 +144,28 @@ async function main() {
   const mockFileSystem = { Directory: class {}, File: class {}, Paths: { cache: {} } };
   const mockBridge = {
     getOfflineBundleFileSha256: async () => "",
-    stagePreparedOnlinePackageDirectory: async () => ({ status: "blocked" }),
-    verifyOnlinePackageCatalog: async () => false,
+    stagePreparedOnlinePackageDirectory: async () => { mockBridge.nativeStageCalls++; return { status: "blocked" }; },
+    verifyOnlinePackageCatalog: async () => true,
     cancelOfflinePackageBundle: async () => true,
+    nativeStageCalls: 0,
   };
   const feed = loadTs(path.join(root, "lib/online-package-feed.ts"), new Map([
     ["expo-file-system", mockFileSystem],
     ["expo-file-system/legacy", mockDownloadModule],
     ["./termux-bridge", mockBridge],
   ]));
+  const parsedCandidate = feed.parseOnlinePackageCatalog(candidateCatalog);
+  assert.ok(parsedCandidate, "read-only catalog parser accepts the explicit candidate schema state");
+  assert.equal(parsedCandidate.catalogState, "candidate", "candidate status is retained by parsing");
+  assert.equal(feed.parseOnlinePackageCatalog({ ...candidateCatalog, catalogState: "pending" }), null,
+    "the schema rejects states other than candidate and production-qualified");
+  for (const asset of parsedCandidate.files) {
+    const extractedAsset = extracted.get(asset.path);
+    assert.ok(extractedAsset, `candidate fixture includes ${asset.path}`);
+    const bytes = Buffer.concat(extractedAsset.chunks.map(chunk => Buffer.from(chunk)));
+    assert.equal(bytes.length, asset.sizeBytes, `candidate asset size matches: ${asset.path}`);
+    assert.equal(sha256(bytes), asset.sha256, `candidate asset hash matches: ${asset.path}`);
+  }
   assert.equal(feed.ONLINE_PACKAGE_RELEASE_BASE_URL, null, "production feed remains unconfigured until an approved release exists");
   let unconfiguredFetchCalls = 0;
   const unconfigured = await feed.fetchAndStageOnlinePackageCatalog("no-release-selected", undefined, async () => {
@@ -143,6 +184,23 @@ async function main() {
     "control metadata is requested from the direct GitHub Release asset URL");
   assert.deepEqual(controlRedirect, { status: "rejected", code: "AIB_ONLINE_PACKAGE_REDIRECT_REJECTED" },
     "the live catalog fetch path rejects an external redirect before parsing bytes");
+  const candidateCatalogBytes = new TextEncoder().encode(JSON.stringify(candidateCatalog));
+  const candidateSignatureBytes = new Uint8Array(256).fill(0x5a);
+  const candidateCatalogUrl = buildGitHubReleaseAssetUrl(releaseBase, "online-catalog.json");
+  const candidateSignatureUrl = buildGitHubReleaseAssetUrl(releaseBase, "online-catalog.sig");
+  const candidateFetches = [];
+  const candidateInstall = await feed.fetchAndStageOnlinePackageCatalog("candidate-must-not-install", undefined, async (url, init) => {
+    candidateFetches.push({ url, method: init.method ?? "GET" });
+    const bytes = url === candidateCatalogUrl ? candidateCatalogBytes : url === candidateSignatureUrl ? candidateSignatureBytes : null;
+    assert.ok(bytes, `candidate status must reject before requesting a package asset: ${url}`);
+    return { ok: true, status: 200, url, headers: { get: name => name.toLowerCase() === "content-length" ? String(bytes.length) : null },
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) };
+  }, releaseBase);
+  assert.deepEqual(candidateInstall, { status: "blocked", code: "AIB_ONLINE_PACKAGE_CATALOG_NOT_PRODUCTION_QUALIFIED" },
+    "even when the native-verifier test stub accepts it, a candidate catalog is rejected before package I/O");
+  assert.deepEqual(candidateFetches, [{ url: candidateCatalogUrl, method: "GET" }, { url: candidateSignatureUrl, method: "GET" }],
+    "candidate install attempt fetches control metadata only, never package assets");
+  assert.equal(mockBridge.nativeStageCalls, 0, "candidate feed bytes never cross into native staging");
 
   const cdnUrl = "https://release-assets.githubusercontent.com/github-production-release-asset/123/bundle.zip?token=temporary";
   const file = { uri: "file:///private/cache/feed.zip", size: 0, exists: true, delete() { this.exists = false; this.deleted = true; } };
@@ -258,7 +316,7 @@ async function main() {
 
   const recovered = await withOnlineFeedRequestDeadline(async () => "next request ok", new AbortController().signal, 100);
   assert.equal(recovered, "next request ok", "a timed-out request leaves no stuck global slot for the next attempt");
-  console.log(`AIB_ONLINE_PACKAGE_FEED_RUNTIME_SELFTEST_OK direct_asset=1 redirects_allowed=2 redirects_rejected=6 cdn_target_stream=1 cancellation=1 production_fail_closed=1 archive_fixture=${packageFixtureCount} bad_header=blocked traversal=blocked control_timeout=1 idle_download_timeout=1 retry_recovers=1`);
+  console.log(`AIB_ONLINE_PACKAGE_FEED_RUNTIME_SELFTEST_OK direct_asset=1 redirects_allowed=2 redirects_rejected=6 cdn_target_stream=1 cancellation=1 production_fail_closed=1 candidate_read_only_parse_hash=1 candidate_install_rejected_before_package_io=1 archive_fixture=${packageFixtureCount} bad_header=blocked traversal=blocked control_timeout=1 idle_download_timeout=1 retry_recovers=1`);
 }
 
 main().catch(error => { console.error(error?.stack || String(error)); process.exit(1); });

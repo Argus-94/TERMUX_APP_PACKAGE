@@ -114,7 +114,14 @@ try {
     const next = generated.indexOf(nextSignature, start + signature.length);
     return generated.slice(start, next < 0 ? generated.length : next);
   }
+  const onlineCatalogGuard = blockAfter('private fun onlineCatalogCheck(', '/** Online feed path is separate');
+  if (!onlineCatalogGuard.includes('doc.optString("catalogState") != "production-qualified"')) {
+    throw new Error('native signature/replay verifier must reject candidate catalogs, even when JS parsing allows them');
+  }
   const validation = blockAfter('private fun offlineValidateStage(', 'private fun offlineAptConfig(');
+  if (!validation.includes('doc.optString("catalogState") != "production-qualified"')) {
+    throw new Error('native stage validation must independently reject candidate catalogs before package planning/install');
+  }
   if (validation.indexOf('verifyOfflinePackageManifestBytes(manifestBytes, signatureBytes)') > validation.indexOf('org.json.JSONObject(text)')) {
     throw new Error('Karat raw-byte verification must happen before JSON parsing');
   }

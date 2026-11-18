@@ -12,6 +12,23 @@ const transport = read("lib/github-release-asset-transport.ts");
 const stageBridge = read("lib/termux-bridge.ts");
 const offlineBundle = read("lib/offline-package-bundle.ts");
 
+assert.match(feed, /export type OnlinePackageCatalogState = "candidate" \| "production-qualified";/,
+  "catalog schema distinguishes candidate data from production-qualified data");
+const catalogParserStart = feed.indexOf("export function parseOnlinePackageCatalog(");
+const catalogParserEnd = feed.indexOf("function stageId(", catalogParserStart);
+assert.ok(catalogParserStart >= 0 && catalogParserEnd > catalogParserStart, "online catalog parser must be present");
+const catalogParser = feed.slice(catalogParserStart, catalogParserEnd);
+assert.match(catalogParser, /doc\.catalogState !== "candidate" && doc\.catalogState !== "production-qualified"/,
+  "the read-only schema parser accepts only explicit candidate or production-qualified states");
+const fetchStart = feed.indexOf("export async function fetchAndStageOnlinePackageCatalog(");
+const candidateGate = feed.indexOf("catalog.catalogState !== \"production-qualified\"", fetchStart);
+const packageAssetRequest = feed.indexOf("getAssetLength(bundleUrl", fetchStart);
+const nativeStageCall = feed.indexOf("stagePreparedOnlinePackageDirectory(", fetchStart);
+assert.ok(fetchStart >= 0 && candidateGate > fetchStart && packageAssetRequest > candidateGate && nativeStageCall > candidateGate,
+  "candidate catalogs must be rejected before package asset requests and native staging");
+assert.match(feed.slice(candidateGate, packageAssetRequest), /AIB_ONLINE_PACKAGE_CATALOG_NOT_PRODUCTION_QUALIFIED/,
+  "candidate refusal has a stable fail-closed outcome");
+
 const acceptStart = bridge.indexOf("private fun onlineCatalogCheck(");
 const acceptEnd = bridge.indexOf("/** Online feed path is separate", acceptStart);
 assert.ok(acceptStart >= 0 && acceptEnd > acceptStart, "native catalog guard must be present");

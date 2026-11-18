@@ -27,12 +27,14 @@ const MAX_FEED_OPERATION_MS = 45 * 60 * 1000;
 const REQUEST_ID = /^[A-Za-z0-9._-]{1,96}$/;
 const STAGE_ID = /^[A-Za-z0-9_-]{16,128}$/;
 
+export type OnlinePackageCatalogState = "candidate" | "production-qualified";
+
 export type OnlinePackageCatalog = {
   format: "aibuilder-online-package-catalog";
   schemaVersion: 3;
   appId: "com.karat.aibuilder";
   architecture: "aarch64";
-  catalogState: "production-qualified";
+  catalogState: OnlinePackageCatalogState;
   catalogCommit: string;
   catalogSha256: string;
   dependencyClosureComplete: true;
@@ -84,7 +86,8 @@ export function parseOnlinePackageCatalog(value: unknown): OnlinePackageCatalog 
   const doc = value as Record<string, unknown>;
   const topKeys = ["format", "schemaVersion", "appId", "architecture", "catalogState", "catalogCommit", "catalogSha256", "dependencyClosureComplete", "signatureAlgorithm", "signerCertificateSha256", "feedRoot", "sequence", "issuedAtMs", "expiresAtMs", "files", "packages"];
   if (!exactKeys(doc, topKeys) || doc.format !== "aibuilder-online-package-catalog" || doc.schemaVersion !== 3 ||
-      doc.appId !== "com.karat.aibuilder" || doc.architecture !== "aarch64" || doc.catalogState !== "production-qualified" ||
+      doc.appId !== "com.karat.aibuilder" || doc.architecture !== "aarch64" ||
+      (doc.catalogState !== "candidate" && doc.catalogState !== "production-qualified") ||
       doc.dependencyClosureComplete !== true || doc.signatureAlgorithm !== "SHA256withRSA" || doc.feedRoot !== "feed" ||
       typeof doc.catalogCommit !== "string" || !/^[a-f0-9]{40}$/i.test(doc.catalogCommit) ||
       typeof doc.catalogSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(doc.catalogSha256) ||
@@ -381,6 +384,9 @@ export async function fetchAndStageOnlinePackageCatalog(
     const catalog = parseOnlinePackageCatalog(parsed);
     if (!catalog) return { status: "rejected", code: "AIB_ONLINE_PACKAGE_CATALOG_SCHEMA_INVALID" };
     if (controller.signal.aborted) throw new Error("AIB_ONLINE_PACKAGE_CANCELLED");
+    if (catalog.catalogState !== "production-qualified") {
+      return { status: "blocked", code: "AIB_ONLINE_PACKAGE_CATALOG_NOT_PRODUCTION_QUALIFIED" };
+    }
 
     root = new Directory(Paths.cache, `offline-bundle-${id}`);
     if (root.exists) root.delete();
