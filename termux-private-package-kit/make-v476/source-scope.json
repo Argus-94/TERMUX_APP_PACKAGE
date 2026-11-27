@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "inventoryOnly": true,
+  "candidateInstallable": false,
+  "profiles": {
+    "make-candidate": ["make"]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "https://github.com/termux/termux-packages.git",
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "inventoryOnly": true,
+  "candidateInstallable": false,
+  "profiles": {
+    "nodejs-lts-npm-candidate": [
+      "nodejs-lts",
+      "npm"
+    ]
+  },
+  "dependencyChoices": {
+    "nodejs-lts-npm-candidate": [
+      {
+        "package": "npm",
+        "dependencyGroupIndex": 0,
+        "alternatives": [
+          "nodejs",
+          "nodejs-lts"
+        ],
+        "selected": "nodejs-lts"
+      }
+    ]
+  },
+  "semantics": {
+    "requiredClosure": "TERMUX_PKG_DEPENDS, TERMUX_SUBPKG_DEPENDS, and upstream subpackage-to-parent rules",
+    "dependencyChoices": "The complete source relation remains recorded; only explicitly selected nodejs-lts is traversed; the candidate package set must still satisfy the full npm alternative relation.",
+    "recommendations": "Recorded but not traversed; APT candidate simulation explicitly disables recommends.",
+    "versionAuthority": "This source inventory pins exact source recipe paths and SHA-256s. Generated .deb versions must still match a separate candidate package set.",
+    "safety": "Inventory only; no installation, signing, publication, or device claims."
+  }
+}

@@ -1,0 +1,305 @@
+name: Temporary AI Builder v525 ARM64 package-closure verification
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: temporary-aib-v525-arm64-closure-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TERMUX_SOURCE_PIN: 505e06ef0c8dbd7611abfb90e9eb60826dcd01d7
+  TERMUX_BUILDER_IMAGE_REF: ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9
+  AIB_TERMUX_APP_DATA_DIR: /data/user/0/com.karat.aibuilder
+  AIB_TERMUX_PREFIX: /data/user/0/com.karat.aibuilder/files/usr
+
+jobs:
+  build-profiles:
+    name: Build and audit ${{ matrix.profile }} closure
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 7
+      matrix:
+        profile:
+          - nodejs-lts-npm
+          - openjdk17
+          - python
+          - cmake-ninja
+          - git
+          - pkg-config
+          - make
+    steps:
+      - name: Enforce workflow_dispatch on main only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REF" = refs/heads/main
+
+      - name: Checkout package-repository main without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Resolve profile paths and pinned metadata from the checked-in plan
+        id: profile
+        shell: bash
+        env:
+          PROFILE_ID: ${{ matrix.profile }}
+        run: |
+          set -Eeuo pipefail
+          python3 - "$PROFILE_ID" temporary-aib-v525-aggregate-plan.json "$GITHUB_OUTPUT" <<'PY'
+          import json,pathlib,sys
+          profile_id,plan_path,out=sys.argv[1:]
+          plan=json.loads(pathlib.Path(plan_path).read_text(encoding='utf-8'))
+          matches=[p for p in plan['profiles'] if p['id']==profile_id]
+          assert len(matches)==1, 'PROFILE_ID_NOT_UNIQUE'
+          p=matches[0]
+          values={
+              'manifest':p['manifestPath'],
+              'wrapper':p['wrapperPath'],
+              'scope':p.get('sourceScopePath',''),
+              'mode':p['buildArgsMode'],
+              'closure_profile':p['sourceClosureProfile'],
+              'closure_sha256':p['sourceClosureSha256'],
+          }
+          with open(out,'a',encoding='utf-8') as f:
+              for key,value in values.items():
+                  f.write(f'{key}={value}\n')
+          PY
+
+      - name: Checkout the exact clean Termux source commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          test ! -e "$source_dir"
+          mkdir -p "$source_dir"
+          git -C "$source_dir" init --quiet
+          git -C "$source_dir" remote add origin https://github.com/termux/termux-packages.git
+          git -C "$source_dir" fetch --quiet --no-tags --depth=1 origin "$TERMUX_SOURCE_PIN"
+          git -C "$source_dir" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$TERMUX_SOURCE_PIN"
+          test -z "$(git -C "$source_dir" status --porcelain=v1)"
+
+      - name: Resolve the Make source closure from its pinned inventory-only scope
+        if: matrix.profile == 'make'
+        shell: bash
+        env:
+          CLOSURE_PROFILE: ${{ steps.profile.outputs.closure_profile }}
+          CLOSURE_SCOPE: ${{ steps.profile.outputs.scope }}
+          EXPECTED_CLOSURE_SHA256: ${{ steps.profile.outputs.closure_sha256 }}
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          closure="$RUNNER_TEMP/aib-v525-make-source-closure.json"
+          python3 scripts/resolve-pinned-termux-recipe-closure.py \
+            --source-root "$source_dir" \
+            --scope "$GITHUB_WORKSPACE/$CLOSURE_SCOPE" \
+            --profile "$CLOSURE_PROFILE" > "$closure"
+          test "$(sha256sum "$closure" | awk '{print $1}')" = "$EXPECTED_CLOSURE_SHA256"
+
+      - name: Pull the digest-pinned official Termux package builder
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          docker info >/dev/null
+          docker pull "$TERMUX_BUILDER_IMAGE_REF"
+          docker image inspect "$TERMUX_BUILDER_IMAGE_REF" --format '{{.Id}}' >/dev/null
+          df -h "$RUNNER_TEMP"
+
+      - name: Build and statically audit the selected exact source closure
+        shell: bash
+        env:
+          PROFILE_ID: ${{ matrix.profile }}
+          BUILD_ARGS_MODE: ${{ steps.profile.outputs.mode }}
+          PROFILE_MANIFEST: ${{ steps.profile.outputs.manifest }}
+          PROFILE_WRAPPER: ${{ steps.profile.outputs.wrapper }}
+        run: |
+          set -Eeuo pipefail
+          source_dir="$RUNNER_TEMP/termux-packages"
+          build_output="$RUNNER_TEMP/aib-v525-profile-output"
+          stage_output="$RUNNER_TEMP/aib-v525-profile-stage/$PROFILE_ID"
+          export AIB_TERMUX_APP_DATA_DIR AIB_TERMUX_PREFIX
+          export AIB_TERMUX_BUILDER_IMAGE_REF="$TERMUX_BUILDER_IMAGE_REF"
+          wrapper="$GITHUB_WORKSPACE/$PROFILE_WRAPPER"
+          manifest="$GITHUB_WORKSPACE/$PROFILE_MANIFEST"
+          case "$BUILD_ARGS_MODE" in
+            source-manifest-output)
+              bash "$wrapper" "$source_dir" "$manifest" "$build_output"
+              ;;
+            source-output)
+              bash "$wrapper" "$source_dir" "$build_output"
+              ;;
+            *)
+              echo "Unsupported profile build-argument mode: $BUILD_ARGS_MODE" >&2
+              exit 2
+              ;;
+          esac
+          if [[ "$BUILD_ARGS_MODE" == source-output ]]; then
+            cp -- "$RUNNER_TEMP/aib-v525-make-source-closure.json" "$build_output/source-closure.json"
+          fi
+          python3 scripts/stage-temporary-aib-profile-artifact.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --plan "$GITHUB_WORKSPACE/temporary-aib-v525-aggregate-plan.json" \
+            --profile-id "$PROFILE_ID" \
+            --source-dir "$source_dir" \
+            --build-output "$build_output" \
+            --destination "$stage_output"
+
+      - name: Upload the short-lived profile handoff artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aib-v525-profile-${{ matrix.profile }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v525-profile-stage/${{ matrix.profile }}
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Remove temporary runner-local source and build outputs
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          rm -rf -- "$RUNNER_TEMP/termux-packages" "$RUNNER_TEMP/aib-v525-profile-output" "$RUNNER_TEMP/aib-v525-make-source-closure.json" "$RUNNER_TEMP/aib-v525-profile-stage"
+
+  aggregate-candidate:
+    name: Verify exact merged 73-package ARM64 candidate closure
+    needs: build-profiles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Enforce workflow_dispatch on main only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REF" = refs/heads/main
+
+      - name: Checkout package-repository main without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install only feed-index and ephemeral-signature verification tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnupg dpkg-dev
+
+      - name: Download only this run's verified profile handoff artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: aib-v525-profile-*-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v525-profile-artifacts
+
+      - name: Reject closure, package identity, or duplicate binary drift
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/prepare-temporary-aib-aggregate-input.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --plan "$GITHUB_WORKSPACE/temporary-aib-v525-aggregate-plan.json" \
+            --profile-artifacts-root "$RUNNER_TEMP/aib-v525-profile-artifacts" \
+            --packages-dir "$RUNNER_TEMP/aib-v525-aggregate-packages" \
+            --manifest-out "$RUNNER_TEMP/aib-v525-aggregate-input.json" \
+            --evidence-dir "$RUNNER_TEMP/aib-v525-profile-evidence" \
+            --merge-report-out "$RUNNER_TEMP/aib-v525-merge-report.json"
+
+      - name: Create an ephemeral test-only signed feed and simulate the exact APT transaction
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/build-unified-candidate-feed.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --package-set "$RUNNER_TEMP/aib-v525-aggregate-input.json" \
+            --packages-dir "$RUNNER_TEMP/aib-v525-aggregate-packages" \
+            --output "$RUNNER_TEMP/aib-v525-aggregate-feed" \
+            --test-only-roots nodejs-lts npm openjdk-17 python cmake ninja git pkg-config make
+          python3 - "$RUNNER_TEMP/aib-v525-aggregate-feed" "$RUNNER_TEMP/aib-v525-merge-report.json" <<'PY'
+          import json,pathlib,sys
+          root=pathlib.Path(sys.argv[1])
+          feed=json.loads((root/'validation-report.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'aggregate-manifest.json').read_text(encoding='utf-8'))
+          merge=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8'))
+          expected=['nodejs-lts','npm','openjdk-17','python','cmake','ninja','git','pkg-config','make']
+          assert feed['valid'] is True and feed['qualified'] is False and feed['productionAllowed'] is False
+          assert feed['testOnlySynthetic'] is True and feed['aptSimulation']=='PASS'
+          assert feed['packageCount']==73 and len(feed['rootSpecs'])==9
+          assert feed['installPerformed'] is False and feed['android']=='NOT_RUN' and feed['aggregateABI']=='NOT_PROVEN'
+          assert feed['privateKeyRetained'] is False
+          assert manifest['channel']=='candidate-only' and manifest['qualified'] is False and manifest['productionAllowed'] is False
+          assert manifest['testOnlySynthetic'] is True and manifest['testOnlyRoots']==expected
+          assert manifest['releaseGate']['publicationAllowed'] is False
+          assert [item['name'] for item in manifest['packages']] and len(manifest['packages'])==73
+          assert merge['valid'] is True and merge['allDuplicateIdentitiesAndHashesEqual'] is True
+          assert merge['rootPackages']==expected and merge['uniquePackageCount']==73
+          print('TEMPORARY_AGGREGATE_VERIFIED packages=73 roots=9 apt=PASS qualified=false production=false device_install=NOT_RUN')
+          print('EPHEMERAL_PUBLIC_FINGERPRINT='+feed['fingerprint'])
+          PY
+
+      - name: Stage only the aggregate candidate and package-closure evidence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          final="$RUNNER_TEMP/aib-v525-arm64-aggregate-candidate"
+          mkdir -p "$final/feed" "$final/profile-evidence"
+          cp -a "$RUNNER_TEMP/aib-v525-aggregate-feed/." "$final/feed/"
+          cp -a "$RUNNER_TEMP/aib-v525-profile-evidence/." "$final/profile-evidence/"
+          cp -- "$RUNNER_TEMP/aib-v525-merge-report.json" "$final/merge-report.json"
+          cat > "$final/README.txt" <<'EOF'
+          Temporary AI Builder v525 ARM64 package-closure candidate.
+          Synthetic test-only package set; 73 packages; nine explicit roots.
+          Ephemeral test signing key; no production qualification, device installation, or runtime test.
+          Not an installable production release and not a release artifact.
+          EOF
+          tar -czf "$RUNNER_TEMP/aib-v525-arm64-aggregate-candidate.tar.gz" -C "$final" .
+
+      - name: Upload the one short-lived aggregate candidate artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aib-v525-arm64-aggregate-candidate-${{ github.run_id }}
+          path: ${{ runner.temp }}/aib-v525-arm64-aggregate-candidate.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Record a concise verification summary and clean runner-local outputs
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -f "$RUNNER_TEMP/aib-v525-aggregate-feed/validation-report.json" ]; then
+            python3 - "$RUNNER_TEMP/aib-v525-aggregate-feed/validation-report.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json,pathlib,sys
+          r=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          print('### Temporary ARM64 package-closure result')
+          print(f"- Package count: {r.get('packageCount')}")
+          print(f"- Explicit roots: {len(r.get('rootSpecs',[]))}")
+          print(f"- Exact APT simulation: {r.get('aptSimulation')}")
+          print(f"- Qualification: {r.get('qualified')} (production allowed: {r.get('productionAllowed')})")
+          print(f"- Device install/runtime: {r.get('android')}; aggregate ABI: {r.get('aggregateABI')}")
+          print(f"- Ephemeral public fingerprint: {r.get('fingerprint')}")
+          PY
+          fi
+          rm -rf -- \
+            "$RUNNER_TEMP/aib-v525-profile-artifacts" \
+            "$RUNNER_TEMP/aib-v525-aggregate-packages" \
+            "$RUNNER_TEMP/aib-v525-profile-evidence" \
+            "$RUNNER_TEMP/aib-v525-aggregate-feed" \
+            "$RUNNER_TEMP/aib-v525-aggregate-input.json" \
+            "$RUNNER_TEMP/aib-v525-merge-report.json" \
+            "$RUNNER_TEMP/aib-v525-arm64-aggregate-candidate" \
+            "$RUNNER_TEMP/aib-v525-arm64-aggregate-candidate.tar.gz"

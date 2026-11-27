@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "temporaryOnly": true,
+  "sourceCommit": "505e06ef0c8dbd7611abfb90e9eb60826dcd01d7",
+  "builderImage": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+  "applicationId": "com.karat.aibuilder",
+  "architecture": "aarch64",
+  "modeledDataDir": "/data/user/0/com.karat.aibuilder",
+  "modeledPrefix": "/data/user/0/com.karat.aibuilder/files/usr",
+  "expectedProfileCount": 7,
+  "expectedPackageUnionCount": 73,
+  "rootPackages": [
+    "nodejs-lts",
+    "npm",
+    "openjdk-17",
+    "python",
+    "cmake",
+    "ninja",
+    "git",
+    "pkg-config",
+    "make"
+  ],
+  "profiles": [
+    {
+      "id": "nodejs-lts-npm",
+      "sourceClosureProfile": "nodejs-lts-npm-candidate",
+      "manifestPath": "nodejs-lts-npm-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/nodejs-lts-npm/build-nodejs-lts-npm-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["nodejs-lts", "npm"],
+      "expectedPackageCount": 10,
+      "expectedDependencyAlternativeCount": 13,
+      "sourceClosureSha256": "69f0a9c19cdb8093633708817f31fc0b2fac221c5400e5d04ee2127f03390efc",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "openjdk17",
+      "sourceClosureProfile": "openjdk17-candidate",
+      "manifestPath": "openjdk17-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/openjdk17/build-openjdk17-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["openjdk-17"],
+      "expectedPackageCount": 36,
+      "expectedDependencyAlternativeCount": 46,
+      "sourceClosureSha256": "378bf846bf86255a89c94510b4cb52a945b22e1df06c3624919badd85f6c402a",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "python",
+      "sourceClosureProfile": "python-candidate",
+      "manifestPath": "python-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/python-v3.14.6/build-python-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["python"],
+      "expectedPackageCount": 17,
+      "expectedDependencyAlternativeCount": 25,
+      "sourceClosureSha256": "fee7f54aab5e120b377abbb503e704380a478162e8025bb9d975f5bdbd372ad6",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "cmake-ninja",
+      "sourceClosureProfile": "cmake-ninja-candidate",
+      "manifestPath": "cmake-ninja-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/cmake-ninja/build-cmake-ninja-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["cmake", "ninja"],
+      "expectedPackageCount": 22,
+      "expectedDependencyAlternativeCount": 34,
+      "sourceClosureSha256": "9423ddd7b885395cea329ec4a8580de17589eb9a0106e58fd54f0ea5a28d22ff",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "git",
+      "sourceClosureProfile": "git-candidate",
+      "manifestPath": "git-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/git-v2.56.0/build-git-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["git"],
+      "expectedPackageCount": 14,
+      "expectedDependencyAlternativeCount": 20,
+      "sourceClosureSha256": "73862da9d8693dd8fdb353c99c4a8f36dc4222e08d11e1c060b859ec3a29df62",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "pkg-config",
+      "sourceClosureProfile": "pkg-config-candidate",
+      "manifestPath": "pkg-config-candidate-package-set.json",
+      "wrapperPath": "termux-private-package-kit/pkg-config-v0.29.2/build-pkg-config-private-aarch64.sh",
+      "buildArgsMode": "source-manifest-output",
+      "rootPackages": ["pkg-config"],
+      "expectedPackageCount": 22,
+      "expectedDependencyAlternativeCount": 33,
+      "sourceClosureSha256": "84fbfa0980dbe28aa348d84003b715571c53891cdeaa6c03f1d5b0291cd635f6",
+      "timeoutMinutes": 360
+    },
+    {
+      "id": "make",
+      "sourceClosureProfile": "make-candidate",
+      "manifestPath": "termux-private-package-kit/make-v476/manifest.json",
+      "sourceScopePath": "termux-private-package-kit/make-v476/source-scope.json",
+      "wrapperPath": "termux-private-package-kit/make-v476/build-make-private-aarch64.sh",
+      "buildArgsMode": "source-output",
+      "rootPackages": ["make"],
+      "expectedPackageCount": 1,
+      "expectedDependencyAlternativeCount": 0,
+      "sourceClosureSha256": "32d06ee9bd9c9e36884b57f9008f9cd01ca66d28adfd972d001bd33a69c1af2c",
+      "timeoutMinutes": 360
+    }
+  ]
+}
