@@ -3,11 +3,27 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import hashlib
 import json
 import pathlib
+import re
 import shutil
 import subprocess
+import tarfile
+import tempfile
+from pathlib import PurePosixPath
+
+SAFE_PROFILE_ARCHIVE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\.tar\.gz\Z")
+PROFILE_EVIDENCE_FILES = {
+    "candidate-package-set.json",
+    "source-closure.json",
+    "build-result.json",
+    "audit-report.json",
+    "profile-index.json",
+}
+MAX_PROFILE_ARCHIVE_MEMBERS = 1024
+MAX_PROFILE_ARCHIVE_BYTES = 8 * 1024 * 1024 * 1024
 
 
 def fail(message: str) -> None:
@@ -27,6 +43,120 @@ def sha256(path: pathlib.Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def safe_extract_profile_archive(archive_path: pathlib.Path, destination: pathlib.Path) -> pathlib.Path:
+    archive_path = pathlib.Path(archive_path)
+    if archive_path.is_symlink() or not archive_path.is_file():
+        fail("PROFILE_ARCHIVE_NOT_REGULAR_FILE")
+    if not SAFE_PROFILE_ARCHIVE_NAME.fullmatch(archive_path.name):
+        fail("PROFILE_ARCHIVE_FILENAME_UNSAFE")
+    destination = pathlib.Path(destination)
+    if destination.is_symlink() or destination.exists():
+        fail("PROFILE_ARCHIVE_DESTINATION_NOT_NEW")
+    destination.mkdir(parents=True)
+    seen: set[str] = set()
+    total_size = 0
+    try:
+        with tarfile.open(archive_path, "r:gz") as archive:
+            members = archive.getmembers()
+            if not members or len(members) > MAX_PROFILE_ARCHIVE_MEMBERS:
+                fail("PROFILE_ARCHIVE_MEMBER_COUNT_INVALID")
+            for member in members:
+                raw_name = member.name
+                if not raw_name or raw_name.startswith("/") or "\\" in raw_name or "//" in raw_name:
+                    fail("PROFILE_ARCHIVE_MEMBER_PATH_INVALID")
+                normalized_name = raw_name[:-1] if raw_name.endswith("/") else raw_name
+                parts = PurePosixPath(normalized_name).parts
+                if not parts or normalized_name in ("", ".") or any(part in ("", ".", "..") for part in parts):
+                    fail("PROFILE_ARCHIVE_MEMBER_PATH_INVALID")
+                member_name = "/".join(parts)
+                if member_name != normalized_name:
+                    fail("PROFILE_ARCHIVE_MEMBER_PATH_INVALID")
+                if member_name in seen:
+                    fail("PROFILE_ARCHIVE_DUPLICATE_MEMBER")
+                seen.add(member_name)
+                if member.issym() or member.islnk() or member.isdev() or not (member.isdir() or member.isfile()):
+                    fail("PROFILE_ARCHIVE_MEMBER_TYPE_INVALID")
+                if member.isdir():
+                    if parts != ("packages",) or member.size != 0:
+                        fail("PROFILE_ARCHIVE_DIRECTORY_INVALID")
+                    (destination / "packages").mkdir(exist_ok=True)
+                    continue
+                if len(parts) == 1 and member_name in PROFILE_EVIDENCE_FILES:
+                    pass
+                elif len(parts) == 2 and parts[0] == "packages" and parts[1].endswith(".deb"):
+                    pass
+                else:
+                    fail("PROFILE_ARCHIVE_UNEXPECTED_MEMBER")
+                if member.size < 0:
+                    fail("PROFILE_ARCHIVE_MEMBER_SIZE_INVALID")
+                total_size += member.size
+                if total_size > MAX_PROFILE_ARCHIVE_BYTES:
+                    fail("PROFILE_ARCHIVE_EXPANDED_SIZE_LIMIT")
+                target = destination.joinpath(*parts)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if target.is_symlink() or target.exists():
+                    fail("PROFILE_ARCHIVE_DUPLICATE_MEMBER")
+                source = archive.extractfile(member)
+                if source is None:
+                    fail("PROFILE_ARCHIVE_MEMBER_UNREADABLE")
+                with source, target.open("xb") as output:
+                    shutil.copyfileobj(source, output)
+                target.chmod(0o600)
+    except (OSError, EOFError, tarfile.TarError) as exc:
+        shutil.rmtree(destination, ignore_errors=True)
+        fail(f"PROFILE_ARCHIVE_INVALID:{archive_path.name}:{exc}")
+    except BaseException:
+        shutil.rmtree(destination, ignore_errors=True)
+        raise
+
+    top_level_files = {path.name for path in destination.iterdir() if path.is_file() and not path.is_symlink()}
+    if top_level_files != PROFILE_EVIDENCE_FILES:
+        fail("PROFILE_ARCHIVE_EVIDENCE_FILE_SET_INVALID")
+    packages = destination / "packages"
+    if packages.is_symlink() or not packages.is_dir():
+        fail("PROFILE_ARCHIVE_PACKAGE_DIRECTORY_MISSING")
+    deb_files = sorted(packages.iterdir())
+    if not deb_files or any(path.is_symlink() or not path.is_file() or path.suffix != ".deb" for path in deb_files):
+        fail("PROFILE_ARCHIVE_PACKAGE_FILE_SET_INVALID")
+    return destination
+
+
+def unpack_profile_artifacts(
+    artifacts_root: pathlib.Path, profile_ids: set[str], destination: pathlib.Path
+) -> pathlib.Path:
+    artifacts_root = pathlib.Path(artifacts_root)
+    if artifacts_root.is_symlink() or not artifacts_root.is_dir():
+        fail("PROFILE_ARTIFACT_ROOT_INVALID")
+    destination = pathlib.Path(destination)
+    if destination.is_symlink() or (destination.exists() and (not destination.is_dir() or any(destination.iterdir()))):
+        fail("PROFILE_ARCHIVE_DESTINATION_NOT_EMPTY")
+    destination.mkdir(parents=True, exist_ok=True)
+    artifact_dirs = sorted(artifacts_root.iterdir())
+    if len(artifact_dirs) != len(profile_ids):
+        fail("PROFILE_ARCHIVE_COUNT_MISMATCH")
+    seen: set[str] = set()
+    for artifact_dir in artifact_dirs:
+        if artifact_dir.is_symlink() or not artifact_dir.is_dir():
+            fail("PROFILE_ARTIFACT_DIRECTORY_INVALID")
+        entries = sorted(artifact_dir.iterdir())
+        if len(entries) != 1:
+            fail("PROFILE_ARTIFACT_CONTENT_COUNT_INVALID")
+        archive_path = entries[0]
+        if archive_path.is_symlink() or not archive_path.is_file() or not archive_path.name.endswith(".tar.gz"):
+            fail("PROFILE_ARTIFACT_ARCHIVE_MISSING")
+        profile_id = archive_path.name[:-7]
+        if profile_id not in profile_ids or profile_id in seen or archive_path.name != f"{profile_id}.tar.gz":
+            fail("PROFILE_ARCHIVE_PROFILE_ID_INVALID")
+        prefix = f"aib-v525-profile-{profile_id}-"
+        if not artifact_dir.name.startswith(prefix) or not artifact_dir.name[len(prefix):].isdecimal():
+            fail("PROFILE_ARTIFACT_NAME_INVALID")
+        safe_extract_profile_archive(archive_path, destination / profile_id)
+        seen.add(profile_id)
+    if seen != profile_ids:
+        fail("PROFILE_ARCHIVE_PROFILE_SET_MISMATCH")
+    return destination
 
 
 def deb_identity(path: pathlib.Path) -> tuple[str, str, str]:
@@ -114,11 +244,14 @@ def main() -> None:
 
     repo = args.repo_root.resolve(strict=True)
     plan = read_json(args.plan.resolve(strict=True))
-    artifacts_root = args.profile_artifacts_root.resolve(strict=True)
+    artifacts_root = pathlib.Path(args.profile_artifacts_root)
     profiles = plan.get("profiles", [])
     if len(profiles) != plan.get("expectedProfileCount") or len({p.get("id") for p in profiles}) != len(profiles):
         fail("PROFILE_PLAN_COUNT_OR_ID_INVALID")
     by_profile = {p["id"]: p for p in profiles}
+    unpack_root = pathlib.Path(tempfile.mkdtemp(prefix="aib-v525-profile-archives-"))
+    atexit.register(shutil.rmtree, unpack_root, ignore_errors=True)
+    artifacts_root = unpack_profile_artifacts(artifacts_root, set(by_profile), unpack_root)
     index_paths = sorted(artifacts_root.rglob("profile-index.json"))
     if len(index_paths) != len(profiles):
         fail("PROFILE_ARTIFACT_COUNT_MISMATCH")

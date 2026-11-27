@@ -5,10 +5,16 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
+
+SAFE_PROFILE_ARCHIVE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\.tar\.gz\Z")
 
 
 def fail(message: str) -> None:
@@ -28,6 +34,52 @@ def sha256(path: pathlib.Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def create_profile_archive(stage_dir: pathlib.Path, archive_path: pathlib.Path) -> pathlib.Path:
+    if stage_dir.is_symlink():
+        fail("ARCHIVE_SOURCE_NOT_REGULAR_DIRECTORY")
+    stage_dir = stage_dir.resolve(strict=True)
+    if not stage_dir.is_dir():
+        fail("ARCHIVE_SOURCE_NOT_REGULAR_DIRECTORY")
+    archive_path = pathlib.Path(archive_path)
+    if not SAFE_PROFILE_ARCHIVE_NAME.fullmatch(archive_path.name):
+        fail("ARCHIVE_FILENAME_UNSAFE")
+    if archive_path.is_symlink():
+        fail("ARCHIVE_DESTINATION_IS_SYMLINK")
+    archive_path = archive_path.resolve(strict=False)
+    if archive_path.exists():
+        fail("ARCHIVE_DESTINATION_EXISTS")
+    if archive_path.is_relative_to(stage_dir):
+        fail("ARCHIVE_DESTINATION_INSIDE_STAGE")
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{archive_path.name}.", suffix=".tmp", dir=archive_path.parent
+    )
+    os.close(fd)
+    temporary_path = pathlib.Path(temporary_name)
+    file_count = 0
+    try:
+        with tarfile.open(temporary_path, "w:gz") as archive:
+            paths = sorted(stage_dir.rglob("*"), key=lambda item: item.relative_to(stage_dir).as_posix())
+            for path in paths:
+                if path.is_symlink():
+                    fail("ARCHIVE_SOURCE_CONTAINS_SYMLINK")
+                relative = path.relative_to(stage_dir).as_posix()
+                if path.is_dir():
+                    archive.add(path, arcname=relative, recursive=False)
+                elif path.is_file():
+                    archive.add(path, arcname=relative, recursive=False)
+                    file_count += 1
+                else:
+                    fail("ARCHIVE_SOURCE_HAS_NONREGULAR_ENTRY")
+        if file_count == 0:
+            fail("ARCHIVE_SOURCE_EMPTY")
+        os.replace(temporary_path, archive_path)
+    except BaseException:
+        temporary_path.unlink(missing_ok=True)
+        raise
+    return archive_path
 
 
 def identity_from_deb(path: pathlib.Path) -> tuple[str, str, str]:
@@ -122,6 +174,7 @@ def main() -> None:
     ap.add_argument("--source-dir", type=pathlib.Path, required=True)
     ap.add_argument("--build-output", type=pathlib.Path, required=True)
     ap.add_argument("--destination", type=pathlib.Path, required=True)
+    ap.add_argument("--archive-out", type=pathlib.Path, required=True)
     args = ap.parse_args()
 
     repo = args.repo_root.resolve(strict=True)
@@ -324,10 +377,12 @@ def main() -> None:
         },
     }
     (dest / "profile-index.json").write_text(json.dumps(index, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    archive_path = create_profile_archive(dest, args.archive_out)
     print(
         f"PROFILE_STAGE_OK id={profile['id']} packages={len(staged_records)} "
         f"closure_sha256={closure_hash} source_commit={plan['sourceCommit']}"
     )
+    print(f"PROFILE_ARCHIVE_OK name={archive_path.name} size={archive_path.stat().st_size} sha256={sha256(archive_path)}")
 
 
 if __name__ == "__main__":

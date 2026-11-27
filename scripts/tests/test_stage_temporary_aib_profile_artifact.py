@@ -1,5 +1,7 @@
 import importlib.util
 import pathlib
+import tarfile
+import tempfile
 import unittest
 from unittest import mock
 
@@ -50,6 +52,46 @@ class IdentityFromDebTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(SystemExit, "PROFILE_STAGE_REJECTED:INVALID_DEB_IDENTITY"):
                     stage.identity_from_deb(pathlib.Path("invalid.deb"))
+
+
+class ProfileArchiveTests(unittest.TestCase):
+    def test_colon_epoch_deb_is_preserved_inside_safe_outer_archive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            stage_dir = root / "stage"
+            packages = stage_dir / "packages"
+            packages.mkdir(parents=True)
+            filename = "ca-certificates_1:2026.09.25_all.deb"
+            original_bytes = b"fixture-deb-bytes-with-epoch\x00\xff"
+            (packages / filename).write_bytes(original_bytes)
+            archive_path = root / "python.tar.gz"
+
+            result = stage.create_profile_archive(stage_dir, archive_path)
+
+            self.assertEqual(result, archive_path)
+            self.assertTrue(archive_path.name.endswith(".tar.gz"))
+            self.assertNotIn(":", archive_path.name)
+            with tarfile.open(archive_path, "r:gz") as archive:
+                member = archive.getmember(f"packages/{filename}")
+                with archive.extractfile(member) as payload:
+                    self.assertEqual(payload.read(), original_bytes)
+
+    def test_outer_archive_name_with_colon_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            stage_dir = root / "stage"
+            stage_dir.mkdir()
+            with self.assertRaisesRegex(SystemExit, "PROFILE_STAGE_REJECTED:ARCHIVE_FILENAME_UNSAFE"):
+                stage.create_profile_archive(stage_dir, root / "profile:unsafe.tar.gz")
+
+    def test_workflow_uploads_only_safe_outer_archive(self):
+        repo = pathlib.Path(__file__).resolve().parents[2]
+        workflow = (repo / ".github/workflows/temporary-aib-v525-arm64-closure.yml").read_text()
+        self.assertIn('--archive-out "$RUNNER_TEMP/aib-v525-profile-stage/$PROFILE_ID.tar.gz"', workflow)
+        self.assertIn(
+            "path: ${{ runner.temp }}/aib-v525-profile-stage/${{ matrix.profile }}.tar.gz",
+            workflow,
+        )
 
 
 if __name__ == "__main__":

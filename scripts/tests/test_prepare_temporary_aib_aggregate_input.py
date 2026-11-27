@@ -1,5 +1,8 @@
 import importlib.util
+import io
 import pathlib
+import tarfile
+import tempfile
 import unittest
 from unittest import mock
 
@@ -50,6 +53,72 @@ class DebIdentityTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(SystemExit, "AGGREGATE_INPUT_REJECTED:INVALID_DEB_IDENTITY"):
                     aggregate.deb_identity(pathlib.Path("invalid.deb"))
+
+
+class ProfileArchiveTests(unittest.TestCase):
+    def test_unpack_preserves_colon_epoch_deb_filename_and_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            artifact_root = root / "downloaded"
+            artifact_dir = artifact_root / "aib-v525-profile-openjdk17-123456"
+            artifact_dir.mkdir(parents=True)
+            archive_path = artifact_dir / "openjdk17.tar.gz"
+            filename = "ca-certificates_1:2026.09.25_all.deb"
+            original_bytes = b"fixture-deb-bytes-with-epoch\x00\xff"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                package_dir = tarfile.TarInfo("packages")
+                package_dir.type = tarfile.DIRTYPE
+                archive.addfile(package_dir)
+                for name in sorted(aggregate.PROFILE_EVIDENCE_FILES):
+                    data = b"{}\n"
+                    member = tarfile.TarInfo(name)
+                    member.size = len(data)
+                    archive.addfile(member, io.BytesIO(data))
+                deb = tarfile.TarInfo(f"packages/{filename}")
+                deb.size = len(original_bytes)
+                archive.addfile(deb, io.BytesIO(original_bytes))
+
+            unpacked = aggregate.unpack_profile_artifacts(
+                artifact_root, {"openjdk17"}, root / "unpacked"
+            )
+            result = unpacked / "openjdk17" / "packages" / filename
+            self.assertTrue(result.is_file())
+            self.assertEqual(result.name, filename)
+            self.assertEqual(result.read_bytes(), original_bytes)
+
+    def test_rejects_archive_member_path_traversal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            archive_path = root / "python.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                data = b"escape"
+                member = tarfile.TarInfo("../escape.deb")
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+            with self.assertRaisesRegex(SystemExit, "AGGREGATE_INPUT_REJECTED:PROFILE_ARCHIVE_MEMBER_PATH_INVALID"):
+                aggregate.safe_extract_profile_archive(archive_path, root / "out")
+
+    def test_rejects_normalized_dot_segment_archive_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            archive_path = root / "python.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                data = b"dot-segment"
+                member = tarfile.TarInfo("packages/./escape.deb")
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+            with self.assertRaisesRegex(SystemExit, "AGGREGATE_INPUT_REJECTED:PROFILE_ARCHIVE_MEMBER_PATH_INVALID"):
+                aggregate.safe_extract_profile_archive(archive_path, root / "out")
+
+    def test_rejects_symlinked_artifact_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "real-artifacts"
+            target.mkdir()
+            alias = root / "artifact-link"
+            alias.symlink_to(target, target_is_directory=True)
+            with self.assertRaisesRegex(SystemExit, "AGGREGATE_INPUT_REJECTED:PROFILE_ARTIFACT_ROOT_INVALID"):
+                aggregate.unpack_profile_artifacts(alias, set(), root / "out")
 
 
 if __name__ == "__main__":

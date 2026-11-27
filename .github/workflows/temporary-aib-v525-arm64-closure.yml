@@ -153,13 +153,14 @@ jobs:
             --profile-id "$PROFILE_ID" \
             --source-dir "$source_dir" \
             --build-output "$build_output" \
-            --destination "$stage_output"
+            --destination "$stage_output" \
+            --archive-out "$RUNNER_TEMP/aib-v525-profile-stage/$PROFILE_ID.tar.gz"
 
       - name: Upload the short-lived profile handoff artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aib-v525-profile-${{ matrix.profile }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/aib-v525-profile-stage/${{ matrix.profile }}
+          path: ${{ runner.temp }}/aib-v525-profile-stage/${{ matrix.profile }}.tar.gz
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
