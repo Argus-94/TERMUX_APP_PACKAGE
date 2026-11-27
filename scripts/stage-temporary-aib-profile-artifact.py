@@ -39,10 +39,17 @@ def identity_from_deb(path: pathlib.Path) -> tuple[str, str, str]:
         )
     except subprocess.CalledProcessError as exc:
         fail(f"INVALID_DEB:{path.name}:{exc.output[-800:]}")
-    fields = raw.splitlines()
-    if len(fields) != 3 or any(not value for value in fields):
+    labels = ("Package", "Version", "Architecture")
+    lines = raw.splitlines()
+    if len(lines) != len(labels):
         fail(f"INVALID_DEB_IDENTITY:{path.name}:{raw!r}")
-    return tuple(fields)  # type: ignore[return-value]
+    values = []
+    for expected_label, line in zip(labels, lines):
+        label, separator, value = line.partition(":")
+        if label != expected_label or not separator or not value.strip():
+            fail(f"INVALID_DEB_IDENTITY:{path.name}:{raw!r}")
+        values.append(value.strip())
+    return tuple(values)  # type: ignore[return-value]
 
 
 def safe_repo_file(repo: pathlib.Path, relative: str) -> pathlib.Path:

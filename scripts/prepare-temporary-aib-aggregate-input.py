@@ -31,16 +31,24 @@ def sha256(path: pathlib.Path) -> str:
 
 def deb_identity(path: pathlib.Path) -> tuple[str, str, str]:
     try:
-        fields = subprocess.check_output(
+        raw = subprocess.check_output(
             ["dpkg-deb", "-f", str(path), "Package", "Version", "Architecture"],
             text=True,
             stderr=subprocess.STDOUT,
-        ).splitlines()
+        )
     except subprocess.CalledProcessError as exc:
         fail(f"INVALID_DEB:{path.name}:{exc.output[-800:]}")
-    if len(fields) != 3 or any(not item for item in fields):
+    labels = ("Package", "Version", "Architecture")
+    lines = raw.splitlines()
+    if len(lines) != len(labels):
         fail(f"INVALID_DEB_IDENTITY:{path.name}")
-    return tuple(fields)  # type: ignore[return-value]
+    values = []
+    for expected_label, line in zip(labels, lines):
+        label, separator, value = line.partition(":")
+        if label != expected_label or not separator or not value.strip():
+            fail(f"INVALID_DEB_IDENTITY:{path.name}")
+        values.append(value.strip())
+    return tuple(values)  # type: ignore[return-value]
 
 
 def rows_from_manifest(manifest: dict) -> list[dict]:

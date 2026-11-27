@@ -20,7 +20,7 @@ class OverlayPolicyTests(unittest.TestCase):
     def test_build_script_hash_is_reviewed(self):
         root = pathlib.Path(__file__).resolve().parents[1]
         builder = root / "build-git-private-aarch64.sh"
-        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "a94dd2c147bc427f74dd25cde324423e784d554da5c4717ac2bc7c04e5863667")
+        self.assertEqual(hashlib.sha256(builder.read_bytes()).hexdigest(), "ca62f4df899fc6023afeb0ea7f5bbeb95229e2013567ca87457d1317afde8fed")
     def test_local_recipe_overlays_are_pinned_in_candidate_manifest(self):
         root = pathlib.Path(__file__).resolve().parents[3]
         manifest = __import__("json").loads((root / "git-candidate-package-set.json").read_text())

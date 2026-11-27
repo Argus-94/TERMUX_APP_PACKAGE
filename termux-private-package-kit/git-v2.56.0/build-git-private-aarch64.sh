@@ -88,10 +88,11 @@ WORKTREE="$OUTPUT_DIR/work/termux-packages"
 git clone --shared --dissociate --no-checkout "$SOURCE_REPO" "$WORKTREE" >/dev/null
 git -C "$WORKTREE" checkout --detach "$PIN" >/dev/null
 python3 "$ROOT/scripts/apply-candidate-packaging-policy.py" --source-root "$WORKTREE"
-# Reviewed shared overlay policy: curl optional zstd off; preserve split ncurses license.
+# Reviewed overlays: curl optional zstd off; preserve split ncurses license; use archived Apache APR-util 1.6.5 source.
 for spec in \
   'libcurl-disable-optional-zstd.patch 69ddb473018aa7bc6500350d8dbbda309393c62a3956d2ddad3d8f4f4d07c788' \
-  'ncurses-ui-libs-license.patch f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9'; do
+  'ncurses-ui-libs-license.patch f29765e65520dacedb70c79e6156ffa247e47849c982d0e233ed4a88817876c9' \
+  'apr-util-source-url.patch 1d6af74e07e6dc08356a9649350fdfe6f6d512aef9680ffba0881a526f07e4da'; do
   read -r patch expected <<< "$spec"
   overlay="$KIT_DIR/$patch"
   [[ "$(sha256sum "$overlay" | awk '{print $1}')" == "$expected" ]] || fail "REVIEWED_OVERLAY_HASH_MISMATCH:$patch"
